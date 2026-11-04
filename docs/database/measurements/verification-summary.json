@@ -93,5 +93,14 @@
     "private_values_checked": 13,
     "large_new_files": 0,
     "status": "PASS"
+  },
+  "git": {
+    "branch": "feature/mysql-database-foundation",
+    "implementation_commit": "d29a781ff34e457c3ae18522269491f4c4a798b2",
+    "tracked_files": 179,
+    "remote_changed": false,
+    "pushed": false,
+    "merged": false,
+    "report_commit": "separate local documentation commit; see git log"
   }
 }

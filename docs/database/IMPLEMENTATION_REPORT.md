@@ -122,7 +122,7 @@ Native macOS and external SMTP remain NOT RUN; screen-reader certification, prod
 
 ## 10. Git and preservation
 
-Branch: `feature/mysql-database-foundation`. Starting head: `675c718`. Implementation commit: **PENDING_LOCAL_COMMIT**. The report is finalized in a separate documentation commit after verification. No remote configuration change, push, merge, reset or cleanup of original data is authorized/performed. Existing main stylesheet bytes are unchanged; the original V2 layout is preserved with the specifically requested real adapters and inline controls.
+Branch: `feature/mysql-database-foundation`. Starting head: `675c718`. Implementation commit: `d29a781ff34e457c3ae18522269491f4c4a798b2`. The code/test implementation above is committed locally. This verification report is finalized in a separate documentation commit; its HEAD is available with git log. Working tree is checked clean afterward. No remote configuration change, push, merge, reset or cleanup of original data is authorized/performed. Existing main stylesheet bytes are unchanged; the original V2 layout is preserved with the specifically requested real adapters and inline controls.
 
 ## 11. Prioritized next work
 
@@ -132,3 +132,5 @@ Branch: `feature/mysql-database-foundation`. Starting head: `675c718`. Implement
 4. Review/publish only after explicit permission; production identity, TLS, retention and deployment require separate validation.
 
 Private screenshots: `.local/database-verification/platform-browser/` (logs and Investigation at 1366/1440/1920). [Demo script](DEMO_SCRIPT.md), [API](API.md) and numerical JSON receipts are included; no real credentials are embedded.
+
+Tracked files after implementation: 179. Private runtime/datasets/model artifacts remain ignored. No GitHub publication occurred.
