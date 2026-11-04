@@ -1,8 +1,127 @@
-# Safe Git baseline — Gate 1 audit and preparation
+# Safe Git baseline — Gate 2 verified
 
-Audit date: 2026-11-04 (Asia/Ho_Chi_Minh). Status: **AWAITING GATE 1 APPROVAL**.
-No Git initialization, staging, commit, remote configuration or push has occurred.
-Existing application, test, data and configuration files are preserved.
+Audit date: 2026-11-04 (Asia/Ho_Chi_Minh). **Gate 2 completed locally.**
+
+## Current outcome
+
+- Repository root: `D:\1)_KHUTAOSONG\2)Project\13)LogSense AI`.
+- Branch: `main`.
+- Baseline commit: `b12e19b4a09a621af2c4a002a4e4fa3407889b63`.
+- Baseline message: `chore: establish safe LogSense AI baseline`.
+- Baseline: exactly **100 files / 2,777,052 bytes** of uncompressed file content.
+- Ignored original files: **4,183**. No full datasets, virtual environment, browser
+  profile, private backup or runtime databases are tracked.
+- No remote was added/edited and no push occurred.
+- Original-file integrity: all **4,279** original files still exist; **4,278** are
+  byte-identical to the private backup. The only approved original-file change
+  is the root `.gitignore`, applied exactly from the approved proposal.
+- Tests after the baseline commit: **50 passed**, 0.757 seconds, bytecode writes
+  disabled. No application logic, dependencies or global Git configuration changed.
+
+This report update is recorded in a separate documentation-only follow-up commit,
+so the approved baseline remains immutable and the final working tree is clean.
+Use `git log -2 --oneline` to identify that follow-up commit; a document cannot
+embed its own final commit hash without another content update.
+
+## Gate 2 checks and implementation
+
+1. Rechecked absence of root/ancestor Git metadata and Git redirect variables.
+   Revalidated all original source and independent backup hashes plus the four
+   Gate 1 preparation files; verified all required source/docs were in the plan.
+2. Reviewed 82 text/SVG files from the intended baseline, with value-safe reports.
+   Only reviewed synthetic security test fixtures matched suspicious patterns.
+   No real-secret blocker was found; no specialist scanner was installed.
+3. Applied the approved `.gitignore`, initialized the existing root on `main`,
+   set repository-local `core.autocrlf=false` and `core.safecrlf=true`, and checked
+   that no active hooks or unexpected content-transforming attributes existed.
+4. Native ignore checks protected env/local/raw/model/database representatives;
+   required source, tests, docs, small synthetic CSV/JSON and the license remained
+   trackable. The native untracked list matched the approved 100 paths exactly.
+5. Staged ONLY approved literal paths through a NUL-delimited path list. Read
+   every staged blob back through `git cat-file`; its SHA-256 and bytes matched
+   the approved manifest and working file. No LFS pointer or newline normalization
+   was substituted for an approved file.
+6. Reviewed staged status/stat/diff and scanned actual staged text content for
+   secrets. No file list expansion, deletion, private credential or large binary
+   dataset was accepted. No source/content was changed to make tests pass.
+7. Created the baseline commit above, verified its clean initial status, compared
+   the entire original manifest and ran the automated suite successfully.
+8. Updated only this report afterward, including the requested progress tree.
+   The historical Gate 1 manifest remains an immutable record of the approved
+   baseline; this report's follow-up change is the explicitly requested audit update.
+
+### Whitespace interpretation — disclosed local exceptions
+
+The first raw `git diff --cached --check` flagged preserved CRLF endings and five
+pre-existing cosmetic locations. All were compared with the original backup.
+Production source bytes were not rewritten or reformatted.
+
+Repository-local `core.whitespace` enables `cr-at-eol` alongside ordinary whitespace
+checks. `.git/info/attributes` applies only these exact exceptions:
+
+- `data/raw/LOGHUB_LICENSE.txt`: preserve two upstream trailing spaces.
+- `docs/ui/TIMELINE_V2_UI_SPEC.md`: preserve the two-space Markdown line breaks.
+- `docs/benchmarks/v3/fixture-profile.txt`: preserve generated trailing blank lines.
+
+Other whitespace checks stay enabled. With this explicit policy,
+`git diff --cached --check` passed with no diagnostics before each commit.
+These local attributes do not transform blob content, and are not shared as
+application source. See [Git per-path whitespace attributes](https://git-scm.com/docs/gitattributes#_checking_whitespace_errors).
+A future clone must apply an appropriate local policy before comparing working
+bytes; the baseline commit itself retains the exact approved bytes.
+
+## Requested project/progress tree
+
+```text
+LogSense AI/
+├── app/                           Implemented Flask investigation workspace
+│   ├── api/                       Timeline, results, CSV and evidence APIs
+│   ├── services/                  Fixture aggregation, evidence and redaction
+│   ├── templates/                 Single workspace and evidence drawer
+│   └── static/                    CSS and JavaScript interactions
+├── tests/                         50 automated tests pass
+├── scripts/                       Dataset acquisition, QA and fixture benchmark
+├── docs/
+│   ├── research/                  Papers, datasets and published baselines
+│   ├── ui/                        Wireframes, screenshots and verification
+│   ├── architecture/              V3 proposal; implementation pending
+│   ├── benchmarks/v3/             Measured fixture baseline; no 1M SQL claim
+│   └── development/               Approved Git manifest and this report
+├── data/raw/                      Local archives ignored; license notice tracked
+├── research/papers/               Local downloaded PDFs ignored
+├── .venv/                         Local Python environment ignored
+├── .local/                        Local/browser/cache state ignored
+└── .git/                          Local Git history; no remote/push
+```
+
+```text
+Progress
+├── Complete: Flask foundation and research acquisition
+├── Complete: Investigation V2 timeline/filter/table/export flow
+├── Complete: Evidence Drawer and synthetic-data verification
+├── Complete: V3 architecture and six-anomaly fixture performance report
+├── Complete: Independent verified backup and local Git baseline
+└── Pending
+    ├── GitHub remote/push: requires a separate explicit instruction
+    ├── MySQL/SQLAlchemy persistence and real-data import
+    ├── Executed detectors and original raw-log provenance
+    └── Isolated 10K/100K/1M parsed-event database benchmarks
+```
+
+## Remaining limits
+
+The secret review is heuristic and not an absolute security certification. Large
+public research archives, downloaded papers, local browser state and the private
+backup are deliberately outside Git. The private backup is a separate directory
+on the same D: volume, so it is not protection against failure of that whole drive.
+A Git baseline protects version history on
+this machine; GitHub remains unchanged until an explicit remote/push task.
+
+## Historical Gate 1 audit
+
+The following sections are retained from the pre-approval audit. Their statements
+about initialization/commit being pending describe Gate 1, not the current outcome
+above. The original approved document is also preserved in the baseline commit.
 
 ## 1. Executive summary
 
