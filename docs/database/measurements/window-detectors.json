@@ -1,0 +1,127 @@
+{
+  "schema": "logsense_bench_c13e43856963",
+  "dataset_id": 2,
+  "reports": [
+    {
+      "run_id": 1,
+      "metrics": {
+        "f1": 0.2697947214076246,
+        "fn": 437,
+        "fp": 61,
+        "tn": 78519,
+        "tp": 92,
+        "fpr": 0.0007762789513871214,
+        "unit": "observed host-window",
+        "scope": "chronological test split only",
+        "recall": 0.17391304347826086,
+        "precision": 0.6013071895424836,
+        "label_policy": "any original BGL alert among ALL observed events in this window",
+        "label_source": "loghub-bgl original",
+        "eligible_units": 79109,
+        "unlabeled_units": 0,
+        "auprc_average_precision": 0.17724455267373854,
+        "source_time_completeness": "unknown; imported observations only",
+        "no_event_level_comparison": true
+      },
+      "configuration": {
+        "seed": 42,
+        "sklearn": "1.7.2",
+        "detector": "rule",
+        "features": [
+          "log1p_event_count",
+          "high_severity_fraction",
+          "distinct_template_fraction",
+          "dominant_template_fraction",
+          "log1p_mean_message_length"
+        ],
+        "test_end": "2005-06-05T16:40:00Z",
+        "reference": {
+          "threshold": 2.0000000000000004,
+          "mean_event_count": 1.509180474697716
+        },
+        "threshold": 2.0000000000000004,
+        "train_end": "2005-06-04T19:40:00Z",
+        "train_start": "2005-06-03T22:40:00Z",
+        "split_counts": {
+          "test": 79109,
+          "train": 11165,
+          "validation": 60
+        },
+        "training_used": 11165,
+        "input_revision": 200,
+        "model_artifact": null,
+        "validation_end": "2005-06-05T06:10:00Z",
+        "window_seconds": 300,
+        "feature_version": "observed-host-window-1",
+        "score_direction": "higher",
+        "template_policy": "replace whole decimal/hex tokens with <*> then SHA256; v1",
+        "validation_used": 60,
+        "maximum_event_id": 110000,
+        "threshold_policy": "training count p99",
+        "feature_file_sha256": "faebe006dbfebc65a3772bae20df73566c91eea2dc0014faf52fa9764ef39b26"
+      }
+    },
+    {
+      "run_id": 2,
+      "metrics": {
+        "f1": 0.0,
+        "fn": 529,
+        "fp": 5,
+        "tn": 78575,
+        "tp": 0,
+        "fpr": 6.362942224484602e-05,
+        "unit": "observed host-window",
+        "scope": "chronological test split only",
+        "recall": 0.0,
+        "precision": 0.0,
+        "label_policy": "any original BGL alert among ALL observed events in this window",
+        "label_source": "loghub-bgl original",
+        "eligible_units": 79109,
+        "unlabeled_units": 0,
+        "auprc_average_precision": 0.2545639511332459,
+        "source_time_completeness": "unknown; imported observations only",
+        "no_event_level_comparison": true
+      },
+      "configuration": {
+        "seed": 42,
+        "sklearn": "1.7.2",
+        "detector": "isolation_forest",
+        "features": [
+          "log1p_event_count",
+          "high_severity_fraction",
+          "distinct_template_fraction",
+          "dominant_template_fraction",
+          "log1p_mean_message_length"
+        ],
+        "test_end": "2005-06-05T16:40:00Z",
+        "reference": {
+          "threshold": -0.8209836085366523,
+          "mean_event_count": 1.509180474697716
+        },
+        "threshold": -0.8209836085366523,
+        "train_end": "2005-06-04T19:40:00Z",
+        "train_start": "2005-06-03T22:40:00Z",
+        "split_counts": {
+          "test": 79109,
+          "train": 11165,
+          "validation": 60
+        },
+        "training_used": 11165,
+        "input_revision": 200,
+        "model_artifact": {
+          "key": "bfb26487527f4d78b485d5dd6b881c93.joblib",
+          "sha256": "cda45a7fd5051d063c2b88b05c3ffb40d278f1ccb1ea9a2acd5ee7335f11b696"
+        },
+        "validation_end": "2005-06-05T06:10:00Z",
+        "window_seconds": 300,
+        "feature_version": "observed-host-window-1",
+        "score_direction": "lower",
+        "template_policy": "replace whole decimal/hex tokens with <*> then SHA256; v1",
+        "validation_used": 60,
+        "maximum_event_id": 110000,
+        "threshold_policy": "validation native-score p01, no labels",
+        "feature_file_sha256": "faebe006dbfebc65a3772bae20df73566c91eea2dc0014faf52fa9764ef39b26"
+      }
+    }
+  ]
+}

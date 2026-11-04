@@ -1,4 +1,4 @@
-"""Read-only demo APIs; real ingestion and authorization are not connected."""
+"""Demo and authorized MySQL Investigation APIs using the shared V2 contract."""
 import csv
 import io
 import time
@@ -11,6 +11,7 @@ from app.access import authorize_source
 from app.presentation import payload
 from app.services.evidence import evidence, find_record, raw_page, related_page
 from app.services.redaction import redact
+from app.services.csv_safety import safe_cell
 from app.services.investigation import (QueryError, REVISION, SOURCES, build, detail,
                                         export_rows, query)
 
@@ -24,6 +25,10 @@ def invalid_query(error):
 
 @api.before_request
 def validate_revision():
+    from app.services.mysql_investigation import is_mysql,state
+    if is_mysql(request.args):
+        state(request.args)
+        return None
     authorize_source(request.args.get('source', 'demo'))
     if request.args.get('revision', REVISION) != REVISION:
         return jsonify(error={'code': 'revision_changed', 'message': 'Data revision changed. Refresh this scope before continuing.'}), 409
@@ -51,24 +56,42 @@ def evidence_context(anomaly_id):
 
 @api.get('/anomalies/<anomaly_id>/evidence')
 def anomaly_evidence(anomaly_id):
+    from app.services.mysql_investigation import is_mysql
+    if is_mysql(request.args):
+        from app.services.mysql_evidence import evidence as actual_evidence
+        return jsonify(actual_evidence(anomaly_id,request.args))
     event, state, signer = evidence_context(anomaly_id)
     return jsonify(evidence(event, state, request.args, signer))
 
 
 @api.get('/anomalies/<anomaly_id>/evidence/raw')
 def raw_evidence(anomaly_id):
+    from app.services.mysql_investigation import is_mysql
+    if is_mysql(request.args):
+        from app.services.mysql_evidence import evidence as actual_evidence
+        return jsonify(raw_event=actual_evidence(anomaly_id,request.args)['raw_event']['page'],mode='database')
     event, state, _ = evidence_context(anomaly_id)
     return jsonify(raw_event=raw_page(event, request.args), revision=REVISION, mode='demo')
 
 
 @api.get('/anomalies/<anomaly_id>/related')
 def related_evidence(anomaly_id):
+    from app.services.mysql_investigation import is_mysql
+    if is_mysql(request.args):
+        from app.services.mysql_evidence import evidence as actual_evidence
+        return jsonify(related_events=actual_evidence(anomaly_id,request.args)['related_events'],mode='database')
     event, state, signer = evidence_context(anomaly_id)
     return jsonify(related_events=related_page(event, state, request.args, signer), revision=REVISION, mode='demo')
 
 
 @api.get('/anomalies/<anomaly_id>/evidence/export')
 def export_evidence(anomaly_id):
+    from app.services.mysql_investigation import is_mysql
+    if is_mysql(request.args):
+        from app.services.mysql_evidence import evidence as actual_evidence
+        result=actual_evidence(anomaly_id,request.args)
+        result['export_scope']='Current redacted raw/related page; actual persisted evidence.'
+        return jsonify(result)
     event, state, signer = evidence_context(anomaly_id)
     result = evidence(event, state, request.args, signer)
     result['export_scope'] = {'type': 'current evidence page', 'query': redact(state),
@@ -81,25 +104,32 @@ def export_evidence(anomaly_id):
 @api.get('/investigation')
 def investigation():
     started = time.perf_counter()
-    result = payload(build(query(request.args)))
+    from app.services.mysql_investigation import is_mysql,build as real_build,state
+    result = payload(real_build(state(request.args))) if is_mysql(request.args) else payload(build(query(request.args)))
     result['query_ms'] = round((time.perf_counter()-started)*1000, 2)
     return jsonify(result)
 
 
 @api.get('/anomalies/timeline')
 def timeline():
-    view = build(query(request.args))
+    from app.services.mysql_investigation import is_mysql,build as real_build,state
+    view = real_build(state(request.args)) if is_mysql(request.args) else build(query(request.args))
     return jsonify({key: view[key] for key in ['state', 'revision', 'mode', 'scope_count', 'high_critical_count', 'timeline', 'coverage', 'row_count', 'row_page_count']})
 
 
 @api.get('/anomalies')
 def anomalies():
-    view = build(query(request.args))
+    from app.services.mysql_investigation import is_mysql,build as real_build,state
+    view = real_build(state(request.args)) if is_mysql(request.args) else build(query(request.args))
     return jsonify({key: view[key] for key in ['state', 'revision', 'mode', 'scope_count', 'result_count', 'events', 'page_count']})
 
 
 @api.get('/anomalies/export')
 def export():
+    from app.services.mysql_investigation import is_mysql
+    if is_mysql(request.args):
+        from app.api.mysql_export import export_actual
+        return export_actual()
     state = query(request.args)
     rows = export_rows(state)
     # Demo adapter is bounded. A SQL repository must stream its snapshot rather
@@ -109,8 +139,7 @@ def export():
     fields = ['id', 'timestamp', 'host', 'service', 'detector', 'unit', 'score', 'severity', 'message', 'synthetic']
 
     def safe(value):
-        value = str(value if value is not None else '')
-        return "'"+value if value.startswith(('=', '+', '-', '@', '\t', '\r', '\n')) else value
+        return safe_cell(value)
 
     def generate():
         buffer = io.StringIO(newline='')
@@ -130,6 +159,10 @@ def export():
 
 @api.get('/anomalies/<anomaly_id>')
 def anomaly_detail(anomaly_id):
+    from app.services.mysql_investigation import is_mysql
+    if is_mysql(request.args):
+        from app.services.mysql_evidence import evidence as actual_evidence
+        return jsonify(event=actual_evidence(anomaly_id,request.args)['anomaly'],mode='database')
     source = request.args.get('source', 'demo')
     if source not in SOURCES:
         raise QueryError('Unknown source.')

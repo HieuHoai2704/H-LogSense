@@ -1,3 +1,5 @@
+> Historical fixture benchmark: the figures below describe the original six-anomaly workload. New real-BGL import/API measurements through one million parsed events are in [the current report](../../database/IMPLEMENTATION_REPORT.md); these workloads must not be treated as equivalent.
+
 # Investigation V3 — benchmark methodology and measured baseline
 
 Date: 2026-11-03, Asia/Ho_Chi_Minh. **Architecture/reporting task only.**

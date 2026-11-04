@@ -1,0 +1,97 @@
+{
+  "date": "2026-11-04",
+  "default_suite": {
+    "discovered": 125,
+    "passed": 73,
+    "actual_mysql_skipped": 52
+  },
+  "actual_mysql_integration": {
+    "schemas": [
+      "logsense_test_33aa779d8257",
+      "logsense_test_02cc6dea476c"
+    ],
+    "tests": 52,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "mysql_integration": "PASS",
+    "cleanup": "No database/table/volume dropped. Generated fixtures retained."
+  },
+  "browser": {
+    "demo_workspace_groups": 21,
+    "demo_drawer_groups": 13,
+    "real_mysql_groups": 9,
+    "page_errors": 0
+  },
+  "axe": {
+    "tool": "axe-core 4.10.3",
+    "viewport": 1366,
+    "checks": [
+      {
+        "page": "demo",
+        "violations": [],
+        "passes": 28,
+        "incomplete_checks": 2
+      },
+      {
+        "page": "logs",
+        "violations": [],
+        "passes": 27,
+        "incomplete_checks": 1
+      },
+      {
+        "page": "mysql-investigation",
+        "violations": [],
+        "passes": 28,
+        "incomplete_checks": 2
+      }
+    ],
+    "status": "PASS",
+    "limits": "Automated checks only. Screen reader, manual contrast in every state and native macOS testing NOT RUN."
+  },
+  "packages": {
+    "Flask": "3.1.3",
+    "SQLAlchemy": "2.0.57",
+    "Flask-SQLAlchemy": "3.1.1",
+    "Flask-Migrate": "4.1.0",
+    "alembic": "1.20.1",
+    "PyMySQL": "1.1.3",
+    "scikit-learn": "1.7.2",
+    "numpy": "2.2.6",
+    "psutil": "7.2.2"
+  },
+  "migration_head": "0004",
+  "domain_tables": 23,
+  "mysql": "8.4.7",
+  "status": {
+    "database_models_migrations_fk": "PASS",
+    "bgl_parser_streaming_ingestion_resume": "PASS",
+    "real_source_bytes_labels_fields_1M": "PASS",
+    "log_API_snapshot_pagination_csv": "PASS",
+    "real_investigation_and_evidence": "PASS",
+    "authentication_dataset_permissions_csrf": "PASS",
+    "window_models_reproducibility_and_evaluation": "PASS",
+    "alerts_audit_cooldown_smtp_mocks": "PASS",
+    "operational_detector_quality": "FAIL: experimental rule/IF are insufficient; window IF recall is zero",
+    "mysql_restart_backup_restore_windows": "PASS",
+    "macOS_native_execution": "NOT RUN",
+    "external_SMTP_delivery": "NOT RUN",
+    "manual_screen_reader": "NOT RUN",
+    "HTTP_upload": "NOT IMPLEMENTED; endpoint absent and request-size rejection tested",
+    "full_eight_week_roadmap": "PARTIAL; see TRACEABILITY.md"
+  },
+  "safety": {
+    "push": false,
+    "merge": false,
+    "drop_existing_database_or_table": false,
+    "delete_original_dataset": false,
+    "interface": "Existing stylesheet and V2 layout retained; authorized MySQL adapters/Log Explorer/inline incident controls added"
+  },
+  "stylesheet_original_byte_match": "PASS",
+  "security_scan": {
+    "actual_secret_value_matches": 0,
+    "private_values_checked": 13,
+    "large_new_files": 0,
+    "status": "PASS"
+  }
+}

@@ -1,111 +1,128 @@
 # LogSense AI
 
-A Flask-based log anomaly detection project for an Advanced Python course.
+A Python/Flask investigation workspace for imported system logs and experimental
+anomaly detection. The application keeps a clearly labeled synthetic Demo Mode
+separate from authenticated MySQL data. It is an Advanced Python portfolio
+project, not a production monitoring or root-cause diagnosis service.
 
-## V3 architecture proposal
+## Implemented
 
-See the [Investigation V3 architecture review](docs/architecture/README.md) for
-the proposed count/data model, compact timeline contract, SQL/index/coverage
-strategy, staged benchmark matrix and scaling roadmap. A measured six-anomaly
-fixture baseline is included; the 10K/100K/1M parsed-event MySQL benchmark is NOT
-executed because an approved isolated database is unavailable. V3 does not change
-the current application or provision infrastructure.
+- Flask application factory, Blueprints, Jinja2 and modular Python services.
+- MySQL 8.4, SQLAlchemy 2 and Alembic/Flask-Migrate; dataset-scoped foreign keys.
+- Streaming Loghub BGL parser, exact source bytes and provenance, atomic batch
+  ingestion, validation, malformed-row reporting, checkpoints and safe resume.
+- Authenticated Log Explorer with UTC filters, signed keyset snapshots, bounded
+  server-side pagination, aggregated volume and scoped streamed CSV.
+- The existing Investigation V2 layout connected to persisted anomaly outputs:
+  Severity/Volume, brush/zoom, facets, real Evidence Drawer and frozen run scope.
+- Event baselines plus observed host-window rule/Isolation Forest jobs, versioned
+  features/configuration, predictions and test-only evaluation.
+- User/dataset permissions, password hashing, CSRF-protected changes, incident
+  acknowledgement/assignment/notes/audit, cooldown decisions and an opt-in SMTP
+  outbox with bounded retry.
 
-## Research resources
+The latest measured real-BGL prefix import reached **1,000,000 parsed events**.
+That is not one million anomalies. Model quality remains experimental: the
+current host-window Isolation Forest has **zero recall** on its defined test
+split. See the exact measurements and limitations before interpreting results.
 
-See the [research library](docs/research/README.md) for the initial paper register,
-public dataset catalog, measured archive inventory and acquisition manifest.
-Downloaded archives and paper PDFs are local-only and excluded from Git.
-The [baseline review](docs/research/BASELINE_REVIEW.md) separates published scores
-from unmeasured local methods.
+## Quick start: synthetic demo
 
-## Current scope
-
-Investigation V2 is a working single Flask/Jinja2 workspace with versioned REST
-APIs, server-aggregated adaptive UTC bins, Overall and grouped detector rows,
-Severity/Volume modes, brush/keyboard interval selection, backend zoom,
-multi-select faceted filters, URL history, paged results, contextual evidence and
-server CSV export matching the selected scope. All displayed records and evidence
-are **synthetic**. Four labelled fixture sources exercise complete, empty,
-unprocessed and partial-coverage states; they are not imported datasets.
-
-See the [implementation report](docs/INVESTIGATION_V2_IMPLEMENTATION.md) for the
-final component/API contract, audit, files changed, verification screenshots and
-remaining blockers. Database access (MySQL/SQLAlchemy), authentication, ingestion,
-real detector jobs and large-data performance are **not implemented or verified**.
-
-The [Evidence Drawer report](docs/EVIDENCE_DRAWER.md) documents scope-wide
-Previous/Next, safe redacted raw chunks, rule/ML availability, paginated related
-records, source read policy and evidence export. Public access is restricted to
-the explicitly configured synthetic source allowlist; this is not real user login
-or authorization for private datasets.
-
-## Local setup
-
-Use Python 3.10 or newer. Run these commands from the project directory.
-
-### Windows PowerShell
+Create/activate a native Python 3.10+ environment:
 
 ```powershell
+# Windows PowerShell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m flask --app app:create_app run
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m flask --app app run --host 127.0.0.1
 ```
-
-### macOS / Linux
 
 ```bash
+# macOS
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m flask --app app:create_app run
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m flask --app app run --host 127.0.0.1
 ```
 
-Open http://127.0.0.1:5000 on the machine running Flask. This address is local
-to that machine; a browser on another computer cannot reach it using localhost.
-Stop the development server with Ctrl+C. The development server is for local
-use, not public deployment.
+Open the loopback URL printed by Flask. No database URL/server is needed for
+Demo Mode. Install all runtime dependencies even when using the demo. Never
+copy a Windows venv or MySQL executable to macOS.
 
-## How it works
+## MySQL and real BGL
 
-1. Flask calls `create_app()` in `app/__init__.py`.
-2. The application loads settings from `config.py`.
-3. A GET request to `/` calls the `dashboard()` view.
-4. Jinja2 renders `app/templates/dashboard.html`; the API Blueprint shares the
-   same validated query and aggregation service in `app/services/investigation.py`.
-5. Browser updates use one composite API response; evidence and CSV are separate
-   read endpoints. Downloaded research archives are not automatically imported.
+Follow the [Windows/macOS runbook](docs/database/MYSQL_RUNBOOK.md). A local native
+MySQL ZIP runtime uses only `.local`, port 13306 and 127.0.0.1; no service or global
+configuration is installed. The lifecycle tool generates private credentials and
+passes DATABASE_URL/FLASK_SECRET_KEY into child processes without printing them.
+It refuses reinitialization over an existing runtime. No default login exists.
 
-Runtime dependencies are Flask and `tzdata` (IANA timezone support on Windows).
-
-## UI scope checks
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```text
+python -m scripts.mysql_runtime start
+python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
+python -m scripts.mysql_runtime exec --role app -- -m scripts.database register-bgl --key bgl-research-v1
+python -m scripts.mysql_runtime exec --role app -- -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
+python -m scripts.mysql_runtime exec --role app -- -m scripts.database create-user --username investigator --role admin --dataset DATASET_ID
+python -m scripts.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
 ```
 
-These tests check synthetic scope aggregation and rendering. They do not verify
-MySQL, real ingestion or ML, which have not been implemented.
+Replace DATASET_ID with the actual registration result. Account creation prompts
+for a password; do not put passwords in command arguments. The import limit is an
+absolute physical-line target: increase to 10000/100000 to resume the same source.
+The archive must be the immutable locally downloaded Loghub BGL ZIP. HTTP upload
+is not implemented. Do not pass untrusted server paths through an HTTP endpoint.
 
-Optional browser QA with the locally installed Microsoft Edge and Playwright:
+Open `/?workspace=logs`, sign in and select an authorized dataset. To investigate
+completed detections, open `/?source=db-DATASET_ID`. The Demo workspace remains
+available at `/`. Run the analysis worker separately:
 
-```powershell
-.\.venv\Scripts\python.exe scripts/qa_investigation_v2.py
+```text
+python -m scripts.mysql_runtime exec --role app -- -m scripts.worker
 ```
 
-The QA script starts and stops its own loopback server, exercises interaction and
-failure states, and writes reports/screenshots to `docs/ui/implementation-v2/`.
-Playwright is a local QA utility, not a runtime requirement for the Flask app.
+Jobs are submitted from the inline analysis controls or authenticated REST API.
+A queued job is not a completed detection. Use the inline Alerts panel to create
+rules (manager permission), acknowledge/assign incidents and inspect actual
+anomaly evidence. SMTP is disabled by default; configure it privately and invoke
+`python -m scripts.database notify` outside HTTP requests. Tests use mocks;
+external SMTP delivery was not exercised.
 
-## Research acquisition
+## Verification and measurements
 
-```powershell
-.\.venv\Scripts\python.exe scripts\download_research.py
-.\.venv\Scripts\python.exe scripts\inspect_research_archives.py
+```text
+python -B -m unittest discover -s tests -q
+python -B -m compileall -q app scripts tests migrations
+python -m pip check
 ```
 
-The download script requires `curl` (`curl.exe` on this Windows workstation),
-verifies dataset MD5 against the catalog and computes local SHA-256. It does not
-extract archives. A failed paper source is recorded rather than treated as a PDF.
-See `docs/research/download_status.json` and `paper_download_status.json` for
-artifact status. PDF analysis/browser tools installed locally are research/QA
-utilities, not application runtime dependencies.
+The default suite explicitly skips real-MySQL tests. For actual integration,
+privately configure MYSQL_ADMIN_URL and DATABASE_URL and run
+`python -m scripts.verify_mysql`; it creates new token-marked test schemas, never
+drops existing databases, and runs migrations plus integration/API/security tests.
+See [testing](docs/database/TESTING.md) for browser tools and reproducible data
+benchmarks. The final report distinguishes PASS, FAIL and NOT RUN.
+
+- [Final QA / implementation report](docs/database/IMPLEMENTATION_REPORT.md)
+- [Eight-week and course traceability](docs/database/TRACEABILITY.md)
+- [API reference](docs/database/API.md)
+- [Schema and ERD](docs/database/SCHEMA.md), [ERD diagram](docs/database/ERD.md)
+- [BGL parsing/ingestion](docs/database/BGL_PIPELINE.md)
+- [Detector/evaluation semantics](docs/database/DETECTORS.md)
+- [Demo script](docs/database/DEMO_SCRIPT.md)
+- [Architecture proposal V3](docs/architecture/README.md)
+- [Research and dataset sources](docs/research/README.md)
+
+## Limits and privacy
+
+Native macOS execution, real external SMTP, screen-reader certification,
+production deployment/TLS, full BGL archive detection, supervised baseline,
+Tkinter companion, HTTP upload and production user administration are not
+verified/implemented. The white UI follows the user's design constraint; no dark
+mode was added. The supplied roadmap is not proof of an official lecturer rubric.
+
+Raw datasets, MySQL files, dumps, model artifacts, private credentials and actual
+research-data QA screenshots stay in ignored local directories. Git contains
+source, migrations, tests and sanitized numerical reports. No background server
+or schema creation occurs by importing the application. No push/merge is part of
+this implementation.

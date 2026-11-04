@@ -7,6 +7,7 @@ import csv
 import io
 import json
 import logging
+import os
 from pathlib import Path
 import sys
 import threading
@@ -21,7 +22,7 @@ from app import create_app
 
 def main():
     root = Path(__file__).resolve().parents[1]
-    output = root/'docs/ui/implementation-v2'
+    output = Path(os.environ.get('LOGSENSE_QA_OUTPUT', root/'docs/ui/implementation-v2'))
     output.mkdir(parents=True, exist_ok=True)
     app = create_app()
 
@@ -42,7 +43,7 @@ def main():
 
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(channel='msedge', headless=True)
+            browser = p.chromium.launch(channel=os.environ.get('LOGSENSE_BROWSER_CHANNEL', 'msedge' if sys.platform == 'win32' else 'chromium'), headless=True)
             page = browser.new_page(viewport={'width': 1440, 'height': 1000})
             page.on('pageerror', lambda error: errors.append(str(error)))
             page.on('request', lambda req: requests.append(req.url))

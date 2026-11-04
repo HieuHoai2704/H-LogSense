@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "mysql": "8.4.7",
+  "microseconds_before_boundary": 1,
+  "decimal_floor_at_this_point": 0,
+  "integer_DIV": 0,
+  "grouped_offset_DIV": 0,
+  "ungrouped_offset_wrong": 1100000041666666,
+  "fix": "Exact integer DIV with explicit SQL operator precedence; both one-microsecond and exact-boundary integration tests pass. No decimal-rounding defect is claimed."
+}

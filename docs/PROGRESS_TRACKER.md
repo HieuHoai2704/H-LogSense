@@ -1,3 +1,5 @@
+> Latest verified update (2026-11-04): see [implementation and final QA](database/IMPLEMENTATION_REPORT.md), [eight-week traceability](database/TRACEABILITY.md) and [demo script](database/DEMO_SCRIPT.md). Earlier progress entries below are preserved as history; full roadmap completion is not claimed.
+
 # Progress tracker
 
 Updated: 2026-11-03.

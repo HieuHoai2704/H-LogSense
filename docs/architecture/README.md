@@ -1,3 +1,5 @@
+> Implementation update (2026-11-04): persistence, BGL ingestion, bounded real APIs, selected-run Investigation and minimum incidents/auth now exist. Full V3 publication/retention/federation remains proposed. See [implemented architecture](../database/ARCHITECTURE.md) and [QA](../database/IMPLEMENTATION_REPORT.md).
+
 # Investigation V3 architecture review
 
 Status: **Proposed; no application/database migration implemented.**

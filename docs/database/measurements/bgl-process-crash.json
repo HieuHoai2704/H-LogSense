@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "worker_exit_code": 77,
+  "committed_checkpoint_after_crash": 49500,
+  "stale_job_recovered": 1,
+  "wall_seconds_with_child_startup_and_verification": 18.053823099995498,
+  "dataset_id": 5,
+  "physical_lines": 100000,
+  "parsed_events": 100000,
+  "malformed_rows": 0,
+  "checkpoint_byte": 13259718,
+  "verified_lines": 100000,
+  "provenance": "PASS",
+  "raw_prefix_sha256": "d6b55a02a67d9ab027abae4b60c365edbf9a892fcb6810ff780528512ca01c83",
+  "source_prefix_sha256": "d6b55a02a67d9ab027abae4b60c365edbf9a892fcb6810ff780528512ca01c83",
+  "duplicate_lines": 0,
+  "raw_log_records": 100000,
+  "log_events": 100000,
+  "ground_truth_labels": 100000
+}

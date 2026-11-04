@@ -1,6 +1,7 @@
 """Evidence browser checks on synthetic fixtures; no real logs or credentials."""
 import json
 import logging
+import os
 from pathlib import Path
 import sys
 import threading
@@ -15,7 +16,7 @@ from werkzeug.serving import make_server
 
 def main():
     root = Path(__file__).resolve().parents[1]
-    out = root/'docs/ui/evidence-drawer'
+    out = Path(os.environ.get('LOGSENSE_QA_OUTPUT', root/'docs/ui/evidence-drawer'))
     out.mkdir(parents=True, exist_ok=True)
     logging.getLogger('werkzeug').setLevel(logging.ERROR)
     app = create_app()
@@ -26,7 +27,7 @@ def main():
     passed, errors = [], []
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(channel='msedge', headless=True)
+            browser = p.chromium.launch(channel=os.environ.get('LOGSENSE_BROWSER_CHANNEL', 'msedge' if sys.platform == 'win32' else 'chromium'), headless=True)
             context = browser.new_context(viewport={'width': 1440, 'height': 1000})
             # Test clipboard payload/feedback without modifying the user's OS clipboard.
             context.add_init_script("Object.defineProperty(navigator,'clipboard',{value:{writeText:async text=>{window.testClipboard=text}}})")

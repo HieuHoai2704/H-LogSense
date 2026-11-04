@@ -134,7 +134,7 @@ async function load(url, historyMode = "push") {
     const canonical = stateURL();
     if (historyMode === "push" && canonical.href !== location.href) history.pushState({}, "", canonical);
     if (historyMode === "replace") history.replaceState({}, "", canonical);
-    status.textContent = `Query ready · ${data.result_count} results · ${data.query_ms} ms · DEMO${dirty ? " · Unapplied filter changes" : ""}`;
+    status.textContent = `Query ready · ${data.result_count} results · ${data.query_ms} ms · ${data.mode === "database" ? "MYSQL" : "DEMO"}${dirty ? " · Unapplied filter changes" : ""}`;
     restoreFocus(focus);
   } catch (error) {
     if ((error.name !== "AbortError" || timedOut) && ticket === sequence) {
@@ -177,7 +177,7 @@ function selectRange(first, last) {
 function inspectCell(cell) {
   const severity = JSON.parse(cell.dataset.breakdown);
   const name = cell.dataset.detector ? document.querySelector(`[name="detector"][value="${CSS.escape(cell.dataset.detector)}"]`)?.parentElement.querySelector("span")?.textContent : "Overall";
-  document.getElementById("bin-inspector").textContent = `${name} · ${cell.dataset.label} · ${cell.dataset.count} anomalies · C ${severity.Critical}, H ${severity.High}, M ${severity.Medium}, L ${severity.Low} · ${cell.dataset.coverage} fixture coverage${cell.dataset.coverage !== "complete" ? " — observed count may be incomplete" : ""}`;
+  document.getElementById("bin-inspector").textContent = `${name} · ${cell.dataset.label} · ${cell.dataset.count} anomalies · C ${severity.Critical}, H ${severity.High}, M ${severity.Medium}, L ${severity.Low} · ${cell.dataset.coverage} ${applied.source.startsWith('db-') ? 'data' : 'fixture'} coverage${cell.dataset.coverage !== "complete" ? " — observed count may be incomplete" : ""}`;
 }
 function previewRange(start, end) {
   mount.querySelectorAll("[data-cell]").forEach(c => c.classList.toggle("brush-preview", c.dataset.start < end && c.dataset.end > start));
@@ -232,7 +232,7 @@ document.addEventListener("change", event => {
   const url = formURL(field.name !== "timezone");
   if (field.name === "source" || field.name === "range") {
     ["start_time", "end_time", "base_start_time", "base_end_time"].forEach(k => url.searchParams.delete(k));
-    if (field.name === "source") { url.searchParams.set("range", "full"); closeDetail(false); }
+    if (field.name === "source") { url.searchParams.set("range", "full"); if (applied.source.startsWith("db-")) ["run_id","runs_pinned","host","service","detector"].forEach(k=>url.searchParams.delete(k)); closeDetail(false); }
   }
   load(url);
 });

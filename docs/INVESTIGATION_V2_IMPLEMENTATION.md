@@ -1,3 +1,5 @@
+> Current status (2026-11-04): this original synthetic implementation record is historical. The same V2 layout now has an authenticated MySQL provider; see [current implementation/QA](database/IMPLEMENTATION_REPORT.md).
+
 # Enterprise Investigation V2 — implementation report
 
 Date: 2026-11-03. **Implemented and verified for synthetic fixtures only.**

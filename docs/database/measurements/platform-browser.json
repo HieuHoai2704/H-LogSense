@@ -1,0 +1,22 @@
+{
+  "passed": [
+    "Login, explicit dataset ACL, HttpOnly/SameSite session and bounded real-log page",
+    "Stable keyset next/previous navigation against a pinned imported-event snapshot",
+    "Real host filter, synchronized server timeline/count and CSV scope",
+    "Actual raw provenance drawer, Escape/focus restoration, context unchanged",
+    "Log Explorer layouts at 1366, 1440 and 1920 with controlled chart/table scrolling",
+    "Real alert acknowledgement, redacted note/audit history and linked anomaly evidence",
+    "MySQL Anomaly Center, Severity/Volume, actual Evidence Drawer and selection/CSV scope",
+    "Existing Investigation V2 layout retained at desktop/laptop widths",
+    "Authorized dataset switch clears the old run snapshot without retaining private stale scope"
+  ],
+  "count": 9,
+  "page_errors": [],
+  "data": "real BGL imported prefix; live MySQL",
+  "screenshots": "private .local/database-verification/platform-browser",
+  "not_run": [
+    "native macOS browser",
+    "screen-reader certification",
+    "actual external SMTP delivery"
+  ]
+}

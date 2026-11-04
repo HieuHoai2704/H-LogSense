@@ -1,0 +1,117 @@
+{
+  "status": "PASS",
+  "mysql": "8.4.7",
+  "bind_address": "127.0.0.1",
+  "time_zone": "+00:00",
+  "original_schema": "logsense_bench_a7e053cfdf3e",
+  "restored_schema": "logsense_restore_a376569b1273",
+  "restart_data_checksums": "PASS",
+  "backup_restore_all_table_checksums": "PASS",
+  "graceful_shutdown": "stopped",
+  "source_data": "real BGL first 1000 lines",
+  "tables": {
+    "alembic_version": {
+      "rows": 1,
+      "sha256": "4a4266525c271761d45ce7b57a0bdd2f5bca5fd00c16b97f10cf972620e8a327"
+    },
+    "alert_audit": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "alert_decisions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "alert_rules": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "alerts": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "anomaly_outputs": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "coverage_intervals": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "data_sources": {
+      "rows": 1,
+      "sha256": "b47643cb4b5edd9713ac642da28e9684cf3f5185c935f7f849491335bb46483c"
+    },
+    "datasets": {
+      "rows": 1,
+      "sha256": "677ff8d6f48ae57a9b2e45b69531c893da0859d91c23e5fffb714a8029b7340b"
+    },
+    "detection_predictions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "detection_units": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "detector_runs": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "detector_versions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "detectors": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "evaluation_reports": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "ground_truth_labels": {
+      "rows": 1000,
+      "sha256": "ea18498cbdc28e5b4e29fb8e1220b5f4c89964c6f78a06d9f10fb2b54c44a362"
+    },
+    "log_events": {
+      "rows": 1000,
+      "sha256": "c52c85ad8a00b52b21e8e446023ed770dfa9930b5ab791ce121ee70039924f40"
+    },
+    "notification_outbox": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "processing_jobs": {
+      "rows": 1,
+      "sha256": "3612a731ca5b7daae75b4e071c767c61cc23369f7b1543bb729d0ee889e97cbe"
+    },
+    "raw_log_records": {
+      "rows": 1000,
+      "sha256": "15c1edb46f1df6077f6593326291f09b53445fe1781ef4fad8e29625450ff786"
+    },
+    "source_artifacts": {
+      "rows": 1,
+      "sha256": "b6a8bbeffee414f74303e9835fc89fda64ade0caaae38d67164dbbbf03d0aef9"
+    },
+    "unit_events": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "user_datasets": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "users": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "backup_bytes": 871849,
+  "backup_sha256": "86ac02b5c34289cc8e83987f938f17a19d5ca286c565c0957838a27daabbfed4",
+  "dev_application_privileges": "SELECT, INSERT, UPDATE only",
+  "migration_role": "separate logsense_migrator",
+  "macos_runtime": "NOT RUN: no macOS host available",
+  "existing_schema_unchanged": true,
+  "drop_or_delete_executed": false
+}

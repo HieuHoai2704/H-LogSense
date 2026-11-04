@@ -1,0 +1,26 @@
+{
+  "tool": "axe-core 4.10.3",
+  "viewport": 1366,
+  "checks": [
+    {
+      "page": "demo",
+      "violations": [],
+      "passes": 28,
+      "incomplete_checks": 2
+    },
+    {
+      "page": "logs",
+      "violations": [],
+      "passes": 27,
+      "incomplete_checks": 1
+    },
+    {
+      "page": "mysql-investigation",
+      "violations": [],
+      "passes": 28,
+      "incomplete_checks": 2
+    }
+  ],
+  "status": "PASS",
+  "limits": "Automated checks only. Screen reader, manual contrast in every state and native macOS testing NOT RUN."
+}

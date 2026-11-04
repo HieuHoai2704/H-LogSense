@@ -1,0 +1,76 @@
+"""Bounded single-process worker. Run explicitly outside the Flask server."""
+
+import argparse, time
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+from app import create_app
+from app.extensions import db
+from app.models import ProcessingJob
+from app.services.window_detection import run_windows
+
+
+def run_once(engine):
+    from app.services.bgl_ingestion import import_lease
+
+    with Session(engine) as session:
+        candidate = session.scalar(
+            select(ProcessingJob.id)
+            .where(ProcessingJob.kind == "analysis", ProcessingJob.state == "queued")
+            .order_by(ProcessingJob.id)
+            .limit(1)
+        )
+    if candidate is None:
+        return False
+    try:
+        with import_lease(engine, "analysis-job-" + str(candidate)):
+            return execute_job(engine, candidate)
+    except RuntimeError:
+        return False
+
+
+def execute_job(engine, candidate):
+    with Session(engine) as session, session.begin():
+        job = session.scalar(
+            select(ProcessingJob)
+            .where(ProcessingJob.id == candidate, ProcessingJob.state == "queued")
+            .with_for_update(skip_locked=True)
+        )
+        if job is None:
+            return False
+        job.state = "running"
+        job_id = job.id
+        dataset_id = job.dataset_id
+        config = job.configuration
+    try:
+        result = run_windows(engine, dataset_id, "job:" + str(job_id), config)
+        from app.services.alerts import generate_alerts
+
+        result["alerts"] = generate_alerts(engine, dataset_id, result["run_id"])
+        with Session(engine) as session, session.begin():
+            job = session.get(ProcessingJob, job_id)
+            job.state = "completed"
+            job.result = result
+    except Exception:
+        with Session(engine) as session, session.begin():
+            job = session.get(ProcessingJob, job_id)
+            job.state = "failed"
+            job.error_code = "analysis_failed"
+    return True
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--once", action="store_true")
+    args = parser.parse_args()
+    app = create_app()
+    with app.app_context():
+        while True:
+            worked = run_once(db.engine)
+            if args.once:
+                break
+            if not worked:
+                time.sleep(1)
+
+
+if __name__ == "__main__":
+    main()

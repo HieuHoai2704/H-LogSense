@@ -6,6 +6,6 @@ class Config:
 
     TESTING = False
     # Only these explicitly synthetic sources may be read without a real identity
-    # provider. Private MySQL sources must remain disabled until ACLs are integrated.
+    # provider. Private MySQL sources use the authenticated dataset policy.
     DEMO_READ_ENABLED = True
     PUBLIC_DEMO_SOURCES = ('demo', 'empty', 'partial', 'unprocessed')

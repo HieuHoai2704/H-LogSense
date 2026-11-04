@@ -1,0 +1,82 @@
+{
+  "data": "real Loghub BGL, first physical lines in original archive order",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "python": "3.10.11",
+  "mysql": "8.4.7",
+  "schema": "logsense_bench_c13e43856963",
+  "dataset_id": 3,
+  "requested_lines": 1000000,
+  "batch_size": 500,
+  "wall_seconds": 294.71020560000034,
+  "lines_per_second": 3393.163796157315,
+  "process_rss_baseline_mib": 62.00390625,
+  "process_peak_rss_mib": 70.875,
+  "process_peak_delta_mib": 8.87109375,
+  "rss_sample_interval_ms": 10,
+  "memory_scope": "Importer Python process only; excludes mysqld and OS cache",
+  "query_20_warm_reads_ms": {
+    "p50": 0.7784000044921413,
+    "p95": 0.8897999941837043
+  },
+  "interrupted_before_commit": null,
+  "committed_checkpoint_after_interruption": null,
+  "resume": "NOT RUN in this workload",
+  "retry_idempotency": "PASS",
+  "explain_json": {
+    "query_block": {
+      "select_id": 1,
+      "cost_info": {
+        "query_cost": "56719.14"
+      },
+      "ordering_operation": {
+        "using_filesort": false,
+        "table": {
+          "table_name": "log_events",
+          "access_type": "ref",
+          "possible_keys": [
+            "uq_log_events_dataset_id_id",
+            "uq_log_events_dataset_id_raw_id_parser_version_emit_index",
+            "ix_events_dataset_time_id",
+            "ix_events_dataset_host_time"
+          ],
+          "key": "ix_events_dataset_time_id",
+          "used_key_parts": [
+            "dataset_id"
+          ],
+          "key_length": "8",
+          "ref": [
+            "const"
+          ],
+          "rows_examined_per_scan": 546112,
+          "rows_produced_per_join": 546112,
+          "filtered": "100.00",
+          "using_index": true,
+          "cost_info": {
+            "read_cost": "2107.95",
+            "eval_cost": "54611.20",
+            "prefix_cost": "56719.15",
+            "data_read_per_join": "979M"
+          },
+          "used_columns": [
+            "timestamp",
+            "dataset_id",
+            "id"
+          ]
+        }
+      }
+    }
+  },
+  "explain_analyze": "-> Limit: 100 row(s)  (cost=56719 rows=100) (actual time=0.0115..0.026 rows=100 loops=1)\n    -> Covering index lookup on log_events using ix_events_dataset_time_id (dataset_id=3)  (cost=56719 rows=546112) (actual time=0.011..0.0229 rows=100 loops=1)\n",
+  "physical_lines": 1000000,
+  "parsed_events": 1000000,
+  "malformed_rows": 0,
+  "checkpoint_byte": 141158105,
+  "verified_lines": 1000000,
+  "provenance": "PASS",
+  "raw_prefix_sha256": "51cdd00c485ba0f1af049e3dbce93027e4814432e97bb2e05ddfe69bb3c4bd65",
+  "source_prefix_sha256": "51cdd00c485ba0f1af049e3dbce93027e4814432e97bb2e05ddfe69bb3c4bd65",
+  "duplicate_lines": 0,
+  "raw_log_records": 1000000,
+  "log_events": 1000000,
+  "ground_truth_labels": 1000000
+}

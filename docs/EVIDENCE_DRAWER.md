@@ -1,3 +1,5 @@
+> Current status (2026-11-04): the original fixture report below is retained. The authenticated MySQL adapter and actual-data Drawer are now implemented and tested; see [current QA report](database/IMPLEMENTATION_REPORT.md) and [API](database/API.md).
+
 # Evidence Drawer — implementation and UX contract
 
 Date: 2026-11-03. Status: **Implemented and verified with synthetic fixtures**.

@@ -75,7 +75,7 @@ window.EvidenceDrawer = (() => {
     byId("raw-position").textContent = page.total_chars ? `${page.offset+1}–${page.offset+page.text.length} / ${page.total_chars} characters` : "Empty raw text";
     byId("raw-previous").disabled = page.offset === 0;
     byId("raw-next").disabled = !page.has_more;
-    byId("raw-note").textContent = `Synthetic text; original log unavailable. Redaction applied.${page.has_more ? " More text available in chunks." : ""}`;
+    byId("raw-note").textContent = `${current?.mode === "database" ? "Imported source evidence (a sample for window units)." : "Synthetic text; original log unavailable."} Redaction applied.${page.has_more ? " More text available in chunks." : ""}`;
     byId("raw-redaction-note").textContent = page.redaction_note;
   }
   function renderRelated(data) {
@@ -89,8 +89,8 @@ window.EvidenceDrawer = (() => {
       const reason = document.createElement("p"); reason.textContent = event.relationship_reasons.join(" · ");
       row.append(button, meta, reason); container.append(row);
     }
-    if (!data.items.length) container.textContent = "No related fixture records match this relationship and context interval.";
-    byId("related-status").textContent = `${data.items.length} records on this page · ${data.interval.start} – ${data.interval.end} · original raw context logs unavailable`;
+    if (!data.items.length) container.textContent = current?.mode === "database" ? "No related anomalies match this explicit context." : "No related fixture records match this relationship and context interval.";
+    byId("related-status").textContent = `${data.items.length} records on this page · ${data.interval.start} – ${data.interval.end} · ${current?.mode === "database" ? "related anomaly references; parsed context available in Log Explorer" : "original raw context logs unavailable"}`;
     byId("related-previous").disabled = !cursorHistory.length;
     byId("related-next").disabled = !data.has_more;
     byId("related-retry").hidden = true;
@@ -108,23 +108,23 @@ window.EvidenceDrawer = (() => {
     byId("detail-priority").className = `severity severity-${(a.severity || "").toLowerCase()}`;
     putFields("detail-fields", [["Detection timestamp · UTC", a.timestamp], ["Host", a.host], ["Service", a.service],
       ["Detector", a.detector], ["Detection unit", a.unit], ["Dataset", `${a.dataset_name} · ${a.dataset_id}`], ["Model run", a.model_run_id]]);
-    putFields("raw-provenance", [["Raw fixture timestamp", p.raw_timestamp], ["Adapted UTC timestamp", p.parsed_timestamp], ["Host", p.host],
+    putFields("raw-provenance", [[data.mode === "database" ? "Original timestamp string" : "Raw fixture timestamp", p.raw_timestamp], [data.mode === "database" ? "Parsed UTC timestamp" : "Adapted UTC timestamp", p.parsed_timestamp], ["Host", p.host],
       ["Source file", p.source_file], ["Source line", p.source_line], ["Event reference", p.event_reference], ["Parsing status", p.parsing_status]]);
     byId("detail-parsed").textContent = JSON.stringify(data.parsed_fields, null, 2);
     byId("detail-actual").textContent = unavailable(d.observed_value);
     byId("detail-typical").textContent = unavailable(d.reference_statistics);
     byId("explanation-status").textContent = d.explanation_status;
     let pairs = d.kind === "ml" ? [["Detection method", d.method], ["Model name", d.model_name], ["Model version", d.model_version],
-      ["Feature schema", d.feature_schema], ["Detection score · synthetic", d.score], ["Score direction", d.score_direction],
+      ["Feature schema", d.feature_schema], [data.mode === "database" ? "Native detection score" : "Detection score · synthetic", d.score], ["Score direction", d.score_direction],
       ["Configured threshold", d.configured_threshold], ["Detection unit", d.detection_unit], ["Feature evidence", d.feature_evidence]]
       : [["Rule ID", d.rule_id], ["Rule version", d.rule_version], ["Configured threshold", d.configured_threshold],
-         ["Observation window", d.observation_window], ["Detection score · synthetic", d.score]];
-    if (d.kind === "unknown") pairs = [["Detection method", d.method], ["Detector family", null], ["Detection unit", d.detection_unit], ["Detection score · synthetic", d.score]];
+         ["Observation window", d.observation_window], [data.mode === "database" ? "Native detection score" : "Detection score · synthetic", d.score]];
+    if (d.kind === "unknown") pairs = [["Detection method", d.method], ["Detector family", null], ["Detection unit", d.detection_unit], [data.mode === "database" ? "Native detection score" : "Detection score · synthetic", d.score]];
     putFields("detector-evidence", pairs);
     byId("detail-disclaimer").textContent = d.score_interpretation;
     byId("previous-anomaly").disabled = !data.navigation.previous_id;
     byId("next-anomaly").disabled = !data.navigation.next_id;
-    byId("detail-status").textContent = data.navigation.in_result_scope ? "DEMO · Selected synthetic supporting record" : data.navigation.note;
+    byId("detail-status").textContent = data.navigation.in_result_scope ? (data.mode === "database" ? "MYSQL · Actual persisted supporting evidence" : "DEMO · Selected synthetic supporting record") : data.navigation.note;
     byId("previous-anomaly").title = byId("next-anomaly").title = data.navigation.note;
     byId("filter-evidence-host").hidden = !a.host;
     byId("filter-evidence-service").hidden = !a.service;
@@ -210,7 +210,7 @@ window.EvidenceDrawer = (() => {
     try {
       const data = await fetchJSON(url(endpoint("/export"), {...contextParams(), raw_offset: raw.offset, raw_limit: raw.limit}), controller);
       const file = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: "application/json"}));
-      const link = document.createElement("a"); link.href = file; link.download = `synthetic-evidence-${id}.json`; link.click();
+      const link = document.createElement("a"); link.href = file; link.download = `${current?.mode === "database" ? "mysql" : "synthetic"}-evidence-${id}.json`; link.click();
       setTimeout(() => URL.revokeObjectURL(file), 1000); app().notify("Exported current redacted evidence page; omitted data is identified in availability.");
     } catch (error) { app().notify(`Evidence export failed: ${error.message}`); }
     finally { button.textContent = "Export evidence JSON"; availability(); }
@@ -248,7 +248,7 @@ window.EvidenceDrawer = (() => {
   });
   document.addEventListener("DOMContentLoaded", () => {
     const reference = new URL(location.href).searchParams.get("anomaly_id");
-    if (reference && /^LS-\d{4,12}$/.test(reference)) open(reference);
+    if (reference && /^(?:LS-\d{4,12}|DB-\d{1,19})$/.test(reference)) open(reference);
   });
   return {open, close, refreshContext};
 })();

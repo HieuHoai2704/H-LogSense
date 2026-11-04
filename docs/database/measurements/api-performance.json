@@ -1,0 +1,259 @@
+{
+  "mysql": "8.4.7",
+  "schema": "logsense_bench_c13e43856963",
+  "measurements": [
+    {
+      "endpoint": "/api/v1/logs",
+      "dataset_id": 1,
+      "parsed_events_in_scope": 10000,
+      "requests": 20,
+      "http_ms": {
+        "p50": 9.133849998761434,
+        "p95": 27.888600001460873
+      },
+      "sql_total_per_request_ms": {
+        "p50": 4.31735000165645,
+        "p95": 4.654399992432445
+      },
+      "payload_bytes_max": 11495,
+      "http_requests_per_second_serial": 81.72735673953648
+    },
+    {
+      "endpoint": "/api/v1/logs/timeline",
+      "dataset_id": 1,
+      "parsed_events_in_scope": 10000,
+      "requests": 20,
+      "http_ms": {
+        "p50": 10.512249995372258,
+        "p95": 32.02889999374747
+      },
+      "sql_total_per_request_ms": {
+        "p50": 6.138349999673665,
+        "p95": 6.38720000279136
+      },
+      "payload_bytes_max": 7130,
+      "http_requests_per_second_serial": 60.70779215468121
+    },
+    {
+      "endpoint": "/api/v1/logs",
+      "dataset_id": 2,
+      "parsed_events_in_scope": 100000,
+      "requests": 20,
+      "http_ms": {
+        "p50": 25.938899998436682,
+        "p95": 42.30989998904988
+      },
+      "sql_total_per_request_ms": {
+        "p50": 20.409999990079086,
+        "p95": 21.06479996291455
+      },
+      "payload_bytes_max": 11655,
+      "http_requests_per_second_serial": 35.91999826177247
+    },
+    {
+      "endpoint": "/api/v1/logs/timeline",
+      "dataset_id": 2,
+      "parsed_events_in_scope": 100000,
+      "requests": 20,
+      "http_ms": {
+        "p50": 50.73899999842979,
+        "p95": 51.35750000772532
+      },
+      "sql_total_per_request_ms": {
+        "p50": 46.06844999216264,
+        "p95": 46.70940000505652
+      },
+      "payload_bytes_max": 7161,
+      "http_requests_per_second_serial": 19.313080092164146
+    },
+    {
+      "endpoint": "/api/v1/logs",
+      "dataset_id": 3,
+      "parsed_events_in_scope": 1000000,
+      "requests": 20,
+      "http_ms": {
+        "p50": 189.79154999396997,
+        "p95": 846.5892000094755
+      },
+      "sql_total_per_request_ms": {
+        "p50": 182.97705001168652,
+        "p95": 840.6306999822846
+      },
+      "payload_bytes_max": 11764,
+      "http_requests_per_second_serial": 3.0560058452830403
+    },
+    {
+      "endpoint": "/api/v1/logs/timeline",
+      "dataset_id": 3,
+      "parsed_events_in_scope": 1000000,
+      "requests": 20,
+      "http_ms": {
+        "p50": 453.3346500029438,
+        "p95": 471.1191999958828
+      },
+      "sql_total_per_request_ms": {
+        "p50": 447.158800001489,
+        "p95": 450.775600009365
+      },
+      "payload_bytes_max": 7269,
+      "http_requests_per_second_serial": 2.1889929924165137
+    },
+    {
+      "endpoint": "/api/v1/investigation",
+      "dataset_id": 2,
+      "anomalies_in_scope": 158,
+      "requests": 20,
+      "http_ms": {
+        "p50": 34.73954999935813,
+        "p95": 55.20269999396987
+      },
+      "payload_bytes_max": 181102
+    }
+  ],
+  "sql_explain": {
+    "1": {
+      "json": {
+        "query_block": {
+          "select_id": 1,
+          "cost_info": {
+            "query_cost": "2835.01"
+          },
+          "ordering_operation": {
+            "using_filesort": true,
+            "table": {
+              "table_name": "log_events",
+              "access_type": "ref",
+              "possible_keys": [
+                "uq_log_events_dataset_id_id",
+                "uq_log_events_dataset_id_raw_id_parser_version_emit_index",
+                "ix_events_dataset_time_id",
+                "ix_events_dataset_host_time"
+              ],
+              "key": "ix_events_dataset_host_time",
+              "used_key_parts": [
+                "dataset_id"
+              ],
+              "key_length": "8",
+              "ref": [
+                "const"
+              ],
+              "rows_examined_per_scan": 24212,
+              "rows_produced_per_join": 2689,
+              "filtered": "11.11",
+              "using_index": true,
+              "cost_info": {
+                "read_cost": "413.81",
+                "eval_cost": "268.97",
+                "prefix_cost": "2835.01",
+                "data_read_per_join": "4M"
+              },
+              "used_columns": [
+                "timestamp",
+                "dataset_id",
+                "id"
+              ],
+              "attached_condition": "((`logsense_bench_c13e43856963`.`log_events`.`timestamp` >= TIMESTAMP'2005-06-03 22:42:50') and (`logsense_bench_c13e43856963`.`log_events`.`timestamp` < TIMESTAMP'2005-06-04 00:32:07'))"
+            }
+          }
+        }
+      },
+      "analyze": "-> Limit: 50 row(s)  (cost=680 rows=50) (actual time=7.56..7.56 rows=50 loops=1)\n    -> Sort: log_events.`timestamp`, log_events.id, limit input to 50 row(s) per chunk  (cost=680 rows=24212) (actual time=7.56..7.56 rows=50 loops=1)\n        -> Filter: ((log_events.`timestamp` >= TIMESTAMP'2005-06-03 22:42:50') and (log_events.`timestamp` < TIMESTAMP'2005-06-04 00:32:07'))  (cost=680 rows=24212) (actual time=0.046..6.89 rows=10000 loops=1)\n            -> Covering index lookup on log_events using ix_events_dataset_host_time (dataset_id=1)  (cost=680 rows=24212) (actual time=0.0449..6.28 rows=10000 loops=1)\n"
+    },
+    "2": {
+      "json": {
+        "query_block": {
+          "select_id": 1,
+          "cost_info": {
+            "query_cost": "26485.22"
+          },
+          "ordering_operation": {
+            "using_filesort": false,
+            "table": {
+              "table_name": "log_events",
+              "access_type": "range",
+              "possible_keys": [
+                "uq_log_events_dataset_id_id",
+                "uq_log_events_dataset_id_raw_id_parser_version_emit_index",
+                "ix_events_dataset_time_id",
+                "ix_events_dataset_host_time"
+              ],
+              "key": "ix_events_dataset_time_id",
+              "used_key_parts": [
+                "dataset_id",
+                "timestamp"
+              ],
+              "key_length": "16",
+              "rows_examined_per_scan": 195406,
+              "rows_produced_per_join": 25216,
+              "filtered": "100.00",
+              "using_index": true,
+              "cost_info": {
+                "read_cost": "3785.82",
+                "eval_cost": "2521.65",
+                "prefix_cost": "26485.22",
+                "data_read_per_join": "45M"
+              },
+              "used_columns": [
+                "timestamp",
+                "dataset_id",
+                "id"
+              ],
+              "attached_condition": "((`logsense_bench_c13e43856963`.`log_events`.`dataset_id` = 2) and (`logsense_bench_c13e43856963`.`log_events`.`timestamp` >= TIMESTAMP'2005-06-03 22:42:50') and (`logsense_bench_c13e43856963`.`log_events`.`timestamp` < TIMESTAMP'2005-06-05 16:38:27'))"
+            }
+          }
+        }
+      },
+      "analyze": "-> Limit: 50 row(s)  (cost=180759 rows=50) (actual time=0.0151..0.0233 rows=50 loops=1)\n    -> Filter: ((log_events.dataset_id = 2) and (log_events.`timestamp` >= TIMESTAMP'2005-06-03 22:42:50') and (log_events.`timestamp` < TIMESTAMP'2005-06-05 16:38:27'))  (cost=180759 rows=195406) (actual time=0.0148..0.0216 rows=50 loops=1)\n        -> Covering index range scan on log_events using ix_events_dataset_time_id over (dataset_id = 2 AND '2005-06-03 22:42:50.000000' <= timestamp < '2005-06-05 16:38:27.000000')  (cost=180759 rows=195406) (actual time=0.0138..0.0172 rows=50 loops=1)\n"
+    },
+    "3": {
+      "json": {
+        "query_block": {
+          "select_id": 1,
+          "cost_info": {
+            "query_cost": "61236.30"
+          },
+          "ordering_operation": {
+            "using_filesort": false,
+            "table": {
+              "table_name": "log_events",
+              "access_type": "range",
+              "possible_keys": [
+                "uq_log_events_dataset_id_id",
+                "uq_log_events_dataset_id_raw_id_parser_version_emit_index",
+                "ix_events_dataset_time_id",
+                "ix_events_dataset_host_time"
+              ],
+              "key": "ix_events_dataset_time_id",
+              "used_key_parts": [
+                "dataset_id",
+                "timestamp"
+              ],
+              "key_length": "16",
+              "rows_examined_per_scan": 524834,
+              "rows_produced_per_join": 58303,
+              "filtered": "100.00",
+              "using_index": true,
+              "cost_info": {
+                "read_cost": "8752.91",
+                "eval_cost": "5830.32",
+                "prefix_cost": "61236.31",
+                "data_read_per_join": "104M"
+              },
+              "used_columns": [
+                "timestamp",
+                "dataset_id",
+                "id"
+              ],
+              "attached_condition": "((`logsense_bench_c13e43856963`.`log_events`.`dataset_id` = 3) and (`logsense_bench_c13e43856963`.`log_events`.`timestamp` >= TIMESTAMP'2005-06-03 22:42:50') and (`logsense_bench_c13e43856963`.`log_events`.`timestamp` < TIMESTAMP'2005-06-25 18:47:12'))"
+            }
+          }
+        }
+      },
+      "analyze": "-> Limit: 50 row(s)  (cost=551237 rows=50) (actual time=0.0143..0.0231 rows=50 loops=1)\n    -> Filter: ((log_events.dataset_id = 3) and (log_events.`timestamp` >= TIMESTAMP'2005-06-03 22:42:50') and (log_events.`timestamp` < TIMESTAMP'2005-06-25 18:47:12'))  (cost=551237 rows=524834) (actual time=0.014..0.0207 rows=50 loops=1)\n        -> Covering index range scan on log_events using ix_events_dataset_time_id over (dataset_id = 3 AND '2005-06-03 22:42:50.000000' <= timestamp < '2005-06-25 18:47:12.000000')  (cost=551237 rows=524834) (actual time=0.0133..0.0167 rows=50 loops=1)\n"
+    }
+  },
+  "peak_process_rss_mib": 83.95703125,
+  "memory_scope": "API loopback server and benchmark client in one Python process; excludes mysqld",
+  "conditions": "20 sequential warm loopback HTTP requests per endpoint and dataset; login excluded. Existing workstation/schema, no synthetic counts.",
+  "before_same_workload": "NOT RUN: real log API and real-data investigation adapter did not exist at the original baseline. Fixture latency is not a valid before comparison."
+}
