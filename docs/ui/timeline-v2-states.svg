@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1040" viewBox="0 0 1440 1040" role="img" aria-label="Timeline V2 — proposed volume, coverage and request states">
+<title>Timeline V2 — proposed volume, coverage and request states</title>
+<defs><pattern id="missing" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#F0F3F6"/><path d="M-2 2L2 -2M0 8L8 0M6 10L10 6" stroke="#718391" stroke-width="1"/></pattern></defs>
+<style>text{font-family:Segoe UI,Arial,sans-serif;font-variant-numeric:tabular-nums} .mono{font-family:Consolas,monospace}</style>
+<rect x="0" y="0" width="1440" height="1040" rx="0" fill="#FFFFFF" stroke="none" stroke-width="1"/>
+<text x="24" y="28" font-size="13" fill="#526575" font-weight="650" text-anchor="start" class="">DESIGN STATE SHEET · CONSTRUCTED EXAMPLES, NOT LIVE SOURCE STATUS</text>
+<text x="24" y="69" font-size="24" fill="#172F40" font-weight="650" text-anchor="start" class="">Meaning before decoration</text>
+<text x="24" y="98" font-size="16" fill="#526575" font-weight="400" text-anchor="start" class="">Severity, count, coverage and selection have separate visual rules.</text>
+<rect x="24" y="126" width="1392" height="191" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="44" y="157" font-size="16" fill="#172F40" font-weight="650" text-anchor="start" class="">Same example bins · two exclusive modes</text>
+<text x="44" y="201" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Severity View</text>
+<text x="44" y="259" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Volume View</text>
+<rect x="226" y="177" width="129" height="36" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="290" y="201" font-size="14" fill="#526575" font-weight="650" text-anchor="middle" class="">0</text>
+<rect x="226" y="235" width="129" height="36" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="290" y="259" font-size="14" fill="#172F40" font-weight="650" text-anchor="middle" class="">0</text>
+<rect x="367" y="177" width="129" height="36" rx="2" fill="#087F76" stroke="none" stroke-width="1"/>
+<text x="431" y="201" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">L  1</text>
+<rect x="367" y="235" width="129" height="36" rx="2" fill="#DCEFEB" stroke="#718391" stroke-width="1"/>
+<text x="431" y="259" font-size="14" fill="#172F40" font-weight="650" text-anchor="middle" class="">1</text>
+<rect x="508" y="177" width="129" height="36" rx="2" fill="#8B6700" stroke="none" stroke-width="1"/>
+<text x="572" y="201" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">M  3</text>
+<rect x="508" y="235" width="129" height="36" rx="2" fill="#9CCFC5" stroke="#718391" stroke-width="1"/>
+<text x="572" y="259" font-size="14" fill="#172F40" font-weight="650" text-anchor="middle" class="">3</text>
+<rect x="649" y="177" width="129" height="36" rx="2" fill="#8B6700" stroke="none" stroke-width="1"/>
+<text x="713" y="201" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">M  7</text>
+<rect x="649" y="235" width="129" height="36" rx="2" fill="#9CCFC5" stroke="#718391" stroke-width="1"/>
+<text x="713" y="259" font-size="14" fill="#172F40" font-weight="650" text-anchor="middle" class="">7</text>
+<rect x="790" y="177" width="129" height="36" rx="2" fill="#B84B16" stroke="none" stroke-width="1"/>
+<text x="854" y="201" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">H  12</text>
+<rect x="790" y="235" width="129" height="36" rx="2" fill="#367D72" stroke="#718391" stroke-width="1"/>
+<text x="854" y="259" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">12</text>
+<rect x="931" y="177" width="129" height="36" rx="2" fill="#B84B16" stroke="none" stroke-width="1"/>
+<text x="995" y="201" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">H  48</text>
+<rect x="931" y="235" width="129" height="36" rx="2" fill="#075E55" stroke="#718391" stroke-width="1"/>
+<text x="995" y="259" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">48</text>
+<rect x="1072" y="177" width="129" height="36" rx="2" fill="#AE2442" stroke="none" stroke-width="1"/>
+<text x="1136" y="201" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">C  96</text>
+<rect x="1072" y="235" width="129" height="36" rx="2" fill="#075E55" stroke="#718391" stroke-width="1"/>
+<text x="1136" y="259" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">96</text>
+<rect x="1213" y="177" width="129" height="36" rx="2" fill="#087F76" stroke="none" stroke-width="1"/>
+<text x="1277" y="201" font-size="14" fill="#FFFFFF" font-weight="650" text-anchor="middle" class="">L  4</text>
+<rect x="1213" y="235" width="129" height="36" rx="2" fill="#9CCFC5" stroke="#718391" stroke-width="1"/>
+<text x="1277" y="259" font-size="14" fill="#172F40" font-weight="650" text-anchor="middle" class="">4</text>
+<text x="226" y="295" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Severity: maximum priority + separate count.</text>
+<text x="840" y="295" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Volume: 1–2 / 3–8 / 9–29 / 30–96 · relative to range.</text>
+<text x="24" y="359" font-size="18" fill="#172F40" font-weight="650" text-anchor="start" class="">Coverage is not severity</text>
+<rect x="24" y="379" width="336" height="157" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="40" y="407" font-size="16" fill="#172F40" font-weight="600" text-anchor="start" class="">Complete zero</text>
+<rect x="40" y="426" width="84" height="34" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="82" y="449" font-size="14" fill="#172F40" font-weight="700" text-anchor="middle" class="">0</text>
+<text x="40" y="490" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">No anomaly in a complete bin.</text>
+<text x="40" y="513" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Does not certify system health.</text>
+<rect x="376" y="379" width="336" height="157" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="392" y="407" font-size="16" fill="#172F40" font-weight="600" text-anchor="start" class="">Missing data</text>
+<rect x="392" y="426" width="84" height="34" rx="2" fill="url(#missing)" stroke="#718391" stroke-width="1"/>
+<rect x="423" y="429" width="22" height="27" rx="2" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="434" y="449" font-size="14" fill="#172F40" font-weight="700" text-anchor="middle" class="">!</text>
+<text x="392" y="490" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Known unavailable interval.</text>
+<text x="392" y="513" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Never reported as complete zero.</text>
+<rect x="728" y="379" width="336" height="157" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="744" y="407" font-size="16" fill="#172F40" font-weight="600" text-anchor="start" class="">Unknown coverage</text>
+<rect x="744" y="426" width="84" height="34" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="786" y="449" font-size="14" fill="#172F40" font-weight="700" text-anchor="middle" class="">?</text>
+<text x="744" y="490" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Completeness not supplied.</text>
+<text x="744" y="513" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Observed counts may be incomplete.</text>
+<rect x="1080" y="379" width="336" height="157" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="1096" y="407" font-size="16" fill="#172F40" font-weight="600" text-anchor="start" class="">Partial coverage</text>
+<rect x="1096" y="426" width="84" height="34" rx="2" fill="#B84B16" stroke="#718391" stroke-width="1"/>
+<rect x="1160" y="426" width="20" height="16" rx="0" fill="url(#missing)" stroke="none" stroke-width="1"/>
+<text x="1138" y="449" font-size="14" fill="#FFFFFF" font-weight="700" text-anchor="middle" class="">H  3</text>
+<text x="1096" y="490" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">3 observed anomalies; coverage partial.</text>
+<text x="1096" y="513" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">No invented coverage percentage.</text>
+<text x="24" y="581" font-size="18" fill="#172F40" font-weight="650" text-anchor="start" class="">Requests retain a trustworthy scope</text>
+<rect x="24" y="602" width="684" height="153" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="44" y="633" font-size="16" fill="#172F40" font-weight="650" text-anchor="start" class="">Updating</text>
+<text x="44" y="663" font-size="14" fill="#172F40" font-weight="400" text-anchor="start" class="">Applied: Synthetic fixture · all priorities</text>
+<text x="44" y="689" font-size="14" fill="#096C68" font-weight="600" text-anchor="start" class="">Pending: Critical · updating timeline and results…</text>
+<text x="44" y="731" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Existing data stays legible. Export is temporarily disabled.</text>
+<rect x="732" y="602" width="684" height="153" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="752" y="633" font-size="16" fill="#B84B16" font-weight="650" text-anchor="start" class="">Update failed — previous results retained</text>
+<text x="752" y="663" font-size="14" fill="#172F40" font-weight="400" text-anchor="start" class="">Showing: Synthetic fixture · all priorities</text>
+<text x="752" y="689" font-size="14" fill="#526575" font-weight="400" text-anchor="start" class="">Your requested Critical filter has not been applied.</text>
+<rect x="752" y="705" width="92" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="798.0" y="728.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Retry</text>
+<rect x="856" y="705" width="132" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="922.0" y="728.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Revert draft</text>
+<rect x="24" y="779" width="684" height="150" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="44" y="810" font-size="16" fill="#172F40" font-weight="650" text-anchor="start" class="">No filter matches</text>
+<text x="44" y="840" font-size="14" fill="#526575" font-weight="400" text-anchor="start" class="">No anomalies match the selected host and time range.</text>
+<rect x="44" y="867" width="150" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="119.0" y="890.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Clear selection</text>
+<rect x="206" y="867" width="132" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="272.0" y="890.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Clear filters</text>
+<rect x="732" y="779" width="684" height="150" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="752" y="810" font-size="16" fill="#172F40" font-weight="650" text-anchor="start" class="">No detection results</text>
+<text x="752" y="840" font-size="14" fill="#526575" font-weight="400" text-anchor="start" class="">A source may contain logs without completed detector output.</text>
+<text x="752" y="881" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Show an explicit state; never substitute “0 anomalies”.</text>
+<rect x="24" y="955" width="1392" height="48" rx="0" fill="#F5F7F9" stroke="none" stroke-width="1"/>
+<text x="44" y="985" font-size="14" fill="#172F40" font-weight="400" text-anchor="start" class="">Selected = blue bracket + text; focus = separate dark outline. Pattern/symbol/text always supplement color.</text>
+</svg>

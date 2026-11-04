@@ -1,0 +1,55 @@
+test_access_denial_is_enforced_for_all_anomaly_surfaces_and_page (test_evidence.EvidenceTests) ... ok
+test_before_after_and_same_service_are_real_relationships (test_evidence.EvidenceTests) ... ok
+test_cursor_tampering_cross_source_and_changed_window_are_rejected (test_evidence.EvidenceTests) ... ok
+test_dataset_isolation_and_per_source_read_policy (test_evidence.EvidenceTests) ... ok
+test_export_is_redacted_json_with_explicit_current_page_scope (test_evidence.EvidenceTests) ... ok
+test_html_log_is_text_and_secrets_redacted_in_every_read_surface (test_evidence.EvidenceTests) ... ok
+test_identity_raw_provenance_and_absent_root_cause (test_evidence.EvidenceTests) ... ok
+test_invalid_ids_windows_limits_relationships_and_offsets (test_evidence.EvidenceTests) ... ok
+test_isolation_forest_has_no_probability_importance_or_invented_direction (test_evidence.EvidenceTests) ... ok
+test_large_attribute_and_feature_fields_have_explicit_preview_limits (test_evidence.EvidenceTests) ... ok
+test_malformed_optional_raw_and_missing_evidence (test_evidence.EvidenceTests) ... ok
+test_navigation_respects_filters_and_selected_interval (test_evidence.EvidenceTests) ... ok
+test_raw_redacted_before_chunking_and_raw_payload_is_bounded (test_evidence.EvidenceTests) ... ok
+test_reference_is_not_a_threshold_and_missing_rule_is_explicit (test_evidence.EvidenceTests) ... ok
+test_related_reasons_source_window_and_global_filter_independence (test_evidence.EvidenceTests) ... ok
+test_scope_navigation_spans_result_pages (test_evidence.EvidenceTests) ... ok
+test_secret_pattern_policy_including_headers_keys_tokens_and_url_credentials (test_evidence.EvidenceTests) ... ok
+test_signed_keyset_pagination_has_no_duplicates (test_evidence.EvidenceTests) ... ok
+test_supplied_versions_map_to_correct_detector_without_cross_mapping (test_evidence.EvidenceTests) ... ok
+test_adaptive_resolution_and_manual_bin_limit (test_investigation_v2.InvestigationTests) ... ok
+test_aggregate_does_not_ship_evidence_or_raw_logs (test_investigation_v2.InvestigationTests) ... ok
+test_and_between_or_within_dimensions (test_investigation_v2.InvestigationTests) ... ok
+test_api_invalid_values_are_errors_not_silent_defaults (test_investigation_v2.InvestigationTests) ... ok
+test_cell_selection_matches_table_export_and_preserves_global_scope (test_investigation_v2.InvestigationTests) ... ok
+test_clearing_selection_keeps_other_filters (test_investigation_v2.InvestigationTests) ... ok
+test_complete_zero_missing_partial_empty_and_unprocessed_differ (test_investigation_v2.InvestigationTests) ... ok
+test_csv_formula_guard_and_quoting (test_investigation_v2.InvestigationTests) ... ok
+test_drawable_width_changes_bin_budget (test_investigation_v2.InvestigationTests) ... ok
+test_evidence_and_related_records_belong_to_selected_identity (test_investigation_v2.InvestigationTests) ... ok
+test_exact_half_open_boundary_and_partial_edge_bins (test_investigation_v2.InvestigationTests) ... ok
+test_facets_exclude_only_their_own_dimension (test_investigation_v2.InvestigationTests) ... ok
+test_full_fragment_and_composite_api_match (test_investigation_v2.InvestigationTests) ... ok
+test_missing_optional_evidence_is_not_invented (test_investigation_v2.InvestigationTests) ... ok
+test_multiple_detector_filters_and_zero_cell_selection (test_investigation_v2.InvestigationTests) ... ok
+test_pagination_does_not_limit_export_or_overview (test_investigation_v2.InvestigationTests) ... ok
+test_presentation_has_no_unescaped_query_or_evidence (test_investigation_v2.InvestigationTests) ... ok
+test_priority_not_the_largest_raw_score (test_investigation_v2.InvestigationTests) ... ok
+test_revision_conflict_and_missing_identity (test_investigation_v2.InvestigationTests) ... ok
+test_search_scope_is_shared_with_csv (test_investigation_v2.InvestigationTests) ... ok
+test_timezone_only_changes_labels_and_dst_fold_has_offsets (test_investigation_v2.InvestigationTests) ... ok
+test_utc_midnight_does_not_use_negative_hour_labels (test_investigation_v2.InvestigationTests) ... ok
+test_volume_legend_contains_each_observed_count (test_investigation_v2.InvestigationTests) ... ok
+test_cell_priority_is_not_largest_raw_score (test_workspace.WorkspaceTests) ... ok
+test_each_event_belongs_to_one_drilldown (test_workspace.WorkspaceTests) ... ok
+test_empty_source_differs_from_no_matches (test_workspace.WorkspaceTests) ... ok
+test_fragment_and_full_page_share_filter_state (test_workspace.WorkspaceTests) ... ok
+test_scope_and_cells_describe_same_records (test_workspace.WorkspaceTests) ... ok
+test_search_is_escaped_and_unknown_selection_is_cleared (test_workspace.WorkspaceTests) ... ok
+test_time_boundary_is_half_open (test_workspace.WorkspaceTests) ... ok
+test_timezone_changes_labels_not_membership (test_workspace.WorkspaceTests) ... ok
+
+----------------------------------------------------------------------
+Ran 50 tests in 0.777s
+
+OK

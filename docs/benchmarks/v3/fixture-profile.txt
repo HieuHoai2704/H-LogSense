@@ -1,0 +1,33 @@
+         80431 function calls (78091 primitive calls) in 0.030 seconds
+
+   Ordered by: cumulative time
+   List reduced from 85 to 25 due to restriction <25>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+       30    0.003    0.000    0.027    0.001 investigation.py:214(build)
+       30    0.000    0.000    0.009    0.000 investigation.py:74(records)
+      210    0.000    0.000    0.009    0.000 investigation.py:62(iter_records)
+ 2520/180    0.003    0.000    0.009    0.000 redaction.py:14(redact)
+      180    0.001    0.000    0.009    0.000 redaction.py:17(<dictcomp>)
+     1320    0.001    0.000    0.006    0.000 investigation.py:203(display_time)
+    15120    0.005    0.000    0.005    0.000 {method 'sub' of 're.Pattern' objects}
+     1320    0.004    0.000    0.004    0.000 {method 'strftime' of 'datetime.date' objects}
+     4380    0.002    0.000    0.003    0.000 investigation.py:42(instant)
+     2280    0.001    0.000    0.003    0.000 investigation.py:38(iso)
+       30    0.002    0.000    0.003    0.000 investigation.py:78(query)
+      120    0.000    0.000    0.002    0.000 __init__.py:565(__init__)
+      900    0.001    0.000    0.002    0.000 investigation.py:162(matches)
+      120    0.000    0.000    0.002    0.000 __init__.py:640(update)
+      120    0.000    0.000    0.002    0.000 {built-in method _collections._count_elements}
+      840    0.000    0.000    0.002    0.000 investigation.py:267(<genexpr>)
+       30    0.000    0.000    0.002    0.000 investigation.py:284(<listcomp>)
+     2280    0.001    0.000    0.001    0.000 {method 'isoformat' of 'datetime.datetime' objects}
+      180    0.000    0.000    0.001    0.000 investigation.py:208(summary)
+     7980    0.001    0.000    0.001    0.000 {method 'astimezone' of 'datetime.datetime' objects}
+      600    0.000    0.000    0.001    0.000 structures.py:75(get)
+       30    0.000    0.000    0.001    0.000 investigation.py:252(<listcomp>)
+     6660    0.001    0.000    0.001    0.000 {method 'replace' of 'str' objects}
+     1530    0.000    0.000    0.001    0.000 {built-in method builtins.max}
+       30    0.000    0.000    0.001    0.000 investigation.py:230(<dictcomp>)
+
+

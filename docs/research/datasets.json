@@ -1,0 +1,164 @@
+{
+  "checked_on": "2026-11-03",
+  "provider": "Loghub / LOGPAI",
+  "release_landing_url": "https://zenodo.org/records/8196385",
+  "release_version": "v8",
+  "metadata_source": "https://github.com/logpai/loghub",
+  "license_notice_url": "https://zenodo.org/records/8196385",
+  "verification_scope": "Per-artifact download status, provider MD5 comparison and local SHA-256 are recorded. See download_status.json; archive inspection is separate.",
+  "datasets": [
+    {
+      "id": "D01",
+      "name": "BGL",
+      "archive_name": "BGL.zip",
+      "download_url": "https://zenodo.org/records/8196385/files/BGL.zip?download=1",
+      "provider_md5": "4452953c470f2d95fcb32d5f6e733f7a",
+      "local_sha256": "d67fd82a711aea0157a9b83175892c6ee60e384a2ddf5bc51f39118453816da8",
+      "label_unit": "event_alert_tag",
+      "paper_ids": [
+        "P01",
+        "P03",
+        "P07"
+      ],
+      "artifact_downloaded": true,
+      "download_status": "verified",
+      "local_bytes": 57489019,
+      "local_path": "data\\raw\\BGL.zip",
+      "md5_verified": true,
+      "downloaded_on": "2026-11-03"
+    },
+    {
+      "id": "D02",
+      "name": "HDFS_v1",
+      "archive_name": "HDFS_v1.zip",
+      "download_url": "https://zenodo.org/records/8196385/files/HDFS_v1.zip?download=1",
+      "provider_md5": "76a24b4d9a6164d543fb275f89773260",
+      "local_sha256": "04f919f2185821f23f045dca611a7586429bdabc601bd7b43f30005f8e289b01",
+      "label_unit": "block_session",
+      "paper_ids": [
+        "P01",
+        "P02",
+        "P04",
+        "P07"
+      ],
+      "artifact_downloaded": true,
+      "download_status": "verified",
+      "local_bytes": 186645559,
+      "local_path": "data\\raw\\HDFS_v1.zip",
+      "md5_verified": true,
+      "downloaded_on": "2026-11-03"
+    },
+    {
+      "id": "D03",
+      "name": "OpenStack",
+      "archive_name": "OpenStack.tar.gz",
+      "download_url": "https://zenodo.org/records/8196385/files/OpenStack.tar.gz?download=1",
+      "provider_md5": "66bd42c07837a094d9b0ea2d036b5713",
+      "local_sha256": "87c98c5ed03262e05cdb7a6f3717033df76d88fda0f7d2db23bd9fa4200f1879",
+      "label_unit": "vm_instance_injected_anomaly",
+      "paper_ids": [
+        "P01",
+        "P04"
+      ],
+      "artifact_downloaded": true,
+      "download_status": "verified",
+      "local_bytes": 5394691,
+      "local_path": "data\\raw\\OpenStack.tar.gz",
+      "md5_verified": true,
+      "downloaded_on": "2026-11-03"
+    },
+    {
+      "id": "D04",
+      "name": "Hadoop",
+      "archive_name": "Hadoop.zip",
+      "download_url": "https://zenodo.org/records/8196385/files/Hadoop.zip?download=1",
+      "provider_md5": "34e28a9943704fd54933e2b455829fcc",
+      "local_sha256": "79e63c6521e90ae164754a29d13e04e0c6c5e782490a7fe1e2b124f4f5737ced",
+      "label_unit": "job_with_reported_label_issues",
+      "paper_ids": [
+        "P01",
+        "P08"
+      ],
+      "artifact_downloaded": true,
+      "download_status": "verified",
+      "local_bytes": 3416419,
+      "local_path": "data\\raw\\Hadoop.zip",
+      "md5_verified": true,
+      "downloaded_on": "2026-11-03"
+    },
+    {
+      "id": "D05",
+      "name": "Thunderbird",
+      "archive_name": "Thunderbird.tar.gz",
+      "download_url": "https://zenodo.org/records/8196385/files/Thunderbird.tar.gz?download=1",
+      "provider_md5": "0891b048df2919dc78c99c4428686b44",
+      "local_sha256": "228f8589b7cd569b727c5da654c647aa538dd3dd95541e675a40523c5fff37cf",
+      "label_unit": "event_alert_tag",
+      "paper_ids": [
+        "P01",
+        "P03",
+        "P07"
+      ],
+      "artifact_downloaded": true,
+      "download_status": "verified",
+      "local_bytes": 2016100298,
+      "local_path": "data\\raw\\Thunderbird.tar.gz",
+      "md5_verified": true,
+      "downloaded_on": "2026-11-03"
+    },
+    {
+      "id": "D06",
+      "name": "Linux",
+      "archive_name": "Linux.tar.gz",
+      "download_url": "https://zenodo.org/records/8196385/files/Linux.tar.gz?download=1",
+      "provider_md5": "6d1802d7778126f21c001c6aa7b6b106",
+      "local_sha256": "7e1f820d8d45ae086032e515d9ce8d079a102a9b37dcff5b41a8e60b1f857820",
+      "label_unit": "not_anomaly_labeled_in_inventory",
+      "paper_ids": [
+        "P01"
+      ],
+      "artifact_downloaded": true,
+      "download_status": "verified",
+      "local_bytes": 232039,
+      "local_path": "data\\raw\\Linux.tar.gz",
+      "md5_verified": true,
+      "downloaded_on": "2026-11-03"
+    },
+    {
+      "id": "D07",
+      "name": "OpenSSH",
+      "archive_name": "SSH.tar.gz",
+      "download_url": "https://zenodo.org/records/8196385/files/SSH.tar.gz?download=1",
+      "provider_md5": "a44e40b4348697dabf2bba56885e0a38",
+      "local_sha256": "296610a35773f58b7c295e5407fc5ccdf48beb3c544fc14a6309addf904a2712",
+      "label_unit": "not_anomaly_labeled_in_inventory",
+      "paper_ids": [
+        "P01"
+      ],
+      "artifact_downloaded": true,
+      "download_status": "verified",
+      "local_bytes": 4596666,
+      "local_path": "data\\raw\\SSH.tar.gz",
+      "md5_verified": true,
+      "downloaded_on": "2026-11-03"
+    },
+    {
+      "id": "D08",
+      "name": "Apache",
+      "archive_name": "Apache.tar.gz",
+      "download_url": "https://zenodo.org/records/8196385/files/Apache.tar.gz?download=1",
+      "provider_md5": "de9a42d12f9b60612631c67a5a9f8628",
+      "local_sha256": "f2cb5014453c8a0f71596838e1639a2131ff6d360839ad280409f621a6cac452",
+      "label_unit": "not_anomaly_labeled_in_inventory",
+      "paper_ids": [
+        "P01"
+      ],
+      "artifact_downloaded": true,
+      "download_status": "verified",
+      "local_bytes": 262905,
+      "local_path": "data\\raw\\Apache.tar.gz",
+      "md5_verified": true,
+      "downloaded_on": "2026-11-03"
+    }
+  ]
+}

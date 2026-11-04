@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A single investigation workspace with explicitly synthetic anomaly fixtures.">
+  <title>Investigation · Demo workspace</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
+  <script src="{{ url_for('static', filename='js/evidence.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#events-title">Skip to results</a>
+<div class="app-shell">
+  <main class="workspace-main" id="workspace">
+    <header class="workspace-heading"><h1>Investigation</h1><span>One scope · timeline, results and evidence</span></header>
+    <div class="demo-notice"><strong>DEMO</strong><span>Synthetic events, scores and evidence. No dataset imported or model executed.</span></div>
+    <div id="request-error" class="request-error" role="alert" hidden><span id="error-message"></span><button id="retry-button">Retry</button><button id="revert-button">Revert filters</button></div>
+    <p id="query-status" role="status">Query ready · synthetic fixture</p>
+    <div id="workspace-results" aria-busy="false">{% include 'partials/workspace.html' %}</div>
+    <noscript><p>Filters and timeline cell links work without JavaScript. Interactive brush, zoom and evidence require JavaScript.</p></noscript>
+  </main>
+</div>
+<aside id="detail-panel" class="detail-panel" aria-labelledby="detail-title" hidden>
+  <header class="detail-toolbar"><strong>EVIDENCE · DEMO</strong><button id="close-detail" aria-label="Close event details">×</button></header>
+  <p id="evidence-scope" class="evidence-scope"></p>
+  <div class="evidence-navigation"><button id="previous-anomaly" disabled>← Previous anomaly</button><button id="next-anomaly" disabled>Next anomaly →</button></div>
+  <h2 id="detail-title" tabindex="-1">Evidence</h2>
+  <div id="detail-status" role="status"></div><button id="retry-detail" hidden>Retry evidence</button>
+  <div id="detail-content" hidden>
+    <span id="detail-priority" class="severity"></span>
+    <dl id="detail-fields" class="evidence-metadata"></dl>
+    <section aria-labelledby="signal-heading"><h3 id="signal-heading">Detected signal</h3><p id="detail-message"></p><p class="evidence-note">Observed signal only. No confirmed root cause or generated hypothesis.</p></section>
+    <details id="raw-section" class="evidence-section" open><summary>Raw log · synthetic</summary>
+      <p id="raw-note" class="evidence-note"></p>
+      <div class="raw-controls"><button id="copy-raw">Copy visible log</button><label><input type="checkbox" id="wrap-raw" checked> Wrap lines</label></div>
+      <pre id="detail-raw" tabindex="0" aria-label="Redacted raw log page"></pre>
+      <div class="raw-pagination"><button id="raw-previous">Previous chunk</button><span id="raw-position"></span><button id="raw-retry" hidden>Retry raw log</button><button id="raw-next">Next chunk</button></div>
+      <details><summary>Raw provenance and parsed fields</summary><dl id="raw-provenance"></dl><p class="evidence-note">Fixture fields; no parser executed.</p><p id="raw-redaction-note" class="evidence-note"></p><pre id="detail-parsed"></pre></details>
+    </details>
+    <section aria-labelledby="detection-heading"><h3 id="detection-heading">Detection evidence</h3>
+      <div class="evidence-comparison"><div><span>Observed · synthetic</span><strong id="detail-actual"></strong></div><div><span>Reference · synthetic, not threshold</span><strong id="detail-typical"></strong></div></div>
+      <p id="explanation-status" class="evidence-note"></p><dl id="detector-evidence"></dl>
+      <p id="detail-disclaimer" class="evidence-note"></p>
+    </section>
+    <section aria-labelledby="related-heading"><h3 id="related-heading">Related anomaly records · DEMO</h3>
+      <p class="evidence-note">Same authorized source; context may be outside current result filters. Original surrounding raw logs are unavailable.</p>
+      <div class="related-controls"><label>Relationship<select id="related-relation"><option value="same_host">Same host</option><option value="same_service">Same service</option><option value="before">Before detection</option><option value="after">After detection</option><option value="context_window">Context interval</option><option value="same_session" disabled>Same session/block · unavailable</option><option value="same_window" disabled>Detection window · unavailable</option></select></label><label>Context ±<select id="related-window"><option value="60">1 minute</option><option value="300">5 minutes</option><option value="900">15 minutes</option><option value="1800" selected>30 minutes</option><option value="3600">60 minutes</option></select></label><label>Page size<select id="related-limit"><option value="1">1</option><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option></select></label></div>
+      <p id="related-status" role="status"></p><div id="detail-related"></div>
+      <div class="related-pagination"><button id="related-previous">Previous page</button><button id="related-next">Next page</button><button id="related-retry" hidden>Retry related records</button></div>
+    </section>
+    <section aria-labelledby="actions-heading"><h3 id="actions-heading">Investigation actions</h3><div class="evidence-actions"><button id="filter-evidence-host">Filter by this host</button><button id="filter-evidence-service">Filter by this service</button><button id="focus-evidence-range">Focus context range</button><button id="view-evidence-raw">View raw event</button><button id="copy-evidence-reference">Copy anomaly reference</button><button id="export-evidence">Export evidence JSON</button></div><p class="evidence-note">Export contains the current redacted raw chunk and related page; availability fields describe omissions.</p></section>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status" hidden></div>
+<script id="initial-state" type="application/json">{{ {'state': view.state, 'revision': view.revision}|tojson }}</script>
+</body>
+</html>

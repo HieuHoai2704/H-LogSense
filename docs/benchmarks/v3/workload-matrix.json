@@ -1,0 +1,39 @@
+{
+  "status": "proposed_not_executed",
+  "seed": 2704,
+  "time_start_utc": "2026-10-04T00:00:00Z",
+  "time_end_utc_exclusive": "2026-11-03T00:00:00Z",
+  "parsed_event_counts": [10000, 100000, 1000000],
+  "core": {
+    "detectors": 4,
+    "hosts": 100,
+    "services": 10,
+    "unit_type": "event",
+    "units": "P, shared by logical detectors",
+    "evaluations": "P * D; synthetic query-workload metadata, not measured ML throughput",
+    "anomaly_rate_per_evaluation_ppm": [1000, 10000, 100000],
+    "output_count": "D * floor(P * rate_ppm / 1000000)",
+    "query_ranges": ["1h", "24h", "7d", "30d"],
+    "profiles": ["uniform", "hot_burst"],
+    "matrix_cells": 72
+  },
+  "additional_empty_filter_cells": 12,
+  "sensitivity_not_cartesian": {
+    "detector_counts": [32, 128],
+    "host_counts": [4, 1000],
+    "service_counts": [2, 50],
+    "host_hotspot_fraction": 0.9,
+    "extended_after_100k_correctness_gate": true
+  },
+  "raw_input": {
+    "successful_single_line_parsed_records": "P",
+    "quarantined_lines": "floor(P/49)",
+    "raw_lines": "P + floor(P/49)",
+    "mean_raw_bytes_is_measured_not_assumed": true
+  },
+  "repetitions": {"warmups_per_cell": 10, "timed_per_cell_per_round": 100, "rounds": 3},
+  "isolated_database_required": true,
+  "schema_and_infrastructure_approval_required": true,
+  "correctness_first": true,
+  "executed_mysql_sizes": []
+}

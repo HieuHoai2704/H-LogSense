@@ -1,0 +1,5423 @@
+[
+  {
+    "id": "D01",
+    "name": "BGL",
+    "archive_bytes": 57489019,
+    "listing_complete": true,
+    "listed_member_count": 2,
+    "listed_content_bytes": 743186277,
+    "listed_log_bytes": 743185031,
+    "entries": [
+      {
+        "name": "BGL.log",
+        "bytes": 743185031,
+        "safe_relative_path": true
+      },
+      {
+        "name": "README.md",
+        "bytes": 1246,
+        "safe_relative_path": true
+      }
+    ],
+    "samples": {
+      "BGL.log": [
+        "- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.363779 R02-M1-N0-C:J12-U11 RAS KERNEL INFO instruction cache parity error corrected",
+        "- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.527847 R02-M1-N0-C:J12-U11 RAS KERNEL INFO instruction cache parity error corrected"
+      ]
+    }
+  },
+  {
+    "id": "D02",
+    "name": "HDFS_v1",
+    "archive_bytes": 186645559,
+    "listing_complete": true,
+    "listed_member_count": 8,
+    "listed_content_bytes": 1828043147,
+    "listed_log_bytes": 1577982906,
+    "entries": [
+      {
+        "name": "HDFS.log",
+        "bytes": 1577982906,
+        "safe_relative_path": true
+      },
+      {
+        "name": "preprocessed/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "preprocessed/anomaly_label.csv",
+        "bytes": 18637554,
+        "safe_relative_path": true
+      },
+      {
+        "name": "preprocessed/Event_occurrence_matrix.csv",
+        "bytes": 53099247,
+        "safe_relative_path": true
+      },
+      {
+        "name": "preprocessed/Event_traces.csv",
+        "bytes": 125412805,
+        "safe_relative_path": true
+      },
+      {
+        "name": "preprocessed/HDFS.log_templates.csv",
+        "bytes": 1607,
+        "safe_relative_path": true
+      },
+      {
+        "name": "preprocessed/HDFS.npz",
+        "bytes": 52907681,
+        "safe_relative_path": true
+      },
+      {
+        "name": "README.md",
+        "bytes": 1347,
+        "safe_relative_path": true
+      }
+    ],
+    "samples": {
+      "HDFS.log": [
+        "081109 203518 143 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1608999687919862906 src: /10.250.19.102:54106 dest: /10.250.19.102:50010",
+        "081109 203518 35 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /mnt/hadoop/mapred/system/job_200811092030_0001/job.jar. blk_-1608999687919862906"
+      ],
+      "preprocessed/anomaly_label.csv": [
+        "BlockId,Label",
+        "blk_-1608999687919862906,Normal"
+      ]
+    }
+  },
+  {
+    "id": "D03",
+    "name": "OpenStack",
+    "archive_bytes": 5394691,
+    "listing_complete": true,
+    "listed_member_count": 4,
+    "listed_content_bytes": 61442325,
+    "listed_log_bytes": 61442082,
+    "entries": [
+      {
+        "name": "anomaly_labels.txt",
+        "bytes": 243,
+        "safe_relative_path": true,
+        "regular_file": true
+      },
+      {
+        "name": "openstack_abnormal.log",
+        "bytes": 5436122,
+        "safe_relative_path": true,
+        "regular_file": true
+      },
+      {
+        "name": "openstack_normal1.log",
+        "bytes": 15499595,
+        "safe_relative_path": true,
+        "regular_file": true
+      },
+      {
+        "name": "openstack_normal2.log",
+        "bytes": 40506365,
+        "safe_relative_path": true,
+        "regular_file": true
+      }
+    ],
+    "samples": {
+      "anomaly_labels.txt": [
+        "The following VM instances have injected anomalies as observed in openstack_abnormal.log.",
+        ""
+      ],
+      "openstack_abnormal.log": [
+        "nova-api.log.2017-05-14_21:27:04 2017-05-14 19:39:01.445 25746 INFO nova.osapi_compute.wsgi.server [req-5a2050e7-b381-4ae9-92d2-8b08e9f9f4c0 113d3a99c3da401fbd62cc2caa5b96d2 54fadb412c4e40cdbaed9335e4c35a9e - - -] 10.11.10.1 \"GET /v2/54fadb412c4e40cdbaed9335e4c35a9e/servers/detail HTTP/1.1\" status: 200 len: 1583 time: 0.1919448",
+        "nova-api.log.2017-05-14_21:27:04 2017-05-14 19:39:01.650 25746 INFO nova.osapi_compute.wsgi.server [req-c26a7d54-55ab-412e-947f-421a2cb934fc 113d3a99c3da401fbd62cc2caa5b96d2 54fadb412c4e40cdbaed9335e4c35a9e - - -] 10.11.10.1 \"GET /v2/54fadb412c4e40cdbaed9335e4c35a9e/servers/3edec1e4-9678-4a3a-a21b-a145a4ee5e61 HTTP/1.1\" status: 200 len: 1708 time: 0.2011580"
+      ]
+    }
+  },
+  {
+    "id": "D04",
+    "name": "Hadoop",
+    "archive_bytes": 3416419,
+    "listing_complete": true,
+    "listed_member_count": 1035,
+    "listed_content_bytes": 48600001,
+    "listed_log_bytes": 48595595,
+    "entries": [
+      {
+        "name": "abnormal_label.txt",
+        "bytes": 2265,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000001.log",
+        "bytes": 239767,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000002.log",
+        "bytes": 8417,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000003.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000004.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000005.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000006.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000007.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000008.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000009.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000010.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000011.log",
+        "bytes": 4807,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000012.log",
+        "bytes": 7337,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000013.log",
+        "bytes": 18652,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0011/container_1445062781478_0011_01_000014.log",
+        "bytes": 3496,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000001.log",
+        "bytes": 574291,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000002.log",
+        "bytes": 8790,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000003.log",
+        "bytes": 3724,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000004.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000005.log",
+        "bytes": 3013,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000006.log",
+        "bytes": 8148,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000007.log",
+        "bytes": 3495,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000008.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000009.log",
+        "bytes": 8798,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000010.log",
+        "bytes": 3497,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000011.log",
+        "bytes": 5181,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000013.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000014.log",
+        "bytes": 20610,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000015.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000016.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000017.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000018.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0012/container_1445062781478_0012_01_000019.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000001.log",
+        "bytes": 145323,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000002.log",
+        "bytes": 17743,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000003.log",
+        "bytes": 17750,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000004.log",
+        "bytes": 17750,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000005.log",
+        "bytes": 17831,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000006.log",
+        "bytes": 3725,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000007.log",
+        "bytes": 16582,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000008.log",
+        "bytes": 16814,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000009.log",
+        "bytes": 14699,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000010.log",
+        "bytes": 3497,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_01_000011.log",
+        "bytes": 14335,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000001.log",
+        "bytes": 280471,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000002.log",
+        "bytes": 8422,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000003.log",
+        "bytes": 8802,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000004.log",
+        "bytes": 8802,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000005.log",
+        "bytes": 8802,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000006.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000007.log",
+        "bytes": 8802,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000008.log",
+        "bytes": 8802,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000009.log",
+        "bytes": 8802,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000010.log",
+        "bytes": 8804,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000011.log",
+        "bytes": 4814,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000012.log",
+        "bytes": 7103,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000013.log",
+        "bytes": 15576,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000014.log",
+        "bytes": 4934,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000015.log",
+        "bytes": 4447,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0013/container_1445062781478_0013_02_000016.log",
+        "bytes": 3488,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000001.log",
+        "bytes": 370322,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000002.log",
+        "bytes": 7094,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000003.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000004.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000005.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000006.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000007.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000008.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000009.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000010.log",
+        "bytes": 8798,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000011.log",
+        "bytes": 5180,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000012.log",
+        "bytes": 8789,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000013.log",
+        "bytes": 18670,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000014.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0014/container_1445062781478_0014_01_000015.log",
+        "bytes": 3497,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000001.log",
+        "bytes": 354185,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000002.log",
+        "bytes": 8417,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000003.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000004.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000005.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000006.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000007.log",
+        "bytes": 8148,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000008.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000009.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000010.log",
+        "bytes": 8425,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000011.log",
+        "bytes": 5181,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000013.log",
+        "bytes": 19431,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000014.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000015.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0015/container_1445062781478_0015_01_000016.log",
+        "bytes": 7813,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000001.log",
+        "bytes": 262144,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000002.log",
+        "bytes": 8416,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000003.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000004.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000005.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000006.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000007.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000008.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000009.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000010.log",
+        "bytes": 8425,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000011.log",
+        "bytes": 4808,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000012.log",
+        "bytes": 7094,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000013.log",
+        "bytes": 13182,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000014.log",
+        "bytes": 3013,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0016/container_1445062781478_0016_01_000015.log",
+        "bytes": 2777,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000001.log",
+        "bytes": 1462569,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000002.log",
+        "bytes": 8790,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000003.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000004.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000005.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000006.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000007.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000008.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000009.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000010.log",
+        "bytes": 8150,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000011.log",
+        "bytes": 5180,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000012.log",
+        "bytes": 13046,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000013.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000014.log",
+        "bytes": 4934,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000015.log",
+        "bytes": 4210,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000016.log",
+        "bytes": 7102,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0017/container_1445062781478_0017_01_000017.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000001.log",
+        "bytes": 392511,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000002.log",
+        "bytes": 8790,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000003.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000004.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000005.log",
+        "bytes": 4934,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000006.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000007.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000008.log",
+        "bytes": 5168,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000009.log",
+        "bytes": 17109,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000010.log",
+        "bytes": 5657,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000011.log",
+        "bytes": 5181,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000014.log",
+        "bytes": 28024,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000015.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000016.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000017.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000018.log",
+        "bytes": 5892,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000019.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000020.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_01_000021.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_02_000001.log",
+        "bytes": 132976,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_02_000002.log",
+        "bytes": 8803,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_02_000003.log",
+        "bytes": 14980,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0018/container_1445062781478_0018_02_000004.log",
+        "bytes": 7102,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000001.log",
+        "bytes": 247671,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000002.log",
+        "bytes": 8417,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000003.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000004.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000005.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000006.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000007.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000008.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000009.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000010.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000011.log",
+        "bytes": 4807,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000012.log",
+        "bytes": 5891,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000013.log",
+        "bytes": 15419,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000014.log",
+        "bytes": 4447,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0019/container_1445062781478_0019_01_000015.log",
+        "bytes": 3725,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000001.log",
+        "bytes": 257805,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000002.log",
+        "bytes": 8416,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000003.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000004.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000005.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000006.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000007.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000008.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000009.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000010.log",
+        "bytes": 8425,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000011.log",
+        "bytes": 4808,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000012.log",
+        "bytes": 3496,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000013.log",
+        "bytes": 15996,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000014.log",
+        "bytes": 3496,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000015.log",
+        "bytes": 2777,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445062781478_0020/container_1445062781478_0020_01_000016.log",
+        "bytes": 4204,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000001.log",
+        "bytes": 246477,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000002.log",
+        "bytes": 6373,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000003.log",
+        "bytes": 17760,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000004.log",
+        "bytes": 17759,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000005.log",
+        "bytes": 17751,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000006.log",
+        "bytes": 17760,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000007.log",
+        "bytes": 17750,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000008.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000009.log",
+        "bytes": 17750,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000010.log",
+        "bytes": 5657,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000011.log",
+        "bytes": 5181,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000012.log",
+        "bytes": 16039,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000013.log",
+        "bytes": 14312,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000014.log",
+        "bytes": 17756,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000015.log",
+        "bytes": 17757,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_01_000016.log",
+        "bytes": 17750,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_02_000001.log",
+        "bytes": 106075,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_02_000012.log",
+        "bytes": 3497,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_02_000013.log",
+        "bytes": 2777,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_02_000014.log",
+        "bytes": 1163,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0001/container_1445076437777_0001_02_000016.log",
+        "bytes": 4446,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000001.log",
+        "bytes": 200045,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000002.log",
+        "bytes": 8789,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000003.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000004.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000005.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000006.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000007.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000008.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000009.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000010.log",
+        "bytes": 8798,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000011.log",
+        "bytes": 5180,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000012.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000013.log",
+        "bytes": 16448,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0002/container_1445076437777_0002_01_000014.log",
+        "bytes": 814,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000001.log",
+        "bytes": 382432,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000002.log",
+        "bytes": 8790,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000003.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000004.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000005.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000006.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000007.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000008.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000009.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000010.log",
+        "bytes": 8425,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000011.log",
+        "bytes": 5181,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000014.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000015.log",
+        "bytes": 18540,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000016.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000017.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000018.log",
+        "bytes": 4934,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0003/container_1445076437777_0003_01_000019.log",
+        "bytes": 7814,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000001.log",
+        "bytes": 280367,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000002.log",
+        "bytes": 8417,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000003.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000004.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000005.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000006.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000007.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000008.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000009.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000010.log",
+        "bytes": 8425,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000011.log",
+        "bytes": 4807,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000013.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0004/container_1445076437777_0004_01_000014.log",
+        "bytes": 8141,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000001.log",
+        "bytes": 274997,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000002.log",
+        "bytes": 8417,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000003.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000004.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000005.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000006.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000007.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000008.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000009.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000010.log",
+        "bytes": 8798,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000012.log",
+        "bytes": 5180,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000013.log",
+        "bytes": 7101,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000014.log",
+        "bytes": 18012,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000015.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445076437777_0005/container_1445076437777_0005_01_000016.log",
+        "bytes": 3496,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000001.log",
+        "bytes": 528729,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000002.log",
+        "bytes": 4951,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000003.log",
+        "bytes": 6494,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000004.log",
+        "bytes": 5673,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000005.log",
+        "bytes": 5674,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000006.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000007.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000008.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000009.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000010.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000011.log",
+        "bytes": 7715,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000012.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000013.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000014.log",
+        "bytes": 7442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000015.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000016.log",
+        "bytes": 21432,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000017.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000018.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000019.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000020.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000021.log",
+        "bytes": 7442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000022.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000023.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0001/container_1445087491445_0001_01_000024.log",
+        "bytes": 7442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000001.log",
+        "bytes": 596139,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000002.log",
+        "bytes": 4461,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000003.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000004.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000005.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000006.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000007.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000008.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000009.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000010.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000011.log",
+        "bytes": 36857,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000012.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000013.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000014.log",
+        "bytes": 4951,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000015.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000016.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000017.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000018.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000019.log",
+        "bytes": 5905,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_01_000020.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_02_000001.log",
+        "bytes": 140406,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_02_000002.log",
+        "bytes": 17524,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_02_000003.log",
+        "bytes": 7722,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0002/container_1445087491445_0002_02_000004.log",
+        "bytes": 7440,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000001.log",
+        "bytes": 641499,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000002.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000003.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000004.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000005.log",
+        "bytes": 5672,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000006.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000008.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000009.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000010.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000011.log",
+        "bytes": 24195,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000012.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000013.log",
+        "bytes": 7442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000014.log",
+        "bytes": 3503,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000015.log",
+        "bytes": 2294,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000016.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000017.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000018.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000019.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000020.log",
+        "bytes": 3740,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000021.log",
+        "bytes": 6494,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000022.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000023.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0003/container_1445087491445_0003_01_000024.log",
+        "bytes": 7442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000001.log",
+        "bytes": 485614,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000002.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000003.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000004.log",
+        "bytes": 5674,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000005.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000006.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000007.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000008.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000009.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000010.log",
+        "bytes": 4949,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000011.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000012.log",
+        "bytes": 4227,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000013.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000014.log",
+        "bytes": 4228,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000016.log",
+        "bytes": 23645,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000017.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000018.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000019.log",
+        "bytes": 2292,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000020.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000021.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000022.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_01_000023.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000001.log",
+        "bytes": 278223,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000002.log",
+        "bytes": 21453,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000003.log",
+        "bytes": 7722,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000004.log",
+        "bytes": 7722,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000005.log",
+        "bytes": 7723,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000006.log",
+        "bytes": 2294,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000007.log",
+        "bytes": 1164,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000008.log",
+        "bytes": 7721,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0004/container_1445087491445_0004_02_000009.log",
+        "bytes": 19383,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000001.log",
+        "bytes": 472075,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000002.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000003.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000004.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000005.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000006.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000007.log",
+        "bytes": 12525,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000008.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000009.log",
+        "bytes": 4228,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000010.log",
+        "bytes": 4228,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000011.log",
+        "bytes": 3013,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000012.log",
+        "bytes": 3503,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000013.log",
+        "bytes": 7798,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000014.log",
+        "bytes": 3504,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000015.log",
+        "bytes": 6749,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000016.log",
+        "bytes": 4227,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000017.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000018.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000019.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000020.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000021.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000022.log",
+        "bytes": 22511,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000023.log",
+        "bytes": 6495,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000024.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000025.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000026.log",
+        "bytes": 2778,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000027.log",
+        "bytes": 3503,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0005/container_1445087491445_0005_01_000028.log",
+        "bytes": 5674,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000001.log",
+        "bytes": 203471,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000002.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000003.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000004.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000005.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000006.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000007.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000008.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000009.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000010.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000011.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_01_000012.log",
+        "bytes": 25392,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_02_000001.log",
+        "bytes": 80285,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0006/container_1445087491445_0006_02_000002.log",
+        "bytes": 13388,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000001.log",
+        "bytes": 151165,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000002.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000003.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000004.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000005.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000006.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000007.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000008.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000009.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000010.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000011.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_01_000012.log",
+        "bytes": 8707,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_02_000002.log",
+        "bytes": 87925,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0007/container_1445087491445_0007_02_000003.log",
+        "bytes": 14446,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000001.log",
+        "bytes": 253555,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000002.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000004.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000005.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000006.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000007.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000008.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000009.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000010.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000011.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000012.log",
+        "bytes": 26417,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_01_000013.log",
+        "bytes": 5664,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_02_000001.log",
+        "bytes": 69999,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0008/container_1445087491445_0008_02_000002.log",
+        "bytes": 14147,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000001.log",
+        "bytes": 329905,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000002.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000004.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000005.log",
+        "bytes": 4942,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000006.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000007.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000008.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000009.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000010.log",
+        "bytes": 7715,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000011.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000012.log",
+        "bytes": 8254,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000013.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000014.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000015.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000016.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000017.log",
+        "bytes": 7194,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000018.log",
+        "bytes": 6274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0009/container_1445087491445_0009_01_000019.log",
+        "bytes": 5999,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000001.log",
+        "bytes": 424196,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000002.log",
+        "bytes": 4942,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000003.log",
+        "bytes": 4949,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000004.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000005.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000006.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000007.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000008.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000009.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000010.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000011.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000012.log",
+        "bytes": 10488,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000013.log",
+        "bytes": 2294,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000014.log",
+        "bytes": 3739,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000015.log",
+        "bytes": 3739,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000016.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000017.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000018.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000019.log",
+        "bytes": 6273,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000020.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000021.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445087491445_0010/container_1445087491445_0010_01_000022.log",
+        "bytes": 5999,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000001.log",
+        "bytes": 273081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000002.log",
+        "bytes": 5897,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000003.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000004.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000005.log",
+        "bytes": 7715,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000006.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000008.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000009.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000010.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000011.log",
+        "bytes": 6274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000012.log",
+        "bytes": 14477,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0001/container_1445094324383_0001_01_000013.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000001.log",
+        "bytes": 455175,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000002.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000003.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000004.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000005.log",
+        "bytes": 6274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000006.log",
+        "bytes": 7707,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000008.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000009.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000010.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000011.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000012.log",
+        "bytes": 13894,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000013.log",
+        "bytes": 8924,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0002/container_1445094324383_0002_01_000014.log",
+        "bytes": 13370,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000001.log",
+        "bytes": 408273,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000002.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000004.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000005.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000006.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000007.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000008.log",
+        "bytes": 7441,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000009.log",
+        "bytes": 5760,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000010.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000011.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000013.log",
+        "bytes": 17333,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000014.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000015.log",
+        "bytes": 4226,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000016.log",
+        "bytes": 3503,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000017.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000018.log",
+        "bytes": 7441,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0003/container_1445094324383_0003_01_000019.log",
+        "bytes": 3503,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000001.log",
+        "bytes": 584510,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000002.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000003.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000004.log",
+        "bytes": 6493,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000005.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000006.log",
+        "bytes": 4227,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000007.log",
+        "bytes": 4461,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000008.log",
+        "bytes": 3523,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000009.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000010.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000011.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000012.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000013.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000014.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000015.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000016.log",
+        "bytes": 14807,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000017.log",
+        "bytes": 5665,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000018.log",
+        "bytes": 7440,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0004/container_1445094324383_0004_01_000019.log",
+        "bytes": 2293,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000001.log",
+        "bytes": 689887,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000002.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000004.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000005.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000006.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000008.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000009.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000010.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000011.log",
+        "bytes": 5999,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000012.log",
+        "bytes": 3973,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000013.log",
+        "bytes": 3504,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000014.log",
+        "bytes": 4226,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000015.log",
+        "bytes": 6274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000016.log",
+        "bytes": 14663,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000017.log",
+        "bytes": 3013,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000018.log",
+        "bytes": 2779,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000019.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000020.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000021.log",
+        "bytes": 7715,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000022.log",
+        "bytes": 7442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445094324383_0005/container_1445094324383_0005_01_000023.log",
+        "bytes": 15191,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000001.log",
+        "bytes": 5047127,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000002.log",
+        "bytes": 16460,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000003.log",
+        "bytes": 35597,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000004.log",
+        "bytes": 35594,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000005.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000006.log",
+        "bytes": 18442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000007.log",
+        "bytes": 18442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000008.log",
+        "bytes": 16901,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000009.log",
+        "bytes": 16901,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000010.log",
+        "bytes": 16901,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_01_000011.log",
+        "bytes": 13493,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000001.log",
+        "bytes": 390171,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000002.log",
+        "bytes": 8422,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000003.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000004.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000005.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000006.log",
+        "bytes": 4210,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000007.log",
+        "bytes": 4934,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000008.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000009.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000010.log",
+        "bytes": 5187,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000011.log",
+        "bytes": 19329,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000012.log",
+        "bytes": 3488,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000013.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000014.log",
+        "bytes": 8148,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000015.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000016.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000017.log",
+        "bytes": 4198,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000018.log",
+        "bytes": 2294,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0020/container_1445144423722_0020_02_000019.log",
+        "bytes": 3012,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000001.log",
+        "bytes": 189595,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000002.log",
+        "bytes": 8789,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000003.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000004.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000005.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000006.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000007.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000008.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000009.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000010.log",
+        "bytes": 8798,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000011.log",
+        "bytes": 5181,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000012.log",
+        "bytes": 17167,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0021/container_1445144423722_0021_01_000013.log",
+        "bytes": 2293,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000001.log",
+        "bytes": 412918,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000002.log",
+        "bytes": 8417,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000003.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000004.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000005.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000006.log",
+        "bytes": 24077,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000007.log",
+        "bytes": 7102,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000008.log",
+        "bytes": 23355,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000009.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000010.log",
+        "bytes": 7814,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000011.log",
+        "bytes": 5181,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000012.log",
+        "bytes": 18107,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000013.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000014.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000015.log",
+        "bytes": 8425,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000016.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0022/container_1445144423722_0022_01_000017.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_01_000001.log",
+        "bytes": 5036959,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_01_000002.log",
+        "bytes": 15605,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_01_000003.log",
+        "bytes": 16686,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_01_000004.log",
+        "bytes": 16900,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_01_000005.log",
+        "bytes": 16472,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000001.log",
+        "bytes": 352424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000002.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000003.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000004.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000005.log",
+        "bytes": 7102,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000006.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000007.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000008.log",
+        "bytes": 6379,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000009.log",
+        "bytes": 6614,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000010.log",
+        "bytes": 7103,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000011.log",
+        "bytes": 4813,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000012.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000013.log",
+        "bytes": 18439,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000014.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000015.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000016.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0023/container_1445144423722_0023_02_000017.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000001.log",
+        "bytes": 456785,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000002.log",
+        "bytes": 8416,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000003.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000004.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000005.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000006.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000007.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000008.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000009.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000010.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000011.log",
+        "bytes": 5180,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000012.log",
+        "bytes": 19380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445144423722_0024/container_1445144423722_0024_01_000013.log",
+        "bytes": 4211,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000001.log",
+        "bytes": 339704,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000002.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000004.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000005.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000006.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000007.log",
+        "bytes": 7433,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000008.log",
+        "bytes": 5186,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000009.log",
+        "bytes": 5673,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000010.log",
+        "bytes": 6494,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000011.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000012.log",
+        "bytes": 18869,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000013.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000014.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000015.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0001/container_1445175094696_0001_01_000016.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000001.log",
+        "bytes": 364683,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000002.log",
+        "bytes": 7441,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000004.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000005.log",
+        "bytes": 6486,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000006.log",
+        "bytes": 5673,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000008.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000009.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000010.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000011.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000012.log",
+        "bytes": 17533,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000013.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000014.log",
+        "bytes": 7707,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000015.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000016.log",
+        "bytes": 3739,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0002/container_1445175094696_0002_01_000017.log",
+        "bytes": 2778,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000001.log",
+        "bytes": 8459973,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000002.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000004.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000005.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000006.log",
+        "bytes": 8088,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000007.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000008.log",
+        "bytes": 7441,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000009.log",
+        "bytes": 7442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000010.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000011.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000012.log",
+        "bytes": 25700,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000013.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000014.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_01_000015.log",
+        "bytes": 3504,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_02_000001.log",
+        "bytes": 97608,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_02_000002.log",
+        "bytes": 14098,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_02_000003.log",
+        "bytes": 6280,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0003/container_1445175094696_0003_02_000004.log",
+        "bytes": 5999,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000002.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000003.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000004.log",
+        "bytes": 53011,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000005.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000006.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000007.log",
+        "bytes": 22647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000008.log",
+        "bytes": 21926,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000009.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000010.log",
+        "bytes": 3739,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000011.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000012.log",
+        "bytes": 20284,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000013.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000014.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000015.log",
+        "bytes": 6274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0004/container_1445175094696_0004_01_000016.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000001.log",
+        "bytes": 222224,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000002.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000003.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000004.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000005.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000006.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000008.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000009.log",
+        "bytes": 7442,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000010.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000011.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000012.log",
+        "bytes": 15570,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445175094696_0005/container_1445175094696_0005_01_000013.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000001.log",
+        "bytes": 190826,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000002.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000004.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000005.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000006.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000007.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000008.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000009.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000010.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000011.log",
+        "bytes": 6647,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0001/container_1445182159119_0001_01_000012.log",
+        "bytes": 16164,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000001.log",
+        "bytes": 374961,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000002.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000003.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000004.log",
+        "bytes": 6493,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000005.log",
+        "bytes": 4950,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000006.log",
+        "bytes": 6394,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000007.log",
+        "bytes": 5186,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000008.log",
+        "bytes": 7441,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000009.log",
+        "bytes": 10234,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000010.log",
+        "bytes": 5674,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000011.log",
+        "bytes": 5999,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000012.log",
+        "bytes": 19014,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000013.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000014.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000015.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000016.log",
+        "bytes": 8090,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000017.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000018.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000019.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_01_000020.log",
+        "bytes": 6274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_02_000001.log",
+        "bytes": 92736,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0002/container_1445182159119_0002_02_000002.log",
+        "bytes": 13615,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000001.log",
+        "bytes": 509274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000002.log",
+        "bytes": 7906,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000003.log",
+        "bytes": 6494,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000004.log",
+        "bytes": 7441,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000005.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000006.log",
+        "bytes": 7715,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000008.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000009.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000010.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000011.log",
+        "bytes": 6274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000012.log",
+        "bytes": 8188,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000013.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000014.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000015.log",
+        "bytes": 8081,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000016.log",
+        "bytes": 2286,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000017.log",
+        "bytes": 15666,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0003/container_1445182159119_0003_01_000018.log",
+        "bytes": 7433,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000001.log",
+        "bytes": 533846,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000002.log",
+        "bytes": 7922,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000003.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000004.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000005.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000006.log",
+        "bytes": 4059,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000008.log",
+        "bytes": 8089,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000009.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000010.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000011.log",
+        "bytes": 6646,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000013.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000014.log",
+        "bytes": 2294,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000016.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000017.log",
+        "bytes": 7441,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000018.log",
+        "bytes": 20144,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0004/container_1445182159119_0004_01_000019.log",
+        "bytes": 5664,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000001.log",
+        "bytes": 196926,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000002.log",
+        "bytes": 7708,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000003.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000004.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000005.log",
+        "bytes": 7715,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000006.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000007.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000008.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000009.log",
+        "bytes": 7716,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000010.log",
+        "bytes": 7717,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000011.log",
+        "bytes": 6274,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0005/container_1445182159119_0005_01_000012.log",
+        "bytes": 17101,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000001.log",
+        "bytes": 378421,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000002.log",
+        "bytes": 8789,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000003.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000004.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000005.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000006.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000007.log",
+        "bytes": 4934,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000008.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000009.log",
+        "bytes": 4211,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000010.log",
+        "bytes": 5657,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000011.log",
+        "bytes": 5180,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000012.log",
+        "bytes": 19177,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000013.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000014.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000015.log",
+        "bytes": 8798,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000016.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0011/container_1445182159119_0011_01_000017.log",
+        "bytes": 5891,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000001.log",
+        "bytes": 191343,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000002.log",
+        "bytes": 8416,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000003.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000004.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000005.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000006.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000007.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000008.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000009.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000010.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000011.log",
+        "bytes": 4807,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000012.log",
+        "bytes": 19192,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0012/container_1445182159119_0012_01_000013.log",
+        "bytes": 2777,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000001.log",
+        "bytes": 352253,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000002.log",
+        "bytes": 8790,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000003.log",
+        "bytes": 7102,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000004.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000005.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000006.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000007.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000008.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000009.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000010.log",
+        "bytes": 8425,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000011.log",
+        "bytes": 4807,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000013.log",
+        "bytes": 19380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000014.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000015.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0013/container_1445182159119_0013_01_000016.log",
+        "bytes": 6372,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000001.log",
+        "bytes": 402308,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000002.log",
+        "bytes": 8142,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000003.log",
+        "bytes": 7814,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000004.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000005.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000006.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000007.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000008.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000009.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000010.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000011.log",
+        "bytes": 3496,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000012.log",
+        "bytes": 16282,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000013.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000014.log",
+        "bytes": 6518,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000015.log",
+        "bytes": 5180,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_01_000016.log",
+        "bytes": 14122,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_02_000001.log",
+        "bytes": 120481,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_02_000002.log",
+        "bytes": 8422,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_02_000003.log",
+        "bytes": 14273,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0014/container_1445182159119_0014_02_000004.log",
+        "bytes": 8142,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000001.log",
+        "bytes": 386174,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000002.log",
+        "bytes": 8789,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000003.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000004.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000005.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000006.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000007.log",
+        "bytes": 4279,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000008.log",
+        "bytes": 4279,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000009.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000010.log",
+        "bytes": 6381,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000011.log",
+        "bytes": 5181,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000012.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000013.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000014.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000015.log",
+        "bytes": 20082,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000016.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000017.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000018.log",
+        "bytes": 7102,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0015/container_1445182159119_0015_01_000019.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000001.log",
+        "bytes": 786432,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000002.log",
+        "bytes": 8416,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000003.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000004.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000005.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000006.log",
+        "bytes": 5656,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000007.log",
+        "bytes": 4447,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000008.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000009.log",
+        "bytes": 4934,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000010.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000011.log",
+        "bytes": 4533,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000014.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000016.log",
+        "bytes": 8424,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000017.log",
+        "bytes": 6381,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000018.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0016/container_1445182159119_0016_01_000019.log",
+        "bytes": 8423,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000001.log",
+        "bytes": 189937,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000002.log",
+        "bytes": 8790,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000003.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000004.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000005.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000006.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000007.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000008.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000009.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000010.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000011.log",
+        "bytes": 5180,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000012.log",
+        "bytes": 5648,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000013.log",
+        "bytes": 16254,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0017/container_1445182159119_0017_01_000014.log",
+        "bytes": 2294,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_01_000001.log",
+        "bytes": 72253,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_01_000002.log",
+        "bytes": 17280,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_01_000003.log",
+        "bytes": 4211,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000001.log",
+        "bytes": 468873,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000002.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000003.log",
+        "bytes": 8149,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000004.log",
+        "bytes": 8803,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000005.log",
+        "bytes": 8803,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000006.log",
+        "bytes": 8803,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000007.log",
+        "bytes": 8803,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000008.log",
+        "bytes": 8803,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000009.log",
+        "bytes": 8803,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000010.log",
+        "bytes": 8804,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000011.log",
+        "bytes": 5187,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000013.log",
+        "bytes": 19556,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000014.log",
+        "bytes": 5649,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000015.log",
+        "bytes": 8148,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000016.log",
+        "bytes": 8803,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000017.log",
+        "bytes": 6380,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0018/container_1445182159119_0018_02_000018.log",
+        "bytes": 4447,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_01_000001.log",
+        "bytes": 71749,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_01_000002.log",
+        "bytes": 17280,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_01_000003.log",
+        "bytes": 17287,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000001.log",
+        "bytes": 267980,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000002.log",
+        "bytes": 8422,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000003.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000004.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000005.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000006.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000007.log",
+        "bytes": 8429,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000008.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000009.log",
+        "bytes": 8430,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000010.log",
+        "bytes": 8431,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000011.log",
+        "bytes": 4813,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000012.log",
+        "bytes": 15960,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000013.log",
+        "bytes": 3013,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000014.log",
+        "bytes": 2777,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0019/container_1445182159119_0019_02_000015.log",
+        "bytes": 814,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/",
+        "bytes": 0,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000001.log",
+        "bytes": 483371,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000002.log",
+        "bytes": 8790,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000003.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000004.log",
+        "bytes": 13119,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000005.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000006.log",
+        "bytes": 13120,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000007.log",
+        "bytes": 8796,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000008.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000009.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000010.log",
+        "bytes": 9505,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000011.log",
+        "bytes": 8797,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000012.log",
+        "bytes": 16517,
+        "safe_relative_path": true
+      },
+      {
+        "name": "application_1445182159119_0020/container_1445182159119_0020_01_000013.log",
+        "bytes": 4533,
+        "safe_relative_path": true
+      },
+      {
+        "name": "README.md",
+        "bytes": 2141,
+        "safe_relative_path": true
+      }
+    ],
+    "samples": {
+      "abnormal_label.txt": [
+        "The logs are generated from a Hadoop cluster using two testing applications: WordCount and PageRank. Each application has been run for several times, simulating both normal and abnormal cases with injected specific failures.",
+        ""
+      ],
+      "application_1445062781478_0011/container_1445062781478_0011_01_000001.log": [
+        "2015-10-17 15:37:56,547 INFO [main] org.apache.hadoop.mapreduce.v2.app.MRAppMaster: Created MRAppMaster for application appattempt_1445062781478_0011_000001",
+        "2015-10-17 15:37:56,899 INFO [main] org.apache.hadoop.mapreduce.v2.app.MRAppMaster: Executing with tokens:"
+      ]
+    }
+  },
+  {
+    "id": "D05",
+    "name": "Thunderbird",
+    "archive_bytes": 2016100298,
+    "listing_complete": false,
+    "listed_member_count": 1,
+    "listed_content_bytes": 31788301041,
+    "listed_log_bytes": 31788301041,
+    "entries": [
+      {
+        "name": "Thunderbird.log",
+        "bytes": 31788301041,
+        "safe_relative_path": true,
+        "regular_file": true
+      }
+    ],
+    "samples": {
+      "Thunderbird.log": [
+        "- 1131523501 2005.11.09 aadmin1 Nov 10 00:05:01 src@aadmin1 in.tftpd[14620]: tftp: client does not accept options",
+        "- 1131524071 2005.11.09 tbird-admin1 Nov 10 00:14:31 local@tbird-admin1 postfix/postdrop[10896]: warning: unable to look up public/pickup: No such file or directory"
+      ]
+    }
+  },
+  {
+    "id": "D06",
+    "name": "Linux",
+    "archive_bytes": 232039,
+    "listing_complete": true,
+    "listed_member_count": 1,
+    "listed_content_bytes": 2349686,
+    "listed_log_bytes": 2349686,
+    "entries": [
+      {
+        "name": "Linux.log",
+        "bytes": 2349686,
+        "safe_relative_path": true,
+        "regular_file": true
+      }
+    ],
+    "samples": {
+      "Linux.log": [
+        "Jun  9 06:06:20 combo syslogd 1.4.1: restart.",
+        "Jun  9 06:06:20 combo syslog: syslogd startup succeeded"
+      ]
+    }
+  },
+  {
+    "id": "D07",
+    "name": "OpenSSH",
+    "archive_bytes": 4596666,
+    "listing_complete": true,
+    "listed_member_count": 1,
+    "listed_content_bytes": 73417506,
+    "listed_log_bytes": 73417506,
+    "entries": [
+      {
+        "name": "SSH.log",
+        "bytes": 73417506,
+        "safe_relative_path": true,
+        "regular_file": true
+      }
+    ],
+    "samples": {
+      "SSH.log": [
+        "Dec 10 06:55:46 LabSZ sshd[24200]: reverse mapping checking getaddrinfo for ns.marryaldkfaczcz.com [173.234.31.186] failed - POSSIBLE BREAK-IN ATTEMPT!",
+        "Dec 10 06:55:46 LabSZ sshd[24200]: Invalid user webmaster from 173.234.31.186"
+      ]
+    }
+  },
+  {
+    "id": "D08",
+    "name": "Apache",
+    "archive_bytes": 262905,
+    "listing_complete": true,
+    "listed_member_count": 1,
+    "listed_content_bytes": 5135876,
+    "listed_log_bytes": 5135876,
+    "entries": [
+      {
+        "name": "Apache.log",
+        "bytes": 5135876,
+        "safe_relative_path": true,
+        "regular_file": true
+      }
+    ],
+    "samples": {
+      "Apache.log": [
+        "[Thu Jun 09 06:07:04 2005] [notice] LDAP: Built with OpenLDAP LDAP SDK",
+        "[Thu Jun 09 06:07:04 2005] [notice] LDAP: SSL support unavailable"
+      ]
+    }
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "file": "app/templates/dashboard.html",
+    "sha256": "07AA3CFC729413282BB12E3E1D8FF24C02A94D645A9FF82F8B960545B64A5740",
+    "unchanged": true
+  },
+  {
+    "file": "app/templates/partials/workspace.html",
+    "sha256": "84B151425F38A12D5E297D2B965E3B3BC1E9F8F55E7B3B0E6CEEA5B530DD6673",
+    "unchanged": true
+  },
+  {
+    "file": "app/static/css/console.css",
+    "sha256": "EE7EC96A91D47C81FDB0F21432557469BD0B95FEEBDDC6EC2C6AB18A0F006EBB",
+    "unchanged": true
+  },
+  {
+    "file": "app/static/js/dashboard.js",
+    "sha256": "FB4967A58C971599F48EB90101433942BDC52FE68E04476B22CDD691506940A4",
+    "unchanged": true
+  },
+  {
+    "file": "app/__init__.py",
+    "sha256": "10161297DED1798F3BAFB827310BFB9B13C179458904F115B1CC311F3E0C63BA",
+    "unchanged": true
+  },
+  {
+    "file": "app/demo.py",
+    "sha256": "DE873FCFA005F7013D18F434911D274906D7663000C51F7A227B77AFA73F3FD0",
+    "unchanged": true
+  },
+  {
+    "file": "tests/test_workspace.py",
+    "sha256": "CA726A28AB1EE83D0AD3974B4B32CA85B6CA85EFAF763C69B0B9506DF6002E90",
+    "unchanged": true
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "P01",
+    "status": "verified",
+    "path": "research\\papers\\P01_loghub.pdf",
+    "bytes": 677222,
+    "md5": "b907072ea6d21bc46bd0302b8d8cb2bc",
+    "sha256": "a0d116b2f43e7eb46f9f6f98ac174e2f683c6844febc62607dedc13b33910b25",
+    "url": "https://arxiv.org/pdf/2008.06448v3"
+  },
+  {
+    "id": "P02",
+    "status": "verified",
+    "path": "research\\papers\\P02_hdfs_origin.pdf",
+    "bytes": 321862,
+    "md5": "47d58bd6ce887a6560ab319dd3d926c8",
+    "sha256": "bfcc18133e9f0a20d5fd87f65c04ff061e30dead1cf989f937f55cf70206a3ad",
+    "url": "https://people.eecs.berkeley.edu/~jordan/papers/xu-etal-sosp09.pdf"
+  },
+  {
+    "id": "P04",
+    "status": "verified",
+    "path": "research\\papers\\P04_deeplog.pdf",
+    "bytes": 1875010,
+    "md5": "16e6868b417cb431279de741fc90092a",
+    "sha256": "82169785bf8363f13e543a295e46a5c433493277fa6d31b6040208f5f856e999",
+    "url": "https://acmccs.github.io/papers/p1285-duA.pdf"
+  },
+  {
+    "id": "P05",
+    "status": "verified",
+    "path": "research\\papers\\P05_drain.pdf",
+    "bytes": 346744,
+    "md5": "df84daaec461f357fe70d188119ab656",
+    "sha256": "4e5a037baf4f05262307f00eeee030fc40f7113612d04b1cb389269279afcd1d",
+    "url": "https://pinjiahe.github.io/files/pdf/research/ICWS17.pdf"
+  },
+  {
+    "id": "P06",
+    "status": "verified",
+    "path": "research\\papers\\P06_neurallog.pdf",
+    "bytes": 2220103,
+    "md5": "07c6311683b8549cbe256e180c08378f",
+    "sha256": "6e6735fffd620ad9fd9b2c39006d29156e0e00427c641febce37ee73e574dbf9",
+    "url": "https://arxiv.org/pdf/2108.01955v3"
+  },
+  {
+    "id": "P07",
+    "status": "verified",
+    "path": "research\\papers\\P07_lightad.pdf",
+    "bytes": 1192334,
+    "md5": "9a443fa01c1d3c72f597c640e986d9d9",
+    "sha256": "51f44725e781514256fca5cda1e010a60be9ccf1cc0140e50deab7662be94d84",
+    "url": "https://boxiyu.github.io/assets/pdf/LightAD.pdf"
+  },
+  {
+    "id": "P08",
+    "status": "verified",
+    "path": "research\\papers\\P08_critical_review.pdf",
+    "bytes": 1060948,
+    "md5": "7b157222c918a6cd0aced020679819ef",
+    "sha256": "708a8bbe45d9991ea57e2a5f0d56655c05d35475580733cf86f701117f48209a",
+    "url": "https://www.skopik.at/ait/2024_fse.pdf"
+  },
+  {
+    "id": "P09",
+    "status": "verified",
+    "path": "research\\papers\\P09_loghub2.pdf",
+    "bytes": 5456230,
+    "md5": "e0d698f1c0dcedd8ff107b2918c487d9",
+    "sha256": "18e5bf28afb861fc49d93437b952828d5db576a30e1bcd8d30850567b5680c84",
+    "url": "https://arxiv.org/pdf/2308.10828v2"
+  },
+  {
+    "id": "P03",
+    "status": "failed",
+    "error": "curl: (6) Could not resolve host: adam.oliner.net\ncurl: (6) Could not resolve host: adam.oliner.net\ncurl: (6) Could not resolve host: adam.oliner.net\ncurl: (6) Could not resolve host: adam.oliner.net",
+    "url": "https://adam.oliner.net/files/oliner_dsn_2007.pdf"
+  }
+]

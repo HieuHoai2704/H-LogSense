@@ -1,0 +1,32 @@
+{
+  "audit_date": "2026-11-03",
+  "display_timezone": "Asia/Ho_Chi_Minh",
+  "memory_kib": {
+    "TotalVisibleMemorySize": 33242108,
+    "FreePhysicalMemory": 16020568
+  },
+  "processors": [
+    {
+      "Name": "Intel(R) Core(TM) i5-14600K",
+      "NumberOfLogicalProcessors": 20,
+      "MaxClockSpeed": 3500
+    }
+  ],
+  "disk": {
+    "Name": "D",
+    "Used": 560063610880,
+    "Free": 440138428416
+  },
+  "available_commands": [
+    {
+      "Name": "docker.exe"
+    }
+  ],
+  "mysql_services": [],
+  "mysql_listeners": [],
+  "docker_status": "CLI available; daemon Linux-engine pipe unavailable",
+  "sqlalchemy": "not installed",
+  "pymysql": "not installed",
+  "isolated_mysql_benchmark": "not executed",
+  "infrastructure_changes": false
+}

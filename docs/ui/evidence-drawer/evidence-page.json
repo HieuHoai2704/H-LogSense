@@ -1,0 +1,182 @@
+{
+  "anomaly": {
+    "dataset_id": "demo",
+    "dataset_name": "Synthetic fixture",
+    "detector": "Isolation Forest",
+    "detector_id": "isolation-forest",
+    "host": "storage-02",
+    "id": "LS-1041",
+    "model_run_id": null,
+    "service": "storage",
+    "severity": "High",
+    "timestamp": "2026-11-03T07:28:41Z",
+    "unit": "Time window"
+  },
+  "availability": {
+    "anomaly": "synthetic",
+    "detector_run": "unavailable",
+    "explanation": "unavailable",
+    "feature_evidence_truncated": false,
+    "feature_schema_truncated": false,
+    "original_raw_log": "unavailable",
+    "parsed_fields": "fixture_only",
+    "raw_event": "synthetic",
+    "raw_page_truncated": false,
+    "redaction": "Credential assignments, bearer/JWT tokens, private keys and email patterns are redacted before pagination. This is not exhaustive PII detection.",
+    "related_page_truncated": false,
+    "surrounding_raw_logs": "unavailable"
+  },
+  "detector_evidence": {
+    "configured_threshold": null,
+    "detection_unit": "Time window",
+    "explanation": null,
+    "explanation_status": "Explanation unavailable — no detector execution or explanation method is connected.",
+    "feature_evidence": null,
+    "feature_schema": null,
+    "kind": "ml",
+    "method": "Isolation Forest",
+    "model_name": null,
+    "model_run_id": null,
+    "model_version": null,
+    "observation_window": null,
+    "observed_value": "318 events / min",
+    "reference_statistics": "92 events / min",
+    "rule_id": null,
+    "rule_version": null,
+    "score": 84,
+    "score_direction": null,
+    "score_interpretation": "Synthetic 0–100 presentation ranking. Native detector score direction and calibration are unavailable. Do not compare scores across detectors or treat them as probabilities."
+  },
+  "export_scope": {
+    "note": "Redacted raw and related-event pages only. Availability fields identify omitted or paginated data.",
+    "query": {
+      "base_end_time": "2026-11-03T07:50:00Z",
+      "base_start_time": "2026-11-03T06:50:00Z",
+      "detector": [],
+      "end_time": "2026-11-03T07:50:00Z",
+      "host": [],
+      "limit": 1,
+      "mode": "severity",
+      "page": 1,
+      "q": "",
+      "range": "full",
+      "resolution": "auto",
+      "row_page": 1,
+      "selection_detector": "",
+      "selection_end": "",
+      "selection_start": "",
+      "service": [],
+      "severity": [],
+      "sort": "priority",
+      "source": "demo",
+      "start_time": "2026-11-03T06:50:00Z",
+      "timezone": "local",
+      "width": 1147
+    },
+    "type": "current evidence page"
+  },
+  "mode": "demo",
+  "navigation": {
+    "in_result_scope": true,
+    "next_id": "LS-1040",
+    "note": "Previous/next use the complete current result scope, including timeline selection, across table pages.",
+    "order": "newest_first",
+    "previous_id": "LS-1042",
+    "result_count": 6
+  },
+  "parsed_fields": {
+    "host": "storage-02",
+    "service": "storage",
+    "timestamp": "2026-11-03T07:28:41Z"
+  },
+  "raw_event": {
+    "page": {
+      "has_more": false,
+      "limit": 2048,
+      "next_offset": null,
+      "offset": 0,
+      "redacted": true,
+      "redaction_note": "Credential assignments, bearer/JWT tokens, private keys and email patterns are redacted before pagination. This is not exhaustive PII detection.",
+      "synthetic": true,
+      "text": "2026-11-03T14:28:41+07:00 [DEMO] storage-02 storage: Unusual storage event-rate pattern.",
+      "total_chars": 88
+    },
+    "provenance": {
+      "event_reference": "LS-1041",
+      "host": "storage-02",
+      "note": "Synthetic presentation text. No original source log or parser output is connected.",
+      "original_log_available": false,
+      "parsed_timestamp": "2026-11-03T07:28:41Z",
+      "parsing_status": "not_run",
+      "raw_timestamp": "14:28:41",
+      "source_file": null,
+      "source_line": null
+    }
+  },
+  "related_events": {
+    "available_relations": [
+      {
+        "available": true,
+        "value": "same_host"
+      },
+      {
+        "available": true,
+        "value": "same_service"
+      },
+      {
+        "available": true,
+        "value": "before"
+      },
+      {
+        "available": true,
+        "value": "after"
+      },
+      {
+        "available": true,
+        "value": "context_window"
+      },
+      {
+        "available": false,
+        "value": "same_session"
+      },
+      {
+        "available": false,
+        "value": "same_window"
+      }
+    ],
+    "context_seconds": 1800,
+    "has_more": false,
+    "interval": {
+      "end": "2026-11-03T07:58:41Z",
+      "start": "2026-11-03T06:58:41Z"
+    },
+    "items": [
+      {
+        "host": "storage-02",
+        "id": "LS-1038",
+        "message": "Warning count differs from the reference window.",
+        "relationship_reasons": [
+          "Within the explicit context interval [2026-11-03T06:58:41Z, 2026-11-03T07:58:41Z)",
+          "Same host",
+          "Same service",
+          "Before detection"
+        ],
+        "service": "storage",
+        "severity": "Medium",
+        "timestamp": "2026-11-03T07:09:55Z"
+      }
+    ],
+    "limit": 10,
+    "next_cursor": null,
+    "note": "Bounded related anomaly fixtures from this source, independent of global result filters. Original surrounding raw logs are unavailable.",
+    "relation": "same_host"
+  },
+  "revision": "synthetic-fixture-v2.1",
+  "schema_version": "1.0",
+  "summary": {
+    "hypotheses": [],
+    "note": "Synthetic signal statement supplied by the fixture; no generated explanation.",
+    "observed_signal": "Unusual storage event-rate pattern.",
+    "root_cause": null
+  }
+}

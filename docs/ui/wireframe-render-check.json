@@ -1,0 +1,27 @@
+[
+  {
+    "sheet": "desktop",
+    "outside_canvas": [],
+    "text_overlaps": []
+  },
+  {
+    "sheet": "compact",
+    "outside_canvas": [],
+    "text_overlaps": []
+  },
+  {
+    "sheet": "selection",
+    "outside_canvas": [],
+    "text_overlaps": []
+  },
+  {
+    "sheet": "evidence",
+    "outside_canvas": [],
+    "text_overlaps": "Not evaluated across intentional overlay layers"
+  },
+  {
+    "sheet": "states",
+    "outside_canvas": [],
+    "text_overlaps": []
+  }
+]

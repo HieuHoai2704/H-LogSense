@@ -1,0 +1,82 @@
+# GATE 1 PROPOSAL ONLY: replace the root .gitignore only after approval.
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+/.venv/
+/venv/
+/env/
+
+# Local state, backups, browser profiles and caches
+/.local/
+/backups/
+/tmp/
+*.tmp
+
+# Secrets and private signing material
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ecdsa
+id_ed25519
+.ssh/
+.aws/
+
+# Runtime and local databases
+*.log
+*.pid
+instance/
+/storage/
+*.db
+*.sqlite
+*.sqlite3
+/dumps/
+*.sql.gz
+*.sql.zip
+
+# Research datasets and derived data. Keep the small public license notice.
+/data/raw/*
+!/data/raw/LOGHUB_LICENSE.txt
+/data/processed/
+/data/interim/
+/data/imports/
+/research/papers/
+/research/text/
+
+# Model binaries; Python model/ORM source directories remain trackable.
+/model_artifacts/
+/checkpoints/
+*.pt
+*.pth
+*.onnx
+*.joblib
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+
+# Local benchmark output; curated documentation reports remain trackable.
+/benchmark-results/
+/benchmarks/results/
+
+# IDE and operating-system local files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini

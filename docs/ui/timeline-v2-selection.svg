@@ -1,0 +1,237 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1090" viewBox="0 0 1440 1090" role="img" aria-label="Timeline V2 — desktop design wireframe">
+<title>Timeline V2 — desktop design wireframe</title>
+<defs><pattern id="missing" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#F0F3F6"/><path d="M-2 2L2 -2M0 8L8 0M6 10L10 6" stroke="#718391" stroke-width="1"/></pattern></defs>
+<style>text{font-family:Segoe UI,Arial,sans-serif;font-variant-numeric:tabular-nums} .mono{font-family:Consolas,monospace}</style>
+<rect x="0" y="0" width="1440" height="1090" rx="0" fill="#FFFFFF" stroke="none" stroke-width="1"/>
+<text x="24" y="22" font-size="13" fill="#526575" font-weight="600" text-anchor="start" class="">DESIGN WIREFRAME · PROPOSED, NOT IMPLEMENTED</text>
+<text x="24" y="60" font-size="24" fill="#172F40" font-weight="650" text-anchor="start" class="">Investigation</text>
+<text x="1416" y="56" font-size="13" fill="#526575" font-weight="400" text-anchor="end" class="">1440px · single workspace</text>
+<rect x="24" y="80" width="1392" height="36" rx="0" fill="#F5F7F9" stroke="none" stroke-width="1"/>
+<rect x="24" y="80" width="3" height="36" rx="0" fill="#096C68" stroke="none" stroke-width="1"/>
+<text x="38" y="103" font-size="13" fill="#096C68" font-weight="700" text-anchor="start" class="">DEMO</text>
+<text x="94" y="103" font-size="14" fill="#526575" font-weight="400" text-anchor="start" class="">Synthetic events, scores and evidence. No model executed.</text>
+<rect x="24" y="132" width="250" height="48" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="36" y="149" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Source</text>
+<text x="36" y="169" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Synthetic fixture</text>
+<text x="256" y="165" font-size="16" fill="#526575" font-weight="400" text-anchor="middle" class="">⌄</text>
+<rect x="286" y="132" width="422" height="48" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="298" y="149" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Time range</text>
+<text x="298" y="169" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">03 Nov 2026 · 13:50–14:50</text>
+<text x="690" y="165" font-size="16" fill="#526575" font-weight="400" text-anchor="middle" class="">⌄</text>
+<rect x="720" y="132" width="270" height="48" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="732" y="149" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Timezone</text>
+<text x="732" y="169" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Asia/Ho_Chi_Minh · +07</text>
+<text x="972" y="165" font-size="16" fill="#526575" font-weight="400" text-anchor="middle" class="">⌄</text>
+<text x="1416" y="160" font-size="13" fill="#526575" font-weight="400" text-anchor="end" class="">No connected dataset or live ingestion</text>
+<rect x="24" y="194" width="500" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="274.0" y="217.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Search messages, hosts, detectors…</text>
+<rect x="536" y="194" width="170" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="621.0" y="217.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Entities: all ⌄</text>
+<rect x="718" y="194" width="160" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="798.0" y="217.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Priority: all ⌄</text>
+<rect x="890" y="194" width="330" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="1055.0" y="217.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Detectors: all ⌄</text>
+<rect x="1232" y="194" width="88" height="36" rx="4" fill="#096C68" stroke="#096C68" stroke-width="1"/>
+<text x="1276.0" y="217.0" font-size="14" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">Apply</text>
+<text x="1340" y="217" font-size="13" fill="#096C68" font-weight="600" text-anchor="start" class="">Clear filters</text>
+<text x="24" y="260" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Applied scope: dated synthetic fixture · all hosts, services, priorities and detectors</text>
+<rect x="24" y="282" width="1392" height="480" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="44" y="313" font-size="18" fill="#172F40" font-weight="650" text-anchor="start" class="">Anomaly activity</text>
+<text x="44" y="337" font-size="14" fill="#526575" font-weight="400" text-anchor="start" class="">6 anomalies in scope · 3 High / Critical</text>
+<rect x="1178" y="299" width="112" height="36" rx="4" fill="#EDF3FF" stroke="#164FBA" stroke-width="1"/>
+<text x="1234.0" y="322.0" font-size="14" fill="#164FBA" font-weight="600" text-anchor="middle" class="">Severity</text>
+<rect x="1290" y="299" width="106" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="1343.0" y="322.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Volume</text>
+<rect x="44" y="355" width="40" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="64.0" y="378.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">‹</text>
+<rect x="92" y="355" width="40" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="112.0" y="378.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">›</text>
+<rect x="144" y="355" width="152" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="220.0" y="378.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Select range…</text>
+<rect x="308" y="355" width="100" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="358.0" y="378.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Zoom in</text>
+<rect x="420" y="355" width="100" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="470.0" y="378.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Zoom out</text>
+<rect x="532" y="355" width="112" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="588.0" y="378.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Reset zoom</text>
+<text x="1396" y="378" font-size="13" fill="#526575" font-weight="400" text-anchor="end" class="">Auto · 5 min · 12 bins</text>
+<path d="M44 403L1396 403" stroke="#D6DFE6" stroke-width="1"/>
+<text x="240.0" y="429" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="mono">13:50</text>
+<text x="432.66666666666663" y="429" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="mono">14:00</text>
+<text x="625.3333333333333" y="429" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="mono">14:10</text>
+<text x="818.0" y="429" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="mono">14:20</text>
+<text x="1010.6666666666666" y="429" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="mono">14:30</text>
+<text x="1203.3333333333335" y="429" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="mono">14:40</text>
+<text x="1396.0" y="429" font-size="13" fill="#526575" font-weight="400" text-anchor="end" class="mono">14:50</text>
+<text x="44" y="462" font-size="14" fill="#172F40" font-weight="700" text-anchor="start" class="">Overall</text>
+<rect x="242.0" y="441" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="288.1666666666667" y="462" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="338.33" y="441" width="92.33" height="32" rx="2" fill="#087F76" stroke="none" stroke-width="1"/>
+<text x="384.5" y="462" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">L  1</text>
+<rect x="434.67" y="441" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="480.8333333333333" y="462" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="531.0" y="441" width="92.33" height="32" rx="2" fill="#8B6700" stroke="none" stroke-width="1"/>
+<text x="577.1666666666666" y="462" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">M  1</text>
+<rect x="627.33" y="441" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="673.5" y="462" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="723.67" y="441" width="92.33" height="32" rx="2" fill="#8B6700" stroke="none" stroke-width="1"/>
+<text x="769.8333333333333" y="462" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">M  1</text>
+<rect x="820.0" y="441" width="92.33" height="32" rx="2" fill="#B84B16" stroke="none" stroke-width="1"/>
+<text x="866.1666666666666" y="462" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">H  1</text>
+<rect x="916.33" y="441" width="92.33" height="32" rx="2" fill="#B84B16" stroke="none" stroke-width="1"/>
+<text x="962.5" y="462" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">H  1</text>
+<rect x="1012.67" y="441" width="92.33" height="32" rx="2" fill="#AE2442" stroke="none" stroke-width="1"/>
+<text x="1058.8333333333333" y="462" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">C  1</text>
+<rect x="1109.0" y="441" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1155.1666666666665" y="462" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1205.33" y="441" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1251.5" y="462" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1301.67" y="441" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1347.8333333333333" y="462" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<path d="M44 486L1396 486" stroke="#D6DFE6" stroke-width="1"/>
+<text x="44" y="509" font-size="13" fill="#526575" font-weight="600" text-anchor="start" class="">⌄ Rules · 2 detectors</text>
+<text x="1396" y="509" font-size="13" fill="#096C68" font-weight="600" text-anchor="end" class="">Sort: priority ⌄</text>
+<text x="44" y="541" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Error burst</text>
+<rect x="242.0" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="288.1666666666667" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="338.33" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="384.5" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="434.67" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="480.8333333333333" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="531.0" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="577.1666666666666" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="627.33" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="673.5" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="723.67" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="769.8333333333333" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="820.0" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="866.1666666666666" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="916.33" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="962.5" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1012.67" y="520" width="92.33" height="32" rx="2" fill="#AE2442" stroke="none" stroke-width="1"/>
+<text x="1058.8333333333333" y="541" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">C  1</text>
+<rect x="1010.67" y="517" width="96.33" height="38" rx="3" fill="none" stroke="#FFFFFF" stroke-width="5"/>
+<rect x="1010.67" y="517" width="96.33" height="38" rx="3" fill="none" stroke="#164FBA" stroke-width="2"/>
+<rect x="1109.0" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1155.1666666666665" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1205.33" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1251.5" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1301.67" y="520" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1347.8333333333333" y="541" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<text x="44" y="583" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Timeout frequency</text>
+<rect x="242.0" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="288.1666666666667" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="338.33" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="384.5" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="434.67" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="480.8333333333333" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="531.0" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="577.1666666666666" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="627.33" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="673.5" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="723.67" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="769.8333333333333" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="820.0" y="562" width="92.33" height="32" rx="2" fill="#B84B16" stroke="none" stroke-width="1"/>
+<text x="866.1666666666666" y="583" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">H  1</text>
+<rect x="916.33" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="962.5" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1012.67" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1058.8333333333333" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1109.0" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1155.1666666666665" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1205.33" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1251.5" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1301.67" y="562" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1347.8333333333333" y="583" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<text x="44" y="626" font-size="13" fill="#526575" font-weight="600" text-anchor="start" class="">⌄ Statistical / pattern · 2 detectors</text>
+<text x="44" y="659" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Isolation Forest</text>
+<rect x="242.0" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="288.1666666666667" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="338.33" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="384.5" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="434.67" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="480.8333333333333" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="531.0" y="638" width="92.33" height="32" rx="2" fill="#8B6700" stroke="none" stroke-width="1"/>
+<text x="577.1666666666666" y="659" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">M  1</text>
+<rect x="627.33" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="673.5" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="723.67" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="769.8333333333333" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="820.0" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="866.1666666666666" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="916.33" y="638" width="92.33" height="32" rx="2" fill="#B84B16" stroke="none" stroke-width="1"/>
+<text x="962.5" y="659" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">H  1</text>
+<rect x="1012.67" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1058.8333333333333" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1109.0" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1155.1666666666665" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1205.33" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1251.5" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1301.67" y="638" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1347.8333333333333" y="659" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<text x="44" y="701" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="">Event novelty</text>
+<rect x="242.0" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="288.1666666666667" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="338.33" y="680" width="92.33" height="32" rx="2" fill="#087F76" stroke="none" stroke-width="1"/>
+<text x="384.5" y="701" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">L  1</text>
+<rect x="434.67" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="480.8333333333333" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="531.0" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="577.1666666666666" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="627.33" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="673.5" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="723.67" y="680" width="92.33" height="32" rx="2" fill="#8B6700" stroke="none" stroke-width="1"/>
+<text x="769.8333333333333" y="701" font-size="13" fill="#FFFFFF" font-weight="600" text-anchor="middle" class="">M  1</text>
+<rect x="820.0" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="866.1666666666666" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="916.33" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="962.5" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1012.67" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1058.8333333333333" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1109.0" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1155.1666666666665" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1205.33" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1251.5" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="1301.67" y="680" width="92.33" height="32" rx="2" fill="#F0F3F6" stroke="#718391" stroke-width="1"/>
+<text x="1347.8333333333333" y="701" font-size="13" fill="#526575" font-weight="400" text-anchor="middle" class="">0</text>
+<rect x="44" y="727" width="12" height="12" rx="2" fill="#087F76" stroke="none" stroke-width="1"/>
+<text x="62" y="739" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">L Low</text>
+<rect x="160" y="727" width="12" height="12" rx="2" fill="#8B6700" stroke="none" stroke-width="1"/>
+<text x="178" y="739" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">M Medium</text>
+<rect x="276" y="727" width="12" height="12" rx="2" fill="#B84B16" stroke="none" stroke-width="1"/>
+<text x="294" y="739" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">H High</text>
+<rect x="392" y="727" width="12" height="12" rx="2" fill="#AE2442" stroke="none" stroke-width="1"/>
+<text x="410" y="739" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">C Critical</text>
+<text x="1396" y="739" font-size="13" fill="#526575" font-weight="400" text-anchor="end" class="">Color = highest priority · number = count</text>
+<text x="24" y="783" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">0 = no anomaly in this fixture bin · not evidence of live data coverage</text>
+<rect x="24" y="804" width="1392" height="232" rx="4" fill="#FFFFFF" stroke="#D6DFE6" stroke-width="1"/>
+<text x="44" y="835" font-size="18" fill="#172F40" font-weight="650" text-anchor="start" class="">Results</text>
+<text x="124" y="834" font-size="14" fill="#526575" font-weight="400" text-anchor="start" class="">1 in selection / 6 in scope</text>
+<rect x="1236" y="814" width="160" height="36" rx="4" fill="#FFFFFF" stroke="#718391" stroke-width="1"/>
+<text x="1316.0" y="837.0" font-size="14" fill="#172F40" font-weight="400" text-anchor="middle" class="">Export scoped CSV</text>
+<rect x="25" y="851" width="1390" height="40" rx="0" fill="#EDF3FF" stroke="none" stroke-width="1"/>
+<rect x="25" y="851" width="3" height="40" rx="0" fill="#164FBA" stroke="none" stroke-width="1"/>
+<text x="40" y="877" font-size="14" fill="#164FBA" font-weight="600" text-anchor="start" class="">Selected: Error burst · 14:30–14:35 +07</text>
+<text x="1228" y="877" font-size="13" fill="#164FBA" font-weight="600" text-anchor="end" class="">Clear selection</text>
+<text x="1396" y="877" font-size="13" fill="#164FBA" font-weight="600" text-anchor="end" class="">Zoom to selection</text>
+<text x="40" y="914" font-size="13" fill="#526575" font-weight="600" text-anchor="start" class="">Time / event</text>
+<text x="188" y="914" font-size="13" fill="#526575" font-weight="600" text-anchor="start" class="">Priority</text>
+<text x="336" y="914" font-size="13" fill="#526575" font-weight="600" text-anchor="start" class="">Signal</text>
+<text x="834" y="914" font-size="13" fill="#526575" font-weight="600" text-anchor="start" class="">Host / service</text>
+<text x="1070" y="914" font-size="13" fill="#526575" font-weight="600" text-anchor="start" class="">Detector</text>
+<path d="M24 926L1416 926" stroke="#D6DFE6" stroke-width="1"/>
+<rect x="25" y="927" width="1390" height="52" rx="0" fill="#EDF3FF" stroke="none" stroke-width="1"/>
+<rect x="25" y="927" width="3" height="52" rx="0" fill="#164FBA" stroke="none" stroke-width="1"/>
+<text x="40" y="944" font-size="14" fill="#172F40" font-weight="600" text-anchor="start" class="mono">14:32:08</text>
+<text x="40" y="963" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">LS-1042</text>
+<text x="188" y="944" font-size="14" fill="#AE2442" font-weight="650" text-anchor="start" class="">◆ Critical</text>
+<text x="336" y="944" font-size="14" fill="#172F40" font-weight="400" text-anchor="start" class="">Kernel errors exceeded the baseline.</text>
+<text x="834" y="944" font-size="14" fill="#172F40" font-weight="400" text-anchor="start" class="">compute-07</text>
+<text x="834" y="963" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">kernel</text>
+<text x="1070" y="944" font-size="14" fill="#526575" font-weight="400" text-anchor="start" class="">Error burst</text>
+<text x="1396" y="944" font-size="13" fill="#164FBA" font-weight="600" text-anchor="end" class="">Inspect →</text>
+<path d="M24 979L1416 979" stroke="#D6DFE6" stroke-width="1"/>
+<text x="44" y="1020" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">1–1 of 1</text>
+<text x="1396" y="1020" font-size="13" fill="#526575" font-weight="400" text-anchor="end" class="">Previous   /   Next</text>
+<text x="24" y="1068" font-size="13" fill="#526575" font-weight="400" text-anchor="start" class="">Design proposal · synthetic scores are rankings, not probabilities or root-cause evidence.</text>
+</svg>

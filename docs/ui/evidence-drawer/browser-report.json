@@ -1,0 +1,20 @@
+{
+  "passed": [
+    "Previous/next navigate entire result scope across table pages without global URL changes",
+    "Related relationship reasons and configurable bounded context update truthfully",
+    "Related cursor pagination and previous-page navigation",
+    "Copy reference produces a reloadable source/scoped anomaly deep link (clipboard adapter tested)",
+    "View raw, copy visible chunk, wrapping and expand/collapse",
+    "Evidence JSON export identifies the anomaly, current page and missing original source",
+    "Host/service/focus actions work and preserve unrelated global filters",
+    "Selection visible in drawer, modal focus loop, Escape and opener focus restoration",
+    "Main evidence loading/error/retry does not show stale supporting evidence",
+    "Right drawer at 1440/1366/1024, full-width mobile, nonmodal wide desktop and no document overflow",
+    "HTML stays text; matched terms marked safely, secrets/email redacted and long raw chunk paging",
+    "Independent raw-page error/retry",
+    "Independent related-query error/retry clears mismatched old relationship rows"
+  ],
+  "count": 13,
+  "page_errors": [],
+  "limits": "Synthetic records only. Clipboard uses a browser test adapter. No real MySQL, raw ingestion, login provider or screen-reader certification."
+}
