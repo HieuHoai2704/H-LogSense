@@ -1,63 +1,87 @@
 <div align="center">
-  <img src="docs/showcase/h-logsen.png" alt="H-logsen pixel H icon" width="72" height="72">
+  <img src="docs/showcase/h-logsen.png" alt="H-logsen pixel H icon" width="80" height="80">
   <h1>H-logsen</h1>
-  <p><strong>A desktop workbench for logs, training runs, and local projects.</strong></p>
-  <p><a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.8/downloads/v0.4.8/H-logsen-0.4.8-Windows.zip"><strong>Download for Windows</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.8/downloads/v0.4.8/H-logsen-0.4.8-macOS.zip"><strong>Download for macOS</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.8/downloads/v0.4.8/SHA256.txt">SHA-256</a></p>
+  <p><strong>A desktop workbench for investigating logs and machine learning runs.</strong></p>
+  <p><a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.8/downloads/v0.4.8/H-logsen-0.4.8-Windows.zip"><strong>Download for Windows</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.8/downloads/v0.4.8/H-logsen-0.4.8-macOS.zip"><strong>Download for macOS</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.8/downloads/v0.4.8/SHA256.txt">SHA-256 checksums</a></p>
   <p>Desktop preview · v0.4.8</p>
 </div>
 
-![H-logsen Project workspace showing warning and error activity, training loss, and raw logs](docs/showcase/workspace.png)
+H-logsen brings project files, raw logs, training metrics, and a local shell into one desktop workspace. Use it to inspect a run while it writes logs, compare runs, and read the source or supporting documents alongside the terminal.
 
-<sub>H-logsen on Windows with sample training metrics and logs. The local folder path is hidden in this capture.</sub>
+## Desktop walkthrough
 
-## One workspace for the investigation
+These four screenshots were captured from the installed Windows desktop app using WebView2. A separate example project ran a Python training loop for 12 epochs and wrote the log and metrics shown here. The app language was set to English. Some controls in v0.4.8 still display Vietnamese labels. Local folder paths were hidden for the captures.
 
-| Workspace | What you can do |
-| --- | --- |
-| **Project** | Open a local folder, follow a log, and inspect training metrics and machine activity. Select a time bin to see the underlying log lines. |
-| **Analysis** | Profile external CSV, JSONL, and Parquet files. MySQL-backed log investigation requires a configured database. |
-| **Code** | Edit files, open a PDF alongside code, and run saved Python or JavaScript files in the terminal. Python checks and formatting use tools installed in the project. |
-| **Settings** | Choose an appearance and language, configure the Python environment, and manage local capabilities. |
+### Project
 
-<details>
-<summary><strong>See the Code workspace</strong></summary>
+Open a project folder and select a log in the file tree. H-logsen tails the file and updates the activity view as lines arrive. Select an interval to inspect the matching lines in the read-only log panel. Use the adjacent chart to review loss by epoch or switch to machine load. Run history and comparison are available when the project has recorded runs.
 
-![H-logsen Code workspace with a Python file and the terminal dock](docs/showcase/code.png)
+![Windows Project workspace with train.log, log activity, a loss chart and the log panel](docs/showcase/workspace.png)
 
-</details>
+### Analysis
 
-## Get started
+Open an external dataset and inspect its schema, preview rows, and available summary statistics. Local profiling supports CSV, JSONL, and Parquet. The separate MySQL-backed investigation workflow requires a configured database and covers dataset ingestion, anomaly timelines, supporting evidence, and filtered CSV export.
 
-Use 64-bit Python 3.10–3.13. Python 3.12 is recommended. The installer creates a local virtual environment and downloads dependencies on first run.
+![Windows Analysis workspace profiling the CSV produced by the training run](docs/showcase/analysis.png)
 
-**Windows x64**
+### Code
 
-1. Extract the Windows ZIP.
-2. Run `Install-H-logsen.cmd`, then `Open-H-logsen.cmd`.
-3. Open a project folder and choose a log in the file tree.
+Open a source file or PDF from the tree. Split the editor to view two files together, save with **Ctrl+S** or **⌘S**, and run a saved Python or JavaScript file with the corresponding runtime. Python diagnostics and formatting use tools installed in the selected project environment. The terminal uses the local operating system shell.
 
-**macOS 14 or later**
+![Windows Code workspace showing a Python training script and its completed terminal output](docs/showcase/code.png)
 
-Extract the macOS ZIP, open Terminal in the extracted directory, and run:
+### Settings
+
+Manage appearance, language, Python environments, and local capabilities here. To change the interface language, open **Settings → Language** and select a language from the list.
+
+![Windows Settings workspace with English selected](docs/showcase/settings.png)
+
+## Install the desktop preview
+
+Download the ZIP for your operating system and extract it before running the installer. Use 64-bit Python 3.10–3.13. Python 3.12 is recommended. The installer creates a virtual environment inside the extracted directory and downloads Python dependencies.
+
+| Platform | What you need | Verification for v0.4.8 |
+| --- | --- | --- |
+| Windows x64 | Python and Microsoft Edge WebView2 Runtime | Desktop startup verified. Previous Windows validation recorded 24 browser tests and 34 Python tests. The screenshots above were captured from the installed package. |
+| macOS 14+ | Python, preferably from python.org | ZIP built and SHA-256 checked. Clean native installation remains to be verified. |
+| Linux | Python for the source workflow | A desktop ZIP and clean native validation are pending. |
+
+### Windows
+
+Open Command Prompt in the extracted ZIP folder and run the two commands below. You can also double-click the scripts in File Explorer. The installer and launcher are in the same folder as the bundled wheel.
+
+```bat
+Install-H-logsen.cmd
+Open-H-logsen.cmd
+```
+
+### macOS
+
+Open Terminal in the extracted ZIP folder and run the installer, then the launcher.
 
 ```sh
 sh Install-H-logsen.sh
 sh Open-H-logsen.sh
 ```
 
-| Platform | Verification for v0.4.8 |
-| --- | --- |
-| **Windows** | Desktop startup verified. The workbench passed 24 browser tests and 34 Python tests on Windows. |
-| **macOS** | ZIP built and checksum verified. Native installation and desktop operation await verification. |
+Use the published [SHA-256 list](https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.8/downloads/v0.4.8/SHA256.txt) to compare the downloaded ZIP. Run `Get-FileHash -Algorithm SHA256 .\H-logsen-0.4.8-Windows.zip` in PowerShell or `shasum -a 256 H-logsen-0.4.8-macOS.zip` on macOS.
 
-## Architecture
+## First project
 
-H-logsen uses a local Flask service, Jinja templates and JavaScript. The desktop window uses WebView2 on Windows and WKWebView on macOS. Terminal sessions use the operating system shell. Opening files, editing code and profiling local data work without MySQL.
+1. Open **Project → Open folder** and choose the local project you want to inspect.
+2. Select `train.log` in the tree to view its recent lines and log activity. For loss curves, place `metrics.csv` in the project with columns `epoch`, `train_loss`, and `val_loss`.
+3. Select a log interval to inspect its lines. Switch to **Analysis** for file profiling or **Code** for editing and running a script.
 
-## Source and contributions
+## Architecture and scope
 
-The default branch currently contains the original LogSense AI investigation baseline. The desktop packages above are a later preview. See the [original baseline README](https://github.com/HieuHoai2704/H-LogSense/blob/675c718cdc0503fbcb9daf10fa7c76b3ffcf34dc/README.md) for setup and design notes for the source currently tracked here.
+The desktop preview renders the Flask, Jinja, and JavaScript interface in an operating system web view. It uses WebView2 on Windows and WKWebView on macOS. The local Flask service listens on loopback. File access and terminal commands run under the signed-in OS account. Local file viewing, editing, terminal sessions, and profiling work without MySQL.
 
-Use [Issues](https://github.com/HieuHoai2704/H-LogSense/issues) to report a problem. Include the app version, operating system and steps to reproduce with sample data.
+The MySQL-backed investigation pipeline is a separate workflow for imported log data. See the [original LogSense AI baseline](https://github.com/HieuHoai2704/H-LogSense/blob/675c718cdc0503fbcb9daf10fa7c76b3ffcf34dc/README.md) for its source setup and documentation.
 
-A project-wide open-source license has yet to be selected. The desktop packages include third-party notices.
+## Source, downloads, and feedback
+
+The `main` branch tracks the original LogSense AI investigation source and this showcase. The `download-v0.4.8` branch hosts the packaged desktop preview. Use the installer from the ZIP for the version shown above.
+
+When filing an [issue](https://github.com/HieuHoai2704/H-LogSense/issues), include the app version, operating system, the workspace and action involved, and the smallest sample needed to reproduce the problem. Use sample logs or redact sensitive values before sharing.
+
+A project-wide open-source license is pending. Desktop packages include third-party notices.
