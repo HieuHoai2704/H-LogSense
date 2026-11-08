@@ -1,111 +1,63 @@
-# LogSense AI
+<div align="center">
+  <img src="docs/showcase/h-logsen.png" alt="H-logsen pixel H icon" width="72" height="72">
+  <h1>H-logsen</h1>
+  <p><strong>A desktop workbench for logs, training runs, and local projects.</strong></p>
+  <p><a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.8/downloads/v0.4.8/H-logsen-0.4.8-Windows.zip"><strong>Download for Windows</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.8/downloads/v0.4.8/H-logsen-0.4.8-macOS.zip"><strong>Download for macOS</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.8/downloads/v0.4.8/SHA256.txt">SHA-256</a></p>
+  <p>Desktop preview · v0.4.8</p>
+</div>
 
-A Flask-based log anomaly detection project for an Advanced Python course.
+![H-logsen Project workspace showing warning and error activity, training loss, and raw logs](docs/showcase/workspace.png)
 
-## V3 architecture proposal
+<sub>H-logsen on Windows with sample training metrics and logs. The local folder path is hidden in this capture.</sub>
 
-See the [Investigation V3 architecture review](docs/architecture/README.md) for
-the proposed count/data model, compact timeline contract, SQL/index/coverage
-strategy, staged benchmark matrix and scaling roadmap. A measured six-anomaly
-fixture baseline is included; the 10K/100K/1M parsed-event MySQL benchmark is NOT
-executed because an approved isolated database is unavailable. V3 does not change
-the current application or provision infrastructure.
+## One workspace for the investigation
 
-## Research resources
+| Workspace | What you can do |
+| --- | --- |
+| **Project** | Open a local folder, follow a log, and inspect training metrics and machine activity. Select a time bin to see the underlying log lines. |
+| **Analysis** | Profile external CSV, JSONL, and Parquet files. MySQL-backed log investigation requires a configured database. |
+| **Code** | Edit files, open a PDF alongside code, and run saved Python or JavaScript files in the terminal. Python checks and formatting use tools installed in the project. |
+| **Settings** | Choose an appearance and language, configure the Python environment, and manage local capabilities. |
 
-See the [research library](docs/research/README.md) for the initial paper register,
-public dataset catalog, measured archive inventory and acquisition manifest.
-Downloaded archives and paper PDFs are local-only and excluded from Git.
-The [baseline review](docs/research/BASELINE_REVIEW.md) separates published scores
-from unmeasured local methods.
+<details>
+<summary><strong>See the Code workspace</strong></summary>
 
-## Current scope
+![H-logsen Code workspace with a Python file and the terminal dock](docs/showcase/code.png)
 
-Investigation V2 is a working single Flask/Jinja2 workspace with versioned REST
-APIs, server-aggregated adaptive UTC bins, Overall and grouped detector rows,
-Severity/Volume modes, brush/keyboard interval selection, backend zoom,
-multi-select faceted filters, URL history, paged results, contextual evidence and
-server CSV export matching the selected scope. All displayed records and evidence
-are **synthetic**. Four labelled fixture sources exercise complete, empty,
-unprocessed and partial-coverage states; they are not imported datasets.
+</details>
 
-See the [implementation report](docs/INVESTIGATION_V2_IMPLEMENTATION.md) for the
-final component/API contract, audit, files changed, verification screenshots and
-remaining blockers. Database access (MySQL/SQLAlchemy), authentication, ingestion,
-real detector jobs and large-data performance are **not implemented or verified**.
+## Get started
 
-The [Evidence Drawer report](docs/EVIDENCE_DRAWER.md) documents scope-wide
-Previous/Next, safe redacted raw chunks, rule/ML availability, paginated related
-records, source read policy and evidence export. Public access is restricted to
-the explicitly configured synthetic source allowlist; this is not real user login
-or authorization for private datasets.
+Use 64-bit Python 3.10–3.13. Python 3.12 is recommended. The installer creates a local virtual environment and downloads dependencies on first run.
 
-## Local setup
+**Windows x64**
 
-Use Python 3.10 or newer. Run these commands from the project directory.
+1. Extract the Windows ZIP.
+2. Run `Install-H-logsen.cmd`, then `Open-H-logsen.cmd`.
+3. Open a project folder and choose a log in the file tree.
 
-### Windows PowerShell
+**macOS 14 or later**
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m flask --app app:create_app run
+Extract the macOS ZIP, open Terminal in the extracted directory, and run:
+
+```sh
+sh Install-H-logsen.sh
+sh Open-H-logsen.sh
 ```
 
-### macOS / Linux
+| Platform | Verification for v0.4.8 |
+| --- | --- |
+| **Windows** | Desktop startup verified. The workbench passed 24 browser tests and 34 Python tests on Windows. |
+| **macOS** | ZIP built and checksum verified. Native installation and desktop operation await verification. |
 
-```bash
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m flask --app app:create_app run
-```
+## Architecture
 
-Open http://127.0.0.1:5000 on the machine running Flask. This address is local
-to that machine; a browser on another computer cannot reach it using localhost.
-Stop the development server with Ctrl+C. The development server is for local
-use, not public deployment.
+H-logsen uses a local Flask service, Jinja templates and JavaScript. The desktop window uses WebView2 on Windows and WKWebView on macOS. Terminal sessions use the operating system shell. Opening files, editing code and profiling local data work without MySQL.
 
-## How it works
+## Source and contributions
 
-1. Flask calls `create_app()` in `app/__init__.py`.
-2. The application loads settings from `config.py`.
-3. A GET request to `/` calls the `dashboard()` view.
-4. Jinja2 renders `app/templates/dashboard.html`; the API Blueprint shares the
-   same validated query and aggregation service in `app/services/investigation.py`.
-5. Browser updates use one composite API response; evidence and CSV are separate
-   read endpoints. Downloaded research archives are not automatically imported.
+The default branch currently contains the original LogSense AI investigation baseline. The desktop packages above are a later preview. See the [original baseline README](https://github.com/HieuHoai2704/H-LogSense/blob/675c718cdc0503fbcb9daf10fa7c76b3ffcf34dc/README.md) for setup and design notes for the source currently tracked here.
 
-Runtime dependencies are Flask and `tzdata` (IANA timezone support on Windows).
+Use [Issues](https://github.com/HieuHoai2704/H-LogSense/issues) to report a problem. Include the app version, operating system and steps to reproduce with sample data.
 
-## UI scope checks
-
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
-```
-
-These tests check synthetic scope aggregation and rendering. They do not verify
-MySQL, real ingestion or ML, which have not been implemented.
-
-Optional browser QA with the locally installed Microsoft Edge and Playwright:
-
-```powershell
-.\.venv\Scripts\python.exe scripts/qa_investigation_v2.py
-```
-
-The QA script starts and stops its own loopback server, exercises interaction and
-failure states, and writes reports/screenshots to `docs/ui/implementation-v2/`.
-Playwright is a local QA utility, not a runtime requirement for the Flask app.
-
-## Research acquisition
-
-```powershell
-.\.venv\Scripts\python.exe scripts\download_research.py
-.\.venv\Scripts\python.exe scripts\inspect_research_archives.py
-```
-
-The download script requires `curl` (`curl.exe` on this Windows workstation),
-verifies dataset MD5 against the catalog and computes local SHA-256. It does not
-extract archives. A failed paper source is recorded rather than treated as a PDF.
-See `docs/research/download_status.json` and `paper_download_status.json` for
-artifact status. PDF analysis/browser tools installed locally are research/QA
-utilities, not application runtime dependencies.
+A project-wide open-source license has yet to be selected. The desktop packages include third-party notices.
