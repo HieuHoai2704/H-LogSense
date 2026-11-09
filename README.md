@@ -2,8 +2,8 @@
   <img src="docs/showcase/h-logsen.png" alt="H-logsen pixel H icon" width="80" height="80">
   <h1>H-logsen</h1>
   <p><strong>A desktop workbench for investigating logs and machine learning runs.</strong></p>
-  <p><a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.11/downloads/v0.4.11/H-logsen-0.4.11-Windows.zip"><strong>Download for Windows</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.11/downloads/v0.4.11/H-logsen-0.4.11-macOS.zip"><strong>Download for macOS</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.11/downloads/v0.4.11/SHA256.txt">SHA-256 checksums</a></p>
-  <p>Desktop preview · v0.4.11</p>
+  <p><a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.12/downloads/v0.4.12/H-logsen-0.4.12-Windows.zip"><strong>Download for Windows</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.12/downloads/v0.4.12/H-logsen-0.4.12-macOS.zip"><strong>Download for macOS</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.12/downloads/v0.4.12/SHA256.txt">SHA-256 checksums</a></p>
+  <p>Desktop preview · v0.4.12</p>
 </div>
 
 H-logsen brings project files, raw logs, training metrics, and a local shell into one desktop workspace. Use it to inspect a run while it writes logs, compare runs, and read the source or supporting documents alongside the terminal.
@@ -49,10 +49,10 @@ Manage appearance, language, Python environments, and local capabilities here. S
 
 Download the ZIP for your operating system and extract it before running the installer. Use 64-bit Python 3.10–3.13. Python 3.12 is recommended. The installer creates a virtual environment inside the extracted directory and downloads Python dependencies.
 
-| Platform | What you need | Verification for v0.4.11 |
+| Platform | What you need | Verification for v0.4.12 |
 | --- | --- | --- |
-| Windows x64 | Python and Microsoft Edge WebView2 Runtime | Desktop startup and native glass verified. Regression checks covered the slider, selected cells, Project controls, and the Analysis surfaces. The screenshots above were captured from the installed package. |
-| macOS 14+ | Python, preferably from python.org | ZIP built and SHA-256 checked. The macOS glass implementation awaits native verification. |
+| Windows x64 | Python and Microsoft Edge WebView2 Runtime | Desktop startup and native glass verified. Regression checks covered the slider, selected cells, Project controls, and the Analysis surfaces. The screenshots above show the previous desktop build with the same interface. |
+| macOS 14+ | Python, preferably from python.org | ZIP and SHA-256 verified. A launcher regression test covers the Cocoa startup arguments. Native macOS verification is pending. |
 | Linux | Python for the source workflow | A desktop ZIP and clean native validation are pending. |
 
 ### Windows
@@ -73,7 +73,7 @@ sh Install-H-logsen.sh
 sh Open-H-logsen.sh
 ```
 
-Use the published [SHA-256 list](https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.11/downloads/v0.4.11/SHA256.txt) to compare the downloaded ZIP. Run `Get-FileHash -Algorithm SHA256 .\H-logsen-0.4.11-Windows.zip` in PowerShell or `shasum -a 256 H-logsen-0.4.11-macOS.zip` on macOS.
+Use the published [SHA-256 list](https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.12/downloads/v0.4.12/SHA256.txt) to compare the downloaded ZIP. Run `Get-FileHash -Algorithm SHA256 .\H-logsen-0.4.12-Windows.zip` in PowerShell or `shasum -a 256 H-logsen-0.4.12-macOS.zip` on macOS.
 
 ## First project
 
@@ -89,7 +89,7 @@ The MySQL-backed investigation pipeline is a separate workflow for imported log 
 
 ## Source, downloads, and feedback
 
-The `main` branch tracks the original LogSense AI investigation source and this showcase. The `download-v0.4.11` branch hosts the packaged desktop preview. Use the installer from the ZIP for the version shown above.
+The `main` branch tracks the original LogSense AI investigation source and this showcase. The `download-v0.4.12` branch hosts the packaged desktop preview. Use the installer from the ZIP for the version shown above.
 
 When filing an [issue](https://github.com/HieuHoai2704/H-LogSense/issues), include the app version, operating system, the workspace and action involved, and the smallest sample needed to reproduce the problem. Use sample logs or redact sensitive values before sharing.
 
