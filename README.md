@@ -2,15 +2,15 @@
   <img src="docs/showcase/h-logsen.png" alt="H-logsen pixel H icon" width="80" height="80">
   <h1>H-logsen</h1>
   <p><strong>A desktop workbench for investigating logs and machine learning runs.</strong></p>
-  <p><a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.8/downloads/v0.4.8/H-logsen-0.4.8-Windows.zip"><strong>Download for Windows</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.8/downloads/v0.4.8/H-logsen-0.4.8-macOS.zip"><strong>Download for macOS</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.8/downloads/v0.4.8/SHA256.txt">SHA-256 checksums</a></p>
-  <p>Desktop preview · v0.4.8</p>
+  <p><a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.11/downloads/v0.4.11/H-logsen-0.4.11-Windows.zip"><strong>Download for Windows</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/raw/refs/heads/download-v0.4.11/downloads/v0.4.11/H-logsen-0.4.11-macOS.zip"><strong>Download for macOS</strong></a> · <a href="https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.11/downloads/v0.4.11/SHA256.txt">SHA-256 checksums</a></p>
+  <p>Desktop preview · v0.4.11</p>
 </div>
 
 H-logsen brings project files, raw logs, training metrics, and a local shell into one desktop workspace. Use it to inspect a run while it writes logs, compare runs, and read the source or supporting documents alongside the terminal.
 
 ## Desktop walkthrough
 
-These four screenshots were captured from the installed Windows desktop app using WebView2. A separate example project ran a Python training loop for 12 epochs and wrote the log and metrics shown here. The app language was set to English. Some controls in v0.4.8 still display Vietnamese labels. Local folder paths were hidden for the captures.
+These screenshots were captured from the H-logsen 0.4.11 desktop window on Windows, including the native title bar and the live glass backdrop. The Black glass theme is shown at 82% frame transparency. A separate example project ran a Python training loop for 12 epochs and wrote the log and metrics shown here. English was selected and some controls still display Vietnamese labels. Local folder paths were hidden for the captures.
 
 ### Project
 
@@ -24,26 +24,35 @@ Open an external dataset and inspect its schema, preview rows, and available sum
 
 ![Windows Analysis workspace profiling the CSV produced by the training run](docs/showcase/analysis.png)
 
+<details>
+<summary>See the anomaly timeline in Demo mode</summary>
+
+![Analysis timeline showing synthetic anomalies and severity colors on the glass theme](docs/showcase/timeline.png)
+
+The timeline screenshot uses the built-in synthetic fixture. The CSV screenshot above shows metrics from the local Python run.
+
+</details>
+
 ### Code
 
 Open a source file or PDF from the tree. Split the editor to view two files together, save with **Ctrl+S** or **⌘S**, and run a saved Python or JavaScript file with the corresponding runtime. Python diagnostics and formatting use tools installed in the selected project environment. The terminal uses the local operating system shell.
 
-![Windows Code workspace showing a Python training script and its completed terminal output](docs/showcase/code.png)
+![Windows Code workspace with Python and CSV panes above a monitored log and terminal output](docs/showcase/code.png)
 
 ### Settings
 
-Manage appearance, language, Python environments, and local capabilities here. To change the interface language, open **Settings → Language** and select a language from the list.
+Manage appearance, language, Python environments, and local capabilities here. Select a glass palette and use **Frame transparency** to adjust the interface from 0% to 100%. The operating system supplies the backdrop blur. To change the interface language, open **Settings → Language** and select a language from the list.
 
-![Windows Settings workspace with English selected](docs/showcase/settings.png)
+![Windows Settings showing the Black glass palette and the frame transparency control](docs/showcase/settings.png)
 
 ## Install the desktop preview
 
 Download the ZIP for your operating system and extract it before running the installer. Use 64-bit Python 3.10–3.13. Python 3.12 is recommended. The installer creates a virtual environment inside the extracted directory and downloads Python dependencies.
 
-| Platform | What you need | Verification for v0.4.8 |
+| Platform | What you need | Verification for v0.4.11 |
 | --- | --- | --- |
-| Windows x64 | Python and Microsoft Edge WebView2 Runtime | Desktop startup verified. Previous Windows validation recorded 24 browser tests and 34 Python tests. The screenshots above were captured from the installed package. |
-| macOS 14+ | Python, preferably from python.org | ZIP built and SHA-256 checked. Clean native installation remains to be verified. |
+| Windows x64 | Python and Microsoft Edge WebView2 Runtime | Desktop startup and native glass verified. Regression checks covered the slider, selected cells, Project controls, and the Analysis surfaces. The screenshots above were captured from the installed package. |
+| macOS 14+ | Python, preferably from python.org | ZIP built and SHA-256 checked. The macOS glass implementation awaits native verification. |
 | Linux | Python for the source workflow | A desktop ZIP and clean native validation are pending. |
 
 ### Windows
@@ -64,7 +73,7 @@ sh Install-H-logsen.sh
 sh Open-H-logsen.sh
 ```
 
-Use the published [SHA-256 list](https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.8/downloads/v0.4.8/SHA256.txt) to compare the downloaded ZIP. Run `Get-FileHash -Algorithm SHA256 .\H-logsen-0.4.8-Windows.zip` in PowerShell or `shasum -a 256 H-logsen-0.4.8-macOS.zip` on macOS.
+Use the published [SHA-256 list](https://github.com/HieuHoai2704/H-LogSense/blob/download-v0.4.11/downloads/v0.4.11/SHA256.txt) to compare the downloaded ZIP. Run `Get-FileHash -Algorithm SHA256 .\H-logsen-0.4.11-Windows.zip` in PowerShell or `shasum -a 256 H-logsen-0.4.11-macOS.zip` on macOS.
 
 ## First project
 
@@ -80,7 +89,7 @@ The MySQL-backed investigation pipeline is a separate workflow for imported log 
 
 ## Source, downloads, and feedback
 
-The `main` branch tracks the original LogSense AI investigation source and this showcase. The `download-v0.4.8` branch hosts the packaged desktop preview. Use the installer from the ZIP for the version shown above.
+The `main` branch tracks the original LogSense AI investigation source and this showcase. The `download-v0.4.11` branch hosts the packaged desktop preview. Use the installer from the ZIP for the version shown above.
 
 When filing an [issue](https://github.com/HieuHoai2704/H-LogSense/issues), include the app version, operating system, the workspace and action involved, and the smallest sample needed to reproduce the problem. Use sample logs or redact sensitive values before sharing.
 
