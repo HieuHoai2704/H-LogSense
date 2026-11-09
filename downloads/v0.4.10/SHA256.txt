@@ -1,0 +1,2 @@
+8d436f52b0847fca084be7dfff20e1490ee48b2aa0d29619e6934af14c4192a2  H-logsen-0.4.10-Windows.zip
+4bef0af1e23c7c45cfe6daf8f5cd1dede695603b3d570ee3ac38d7f401b56305  H-logsen-0.4.10-macOS.zip
