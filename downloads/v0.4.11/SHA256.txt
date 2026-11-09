@@ -1,0 +1,2 @@
+5719d5a2c95af57eea2835ad579f631d0ebba77fde8004dfced549317cf62d0f  H-logsen-0.4.11-Windows.zip
+f606c4da59dfdaf092564d3da262cb91914ae8f8a12875128a5739a1a61a72c1  H-logsen-0.4.11-macOS.zip
