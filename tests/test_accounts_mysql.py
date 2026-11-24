@@ -130,11 +130,22 @@ class AccountMySQLTests(unittest.TestCase):
         for message in (
             "Use 3-100 letters, numbers, dot, underscore or hyphen.",
             "Enter a valid email address.",
-            "Use at least 8 characters.",
             "The passwords do not match.",
         ):
             self.assertIn(message, body)
+        self.assertNotIn("Use at least 8 characters.", body)  # administrators may set short passwords
         self.assertEqual(self.app.extensions["account_outbox"], [])
+        # A one-character password set by an administrator works.
+        short = "s" + uuid4().hex[:10]
+        made = self.create_account(
+            self.page("/account/admin/users"),
+            username=short,
+            email=f"{short}@example.invalid",
+            password="1",
+            confirm="1",
+        )
+        self.assertEqual(made.status_code, 303)
+        self.assertEqual(self.sign_in(short, password="1", client=self.app.test_client()).status_code, 303)
         # Staff use the whole application but never the account pages.
         _, staff = self.user("staff")
         other = self.app.test_client()

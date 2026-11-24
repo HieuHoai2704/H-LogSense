@@ -158,16 +158,15 @@ class LogoutForm(ActionForm):
 
 class UserCreateForm(RegisterForm):
     role = SelectField("Role", choices=ROLES, default="staff", validators=[InputRequired()])
+    # An administrator may set any password, of any length; self sign-up keeps its 8-character minimum.
+    password = PasswordField("Password", validators=[InputRequired(), Length(max=1024)])
 
 
 class UserEditForm(FlaskForm):
     email = StringField("Email", filters=[lower], validators=[Optional(), Length(max=254), EMAIL])
     role = SelectField("Role", choices=ROLES, validators=[InputRequired()])
     active = BooleanField("Active")
-    password = PasswordField(
-        "New password (optional)",
-        validators=[Optional(), Length(min=8, max=1024, message="Use at least 8 characters.")],
-    )
+    password = PasswordField("New password (optional)", validators=[Optional(), Length(max=1024)])
     datasets = SelectMultipleField("Dataset access", coerce=int, choices=[])
 
 
