@@ -1,0 +1,12 @@
+{
+  "baseline_commit": "b801b773afefb86317470d4262a2704d00f5e02f",
+  "files_sha256": {
+    "app/services/detector_calibration.py": "15d7a0fe8d838d110751c28474eaa8ce4a4a426bbe7ac237707337c3a572a641",
+    "app/services/window_features.py": "f5bd5fa5848e29cd9410ed8947fa20825a3d9887b47ac86e0feb7e7def433ee9",
+    "app/services/window_deployment.py": "a428192078d000321e4c5d679b1a2b9c4a54f43815f112ce917e1199c685e324",
+    "app/services/window_detection.py": "ad4222961b3c92912cd6af27d54c550ecc27626a41adbb59ee8646aabcf999c3",
+    "app/api/jobs.py": "b748eadd0f12576b4782a6dee17ffd06ecda53cede845b89362f41443d3a47c7",
+    "scripts/audit_isolation_forest.py": "01714cd05e67e815d1e3331f06af4ef9a25a630634b7b154c1f7496864a514dd"
+  },
+  "note": "Guard-only protocol/selection checks were strengthened after validation; no features, model settings, calibration or selection changed after test."
+}

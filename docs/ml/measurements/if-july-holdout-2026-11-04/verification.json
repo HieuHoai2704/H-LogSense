@@ -1,0 +1,41 @@
+{
+  "holdout_pure_tests": {
+    "tests": 7,
+    "passed": 7
+  },
+  "inference_artifact_pure_guards": {
+    "tests": 5,
+    "passed": 5
+  },
+  "inference_mysql_tests": {
+    "tests": 6,
+    "passed": 6,
+    "note": "Included in final full guarded run, not counted again as unique tests"
+  },
+  "full_guarded_suite": {
+    "schemas": [
+      "logsense_test_18c4c8bd4895",
+      "logsense_test_3203703ddb04"
+    ],
+    "tests": 123,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "mysql_integration": "PASS",
+    "cleanup": "No database/table/volume dropped. Generated fixtures retained."
+  },
+  "full_guarded_runner_seconds": 31.979,
+  "default_discovery": {
+    "tests": 264,
+    "passed": 153,
+    "guarded_mysql_skipped": 111,
+    "note": "Separate guarded suite executed all DB cases; raw discovery skips are not PASS"
+  },
+  "frozen_model_threshold_selection_changed_after_test": false,
+  "frozen_curated_metadata_byte_identical_to_originals": "PASS",
+  "actual_db_profile_default_scope_before_fix": 0,
+  "actual_db_profile_default_scope_after_fix": 20,
+  "actual_db_profile_scores_equal_frozen_original_exactly": true,
+  "source_old_directory_retained": "Project rename blocked; active folder remains13)LogSense AI",
+  "no_push_or_merge": true
+}

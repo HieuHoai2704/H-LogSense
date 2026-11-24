@@ -1,0 +1,10 @@
+{% set active = workspace_view|default("analysis") %}
+<header class="workspace-nav">
+  <strong>{{ app_name }}</strong>
+  <nav aria-label="Không gian làm việc">
+    <a href="{{ url_for('dashboard') }}" data-project-view="monitor"{% if active == "monitor" %} aria-current="page"{% endif %}>{{ tr("Project") }}</a>
+    <a href="{{ url_for('dashboard', workspace='logs') if workspace_has_database else url_for('dashboard', source='demo') }}"{% if active == "analysis" %} aria-current="page"{% endif %}>{{ tr("Analysis") }}</a>
+    <a href="{{ url_for('dashboard', view='editor') }}" data-project-view="editor"{% if active == "editor" %} aria-current="page"{% endif %}>Code</a>
+    <a href="{{ url_for('dashboard', view='settings') }}" data-project-view="settings"{% if active == "settings" %} aria-current="page"{% endif %}>{{ tr("Settings") }}</a>
+  </nav>
+</header>

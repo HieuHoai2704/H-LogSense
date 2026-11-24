@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "bootstrap5/form.html" import render_field %}
+{% block title %}{{ tr("Delete empty dataset" if action == "delete" else "Rename dataset") }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ tr("Delete empty dataset" if action == "delete" else "Rename dataset") }}</h1>
+<p>{{ dataset.name }} · {{ dataset.dataset_key }}</p>
+<form method="post" class="card card-body">
+  {{ form.hidden_tag() }}
+  {% for error in form.csrf_token.errors %}<p class="alert alert-danger">{{ error }}</p>{% endfor %}
+  {% if action == "delete" %}
+    <p>{{ tr("Only an empty dataset without related records can be deleted.") }}</p>
+    {{ render_field(form.confirmation) }}
+    <button class="btn btn-danger">{{ tr("Delete empty dataset") }}</button>
+  {% else %}
+    {{ render_field(form.name) }}
+    <button class="btn btn-primary">{{ tr("Save name") }}</button>
+  {% endif %}
+  <a class="mt-2" href="{{ url_for('dataset_pages.index') }}">{{ tr("Cancel") }}</a>
+</form>
+{% endblock %}

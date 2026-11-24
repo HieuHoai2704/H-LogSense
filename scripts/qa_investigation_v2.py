@@ -54,7 +54,7 @@ def main():
                     expect(page.locator('[data-row-id]')).to_have_count(count)
 
             def reset():
-                page.goto(base, wait_until='networkidle')
+                page.goto(base + '/?source=demo', wait_until='networkidle')
                 ready(6)
 
             def capture(name):

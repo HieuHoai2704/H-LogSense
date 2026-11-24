@@ -155,7 +155,7 @@ def initialize_security(app):
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Strict",
-        SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE") == "1",
+        SESSION_COOKIE_SECURE=app.config.get("SESSION_COOKIE_SECURE") or os.environ.get("COOKIE_SECURE") == "1",
         MAX_CONTENT_LENGTH=1024 * 1024,
     )
     if os.environ.get("DATABASE_ALLOWED_DATASETS"):

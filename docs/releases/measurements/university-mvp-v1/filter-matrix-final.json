@@ -1,0 +1,460 @@
+{
+  "anomaly_reference_facts": 158,
+  "cases": [
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.09849050000775605,
+      "case": "all",
+      "csv_seconds_inprocess": 0.02456700000038836,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03283640000154264,
+      "case": "host_single",
+      "csv_seconds_inprocess": 0.009822899999562651,
+      "family": "anomaly",
+      "global_expected": 1,
+      "selected_expected": 1,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.02810549999412615,
+      "case": "host_OR_two",
+      "csv_seconds_inprocess": 0.008381899999221787,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 2,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.044216200010851026,
+      "case": "priority_high",
+      "csv_seconds_inprocess": 0.022745199996279553,
+      "family": "anomaly",
+      "global_expected": 153,
+      "selected_expected": 153,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.024426499992841855,
+      "case": "priority_medium",
+      "csv_seconds_inprocess": 0.008694399992236868,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03766710001218598,
+      "case": "priority_OR",
+      "csv_seconds_inprocess": 0.021401899997727014,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.046057800005655736,
+      "case": "detector_OR",
+      "csv_seconds_inprocess": 0.024380200004088692,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.035294799992698245,
+      "case": "time_start_inclusive",
+      "csv_seconds_inprocess": 0.014738099998794496,
+      "family": "anomaly",
+      "global_expected": 97,
+      "selected_expected": 97,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.034299799997825176,
+      "case": "time_end_exclusive",
+      "csv_seconds_inprocess": 0.012256300004082732,
+      "family": "anomaly",
+      "global_expected": 61,
+      "selected_expected": 61,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03251790000649635,
+      "case": "time_boundary_empty",
+      "csv_seconds_inprocess": 0.006107299996074289,
+      "family": "anomaly",
+      "global_expected": 0,
+      "selected_expected": 0,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03249310000683181,
+      "case": "search_host_literal",
+      "csv_seconds_inprocess": 0.009787600007257424,
+      "family": "anomaly",
+      "global_expected": 1,
+      "selected_expected": 1,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.02661999998963438,
+      "case": "search_detector_literal",
+      "csv_seconds_inprocess": 0.009590899993781932,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.02588050000485964,
+      "case": "search_percent_underscore_literal_empty",
+      "csv_seconds_inprocess": 0.00909190000675153,
+      "family": "anomaly",
+      "global_expected": 0,
+      "selected_expected": 0,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.038267600000835955,
+      "case": "timezone_local",
+      "csv_seconds_inprocess": 0.020650999998906627,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.0375484999967739,
+      "case": "timezone_dst_zone",
+      "csv_seconds_inprocess": 0.02169809999759309,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03628780000144616,
+      "case": "detector_1",
+      "csv_seconds_inprocess": 0.020332500003860332,
+      "family": "anomaly",
+      "global_expected": 153,
+      "selected_expected": 153,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.022979200002737343,
+      "case": "detector_2",
+      "csv_seconds_inprocess": 0.0080961999919964,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.0328631000011228,
+      "case": "run_1",
+      "csv_seconds_inprocess": 0.019220700007281266,
+      "family": "anomaly",
+      "global_expected": 153,
+      "selected_expected": 153,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.020690299992565997,
+      "case": "run_2",
+      "csv_seconds_inprocess": 0.006695300005958416,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03220209998835344,
+      "case": "version_1",
+      "csv_seconds_inprocess": 0.018912100000306964,
+      "family": "anomaly",
+      "global_expected": 153,
+      "selected_expected": 153,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.020280600001569837,
+      "case": "version_2",
+      "csv_seconds_inprocess": 0.0067586999939521775,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03312459999870043,
+      "case": "AND_host_priority_detector",
+      "csv_seconds_inprocess": 0.009121900002355687,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 2,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.027928600000450388,
+      "case": "AND_impossible_priority_detector",
+      "csv_seconds_inprocess": 0.008916600010707043,
+      "family": "anomaly",
+      "global_expected": 0,
+      "selected_expected": 0,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.027226400008657947,
+      "case": "selection_adds_to_host",
+      "csv_seconds_inprocess": 0.007995399995706975,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 1,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.027713900009985082,
+      "case": "selection_detector_adds_to_host",
+      "csv_seconds_inprocess": 0.02607019999413751,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 1,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.026930000007268973,
+      "case": "clear_selection_keeps_host",
+      "csv_seconds_inprocess": 0.008097999991150573,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 2,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "api_seconds_inprocess": 0.025433900009375066,
+      "case": "logs_all",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 100000,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.04968240000016522
+    },
+    {
+      "api_seconds_inprocess": 0.14678870000352617,
+      "case": "logs_severity_INFO",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 93738,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.15559270000085235
+    },
+    {
+      "api_seconds_inprocess": 0.14558019999822136,
+      "case": "logs_severity_ERROR_FATAL_OR",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 6262,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.12621379998745397
+    },
+    {
+      "api_seconds_inprocess": 0.010097899998072535,
+      "case": "logs_host",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 4865,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.009001600003102794
+    },
+    {
+      "api_seconds_inprocess": 0.01635399999213405,
+      "case": "logs_host_AND_severity",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 4865,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.0146011000033468
+    },
+    {
+      "api_seconds_inprocess": 0.2830755000031786,
+      "case": "logs_literal_percent_underscore",
+      "csv_tested": true,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 0,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.13501699999324046
+    },
+    {
+      "api_seconds_inprocess": 0.13889410000410862,
+      "case": "logs_message_literal",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 5854,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.1377438999916194
+    },
+    {
+      "api_seconds_inprocess": 0.024832800001604483,
+      "case": "logs_start_boundary_excluded",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 99995,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.049602500002947636
+    },
+    {
+      "api_seconds_inprocess": 0.024944599994341843,
+      "case": "logs_cursor_reference_first_page",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 100000,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.04866240000410471
+    },
+    {
+      "api_seconds_inprocess": 0.02482649999728892,
+      "case": "logs_cursor_second_page",
+      "family": "logs",
+      "stable_ids_match_independent_sql": true,
+      "status": "PASS"
+    },
+    {
+      "actual_http": 400,
+      "api_seconds_inprocess": 0.002669000008609146,
+      "case": "logs_bad_cursor",
+      "expected_http": 400,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 400,
+      "api_seconds_inprocess": 0.0018164000066462904,
+      "case": "logs_snapshot_filter_changed",
+      "expected_http": 400,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 403,
+      "api_seconds_inprocess": 0.0015513000107603148,
+      "case": "logs_other_dataset",
+      "expected_http": 403,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 403,
+      "api_seconds_inprocess": 0.0011602000013226643,
+      "case": "anomaly_other_dataset",
+      "expected_http": 403,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 400,
+      "api_seconds_inprocess": 0.0012229999992996454,
+      "case": "anomaly_invalid_detector",
+      "expected_http": 400,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 400,
+      "api_seconds_inprocess": 0.0012321999965934083,
+      "case": "anomaly_invalid_priority",
+      "expected_http": 400,
+      "family": "validation_isolation",
+      "status": "PASS"
+    }
+  ],
+  "data": "actual BGL 100K import in isolated QA MySQL on port13307",
+  "errors": [],
+  "failed_cases": 0,
+  "latency_note": "Measured per-call Flask test client, including bounded payload consumption; not network latency or a production p95 SLO.",
+  "not_run": [
+    "Native macOS",
+    "Model quality changes",
+    "Coverage proof beyond observed import"
+  ],
+  "passed_cases": 42,
+  "phase": "post-restart-only",
+  "reference_policy": "Independent Python filtering of exact SQL anomaly facts; logs COUNT/limited IDs use separate SQL, never API query helpers.",
+  "status": "PASS",
+  "wall_seconds": 4.716991300010704,
+  "writes": "Session login only; no application records, job, schema or UI mutations."
+}

@@ -1,0 +1,25 @@
+{
+  "database_health_during_outage": 503,
+  "dedicated_qa_only": true,
+  "demo_during_outage": 200,
+  "original_mysql_13306_untouched": true,
+  "private_query_during_outage": 503,
+  "recovered_query_seconds_inprocess": 0.09752619999926537,
+  "recovered_scope_count": 158,
+  "same_app_connection_pool_recovers": "PASS",
+  "shutdown": {
+    "shutdown": "graceful SQL SHUTDOWN",
+    "status": "stopped"
+  },
+  "start_seconds": 3.0868665000016335,
+  "startup": {
+    "bind_address": "127.0.0.1",
+    "datadir_is_owned": true,
+    "mysql": "8.4.7",
+    "port": 13307,
+    "status": "ready",
+    "time_zone": "+00:00"
+  },
+  "status": "PASS",
+  "stop_seconds": 2.3177810999914072
+}

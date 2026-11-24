@@ -295,6 +295,8 @@ def evidence(identity, args):
                     "event_reference": metadata["id"],
                     "parsing_status": supplied.get("parsing_status", "unavailable"),
                     "original_log_available": bool(supplied.get("source_line")),
+                    "upload": (supplied.get("parsed_attributes") or {}).get("upload"),
+                    "source_kind": "normalized-upload" if (supplied.get("parsed_attributes") or {}).get("upload") else "operator-source",
                 },
             },
             parsed_fields=supplied.get("parsed_attributes"),

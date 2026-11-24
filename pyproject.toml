@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=77,<83"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "H-logsen"
+version = "0.4.8"
+description = "Local workbench for code, data analysis, training runs and log investigation"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+dynamic = ["dependencies"]
+
+[project.urls]
+Repository = "https://github.com/HieuHoai2704/H-LogSense"
+
+[project.optional-dependencies]
+desktop = ["pywebview==6.2.1; sys_platform == 'linux'"]
+
+[project.scripts]
+h-logsen = "app.workbench.__main__:main"
+
+[project.gui-scripts]
+h-logsen-desktop = "app.workbench.__main__:desktop_main"
+
+[tool.setuptools]
+py-modules = ["config"]
+include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["app", "app.*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+app = ["templates/**/*.html", "locales/*.json", "static/**/*"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt", "requirements-workbench-extra.txt"]}

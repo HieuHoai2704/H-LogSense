@@ -1,0 +1,19 @@
+﻿date,search_id,query_or_route,sources_checked,included_ids
+2026-11-05,A1,DeepLog Du CCS 2017 DOI LogAnomaly IJCAI 2019 LogBERT IJCNN 2021 PLELog ICSE 2021 log anomaly detection official paper PDF,ACM author page; IJCAI; IEEE,S10–S13
+2026-11-05,A2,Log anomaly detection large scale empirical study He Zhu 2016 2023 evaluation Chen log anomaly detection LogHub 2.0 datasets BGL temporal leakage official PDF LogRobust,IEEE and author pages,S06 S14 S23 S24
+2026-11-05,A3,Log anomaly detection review systematic survey log based anomaly detection paper Landauer 2023 machine learning evaluation BGL temporal benchmark IEEE ACM,Elsevier; ACM; Springer; IFIP,S01–S05 S30
+2026-11-05,A4,Robust and Transferable Log-based Anomaly Detection RT-Log 3588918 pdf author log data system transfer github,ACM Digital Library,S15
+2026-11-05,A5,Bifet Gavalda Learning from Time-Changing Data with Adaptive Windowing DOI PDF ADWIN Gama Survey Concept Drift Adaptation PDF 2014 DOI,SIAM; ACM; author technical report,S17 S18
+2026-11-05,A6,Roberts 1959 control chart tests based on geometric moving averages DOI page continuous inspection schemes 1954 cusum PDF,Taylor & Francis; Oxford Academic,S28 S29
+2026-11-05,A7,Neyman Pearson classification algorithms NP ROC Tong 2018 DOI Science Advances Saito Rehmsmeier precision recall doi PLoS 2015,Science Advances / PMC; PLOS,S20 S25
+2026-11-05,A8,Adaptive Conformal Inference Under Distribution Shift Gibbs Candes Neurips 2021 Conformal Risk Control ICLR 2024 PDF,NeurIPS Proceedings; OpenReview,S19 S21
+2026-11-05,A9,Isolation Forest Liu 2008 DOI pdf EWMA Roberts 1959 Page CUSUM 1954 official pdf anomaly detection streaming half space trees IJCAI 2011 drift ADWIN Bifet 2007,IEEE; IJCAI; author university,S08 S22
+2026-11-05,A10,Detecting large-scale system problems by mining console logs Xu Huang Fox Patterson Jordan SOSP 2009 pdf DOI 10.1145,ACM; UC Berkeley author copy,S07
+2026-11-05,A11,LogSD Log anomaly detection frequency masking BGL 3660800 arxiv github,ACM; arXiv; artifact repo,S26
+2026-11-05,A12,LogOnline A Semi-Supervised Log-Based Anomaly Detector Aided with Online Learning Mechanism pdf DOI Microsoft log drift,ASE Research Track; MSR,S31
+2026-11-05,A13,LogFlash Real-time streaming log anomaly detection ICSE 2022 DOI PDF LogFlash,DOI and ISSRE proceedings,S32
+2026-11-05,A14,"BGL ""node"" ""log anomaly detection"" host grouped temporal windows BGL paper location fields",Springer; IEEE; publisher search,S33
+2026-11-05,A15,"""Log Anomaly Detection with Conformal Alert Control"" AVITEC 3974 DOI BGL author",AVITEC metadata and publisher full text,S34
+2026-11-05,A16,Log based anomaly detection recent 2025 CNSM comparative study 1571164872 DOI authors github 2026 unseen anomalies 3786705 pdf,IFIP and ACM,S05 S27
+2026-11-05,A17,What Supercomputers Say: A Study of Five System Logs pdf DOI Oliner Stearley,IEEE and USENIX corpus provenance,S16
+2026-11-05,A18,Reference check for Random Forests Breiman from supervised comparative literature,Springer Crossref and UC Berkeley author copy,S09

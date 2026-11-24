@@ -1,0 +1,92 @@
+{
+  "archive_sha256": "d67fd82a711aea0157a9b83175892c6ee60e384a2ddf5bc51f39118453816da8",
+  "candidate_grid": [
+    {
+      "features": "base",
+      "id": "base-100-256",
+      "max_samples": 256,
+      "n_estimators": 100,
+      "seed": 42
+    },
+    {
+      "features": "context",
+      "id": "context-100-256",
+      "max_samples": 256,
+      "n_estimators": 100,
+      "seed": 42
+    },
+    {
+      "features": "base",
+      "id": "base-200-1024",
+      "max_samples": 1024,
+      "n_estimators": 200,
+      "seed": 42
+    },
+    {
+      "features": "context",
+      "id": "context-200-1024",
+      "max_samples": 1024,
+      "n_estimators": 200,
+      "seed": 42
+    }
+  ],
+  "coverage": "unknown source time completeness; no zero-host windows invented",
+  "exposed_old_test_end_utc": "2005-06-25T18:50:00Z",
+  "external_sort": {
+    "key": [
+      "epoch_seconds",
+      "physical_source_line"
+    ],
+    "merge": "heapq.merge",
+    "rows_per_chunk": 50000
+  },
+  "label_use": "no labels in references/features/fitting; validation labels ONLY for calibration/selection; test labels after selection freeze",
+  "legacy_if": "100 trees, max_samples256, seed42, validation first20000 native-score p01",
+  "legacy_rule": "first20000 training counts p99, strict greater comparison",
+  "legacy_training": "first 20000 chronological training units",
+  "max_fpr": 0.01,
+  "maximum_units_per_phase": 1000000,
+  "member": "BGL.log",
+  "member_bytes": 743185031,
+  "member_crc32": 1334389820,
+  "minimum_validation_each_class": 20,
+  "native_comparison": "<",
+  "native_score_direction": "lower",
+  "objective": "validation maximum F1 subject to empirical FPR<=0.01; ties AP, lower FPR, candidate ID",
+  "quantile_sensitivity": [
+    0.001,
+    0.005,
+    0.01,
+    0.02,
+    0.05
+  ],
+  "registered_at_utc": "2026-11-04T12:39:01.905488+00:00",
+  "reservoir_limit": 20000,
+  "reservoir_seed": 42,
+  "seconds": 300,
+  "seed_sensitivity": [
+    17,
+    73
+  ],
+  "software": {
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "python": "3.10.11",
+    "sklearn": "1.7.2"
+  },
+  "split_utc": {
+    "test_end": "2005-07-28T00:00:00+00:00",
+    "train_end": "2005-07-14T00:00:00+00:00",
+    "train_start": "2005-07-01T00:00:00+00:00",
+    "validation_end": "2005-07-21T00:00:00+00:00"
+  },
+  "splits": {
+    "test_end": 1122508800,
+    "train_end": 1121299200,
+    "train_start": 1120176000,
+    "validation_end": 1121904000
+  },
+  "study_id": "f3e5a88403ab48fb84ea36904214e867",
+  "test_policy": "one evaluation of frozen legacy rule/IF and selected IF on identical new test; no test-driven reselection",
+  "unit": "nonempty completed observed host-window UTC [start,end); any original BGL alert among ALL observed events"
+}

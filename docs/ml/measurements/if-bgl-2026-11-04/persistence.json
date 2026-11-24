@@ -1,0 +1,63 @@
+{
+  "run_id": 3,
+  "dataset_id": 3,
+  "state": "completed",
+  "evaluated_units": 89119,
+  "persisted_predictions": 89119,
+  "predicted_positive": 551,
+  "anomaly_outputs": 551,
+  "native_DOUBLE_scores_match_npz_exactly": true,
+  "boolean_predictions_match_npz_exactly": true,
+  "confusion_counts_match_exactly": true,
+  "JSON_metrics_match_with_tolerance": {
+    "relative": 1e-14,
+    "absolute": 1e-15,
+    "reason": "MySQL JSON roundtrip differs by about one ULP for some ratios"
+  },
+  "metrics": {
+    "f1": 0.42018196856906537,
+    "fn": 404,
+    "fp": 297,
+    "tn": 88164,
+    "tp": 254,
+    "fpr": 0.0033574117407671176,
+    "unit": "observed host-window",
+    "scope": "chronological test split only",
+    "recall": 0.3860182370820669,
+    "precision": 0.4609800362976406,
+    "label_policy": "any original BGL alert among ALL observed events in this window",
+    "label_source": "loghub-bgl original",
+    "eligible_units": 89119,
+    "unlabeled_units": 0,
+    "auprc_average_precision": 0.184520796558286,
+    "source_time_completeness": "unknown; imported observations only",
+    "no_event_level_comparison": true
+  },
+  "persistence_seconds": null,
+  "timing_note": "Original post-persist check stopped at strict float JSON equality before elapsed value was saved; timing not reconstructed.",
+  "idempotent_retry_seconds": 0.5342941999988398,
+  "retry": {
+    "run_id": 3,
+    "state": "completed",
+    "retry": "idempotent"
+  },
+  "api_evidence": {
+    "auth_no_token": 403,
+    "scoped_read": 200,
+    "unauthorized_other_dataset": 403,
+    "scope_count": 551,
+    "result_count": 551,
+    "evidence_http": 200,
+    "anomaly_id": 159,
+    "real_raw_provenance_available": true,
+    "raw_redacted": true,
+    "native_score_direction": "lower",
+    "model_version_matches_selection": true,
+    "threshold_matches_frozen": true,
+    "root_cause": null,
+    "explanation": "Explanation unavailable",
+    "raw_page_chars": 174,
+    "related_count": 0,
+    "auth_method": "ephemeral configured read token allowed only dataset3; no persistent ACL/account changes"
+  }
+}

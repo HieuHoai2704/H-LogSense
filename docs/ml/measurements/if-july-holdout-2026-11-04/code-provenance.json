@@ -1,0 +1,14 @@
+{
+  "files_sha256": {
+    "scripts/audit_if_holdout.py": "25678ea2303ca481b3b9dbea9bc318318733c89fbb70042ce770f21287ba312b",
+    "scripts/verify_validated_if_bgl.py": "f658b3bc82a68d3cdeed1ad319e6ecff169f432f9b5c5d55c5d52477b7f37dac",
+    "app/services/validated_if.py": "6f481c45fad6c9bba632b394d8c10a184d0c2e15fe91840eb649ae888613be05",
+    "tests/test_if_holdout.py": "670e23e59824329332e66995c57d712c2e2343232fe76d9d4eea609247992d87",
+    "tests/test_validated_if_mysql.py": "13de4cb4060672db146b20261070259b3e51437236d297f85cbb3ddb06d926ef",
+    "app/services/window_detection.py": "9d6bd90766a6e15e13865fef52bba0ef9e024474cabb8513208e36a5f760204a",
+    "app/services/window_features.py": "f5bd5fa5848e29cd9410ed8947fa20825a3d9887b47ac86e0feb7e7def433ee9",
+    "app/services/detector_calibration.py": "15d7a0fe8d838d110751c28474eaa8ce4a4a426bbe7ac237707337c3a572a641"
+  },
+  "selection_changed_after_test": false,
+  "note": "Inference adapter/dispatcher and default-scope correctness checks were added after the experiment. No feature definition, model fit, threshold, candidate selection or primary metric cohort changed after test."
+}

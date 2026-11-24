@@ -1,0 +1,13 @@
+        <div class="local-root">
+          <strong id="local-root-name" hidden></strong>
+          <p id="local-active-root" class="muted local-root-label"></p>
+        </div>
+        <div class="project-search" id="local-search" hidden>
+          <input id="local-search-input" type="search" aria-label="{{ tr('Search files and folders') }}"
+                 placeholder="{{ tr('Search files and folders') }}" maxlength="120" autocomplete="off" spellcheck="false">
+          <p id="local-search-status" class="muted" role="status"></p>
+        </div>
+        <div class="explorer-entries">
+          <ul id="local-search-results" hidden></ul>
+          <div id="local-tree"></div>
+        </div>

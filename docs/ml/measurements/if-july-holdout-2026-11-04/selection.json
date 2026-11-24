@@ -1,0 +1,18 @@
+{
+  "baseline_artifact_sha256": "8e5554e864b3415216c364f146289db3a19b43befc96c81f8e8ade0c2ad87ca3",
+  "comparison": "<",
+  "frozen_at_utc": "2026-11-04T12:41:38.395349+00:00",
+  "manifest_sha256": "8f126554aa0b3f82c8e429ead642cb9419d5c05f75a13551dc2486846b9c7a4d",
+  "score_direction": "lower",
+  "selected": {
+    "features": "base",
+    "id": "base-100-256",
+    "max_samples": 256,
+    "n_estimators": 100,
+    "seed": 42
+  },
+  "selected_artifact_sha256": "530af8801f567e1e31d5dc0efad23b92b555c86061f5088024d253d96721b01b",
+  "threshold": -0.7700419045395783,
+  "threshold_uses_validation_labels": true,
+  "validation_sha256": "4bd0cbda40fd857e35cc0f102d1a0f8b4bd7e1ae1ce214df0d0403213b7c03bd"
+}

@@ -18,7 +18,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
 from app.models import Dataset, LogEvent, RawLogRecord, SourceArtifact, GroundTruthLabel
-from app.security import authorized_datasets, Forbidden
+from app.security import authorized_datasets, Forbidden, identity
 from app.services.investigation import QueryError, integer, iso
 from app.services.log_queries import parse_scope, page, predicates, timeline
 from app.services.redaction import redact
@@ -50,6 +50,8 @@ def unavailable(error):
 
 @logs_api.before_request
 def require_access():
+    if request.endpoint == "logs.datasets" and identity() is not None:
+        return
     if not authorized_datasets():
         raise Forbidden()
     if "sqlalchemy" not in current_app.extensions:
@@ -144,18 +146,21 @@ def details(event_id):
     artifact = db.session.get(SourceArtifact, raw.artifact_id)
     text = redact(raw.raw_bytes[:262144].decode("utf-8", errors="replace"))
     offset = integer(request.args.get("raw_offset", "0"), 0, len(text), "Raw offset")
-    label = db.session.scalar(
-        select(GroundTruthLabel.label)
+    annotation = db.session.execute(
+        select(GroundTruthLabel.label, GroundTruthLabel.source, GroundTruthLabel.version)
         .where(
             GroundTruthLabel.dataset_id == scope.dataset_id,
             GroundTruthLabel.event_id == event.id,
-            GroundTruthLabel.source == "loghub-bgl",
+            GroundTruthLabel.source.in_(["loghub-bgl", "uploaded-bgl"]),
         )
+        .order_by(GroundTruthLabel.id)
         .limit(1)
-    )
+    ).first()
     return jsonify(
         event=serialize(event),
-        ground_truth_label=label,
+        ground_truth_label=redact(annotation.label) if annotation else None,
+        ground_truth_label_provenance={"source": annotation.source, "version": annotation.version,
+            "note": "Imported annotation; not an unsupervised model feature."} if annotation else None,
         raw={
             "text": text[offset : offset + 8192],
             "next_offset": offset + 8192 if offset + 8192 < len(text) else None,
@@ -167,6 +172,8 @@ def details(event_id):
             "physical_line": raw.line_number,
             "byte_offset": raw.byte_offset,
             "parser_version": event.parser_version,
+            "upload": redact((event.attributes or {}).get("upload")),
+            "source_kind": "normalized-upload" if (event.attributes or {}).get("upload") else "operator-source",
         },
     )
 

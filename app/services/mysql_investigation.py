@@ -82,8 +82,16 @@ def state(args):
                 E.dataset_id == dataset_id
             )
         ).one()
-        first = first or EPOCH
-        last = last or first
+        # A window is anchored at its start, which can precede the first raw
+        # record (e.g. 03:10:00 vs 03:10:30). Include completed output anchors
+        # in an implicit full range; never rewrite explicit user boundaries.
+        anomaly_first, anomaly_last = db.session.execute(
+            select(func.min(A.anchor_time), func.max(A.anchor_time))
+            .join(R, (R.dataset_id == A.dataset_id) & (R.id == A.run_id))
+            .where(A.dataset_id == dataset_id, R.state == "completed")
+        ).one()
+        first = min((value for value in (first, anomaly_first) if value is not None), default=EPOCH)
+        last = max((value for value in (last, anomaly_last) if value is not None), default=first)
         end = last + timedelta(seconds=1)
         spans = {
             "15m": 900,

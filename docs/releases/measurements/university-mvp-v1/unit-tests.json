@@ -1,0 +1,206 @@
+{
+  "measured_at": "2026-11-04",
+  "python": "3.10.11",
+  "commands": {
+    "unit": {
+      "command": "-m unittest discover -s tests -v",
+      "exit_code": 0,
+      "wall_seconds": 9.632640900003025,
+      "status": "PASS",
+      "tests": 166,
+      "runner_seconds": 8.796,
+      "skipped": 56,
+      "passed": 110,
+      "note": "Final default discovery after source-aware UI label fix. 56MySQLtests executed separately."
+    },
+    "pip_check": {
+      "command": "-m pip check",
+      "exit_code": 0,
+      "wall_seconds": 0.6322504999989178,
+      "status": "PASS"
+    },
+    "compileall": {
+      "command": "-m compileall -q app scripts tests migrations",
+      "exit_code": 0,
+      "wall_seconds": 0.1555536999949254,
+      "status": "PASS"
+    }
+  },
+  "offline_migrations_and_packages": {
+    "heads": [
+      "0004"
+    ],
+    "single_head": "PASS",
+    "revisions": [
+      {
+        "revision": "0004",
+        "down_revision": "0003",
+        "path": "0004_alert_decisions.py"
+      },
+      {
+        "revision": "0003",
+        "down_revision": "0002",
+        "path": "0003_job_identity.py"
+      },
+      {
+        "revision": "0002",
+        "down_revision": "0001",
+        "path": "0002_security_jobs_incidents.py"
+      },
+      {
+        "revision": "0001",
+        "down_revision": null,
+        "path": "0001_database_foundation.py"
+      }
+    ],
+    "database_migration_run": "NOT RUN by this agent; root executes fresh MySQL E2E",
+    "packages": {
+      "Flask": "3.1.3",
+      "Flask-SQLAlchemy": "3.1.1",
+      "SQLAlchemy": "2.0.57",
+      "Flask-Migrate": "4.1.0",
+      "PyMySQL": "1.1.3",
+      "Jinja2": "3.1.6",
+      "scikit-learn": "1.7.2",
+      "numpy": "2.2.6",
+      "psutil": "7.2.2",
+      "playwright": "1.64.1",
+      "Flask-WTF": "NOT INSTALLED",
+      "WTForms": "NOT INSTALLED"
+    }
+  },
+  "anonymous_security_demo_smoke": {
+    "status": "PASS",
+    "test_environment": "Cleared process environment, demo-only factory; no MySQL connection",
+    "checks": {
+      "GET /": {
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "cache_control": null
+      },
+      "GET /?workspace=logs": {
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "cache_control": null
+      },
+      "GET /api/v1/investigation?source=demo": {
+        "status": 200,
+        "content_type": "application/json",
+        "cache_control": "no-store"
+      },
+      "GET /api/v1/logs/datasets": {
+        "status": 403,
+        "content_type": "application/json",
+        "cache_control": "no-store"
+      },
+      "GET /api/v1/investigation?source=db-1": {
+        "status": 403,
+        "content_type": "application/json",
+        "cache_control": "no-store"
+      },
+      "POST /api/v1/detection/jobs": {
+        "status": 403,
+        "content_type": "application/json",
+        "cache_control": "no-store"
+      },
+      "POST /api/v1/alert-rules": {
+        "status": 403,
+        "content_type": "application/json",
+        "cache_control": "no-store"
+      },
+      "GET /api/v1/auth/me": {
+        "status": 403,
+        "content_type": "application/json",
+        "cache_control": "no-store"
+      },
+      "POST /api/v1/auth/logout": {
+        "status": 403,
+        "content_type": "application/json",
+        "cache_control": "no-store"
+      }
+    },
+    "registered_blueprints": [
+      "alerts",
+      "anomalies",
+      "database_api",
+      "jobs",
+      "logs",
+      "security"
+    ],
+    "route_count": 28,
+    "delete_routes": 0,
+    "html_autoescape": true
+  },
+  "credential_and_configuration_checks": {
+    "env_example_placeholders": "PASS",
+    "smtp_disabled_by_default": "PASS",
+    "actual_local_credential_exact_match_scan": "PASS",
+    "files_scanned": 203,
+    "matching_files": [],
+    "qualification": "Exact matches of actual ignored local credential values only; no comprehensive secret-detector claim. Credential values never printed."
+  },
+  "source_preservation": {
+    "existing_source_files_hashed": 64,
+    "changed_existing_source_files": [],
+    "this_agent_application_edits": [],
+    "status": "PASS"
+  },
+  "read_only_auth_findings": [
+    {
+      "status": "VERIFIED_SOURCE",
+      "topic": "Dataset grants required even for admin role",
+      "evidence": "app/security.py:36-58"
+    },
+    {
+      "status": "VERIFIED_SOURCE",
+      "topic": "Bearer operator reads require explicit dataset allow-list; mutation decorators require an authenticated session role",
+      "evidence": "app/security.py:45-77"
+    },
+    {
+      "status": "VERIFIED_SOURCE",
+      "topic": "Mutating authenticated routes require X-CSRF-Token; session cookies HttpOnly and SameSite Strict; COOKIE_SECURE opt-in for HTTPS",
+      "evidence": "app/security.py:65-77,156-159"
+    },
+    {
+      "status": "VERIFIED_SOURCE",
+      "topic": "Testing reads TEST_DATABASE_URL and never falls back to development URL; pool_pre_ping, UTC strict SQL session and hide_parameters configured",
+      "evidence": "app/database.py:13-52"
+    },
+    {
+      "status": "VERIFIED_SOURCE",
+      "topic": "Migration guard rejects unknown unversioned tables and MySQL before8.0.16; initial destructive downgrade disabled",
+      "evidence": "migrations/env.py:99-117; migrations/versions/0001_database_foundation.py"
+    }
+  ],
+  "document_gaps": [
+    {
+      "priority": "P1",
+      "file": "README.md",
+      "line": 26,
+      "finding": "Broad current IF zero-recall statement needs qualification: historical default100K result versus opt-in frozenV2 independent-testrecall38.6%; model remains experimental."
+    },
+    {
+      "priority": "P1",
+      "file": "docs/database/DEMO_SCRIPT.md",
+      "line": 33,
+      "finding": "Samehistoricalzero-recall distinction needed for demo narrative."
+    }
+  ],
+  "verified_application_p0_p1_bugs": [],
+  "limitations": [
+    "56MySQL tests explicitly NOT RUN in default discovery; root E2E/guarded suite supplies database evidence separately.",
+    "No external SMTPdelivery, TkinterGUI or nativeMacexecution performed.",
+    "No browserE2Ebythisagent; siblingagentrunsrealBGLbrowserworkflow.",
+    "No modelqualityorenterpriseproduction-readinessclaim frompassingunitchecks.",
+    "Credentialscanchecksactual local secret values only, notallpossibleembeddedsecrets."
+  ],
+  "no_push_or_merge": true,
+  "root_followup": {
+    "intentional_template_change": "app/templates/partials/workspace.html: source-aware range label + missing host/service fallback",
+    "layout_js_api_schema_changed": false,
+    "final_default_runner_seconds": 8.796,
+    "final_real_browser": "12groupsbefore+12afterPASS",
+    "final_demo_browser": "21workspace+13drawerPASS",
+    "final_qa_script_compile": "PASS"
+  }
+}

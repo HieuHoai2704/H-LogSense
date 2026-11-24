@@ -2,7 +2,7 @@
 
 # Investigation V3 architecture review
 
-Status: **Proposed; no application/database migration implemented.**
+The material below records the historical V3 proposal. The implemented system and current test status are tracked in [current architecture](../database/ARCHITECTURE.md) and [University MVP verification](../releases/UNIVERSITY_MVP_READINESS_VI.md).
 
 Start with [V3 proposal](INVESTIGATION_V3_PROPOSAL.md). Supporting documents cover
 [data/query/coverage design](V3_DATA_AND_QUERIES.md),

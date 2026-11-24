@@ -1,0 +1,28 @@
+<details id="external-preview" class="panel">
+  <summary>{{ tr("Analyze data files") }}</summary>
+  <form class="source-controls">
+    <label>Tệp trong dự án <input name="path" required maxlength="1024" placeholder="data/results.csv"></label>
+    <label>Định dạng <select name="format">
+      <optgroup label="Dữ liệu"><option value="csv">CSV</option><option value="jsonl">JSONL</option><option value="parquet">Parquet</option></optgroup>
+      <optgroup label="Log và đánh giá"><option value="hdfs">HDFS</option><option value="openstack">OpenStack</option>
+        <option value="jsonl-log">Log JSONL</option><option value="csv-log">Log CSV</option><option value="evaluation">CSV đánh giá</option></optgroup>
+    </select></label>
+    <label>Đơn vị đánh giá <select name="unit"><option value="event">Event</option><option value="hdfs_block">HDFS block</option><option value="openstack_instance">OpenStack VM</option></select></label>
+    <button type="submit">Phân tích tệp</button>
+  </form>
+  <p>Đọc cục bộ · CSV/JSONL tối đa 1 MiB · Parquet tối đa 256 MiB · thống kê tối đa 5.000 dòng.</p>
+  <p id="external-status" role="status"></p>
+  <section id="external-data" hidden>
+    <h2>Thông tin cột</h2>
+    <div class="table-scroll"><table><thead><tr><th scope="col">Cột</th><th scope="col">Kiểu</th><th scope="col">Thiếu</th></tr></thead>
+      <tbody id="external-columns"></tbody></table></div>
+    <label>Phân phối theo cột <select id="external-column"></select></label>
+    <div id="external-distribution"></div>
+    <h2>Dữ liệu mẫu</h2>
+    <div class="table-scroll"><table id="external-sample"></table></div>
+  </section>
+  <pre id="external-raw" style="overflow: auto; max-height: 400px;" hidden></pre>
+</details>
+<script src="{{ url_for('static', filename='workspace/local-api.js') }}" defer></script>
+<script src="{{ url_for('static', filename='workspace/explorer.js') }}" defer></script>
+<script src="{{ url_for('static', filename='workspace/external.js') }}" defer></script>

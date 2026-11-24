@@ -1,0 +1,12 @@
+{
+  "known_private_values_checked": 12,
+  "prospective_files": 260,
+  "prospective_bytes": 4052760,
+  "known_secret_matches": 0,
+  "oversized_files_over_10MiB": [],
+  "private_paths_ignored": true,
+  "upload_original_http_download": "No route; redacted evidence only",
+  "upload_windows_acl": "current OS account and SYSTEM; inherited broad read grants removed",
+  "posix_upload_hash_regression": "reproduced failure then PASS with corrected manifest path",
+  "native_macOS": "NOT RUN"
+}

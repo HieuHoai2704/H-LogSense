@@ -73,9 +73,11 @@ partial initialization requires investigation and a new dedicated directory.
 - `root@localhost`: local provisioning, grants, backup, safe restore, shutdown.
 - `logsense_migrator@localhost`: SELECT/INSERT/UPDATE/CREATE/ALTER/INDEX/REFERENCES
   on `logsense_dev` only; no global privilege or DROP/DELETE grant.
-- `logsense_app@localhost`: SELECT/INSERT/UPDATE on `logsense_dev` only. Archive
-  records instead of deleting them. Production read-only access should use a
-  separate SELECT-only account and real identity/tenant enforcement.
+- `logsense_app@localhost`: initially SELECT/INSERT/UPDATE on `logsense_dev`
+  only. Dataset CRUD additionally needs an explicit post-migration DELETE grant
+  on only `datasets` and `user_datasets`; no DELETE on logs/jobs/anomalies.
+  Production read-only access should use a separate SELECT-only account and
+  real identity/tenant enforcement.
 
 Test harness grants DDL only on newly generated isolated test/benchmark schemas.
 Those grants are not runtime requirements. No remote-host account is created.
@@ -86,7 +88,9 @@ copied into source, terminal history or `.env`:
 ```text
 python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
 python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db current
+python -m scripts.mysql_runtime grant-dataset-crud --schema logsense_dev
 python -m scripts.mysql_runtime exec --role app -- -m scripts.database register-bgl --key bgl-v1
+python -m scripts.mysql_runtime exec --role app -- -m scripts.database create-user --username investigator --role admin --dataset DATASET_ID
 python -m scripts.mysql_runtime exec --role app -- -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
 python -m scripts.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
 ```
@@ -96,6 +100,43 @@ The default UI continues to show synthetic fixtures. Health is
 then open `/?workspace=logs`; real Investigation is `/?source=db-DATASET_ID`.
 A URL parameter alone never authorizes a dataset. Optional operator read tokens
 must be privately injected, not hard-coded into a frontend.
+
+The `grant-dataset-crud` command is an explicit operator action after migrations,
+not an automatic startup grant. It validates the owned runtime, target schema
+identifier and both existing base tables before granting DELETE on exactly the
+two metadata tables. It grants no schema-wide DELETE, DDL, DROP, GRANT OPTION or
+remote access and executes no data deletion. Repeat the fixed operation safely
+after checking an interrupted result; MySQL GRANT auto-commits. For another owned
+runtime/schema pass its actual `--root` and `--schema`; do not grant against a
+guessed or unrelated schema. See [the exact contract](DATASET_CRUD.md).
+
+Application deletion is separately guarded by active admin role, explicit
+dataset grant, CSRF, a dataset row lock and no dependent data/revision. Only
+pristine empty registered/archived metadata and its ACL links may be removed
+atomically. Populated datasets return 409; table-level grants never authorize
+HTTP access to another dataset.
+
+## Queued uploads and analysis workers
+
+After signing in to Log Explorer, a manager/admin can create/rename granted
+dataset metadata in the inline panel. An analyst/manager/admin with a grant can
+stage BGL-compatible TXT/LOG or one-column `raw_line` CSV (16 MiB file cap).
+Both signed Flask-WTF form CSRF and session/header CSRF apply. Uploads are stored
+under private ignored `.local/uploads`; original bytes are not served by HTTP.
+
+```text
+python -m scripts.mysql_runtime exec --role app -- -m scripts.ingestion_worker
+python -m scripts.mysql_runtime exec --role app -- -m scripts.worker
+```
+
+Run the processes separately. The first consumes upload jobs; the second runs
+detectors. Flask requests only validate/stage/queue imports; a queued response
+is not completion. Poll committed progress in the existing UI. A retry reuses
+an immutable artifact/checkpoint and has bounded attempts; do not edit staged
+files to force recovery. Same dataset/key/content replay reuses its job, while a
+new key represents a new artifact. See [upload recovery and provenance](UPLOADS.md).
+Uploaded labels remain supplied/unverified, so trusted-Loghub evaluation can
+correctly return no eligible ground truth and null metrics.
 
 ## Backup and isolated restore
 
@@ -143,7 +184,3 @@ Edge. Existing QA scripts accept a private `LOGSENSE_QA_OUTPUT` directory.
 
 Remaining NOT RUN: macOS native startup/migration/import/browser/restore, remote
 database/TLS deployment, abrupt OS/power-loss recovery and off-device restoration.
-```text
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database create-user --username investigator --role admin --dataset DATASET_ID
-python -m scripts.mysql_runtime exec --role app -- -m scripts.worker
-```

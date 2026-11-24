@@ -33,7 +33,7 @@ frontend JavaScript. Configure `COOKIE_SECURE=1` only with HTTPS.
 
 | Method/path | Contract |
 |---|---|
-| GET `/api/v1/logs/datasets` | At most 100 authorized datasets, data mode/revision and observed time bounds; these bounds are not coverage proof. |
+| GET `/api/v1/logs/datasets` | At most 100 authorized datasets, data mode, revision and observed time bounds. An authenticated account with no grants gets an empty list. Anonymous access and ungranted log queries receive 403. |
 | GET `/api/v1/logs` | dataset_id, start_time, end_time; optional repeated host/severity, literal q (<=200), sort=asc/desc, limit=1..100, scope_token, cursor. |
 | GET `/api/v1/logs/timeline` | Same scope, optional bins=20..120. Returns server-aggregated parsed-event counts and explicit unknown time coverage. |
 | GET `/api/v1/logs/{event_id}` | Same scope, raw_offset; redacted raw chunk, original timestamp, ground-truth category and source/line/byte provenance. |

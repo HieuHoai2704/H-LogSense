@@ -1,0 +1,76 @@
+{
+  "calibration": {
+    "end": "2005-07-21T00:00:00+00:00",
+    "max_fpr": 0.01,
+    "policy": "validation F1 maximum subject to empirical FPR cap",
+    "start": "2005-07-14T00:00:00+00:00",
+    "units": 232151,
+    "uses_validation_labels": true
+  },
+  "comparison": "<",
+  "coverage": "unknown source completeness; observed parsed host-window target",
+  "detector": "isolation_forest",
+  "eligible_scope": "closed observed host-windows at/after frozen validation end; never earlier training/calibration windows",
+  "feature_names": [
+    "log1p_event_count",
+    "high_severity_fraction",
+    "distinct_template_fraction",
+    "dominant_template_fraction",
+    "log1p_mean_message_length"
+  ],
+  "id": "f3e5a88403ab48fb84ea36904214e867",
+  "independent_test": {
+    "end": "2005-07-28T00:00:00+00:00",
+    "metrics": {
+      "auprc_average_precision": 0.2656097620691372,
+      "eligible_units": 172529,
+      "f1": 0.3202511773940345,
+      "fn": 82,
+      "fp": 351,
+      "fpr": 0.002036612608430764,
+      "precision": 0.2251655629139073,
+      "predicted_positive": 453,
+      "recall": 0.5543478260869565,
+      "tn": 171994,
+      "tp": 102
+    },
+    "note": "Measured on the July BGL holdout, not a promise for another dataset; root cause unconfirmed.",
+    "start": "2005-07-21T00:00:00+00:00",
+    "unit": "observed parsed host-window"
+  },
+  "inference_start_utc": "2005-07-21T00:00:00+00:00",
+  "model_specification": {
+    "features": "base",
+    "id": "base-100-256",
+    "max_samples": 256,
+    "n_estimators": 100,
+    "seed": 42
+  },
+  "name": "Validation-calibrated BGL IF",
+  "report": "docs/ml/IF_JULY_HOLDOUT.md",
+  "score_direction": "lower",
+  "score_is_probability": false,
+  "software": {
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "python": "3.10.11",
+    "sklearn": "1.7.2"
+  },
+  "source_qualification": {
+    "missing_host_events": {
+      "test": 17,
+      "train": 23,
+      "validation": 25
+    },
+    "parser_rejected_selected_rows": 537,
+    "target": "observed parsed host-windows; no complete-raw-window ground-truth claim"
+  },
+  "threshold": -0.7700419045395783,
+  "training": {
+    "end": "2005-07-14T00:00:00+00:00",
+    "fit_uses_labels": false,
+    "start": "2005-07-01T00:00:00+00:00"
+  },
+  "version": "746effaa8a9d1a8747ef145b2a58c7dde33403c7673c0748864d7c8f1b78f0f9",
+  "window_seconds": 300
+}

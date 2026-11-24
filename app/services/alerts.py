@@ -1,14 +1,21 @@
 """Idempotent alert decisions and a bounded, opt-in SMTP outbox."""
 
+from contextlib import nullcontext, suppress
 from datetime import datetime, timedelta, timezone
-from email.message import EmailMessage
-import os, smtplib, ssl
+import os
+import smtplib
+import ssl
+
+from flask import Flask, current_app, has_app_context, render_template
+from flask_mail import Connection, Message
 
 from sqlalchemy import select, exists
 from sqlalchemy.orm import Session
 
 from app.models import AnomalyOutput, DetectorRun, DetectionUnit, LogEvent
 from app.domain import AlertRule, Alert, AlertDecision, AlertAudit, Notification
+from app.extensions import mail
+from config import APP_NAME
 
 PRIORITIES = ["Low", "Medium", "High", "Critical"]
 
@@ -113,60 +120,104 @@ def generate_alerts(engine, dataset_id, run_id):
     return {"created": created, "suppressed": suppressed}
 
 
-def deliver_notifications(engine, *, smtp_factory=None):
+class VerifiedSMTPConnection(Connection):
+    """Keep the outbox's timeout and certificate verification with Flask-Mail."""
+
+    def __init__(self, mail_state, factory):
+        super().__init__(mail_state)
+        self.factory = factory
+
+    def configure_host(self):
+        host = self.factory(self.mail.server, self.mail.port, timeout=5)
+        try:
+            host.starttls(context=ssl.create_default_context())
+            if self.mail.username:
+                host.login(self.mail.username, self.mail.password or "")
+        except Exception:
+            host.close()
+            raise
+        return host
+
+    def __exit__(self, *exc):
+        if self.host is not None:
+            with suppress(OSError, smtplib.SMTPException):
+                self.host.quit()
+            with suppress(OSError):
+                self.host.close()
+
+
+def notification_message(notification, sender, recipients):
+    alert_id, dataset_id = notification.alert_id, notification.dataset_id
+    message = Message(
+        subject=f"{APP_NAME} investigation alert {alert_id}", sender=sender,
+        recipients=recipients,
+        body=f"Alert {alert_id}, dataset {dataset_id}. Review the evidence in {APP_NAME}.",
+        html=render_template(
+            "mail/alert.html", app_name=APP_NAME, alert_id=alert_id, dataset_id=dataset_id
+        ),
+    )
+    message.msgId = f"<logsense-alert-{dataset_id}-{alert_id}@local.invalid>"
+    message.attach("alert-reference.csv", "text/csv", f"dataset_id,alert_id\r\n{dataset_id},{alert_id}\r\n")
+    return message
+
+
+def deliver_notifications(engine, *, smtp_factory=None, alert_id=None):
     if os.environ.get("SMTP_ENABLED") != "1":
         return {"status": "disabled", "sent": 0}
-    host = os.environ.get("SMTP_HOST")
-    recipient = os.environ.get("SMTP_TO")
-    sender = os.environ.get("SMTP_FROM")
-    if (
-        not host
-        or not recipient
-        or not sender
-        or any("\n" in x or "\r" in x for x in (host, recipient, sender))
-    ):
-        raise ValueError("Valid SMTP host/from/to configuration required.")
-    factory = smtp_factory or smtplib.SMTP
+    context = nullcontext()
+    if not has_app_context():
+        app = Flask("app")
+        mail.init_app(app)
+        context = app.app_context()
+    with context:
+        suppressed = bool(current_app.testing or current_app.config.get("MAIL_SUPPRESS_SEND")
+                          or os.environ.get("MAIL_SUPPRESS_SEND") == "1")
+        host = os.environ.get("SMTP_HOST", "")
+        recipient = os.environ.get("SMTP_TO", "")
+        sender = os.environ.get("SMTP_FROM", "")
+        if any("\n" in x or "\r" in x for x in (host, recipient, sender)):
+            raise ValueError("Invalid SMTP host or address.")
+        recipients = [address.strip() for address in recipient.split(",") if address.strip()]
+        if not suppressed and (not host or not recipients or not sender):
+            raise ValueError("SMTP_HOST, SMTP_FROM and SMTP_TO are required for delivery.")
+        sender = sender or "logsense@example.invalid"
+        recipients = recipients or ["preview@example.invalid"]
+        if len(recipients) > 20 or any("@" not in address for address in [sender, *recipients]):
+            raise ValueError("Provide a sender and at most 20 recipient email addresses.")
+        state = mail.init_mail({
+            "MAIL_SERVER": host, "MAIL_PORT": int(os.environ.get("SMTP_PORT", "587")),
+            "MAIL_USERNAME": os.environ.get("SMTP_USER"), "MAIL_PASSWORD": os.environ.get("SMTP_PASSWORD"),
+            "MAIL_USE_TLS": True, "MAIL_SUPPRESS_SEND": suppressed,
+        })
+        query = select(Notification).where(
+            Notification.state.in_(["pending", "retry"]), Notification.attempts < 3,
+            Notification.next_attempt <= datetime.now(timezone.utc),
+        ).order_by(Notification.id)
+        if alert_id is not None:
+            query = query.where(Notification.alert_id == alert_id)
+        return _dispatch_notifications(engine, state, smtp_factory or smtplib.SMTP, sender, recipients, query)
+
+
+def _dispatch_notifications(engine, mail_state, factory, sender, recipients, query):
+    if mail_state.suppress:
+        with Session(engine) as session, VerifiedSMTPConnection(mail_state, factory) as connection:
+            pending = session.scalars(query.limit(100))
+            captured = 0
+            for notification in pending:
+                connection.send(notification_message(notification, sender, recipients))
+                captured += 1
+        return {"status": "suppressed", "sent": 0, "captured": captured}
     sent = 0
     for _ in range(100):
         with Session(engine) as session, session.begin():
             now = datetime.now(timezone.utc)
-            notification = session.scalar(
-                select(Notification)
-                .where(
-                    Notification.state.in_(["pending", "retry"]),
-                    Notification.attempts < 3,
-                    Notification.next_attempt <= now,
-                )
-                .order_by(Notification.id)
-                .with_for_update(skip_locked=True)
-                .limit(1)
-            )
+            notification = session.scalar(query.with_for_update(skip_locked=True).limit(1))
             if notification is None:
                 break
             notification.attempts += 1
             try:
-                message = EmailMessage()
-                message["From"] = sender
-                message["To"] = recipient
-                message["Subject"] = "LogSense investigation alert " + str(
-                    notification.alert_id
-                )
-                message["Message-ID"] = (
-                    f"<logsense-alert-{notification.dataset_id}-{notification.alert_id}@local.invalid>"
-                )
-                message.set_content(
-                    f"Alert {notification.alert_id}, dataset {notification.dataset_id}. Investigate the authorized evidence view. A detector signal is not a confirmed root cause."
-                )
-                with factory(
-                    host, int(os.environ.get("SMTP_PORT", "587")), timeout=5
-                ) as smtp:
-                    smtp.starttls(context=ssl.create_default_context())
-                    if os.environ.get("SMTP_USER"):
-                        smtp.login(
-                            os.environ["SMTP_USER"], os.environ.get("SMTP_PASSWORD", "")
-                        )
-                    smtp.send_message(message)
+                with VerifiedSMTPConnection(mail_state, factory) as connection:
+                    connection.send(notification_message(notification, sender, recipients))
                 notification.state = "sent"
                 notification.error_code = None
                 sent += 1

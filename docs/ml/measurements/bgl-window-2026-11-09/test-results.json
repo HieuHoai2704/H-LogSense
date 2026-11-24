@@ -1,0 +1,217 @@
+{
+  "champion": "window-lr",
+  "fpr_budget": 0.002,
+  "partitions": {
+    "later_test": {
+      "memory": {
+        "peak_working_set_mib": 771.61,
+        "rss_mib": 460.9
+      },
+      "models": {
+        "count-lr": {
+          "auprc_average_precision": 0.5937919252656446,
+          "eligible_units": 470831,
+          "f1": 0.2159784844170226,
+          "fn": 43776,
+          "fp": 5782,
+          "fpr": 0.013759164645943045,
+          "precision": 0.5414022842639594,
+          "predicted_positive": 12608,
+          "recall": 0.13489585391881745,
+          "tn": 414447,
+          "tp": 6826
+        },
+        "count-rule": {
+          "auprc_average_precision": 0.09323370524019423,
+          "eligible_units": 470831,
+          "f1": 0.005433823788857132,
+          "fn": 50448,
+          "fp": 5926,
+          "fpr": 0.014101834951895277,
+          "precision": 0.02532894736842105,
+          "predicted_positive": 6080,
+          "recall": 0.0030433579700407097,
+          "tn": 414303,
+          "tp": 154
+        },
+        "count-xgb": {
+          "auprc_average_precision": 0.6749030482124012,
+          "eligible_units": 470831,
+          "f1": 0.34651896346156746,
+          "fn": 39122,
+          "fp": 4177,
+          "fpr": 0.009939818527517139,
+          "precision": 0.7332183687807371,
+          "predicted_positive": 15657,
+          "recall": 0.22686850322121654,
+          "tn": 416052,
+          "tp": 11480
+        },
+        "isolation-forest": {
+          "auprc_average_precision": 0.12524727305289107,
+          "eligible_units": 470831,
+          "f1": 0.00044137931034482757,
+          "fn": 50590,
+          "fp": 3761,
+          "fpr": 0.008949882088099584,
+          "precision": 0.0031804929764113437,
+          "predicted_positive": 3773,
+          "recall": 0.00023714477688628908,
+          "tn": 416468,
+          "tp": 12
+        },
+        "window-lr": {
+          "auprc_average_precision": 0.9789438501142258,
+          "eligible_units": 470831,
+          "f1": 0.9588829298932212,
+          "fn": 987,
+          "fp": 3268,
+          "fpr": 0.007776712221193682,
+          "precision": 0.9382032032978462,
+          "predicted_positive": 52883,
+          "recall": 0.9804948421011027,
+          "tn": 416961,
+          "tp": 49615
+        },
+        "window-xgb": {
+          "auprc_average_precision": 0.9916505470536242,
+          "eligible_units": 470831,
+          "f1": 0.9902925922301595,
+          "fn": 3,
+          "fp": 989,
+          "fpr": 0.002353478698519141,
+          "precision": 0.9808288749321548,
+          "predicted_positive": 51588,
+          "recall": 0.9999407138057784,
+          "tn": 419240,
+          "tp": 50599
+        }
+      },
+      "seconds": 25.497,
+      "source": {
+        "dropped": {
+          "invalid_field_count": 30777,
+          "missing_host": 147
+        },
+        "invalid_epoch_unassigned_seen_in_prefix": 0,
+        "negatives": 420229,
+        "parse_seconds": 23.037,
+        "parsed_rows": 1185263,
+        "positives": 50602,
+        "raw_rows": 1216187,
+        "source_slice_sha256": "87fcb1f3e0ff637063f2e69177fa3c0fd4b640186a90a238d90e4c8c93f587db",
+        "templates": 12557,
+        "utc": [
+          "2005-10-01",
+          "2006-01-05"
+        ],
+        "windows": 470831
+      }
+    },
+    "test": {
+      "memory": {
+        "peak_working_set_mib": 353.43,
+        "rss_mib": 305.17
+      },
+      "models": {
+        "count-lr": {
+          "auprc_average_precision": 0.7987511796244372,
+          "eligible_units": 75470,
+          "f1": 0.10361053090642,
+          "fn": 34721,
+          "fp": 4332,
+          "fpr": 0.11254286605008833,
+          "precision": 0.3425405979663075,
+          "predicted_positive": 6589,
+          "recall": 0.061036291849207634,
+          "tn": 34160,
+          "tp": 2257
+        },
+        "count-rule": {
+          "auprc_average_precision": 0.46562461086231827,
+          "eligible_units": 75470,
+          "f1": 0.0026563247091324444,
+          "fn": 36928,
+          "fp": 618,
+          "fpr": 0.016055284214901797,
+          "precision": 0.0748502994011976,
+          "predicted_positive": 668,
+          "recall": 0.0013521553356049543,
+          "tn": 37874,
+          "tp": 50
+        },
+        "count-xgb": {
+          "auprc_average_precision": 0.6694189976451218,
+          "eligible_units": 75470,
+          "f1": 0.11136118994030728,
+          "fn": 34702,
+          "fp": 1622,
+          "fpr": 0.04213862620804323,
+          "precision": 0.5838891739353514,
+          "predicted_positive": 3898,
+          "recall": 0.06155011087673752,
+          "tn": 36870,
+          "tp": 2276
+        },
+        "isolation-forest": {
+          "auprc_average_precision": 0.4287261796729017,
+          "eligible_units": 75470,
+          "f1": 0.0007909735954402698,
+          "fn": 36961,
+          "fp": 5990,
+          "fpr": 0.15561675153278604,
+          "precision": 0.002830031629765274,
+          "predicted_positive": 6007,
+          "recall": 0.00045973281410568447,
+          "tn": 32502,
+          "tp": 17
+        },
+        "window-lr": {
+          "auprc_average_precision": 0.9990179740620039,
+          "eligible_units": 75470,
+          "f1": 0.9983641795887467,
+          "fn": 54,
+          "fp": 67,
+          "fpr": 0.0017406214278291594,
+          "precision": 0.9981887486145279,
+          "predicted_positive": 36991,
+          "recall": 0.9985396722375467,
+          "tn": 38425,
+          "tp": 36924
+        },
+        "window-xgb": {
+          "auprc_average_precision": 0.998960715656847,
+          "eligible_units": 75470,
+          "f1": 0.9993108387497804,
+          "fn": 2,
+          "fp": 49,
+          "fpr": 0.0012729917905019224,
+          "precision": 0.9986765698852127,
+          "predicted_positive": 37025,
+          "recall": 0.9999459137865758,
+          "tn": 38443,
+          "tp": 36976
+        }
+      },
+      "seconds": 7.175,
+      "source": {
+        "dropped": {
+          "missing_host": 26
+        },
+        "invalid_epoch_unassigned_seen_in_prefix": 0,
+        "negatives": 38492,
+        "parse_seconds": 6.193,
+        "parsed_rows": 222507,
+        "positives": 36978,
+        "raw_rows": 222533,
+        "source_slice_sha256": "1f5d509ae841ee001fe4f160d71e4d02434318df09a108ea3ab9ea56c0a0639b",
+        "templates": 7888,
+        "utc": [
+          "2005-09-01",
+          "2005-10-01"
+        ],
+        "windows": 75470
+      }
+    }
+  }
+}

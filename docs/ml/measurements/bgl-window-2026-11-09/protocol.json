@@ -1,0 +1,68 @@
+{
+  "archive_sha256": "d67fd82a711aea0157a9b83175892c6ee60e384a2ddf5bc51f39118453816da8",
+  "code_sha256": "46e3632c5752e2b16f76a73409ccd491f02b5b79e50eee0248773faa5cb028b5",
+  "fit_access": "train only; selection/calibration after fit; both tests after freeze",
+  "if_sample_limit": 20000,
+  "max_fpr": 0.002,
+  "models": [
+    "count-rule",
+    "isolation-forest",
+    "count-lr",
+    "count-xgb",
+    "window-lr",
+    "window-xgb"
+  ],
+  "negative_sample_limit": 400000,
+  "numpy": "2.2.6",
+  "parser_version": "bgl-1.0.0",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "python": "3.10.11",
+  "ranges_utc_half_open": {
+    "calibration": [
+      "2005-08-18",
+      "2005-09-01"
+    ],
+    "later_test": [
+      "2005-10-01",
+      "2006-01-05"
+    ],
+    "selection": [
+      "2005-08-01",
+      "2005-08-18"
+    ],
+    "test": [
+      "2005-09-01",
+      "2005-10-01"
+    ],
+    "train": [
+      "2005-06-03",
+      "2005-08-01"
+    ]
+  },
+  "seed": 42,
+  "select_among": [
+    "count-lr",
+    "count-xgb",
+    "window-lr",
+    "window-xgb"
+  ],
+  "selection_order": "recall, AP, lower FPR, ID",
+  "sklearn": "1.7.2",
+  "threshold": "maximize recall on calibration at empirical FPR cap; ties prefer fewer FP",
+  "unit_seconds": 300,
+  "xgboost": {
+    "colsample_bytree": 0.85,
+    "eval_metric": "logloss",
+    "learning_rate": 0.1,
+    "max_bin": 128,
+    "max_depth": 5,
+    "min_child_weight": 5,
+    "n_estimators": 120,
+    "n_jobs": 6,
+    "random_state": 42,
+    "reg_lambda": 2,
+    "subsample": 0.85,
+    "tree_method": "hist"
+  },
+  "xgboost_version": "3.2.0"
+}

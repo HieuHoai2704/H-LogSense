@@ -1,0 +1,13 @@
+<div class="explorer-folder-tools">
+  <button type="button" id="open-project-file" aria-controls="local-project-form" aria-expanded="false" disabled>{{ tr("Open folder") }}</button>
+  <p id="local-folder-feedback" role="status" hidden></p>
+  <form id="local-project-form" hidden>
+    <label for="local-root">{{ tr("Local folder path") }}</label>
+    <input id="local-root" maxlength="2048" required>
+    <div class="explorer-folder-actions">
+      <button type="submit">{{ tr("Open folder") }}</button>
+      <button type="button" id="local-folder-cancel">{{ tr("Cancel") }}</button>
+    </div>
+    <select id="local-recent" aria-label="{{ tr('Recent projects') }}"><option value="">{{ tr("Recent projects") }}</option></select>
+  </form>
+</div>

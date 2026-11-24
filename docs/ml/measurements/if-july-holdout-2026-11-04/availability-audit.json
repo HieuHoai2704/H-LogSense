@@ -1,0 +1,26 @@
+{
+  "scope": "Availability audit after frozen test evaluation; no model/threshold/primary-cohort changes",
+  "selected_raw_rows": {
+    "train": 835354,
+    "validation": 403295,
+    "test": 313651
+  },
+  "parse_error_counts": {
+    "train": {
+      "invalid_field_count": 278
+    },
+    "validation": {
+      "invalid_field_count": 219
+    },
+    "test": {
+      "invalid_field_count": 40
+    }
+  },
+  "missing_host_events": {
+    "test": 17,
+    "train": 23,
+    "validation": 25
+  },
+  "primary_metric_target": "observed parsed host-windows only, not all raw source windows; malformed rows and unknown hosts are excluded explicitly",
+  "model_or_threshold_changed": false
+}

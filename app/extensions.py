@@ -2,6 +2,9 @@
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_bootstrap import Bootstrap5
+from flask_mail import Mail
+from flask_moment import Moment
 from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase
 
@@ -20,3 +23,6 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 migrate = Migrate()
+bootstrap = Bootstrap5()
+moment = Moment()
+mail = Mail()

@@ -1,0 +1,12 @@
+{
+  "schemas": [
+    "logsense_test_bf398d68d1ea",
+    "logsense_test_2eeef4566c9c"
+  ],
+  "tests": 63,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "mysql_integration": "PASS",
+  "cleanup": "No database/table/volume dropped. Generated fixtures retained."
+}

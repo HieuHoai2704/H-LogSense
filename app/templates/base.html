@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="{{ interface_language }}"{% if workbench_enabled %} data-workspace-theme{% endif %}>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  {{ bootstrap.load_css() }}
+{% include "partials/language_assets.html" %}
+{% include "partials/workspace_assets.html" %}
+</head>
+<body>
+{% include "partials/workspace_navigation.html" %}
+  <main class="container py-4">
+    <nav class="mb-3"><a href="{{ url_for('dashboard', workspace='logs') }}">{{ tr("Log Explorer") }}</a></nav>
+
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    <p class="alert alert-{{ category }}" role="status">{{ tr(message) }}</p>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,132 @@
+#machine { container-type: inline-size; }
+#machine-chart {
+  display: grid;
+  grid-template-columns: clamp(106px, 28%, 150px) minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--background);
+}
+.machine-resources {
+  display: grid;
+  grid-template-rows: repeat(4, minmax(35px, 1fr));
+  gap: 4px;
+  align-content: start;
+  border-inline-end: 1px solid var(--border);
+  padding: 5px;
+}
+.machine-resources button {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 35px;
+  padding: 4px 6px;
+  text-align: start;
+  background: transparent;
+  border-color: transparent;
+}
+.machine-resources button:hover { border-color: var(--border); }
+.machine-resources button[aria-pressed="true"] {
+  background: var(--selected);
+  border-color: var(--border);
+  border-inline-start-color: var(--trace);
+}
+.machine-resource-text { display: grid; line-height: 1.2; }
+.machine-resource-text strong { font-size: 12px; font-weight: 620; }
+.machine-resource-text small { color: var(--muted); font: 11px/1.3 var(--mono); }
+.machine-resources svg { display: block; width: 40px; height: 23px; background: var(--panel); border: 1px solid var(--border); }
+.machine-detail { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 8px 10px 5px; }
+.machine-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 6px 12px; margin-bottom: 6px; }
+.machine-heading h2 { font-size: 17px; }
+#machine-source { color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+.machine-reading { display: grid; justify-items: end; min-width: 0; }
+#machine-value { font: 600 clamp(17px, 1.65vw, 24px)/1.15 var(--mono); }
+#machine-capacity { color: var(--muted); font: 11px/1.35 var(--mono); white-space: nowrap; }
+.machine-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: minmax(75px, 1fr) auto;
+  min-height: 90px;
+  gap: 3px 6px;
+}
+.machine-scale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: end;
+  font: 10px var(--mono);
+  color: var(--muted);
+}
+#machine-trend { position: relative; min-width: 0; border: 1px solid var(--border); background: var(--panel); }
+#machine-trend[tabindex="0"] { cursor: crosshair; }
+#machine-trend svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+#machine-empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 8px; color: var(--muted); text-align: center; font-size: 12px; }
+.machine-time { grid-column: 2; display: flex; justify-content: space-between; gap: 6px; color: var(--muted); font: 10px/1.3 var(--mono); }
+.machine-footer { display: flex; justify-content: space-between; align-items: center; min-height: 25px; gap: 6px; color: var(--muted); font-size: 11px; }
+.machine-footer button { min-height: 22px; padding: 2px 6px; font-size: 11px; }
+.machine-guides, .machine-line, .machine-crosshair { fill: none; vector-effect: non-scaling-stroke; }
+.machine-guides { stroke: var(--border); opacity: .72; }
+.machine-fill { fill: var(--trace); opacity: .12; }
+.machine-line { stroke: var(--trace); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.machine-crosshair { stroke: var(--accent); opacity: .7; stroke-dasharray: 4 3; }
+:is([data-resource="cpu"], [data-selected-resource="cpu"] .machine-detail) { --trace: var(--accent); }
+:is([data-resource="ram"], [data-selected-resource="ram"] .machine-detail) { --trace: var(--error); }
+:is([data-resource="gpu"], [data-selected-resource="gpu"] .machine-detail) { --trace: var(--warning); }
+:is([data-resource="vram"], [data-selected-resource="vram"] .machine-detail) { --trace: var(--muted); }
+:root[data-theme="mono"] #machine-chart { --warning: var(--accent); --error: var(--accent); }
+@container (max-width: 380px) {
+  #machine-chart { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .machine-resources { grid-template: auto / repeat(4, minmax(0, 1fr)); border-inline-end: 0; border-block-end: 1px solid var(--border); }
+  .machine-resources button { display: flex; justify-content: center; min-height: 33px; padding: 2px 3px; }
+  .machine-resources svg { display: none; }
+  .machine-resource-text { text-align: center; }
+  .machine-detail { padding-block: 5px 2px; }
+}
+@media (min-width: 701px) and (min-height: 520px) and (max-height: 670px) {
+  #machine { padding-block: 4px; }
+  #machine-chart { grid-template: minmax(0, 1fr) / 74px minmax(0, 1fr); }
+  .machine-resources {
+    grid-template: repeat(4, minmax(25px, 1fr)) / minmax(0, 1fr);
+    gap: 2px;
+    border-block-end: 0;
+    border-inline-end: 1px solid var(--border);
+    padding: 3px;
+  }
+  .machine-resources button { display: flex; justify-content: center; min-height: 25px; padding: 1px 3px; }
+  .machine-resource-text { text-align: center; }
+  .machine-resources svg { display: none; }
+  .machine-detail { padding-block: 3px 1px; }
+  .machine-heading { margin-bottom: 2px; }
+  .machine-heading h2 { font-size: 15px; }
+  .machine-grid { min-height: 72px; grid-template-rows: minmax(72px, 1fr); }
+  .machine-time { display: none; }
+  .machine-footer { min-height: 20px; }
+}
+
+#machine-device-label {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 4px;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+#machine-device {
+  width: 100%;
+  min-width: 0;
+  min-height: 24px;
+  padding: 2px 5px;
+  font-size: 11px;
+}
+.machine-heading > div:first-child { flex: 1; min-width: 0; }
+.training-sync { color: var(--muted); font-size: 11px; padding-top: 4px; }
+.log-line.machine-log-anchor { background: var(--selected); border-inline-start: 2px solid var(--accent); padding-inline-start: 5px; }
+@media (min-width: 701px) and (min-height: 520px) and (max-height: 670px) {
+  .machine-heading:has(#machine-device-label:not([hidden])) #machine-source { display: none; }
+  #machine-device-label { margin-top: 0; }
+}

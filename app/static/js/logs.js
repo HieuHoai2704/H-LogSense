@@ -1,7 +1,10 @@
 "use strict";
 (() => {
+  const t = window.logsenseTranslate;
   const form = document.getElementById("log-filters"),
-    status = document.getElementById("logs-status");
+    status = document.getElementById("logs-status"),
+    investigationNav = document.getElementById("log-investigation-nav"),
+    investigationLink = document.getElementById("log-investigation");
   let applied = null,
     scope = null,
     cursor = null,
@@ -23,7 +26,9 @@
     const data = await response.json();
     if (!response.ok)
       throw new Error(
-        data.error?.message || data.error?.code || "Request failed",
+        data.error?.code === "invalid_credentials"
+          ? t("Invalid credentials. Check your username and password.")
+          : t(data.error?.message || data.error?.code || "Request failed"),
       );
     return data;
   }
@@ -50,7 +55,7 @@
     document.querySelector(".app-shell").inert = true;
     document.getElementById("log-detail-title").focus();
     document.getElementById("log-detail-status").textContent =
-      "Loading source evidence…";
+      t("Loading source evidence…");
     document.getElementById("log-raw").textContent = "";
     const requested = id;
     try {
@@ -59,7 +64,7 @@
       p.set("raw_offset", String(offset));
       const data = await api("/api/v1/logs/" + id + "?" + p);
       if (selected !== requested || panel.hidden) return;
-      document.getElementById("log-detail-title").textContent = "Event " + id;
+      document.getElementById("log-detail-title").textContent = t("Event {0}", id);
       document.getElementById("log-raw").textContent = data.raw.text;
       document.getElementById("log-provenance").textContent = JSON.stringify(
         {
@@ -71,7 +76,7 @@
         2,
       );
       document.getElementById("log-detail-status").textContent =
-        "Actual imported raw line · redacted";
+        t("Actual imported raw line · redacted");
       const next = document.getElementById("log-raw-next");
       next.hidden = data.raw.next_offset === null;
       next.onclick = () => inspect(id, null, data.raw.next_offset);
@@ -87,7 +92,7 @@
     if (!reset && scope) p.set("scope_token", scope);
     if (next) p.set("cursor", next);
     form.setAttribute("aria-busy", "true");
-    say("Loading MySQL page… Previous results are retained.");
+    say(t("Loading MySQL page… Previous results are retained."));
     try {
       const data = await api("/api/v1/logs?" + p, {
         signal: controller.signal,
@@ -107,9 +112,13 @@
       });
       if (ticket !== sequence) return;
       if (data.count !== volume.count)
-        throw new Error("Scope mismatch; retry the query.");
+        throw new Error(t("Scope mismatch; retry the query."));
       scope = pinned;
       applied = new URLSearchParams(p);
+      investigationLink.href = "/?" + new URLSearchParams({
+        source: "db-" + applied.get("dataset_id"),
+      });
+      investigationNav.hidden = false;
       if (reset) {
         historyCursors = [null];
         index = 0;
@@ -131,8 +140,8 @@
         }
         const td = document.createElement("td"),
           button = document.createElement("button");
-        button.textContent = "Inspect →";
-        button.setAttribute("aria-label", "Inspect log " + row.id);
+        button.textContent = t("Inspect →");
+        button.setAttribute("aria-label", t("Inspect log {0}", row.id));
         button.onclick = () => inspect(row.id, button);
         td.append(button);
         tr.append(td);
@@ -142,17 +151,15 @@
         const tr = document.createElement("tr"),
           td = document.createElement("td");
         td.colSpan = 5;
-        td.textContent = "No imported events match this scope.";
+        td.textContent = t("No imported events match this scope.");
         tr.append(td);
         body.append(tr);
       }
       document.getElementById("logs-count").textContent = data.count;
       document.getElementById("logs-snapshot").textContent =
-        "Input revision " +
-        data.input_revision +
-        " · bounded snapshot · UTC [start,end)";
+        t("Input revision {0} · bounded snapshot · UTC [start,end)", data.input_revision);
       document.getElementById("log-page").textContent =
-        "Page " + (index + 1) + " · " + data.items.length + " displayed";
+        t("Page {0} · {1} displayed", index + 1, data.items.length);
       document.getElementById("log-next").disabled = !cursor;
       document.getElementById("log-previous").disabled = index === 0;
       const exportLink = document.getElementById("logs-export");
@@ -161,7 +168,7 @@
       exportLink.onclick = (e) => {
         if (data.count > 100000) {
           e.preventDefault();
-          say("Narrow the scope to 100,000 parsed events before exporting.");
+          say(t("Narrow the scope to 100,000 parsed events before exporting."));
         }
       };
       const bins = document.getElementById("log-bins");
@@ -172,12 +179,7 @@
         b.className = "heat " + (cell.event_count ? "volume-3" : "priority-0");
         b.textContent = cell.event_count || "·";
         b.title =
-          cell.start +
-          " — " +
-          cell.end +
-          " · " +
-          cell.event_count +
-          " events · coverage unknown";
+          t("{0} — {1} · {2} events · coverage unknown", (cell.start), cell.end, cell.event_count);
         b.setAttribute("aria-label", b.title);
         b.onclick = () => {
           form.elements.start_time.value = cell.start.replace("Z", "");
@@ -187,16 +189,14 @@
         bins.append(b);
       }
       say(
-        "MySQL ready · " +
-          data.count +
-          " parsed events · no raw-result download beyond this page",
+        t("MySQL ready · {0} parsed events · no raw-result download beyond this page", data.count),
       );
       const url = new URL(location.href);
       url.search = "workspace=logs&" + query();
       history.replaceState({}, "", url);
     } catch (e) {
       if (e.name !== "AbortError")
-        say("Query failed: " + e.message + ". Previous results retained.");
+        say(t("Query failed: {0}. Previous results retained.", e.message));
     } finally {
       if (ticket === sequence) form.setAttribute("aria-busy", "false");
     }
@@ -204,6 +204,7 @@
   async function initialize() {
     const auth = await api("/api/v1/auth/me");
     csrf = auth.csrf_token;
+    document.dispatchEvent(new CustomEvent("logsense:auth-changed", { detail: auth }));
     const data = await api("/api/v1/logs/datasets");
     const select = form.elements.dataset_id;
     select.replaceChildren();
@@ -214,10 +215,10 @@
       select.add(o);
     }
     document.getElementById("login-panel").hidden = true;
-    document.getElementById("log-workspace").hidden = false;
+    document.getElementById("log-workspace").hidden = !select.options.length;
     document.getElementById("logs-logout").hidden = false;
     if (!select.options.length) {
-      say("No dataset access has been granted.");
+      say(t("No dataset access has been granted."));
       return;
     }
     const params = new URLSearchParams(location.search);
@@ -297,12 +298,79 @@
         method: "POST",
         headers: { "X-CSRF-Token": csrf },
       });
+      document.dispatchEvent(new CustomEvent("logsense:auth-changed", { detail: null }));
       location.reload();
     } catch (e) {
       say(e.message);
     }
   };
-  initialize().catch(() =>
-    say("Sign in to access explicitly authorized MySQL datasets."),
-  );
+  let datasetRefresh = 0;
+  document.addEventListener("logsense:datasets-changed", async (event) => {
+    const ticket = ++datasetRefresh;
+    try {
+      const data = await api("/api/v1/logs/datasets");
+      if (ticket !== datasetRefresh) return;
+      const select = form.elements.dataset_id;
+      const prior = select.value;
+      const currentQuery = query(), oldApplied = applied ? new URLSearchParams(applied) : null;
+      oldApplied?.delete("scope_token");
+      oldApplied?.delete("cursor");
+      const pendingEdits = oldApplied && currentQuery.toString() !== oldApplied.toString();
+      const utcValue = (value) => Date.parse(value.endsWith("Z") ? value : value + "Z");
+      const followedFullRange = baseRange &&
+        utcValue(form.elements.start_time.value) === utcValue(baseRange[0]) &&
+        utcValue(form.elements.end_time.value) === utcValue(baseRange[1]);
+      select.replaceChildren();
+      for (const d of data.datasets) {
+        const option = new Option(d.name + " · " + d.data_mode, d.id);
+        option.dataset.start = d.start_time || "";
+        option.dataset.end = d.end_time || "";
+        select.add(option);
+      }
+      if (data.datasets.some((d) => String(d.id) === prior)) {
+        select.value = prior;
+        if (event.detail?.action === "import" && String(event.detail.dataset_id) === prior) {
+          if (pendingEdits) {
+            say(t("Import completed. Previous snapshot retained; Apply filters to refresh."));
+          } else {
+            if (followedFullRange) chooseRange();
+            await load(); // New input revision requires a fresh bounded snapshot.
+          }
+        }
+        return; // Metadata-only changes preserve filters/page/snapshot.
+      }
+      controller?.abort();
+      ++sequence;
+      applied = scope = cursor = selected = null;
+      historyCursors = [null];
+      index = 0;
+      document.getElementById("log-rows").replaceChildren();
+      document.getElementById("log-bins").replaceChildren();
+      document.getElementById("logs-count").textContent = "0";
+      document.getElementById("logs-snapshot").textContent = t("No selected snapshot");
+      document.getElementById("log-page").textContent = t("No page");
+      document.getElementById("log-next").disabled = true;
+      document.getElementById("log-previous").disabled = true;
+      const exportLink = document.getElementById("logs-export");
+      exportLink.removeAttribute("href");
+      exportLink.setAttribute("aria-disabled", "true");
+      investigationNav.hidden = true;
+      document.getElementById("log-workspace").hidden = !select.options.length;
+      if (select.options.length) {
+        chooseRange();
+        await load();
+      } else {
+        const url = new URL(location.href);
+        url.search = "workspace=logs";
+        history.replaceState({}, "", url);
+        say(t("No dataset access has been granted. Create a dataset or request a grant."));
+      }
+    } catch (error) {
+      say(t("Dataset metadata changed; refreshing the selector failed: {0}", error.message));
+    }
+  });
+  initialize().catch(() => {
+    document.dispatchEvent(new CustomEvent("logsense:auth-changed", { detail: null }));
+    say(t("Sign in to access explicitly authorized MySQL datasets."));
+  });
 })();

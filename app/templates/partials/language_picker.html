@@ -1,0 +1,9 @@
+<form class="language-picker" method="post" action="{{ url_for('locale_pages.select_language') }}">
+  <input type="hidden" name="next" value="{{ request.full_path if request.query_string else request.path }}">
+  <label for="interface-language">{{ tr("Language") }}</label>
+  <select id="interface-language" name="language">
+    {% for code, native_name in languages.items() %}
+    <option value="{{ code }}" lang="{{ code }}"{% if code == interface_language %} selected{% endif %}>{{ native_name }}</option>
+    {% endfor %}
+  </select>
+</form>

@@ -1,0 +1,1387 @@
+{
+  "probe_limit_per_source_member": 1000,
+  "probe_status": {
+    "UNSUPPORTED_SCHEMA": 27,
+    "COMPATIBLE": 4,
+    "NOT_APPLICABLE": 27
+  },
+  "upload_guard": {
+    "unsupported_log_schema": 25,
+    "unsupported_encoding": 2
+  },
+  "probe_rows": [
+    {
+      "name": "ADFA-LD.zip",
+      "archive_bytes": 2381193,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "ADFA-LD/Training_Data_Master/UTD-0258.txt",
+      "sampled": 1,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 1
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0958
+    },
+    {
+      "name": "Android_v1.zip",
+      "archive_bytes": 24858007,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "Android.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 423,
+        "invalid_timestamp": 577
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0969
+    },
+    {
+      "name": "Android_v2.zip",
+      "archive_bytes": 444986139,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "duplicate_type1/issue_1/applogcat.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 423,
+        "invalid_timestamp": 577
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.4258
+    },
+    {
+      "name": "Apache.tar.gz",
+      "archive_bytes": 262905,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "Apache.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 825,
+        "invalid_field_count": 175
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0937
+    },
+    {
+      "name": "BGL-CFDR.gz",
+      "archive_bytes": 62936464,
+      "category": "tagged_log",
+      "integrity": "PASS",
+      "member": "BGL-CFDR",
+      "sampled": 1000,
+      "parsed": 1000,
+      "hosts_present": 1000,
+      "tagged_alerts": 0,
+      "parse_errors": {},
+      "earliest": "2005-06-03T22:42:50+00:00",
+      "latest": "2005-06-03T22:45:53+00:00",
+      "parser_status": "COMPATIBLE",
+      "reason": "Native BGL parser accepted known tagged corpus syntax",
+      "seconds": 0.0974
+    },
+    {
+      "name": "BGL-Loghub-3227177.tar.gz",
+      "archive_bytes": 62936967,
+      "category": "tagged_log",
+      "integrity": "PASS",
+      "member": "BGL.log",
+      "sampled": 1000,
+      "parsed": 1000,
+      "hosts_present": 1000,
+      "tagged_alerts": 0,
+      "parse_errors": {},
+      "earliest": "2005-06-03T22:42:50+00:00",
+      "latest": "2005-06-03T22:45:53+00:00",
+      "parser_status": "COMPATIBLE",
+      "reason": "Native BGL parser accepted known tagged corpus syntax",
+      "seconds": 0.0793
+    },
+    {
+      "name": "BGL.zip",
+      "archive_bytes": 57489019,
+      "category": "tagged_log",
+      "integrity": "PASS",
+      "member": "BGL.log",
+      "sampled": 1000,
+      "parsed": 1000,
+      "hosts_present": 1000,
+      "tagged_alerts": 0,
+      "parse_errors": {},
+      "earliest": "2005-06-03T22:42:50+00:00",
+      "latest": "2005-06-03T22:45:53+00:00",
+      "parser_status": "COMPATIBLE",
+      "reason": "Native BGL parser accepted known tagged corpus syntax",
+      "seconds": 0.0632
+    },
+    {
+      "name": "BGL_2k.log",
+      "archive_bytes": 317150,
+      "category": "tagged_log",
+      "integrity": "PASS",
+      "member": "BGL_2k.log",
+      "sampled": 1000,
+      "parsed": 1000,
+      "hosts_present": 1000,
+      "tagged_alerts": 96,
+      "parse_errors": {},
+      "earliest": "2005-06-03T22:42:50+00:00",
+      "latest": "2005-07-17T11:04:38+00:00",
+      "parser_status": "COMPATIBLE",
+      "reason": "Native BGL parser accepted known tagged corpus syntax",
+      "seconds": 0.0361
+    },
+    {
+      "name": "Electricity-OpenML-151.arff",
+      "archive_bytes": 3092013,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0105
+    },
+    {
+      "name": "F-dataset-source-f16a73f.zip",
+      "archive_bytes": 822784603,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "Fault-Injection-Dataset-f16a73f87244211bb72916a6ec8134ab1d6270f6/Cinder/Test_1/logs/round_1/cinder/api.log.bzip2.out",
+      "sampled": 284,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 220,
+        "invalid_field_count": 64
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 1.1733
+    },
+    {
+      "name": "hades_data.zip",
+      "archive_bytes": 417536743,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "data/labeled_csv/log_csv/drain_labeled.csv",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 143,
+        "invalid_timestamp": 857
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.6555
+    },
+    {
+      "name": "Hadoop-Loghub-3227177.tar.gz",
+      "archive_bytes": 2565294,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "application_1445062781478_0011/container_1445062781478_0011_01_000001.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 925,
+        "invalid_field_count": 75
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0673
+    },
+    {
+      "name": "Hadoop.zip",
+      "archive_bytes": 3416419,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "application_1445062781478_0011/container_1445062781478_0011_01_000001.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 925,
+        "invalid_field_count": 75
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0715
+    },
+    {
+      "name": "HDFS_v1-Loghub-3227177.tar.gz",
+      "archive_bytes": 161886385,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "HDFS.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 823,
+        "invalid_field_count": 177
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.4403
+    },
+    {
+      "name": "HDFS_v1.zip",
+      "archive_bytes": 186645559,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "HDFS.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 823,
+        "invalid_field_count": 177
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.4327
+    },
+    {
+      "name": "HDFS_v2.zip",
+      "archive_bytes": 823700713,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "node_logs/hadoop-hdfs-datanode-mesos-01.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 101,
+        "invalid_timestamp": 899
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.9325
+    },
+    {
+      "name": "HDFS_v3_TraceBench.zip",
+      "archive_bytes": 567419398,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "tracebench/AN_Data_corruptBlk_r_00FDN_30C_1to19B_0to120INT_15RT_5WT/edge.csv",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 1000
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.7502
+    },
+    {
+      "name": "HealthApp.tar.gz",
+      "archive_bytes": 2296618,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "HealthApp.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 990,
+        "invalid_timestamp": 10
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0604
+    },
+    {
+      "name": "HPC.zip",
+      "archive_bytes": 2975898,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "HPC.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 1000
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0642
+    },
+    {
+      "name": "KDDCup99-full.gz",
+      "archive_bytes": 18115902,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0162
+    },
+    {
+      "name": "LADEmpStudy.zip",
+      "archive_bytes": 43263038,
+      "category": "artifact",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.2038
+    },
+    {
+      "name": "Liberty-CFDR.gz",
+      "archive_bytes": 672363372,
+      "category": "tagged_log",
+      "integrity": "PASS",
+      "member": "Liberty-CFDR",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": 0,
+      "parse_errors": {
+        "invalid_field_count": 9,
+        "invalid_timestamp": 991
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "No tagged line matched native BGL syntax",
+      "seconds": 0.7049
+    },
+    {
+      "name": "Linux.tar.gz",
+      "archive_bytes": 232039,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "Linux.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 335,
+        "invalid_timestamp": 659,
+        "invalid_utf8": 6
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_encoding",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0638
+    },
+    {
+      "name": "Mac.tar.gz",
+      "archive_bytes": 1489372,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "Mac.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 840,
+        "invalid_field_count": 160
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0694
+    },
+    {
+      "name": "OpenStack-Kalaki.zip",
+      "archive_bytes": 2433414,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "openstack-logs-HEAD/openstack-nova-dhcpoff.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 667,
+        "invalid_timestamp": 333
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.067
+    },
+    {
+      "name": "OpenStack.tar.gz",
+      "archive_bytes": 5394691,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "openstack_normal1.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 1000
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0755
+    },
+    {
+      "name": "PimaDiabetes-OpenML-37.arff",
+      "archive_bytes": 37419,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0029
+    },
+    {
+      "name": "Proxifier.tar.gz",
+      "archive_bytes": 172346,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "Proxifier.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 1000
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0594
+    },
+    {
+      "name": "S02-author-splits.zip",
+      "archive_bytes": 121575679,
+      "category": "artifact",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0935
+    },
+    {
+      "name": "S25-predictiondata.tar.bz2",
+      "archive_bytes": 1630984,
+      "category": "artifact",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0037
+    },
+    {
+      "name": "S25-testdata.tar.bz2",
+      "archive_bytes": 218138592,
+      "category": "artifact",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.1654
+    },
+    {
+      "name": "Spark.tar.gz",
+      "archive_bytes": 183474743,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "application_1440487435730_0039/container_1440487435730_0039_01_000015.log",
+      "sampled": 488,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 251,
+        "invalid_timestamp": 237
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.2044
+    },
+    {
+      "name": "Spirit-CFDR.gz",
+      "archive_bytes": 905546294,
+      "category": "tagged_log",
+      "integrity": "PASS",
+      "member": "Spirit-CFDR",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": 0,
+      "parse_errors": {
+        "invalid_timestamp": 1000
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "No tagged line matched native BGL syntax",
+      "seconds": 0.7572
+    },
+    {
+      "name": "SSH.tar.gz",
+      "archive_bytes": 4596666,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "SSH.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 1000
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0759
+    },
+    {
+      "name": "Thunderbird-CFDR.gz",
+      "archive_bytes": 2026877828,
+      "category": "tagged_log",
+      "integrity": "PASS",
+      "member": "Thunderbird-CFDR",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": 0,
+      "parse_errors": {
+        "invalid_timestamp": 992,
+        "invalid_field_count": 8
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "No tagged line matched native BGL syntax",
+      "seconds": 1.5628
+    },
+    {
+      "name": "Thunderbird.tar.gz",
+      "archive_bytes": 2016100298,
+      "category": "tagged_log",
+      "integrity": "PASS",
+      "member": "Thunderbird.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": 0,
+      "parse_errors": {
+        "invalid_timestamp": 992,
+        "invalid_field_count": 8
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "No tagged line matched native BGL syntax",
+      "seconds": 1.5586
+    },
+    {
+      "name": "UCI-Arrhythmia.zip",
+      "archive_bytes": 98839,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0029
+    },
+    {
+      "name": "UCI-BreastCancerWisconsin.zip",
+      "archive_bytes": 86541,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0031
+    },
+    {
+      "name": "UCI-Congressional-Votes.zip",
+      "archive_bytes": 4318,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.003
+    },
+    {
+      "name": "UCI-Covertype.zip",
+      "archive_bytes": 11251206,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0112
+    },
+    {
+      "name": "UCI-Deterding-Vowel.zip",
+      "archive_bytes": 69486,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0033
+    },
+    {
+      "name": "UCI-Ecoli.zip",
+      "archive_bytes": 5660,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0031
+    },
+    {
+      "name": "UCI-German-Credit.zip",
+      "archive_bytes": 29607,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0032
+    },
+    {
+      "name": "UCI-Glass.zip",
+      "archive_bytes": 6380,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0033
+    },
+    {
+      "name": "UCI-Image-Segmentation.zip",
+      "archive_bytes": 110572,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0032
+    },
+    {
+      "name": "UCI-Ionosphere.zip",
+      "archive_bytes": 29983,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0032
+    },
+    {
+      "name": "UCI-KDD-Cup-1999.zip",
+      "archive_bytes": 6938,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0031
+    },
+    {
+      "name": "UCI-Letter-Recognition.zip",
+      "archive_bytes": 387167,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0038
+    },
+    {
+      "name": "UCI-Liver-Disorders.zip",
+      "archive_bytes": 5985,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0036
+    },
+    {
+      "name": "UCI-Sonar.zip",
+      "archive_bytes": 65413,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0035
+    },
+    {
+      "name": "UCI-Soybean-Large.zip",
+      "archive_bytes": 23316,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0033
+    },
+    {
+      "name": "UCI-Statlog-Landsat.zip",
+      "archive_bytes": 103388,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0032
+    },
+    {
+      "name": "UCI-Statlog-Shuttle.zip",
+      "archive_bytes": 430418,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0038
+    },
+    {
+      "name": "UCI-Statlog-Vehicle.zip",
+      "archive_bytes": 26406,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0031
+    },
+    {
+      "name": "UCI-Thyroid-Disease.zip",
+      "archive_bytes": 624990,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0034
+    },
+    {
+      "name": "UCI-Waveform-v1.zip",
+      "archive_bytes": 508826,
+      "category": "tabular",
+      "integrity": "PASS",
+      "parser_status": "NOT_APPLICABLE",
+      "reason": "Tabular benchmark or author artifact, not a source log for the current importer",
+      "seconds": 0.0033
+    },
+    {
+      "name": "Windows.tar.gz",
+      "archive_bytes": 1670098945,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "Windows.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_field_count": 152,
+        "invalid_timestamp": 848
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_encoding",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 1.2675
+    },
+    {
+      "name": "Zookeeper.tar.gz",
+      "archive_bytes": 459911,
+      "category": "system_log",
+      "integrity": "PASS",
+      "member": "Zookeeper.log",
+      "sampled": 1000,
+      "parsed": 0,
+      "hosts_present": 0,
+      "tagged_alerts": null,
+      "parse_errors": {
+        "invalid_timestamp": 799,
+        "invalid_field_count": 201
+      },
+      "earliest": null,
+      "latest": null,
+      "upload_guard": "unsupported_log_schema",
+      "parser_status": "UNSUPPORTED_SCHEMA",
+      "reason": "Native importer implements BGL fields and BGL label semantics only",
+      "seconds": 0.0629
+    }
+  ],
+  "prefix_differences": {
+    "pairs": 100000,
+    "byte_different": 4,
+    "label_token_different": 4,
+    "binary_label_different": 4,
+    "epoch_different": 0,
+    "host_different": 0
+  },
+  "comparison": [
+    {
+      "file": "BGL-Loghub-3227177.tar.gz",
+      "detector": "rule",
+      "aligned": 79109,
+      "flag_differences": 0,
+      "max_score_difference": 0.0
+    },
+    {
+      "file": "BGL-Loghub-3227177.tar.gz",
+      "detector": "isolation_forest",
+      "aligned": 79109,
+      "flag_differences": 0,
+      "max_score_difference": 0.0
+    },
+    {
+      "file": "BGL-CFDR.gz",
+      "detector": "rule",
+      "aligned": 79109,
+      "flag_differences": 0,
+      "max_score_difference": 0.0
+    },
+    {
+      "file": "BGL-CFDR.gz",
+      "detector": "isolation_forest",
+      "aligned": 79109,
+      "flag_differences": 0,
+      "max_score_difference": 0.0
+    }
+  ],
+  "mysql_run": {
+    "mysql": "8.4.7",
+    "port": 13308,
+    "schema": "logsense_bench_0f12331c4670",
+    "migration_head": "0004",
+    "python": "3.10.11",
+    "datasets": [
+      {
+        "name": "BGL.zip",
+        "dataset_id": 1,
+        "limit": 100000,
+        "label_source": "loghub-bgl",
+        "label_version": "original",
+        "detectors": {
+          "rule": {
+            "status": "PASS",
+            "run_id": 1,
+            "split_counts": {
+              "test": 79109,
+              "train": 11165,
+              "validation": 60
+            },
+            "seconds": 159.9883,
+            "metrics": {
+              "tp": 92,
+              "fp": 61,
+              "fn": 437,
+              "tn": 78519,
+              "predictions": 79109,
+              "positive": 529,
+              "negative": 78580,
+              "precision": 0.6013071895424836,
+              "recall": 0.17391304347826086,
+              "f1": 0.2697947214076246,
+              "fpr": 0.0007762789513871214,
+              "ap": 0.17724455267373854,
+              "native_eligible_units": 79109
+            }
+          },
+          "isolation_forest": {
+            "status": "PASS",
+            "run_id": 2,
+            "split_counts": {
+              "test": 79109,
+              "train": 11165,
+              "validation": 60
+            },
+            "seconds": 113.5359,
+            "metrics": {
+              "tp": 0,
+              "fp": 5,
+              "fn": 529,
+              "tn": 78575,
+              "predictions": 79109,
+              "positive": 529,
+              "negative": 78580,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "fpr": 6.362942224484602e-05,
+              "ap": 0.2545639511332459,
+              "native_eligible_units": 79109
+            }
+          }
+        },
+        "ingestion": {
+          "dataset_id": 1,
+          "physical_lines": 100000,
+          "parsed_events": 100000,
+          "malformed_rows": 0,
+          "checkpoint_byte": 13259718,
+          "source_prefix_sha256": "d6b55a02a67d9ab027abae4b60c365edbf9a892fcb6810ff780528512ca01c83",
+          "seconds": 24.0412,
+          "original_alert_events": 2609,
+          "provenance": "PASS",
+          "status": "PASS"
+        },
+        "investigation": {
+          "status": "PASS",
+          "timeline_and_csv_rows": 158
+        },
+        "evidence": {
+          "status": "PASS",
+          "example_anomaly": "DB-1",
+          "source_line": 17385
+        },
+        "log_api": {
+          "status": "PASS",
+          "count": 100000,
+          "page_items": 20
+        },
+        "initial_api_harness_error": {
+          "status": "FAIL",
+          "reason": "AssertionError: (400, 400)"
+        },
+        "idempotent_repeats": [
+          {
+            "detector": "rule",
+            "status": 200,
+            "job_id": 5
+          },
+          {
+            "detector": "isolation_forest",
+            "status": 200,
+            "job_id": 6
+          }
+        ]
+      },
+      {
+        "name": "BGL-Loghub-3227177.tar.gz",
+        "dataset_id": 2,
+        "limit": 100000,
+        "label_source": "loghub-3227177-bgl",
+        "label_version": "original",
+        "detectors": {
+          "rule": {
+            "status": "PASS",
+            "run_id": 5,
+            "split_counts": {
+              "test": 79109,
+              "train": 11165,
+              "validation": 60
+            },
+            "seconds": 252.6568,
+            "metrics": {
+              "tp": 92,
+              "fp": 61,
+              "fn": 437,
+              "tn": 78519,
+              "predictions": 79109,
+              "positive": 529,
+              "negative": 78580,
+              "precision": 0.6013071895424836,
+              "recall": 0.17391304347826086,
+              "f1": 0.2697947214076246,
+              "fpr": 0.0007762789513871214,
+              "ap": 0.17724455267373854,
+              "native_eligible_units": 0
+            },
+            "job_id": 7
+          },
+          "isolation_forest": {
+            "status": "PASS",
+            "run_id": 8,
+            "split_counts": {
+              "test": 79109,
+              "train": 11165,
+              "validation": 60
+            },
+            "seconds": 179.0414,
+            "metrics": {
+              "tp": 0,
+              "fp": 5,
+              "fn": 529,
+              "tn": 78575,
+              "predictions": 79109,
+              "positive": 529,
+              "negative": 78580,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "fpr": 6.362942224484602e-05,
+              "ap": 0.2545639511332459,
+              "native_eligible_units": 0
+            },
+            "job_id": 8
+          }
+        },
+        "ingestion": {
+          "dataset_id": 2,
+          "physical_lines": 100000,
+          "parsed_events": 100000,
+          "malformed_rows": 0,
+          "checkpoint_byte": 13259718,
+          "source_prefix_sha256": "d6b55a02a67d9ab027abae4b60c365edbf9a892fcb6810ff780528512ca01c83",
+          "seconds": 25.1357,
+          "original_alert_events": 2609,
+          "provenance": "PASS",
+          "status": "PASS"
+        },
+        "investigation": {
+          "status": "PASS",
+          "timeline_and_csv_rows": 158
+        },
+        "evidence": {
+          "status": "PASS",
+          "example_anomaly": "DB-161",
+          "source_line": 17385
+        },
+        "log_api": {
+          "status": "PASS",
+          "count": 100000,
+          "page_items": 20
+        },
+        "initial_api_harness_error": {
+          "status": "FAIL",
+          "reason": "AssertionError: (400, 400)"
+        },
+        "idempotent_repeats": [
+          {
+            "detector": "rule",
+            "status": 200,
+            "job_id": 7
+          },
+          {
+            "detector": "isolation_forest",
+            "status": 200,
+            "job_id": 8
+          }
+        ]
+      },
+      {
+        "name": "BGL-CFDR.gz",
+        "dataset_id": 3,
+        "limit": 100000,
+        "label_source": "usenix-cfdr-bgl",
+        "label_version": "original",
+        "detectors": {
+          "rule": {
+            "status": "PASS",
+            "run_id": 6,
+            "split_counts": {
+              "test": 79109,
+              "train": 11165,
+              "validation": 60
+            },
+            "seconds": 246.4549,
+            "metrics": {
+              "tp": 93,
+              "fp": 60,
+              "fn": 437,
+              "tn": 78519,
+              "predictions": 79109,
+              "positive": 530,
+              "negative": 78579,
+              "precision": 0.6078431372549019,
+              "recall": 0.17547169811320754,
+              "f1": 0.27232796486090777,
+              "fpr": 0.0007635627839499103,
+              "ap": 0.18165710338853247,
+              "native_eligible_units": 0
+            },
+            "job_id": 9
+          },
+          "isolation_forest": {
+            "status": "PASS",
+            "run_id": 7,
+            "split_counts": {
+              "test": 79109,
+              "train": 11165,
+              "validation": 60
+            },
+            "seconds": 182.1126,
+            "metrics": {
+              "tp": 0,
+              "fp": 5,
+              "fn": 530,
+              "tn": 78574,
+              "predictions": 79109,
+              "positive": 530,
+              "negative": 78579,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "fpr": 6.363023199582586e-05,
+              "ap": 0.2558421065512397,
+              "native_eligible_units": 0
+            },
+            "job_id": 10
+          }
+        },
+        "ingestion": {
+          "dataset_id": 3,
+          "physical_lines": 100000,
+          "parsed_events": 100000,
+          "malformed_rows": 0,
+          "checkpoint_byte": 13259750,
+          "source_prefix_sha256": "aa46323f6a9d22dcaf9286f1eae2165e38a754606ab47d5023ac672ca8af2b9b",
+          "seconds": 23.7035,
+          "original_alert_events": 2613,
+          "provenance": "PASS",
+          "status": "PASS"
+        },
+        "investigation": {
+          "status": "PASS",
+          "timeline_and_csv_rows": 158
+        },
+        "evidence": {
+          "status": "PASS",
+          "example_anomaly": "DB-165",
+          "source_line": 17385
+        },
+        "log_api": {
+          "status": "PASS",
+          "count": 100000,
+          "page_items": 20
+        },
+        "initial_api_harness_error": {
+          "status": "FAIL",
+          "reason": "AssertionError: (400, 400)"
+        },
+        "idempotent_repeats": [
+          {
+            "detector": "rule",
+            "status": 200,
+            "job_id": 9
+          },
+          {
+            "detector": "isolation_forest",
+            "status": 200,
+            "job_id": 10
+          }
+        ]
+      },
+      {
+        "name": "BGL_2k.log",
+        "dataset_id": 4,
+        "limit": 2000,
+        "label_source": "loghub-bgl-2k",
+        "label_version": "original",
+        "detectors": {
+          "rule": {
+            "status": "PASS",
+            "run_id": 3,
+            "split_counts": {
+              "test": 257,
+              "train": 1375,
+              "validation": 308
+            },
+            "seconds": 1.0422,
+            "metrics": {
+              "tp": 0,
+              "fp": 0,
+              "fn": 22,
+              "tn": 235,
+              "predictions": 257,
+              "positive": 22,
+              "negative": 235,
+              "precision": null,
+              "recall": 0.0,
+              "f1": 0.0,
+              "fpr": 0.0,
+              "ap": 0.08560311284046693,
+              "native_eligible_units": 0
+            },
+            "job_id": 11
+          },
+          "isolation_forest": {
+            "status": "PASS",
+            "run_id": 4,
+            "split_counts": {
+              "test": 257,
+              "train": 1375,
+              "validation": 308
+            },
+            "seconds": 2.1587,
+            "metrics": {
+              "tp": 0,
+              "fp": 2,
+              "fn": 22,
+              "tn": 233,
+              "predictions": 257,
+              "positive": 22,
+              "negative": 235,
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "fpr": 0.00851063829787234,
+              "ap": 0.07704836716282512,
+              "native_eligible_units": 0
+            },
+            "job_id": 12
+          }
+        },
+        "ingestion": {
+          "dataset_id": 4,
+          "physical_lines": 2000,
+          "parsed_events": 2000,
+          "malformed_rows": 0,
+          "checkpoint_byte": 317150,
+          "source_prefix_sha256": "2a819ea540909db682005c9cf948387a40729b5c2e9f19d430e29ce704825496",
+          "seconds": 0.3765,
+          "original_alert_events": 143,
+          "provenance": "PASS",
+          "status": "PASS"
+        },
+        "investigation": {
+          "status": "PASS",
+          "timeline_and_csv_rows": 2
+        },
+        "evidence": {
+          "status": "PASS",
+          "example_anomaly": "DB-159",
+          "source_line": 1772
+        },
+        "log_api": {
+          "status": "PASS",
+          "count": 2000,
+          "page_items": 20
+        },
+        "initial_api_harness_error": {
+          "status": "FAIL",
+          "reason": "AssertionError: (400, 400)"
+        },
+        "idempotent_repeats": [
+          {
+            "detector": "rule",
+            "status": 200,
+            "job_id": 11
+          },
+          {
+            "detector": "isolation_forest",
+            "status": 200,
+            "job_id": 12
+          }
+        ]
+      }
+    ]
+  },
+  "label_verification": [
+    {
+      "name": "BGL.zip",
+      "status": "PASS",
+      "labels_exact": 100000,
+      "original_alerts": 2609,
+      "seconds": 1.531
+    },
+    {
+      "name": "BGL-Loghub-3227177.tar.gz",
+      "status": "PASS",
+      "labels_exact": 100000,
+      "original_alerts": 2609,
+      "seconds": 1.469
+    },
+    {
+      "name": "BGL-CFDR.gz",
+      "status": "PASS",
+      "labels_exact": 100000,
+      "original_alerts": 2613,
+      "seconds": 1.469
+    },
+    {
+      "name": "BGL_2k.log",
+      "status": "PASS",
+      "labels_exact": 2000,
+      "original_alerts": 143,
+      "seconds": 0.031
+    }
+  ],
+  "targeted_unit_tests": {
+    "status": "PASS",
+    "count": 36,
+    "suites": [
+      "test_bgl_parser",
+      "test_upload_staging",
+      "test_detector_calibration"
+    ]
+  },
+  "concurrent_enqueue_observation": {
+    "http_status": 503,
+    "error": "database_unavailable",
+    "scope": "Re-submitted an existing analysis key while that dataset was writing predictions in the isolated QA runtime"
+  }
+}

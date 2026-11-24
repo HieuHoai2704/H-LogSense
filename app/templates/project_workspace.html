@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="{{ interface_language }}"{% if workspace_view == "monitor" %} data-workspace-home{% endif %}{% if workbench_desktop %} data-workbench-desktop{% endif %}>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ app_name }}</title>
+  {% include "partials/language_assets.html" %}
+  {% include "partials/workspace_assets.html" %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='workspace/project.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='workspace/machine-chart.css') }}">
+  {% if workbench_enabled %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/xterm/xterm.css') }}">
+  <script src="{{ url_for('static', filename='workspace/local-api.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/source-links.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='vendor/xterm/xterm.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='vendor/xterm-fit/addon-fit.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/live-terminal.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/run-detail.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/run-compare.js') }}" defer></script>
+  {% endif %}
+  <script src="{{ url_for('static', filename='workspace/machine-chart.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/project.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/terminal.js') }}" defer></script>
+  {% if workbench_enabled %}
+  <script src="{{ url_for('static', filename='workspace/explorer.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/dock.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/code-editor.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/local-project.js') }}" defer></script>
+  {% endif %}
+</head>
+<body>
+  {% if workspace_view == "monitor" %}
+  <div id="workspace-launch" class="workspace-launch" aria-hidden="true">
+    <div class="workspace-launch-brand">
+      <img src="{{ url_for('static', filename='h-logsen.png') }}" width="88" height="88" alt="" decoding="async">
+      <strong>{{ app_name }}</strong>
+    </div>
+  </div>
+  {% endif %}
+  {% include "partials/workspace_navigation.html" %}
+  <div class="project-shell" data-view="{{ workspace_view }}">
+    <aside class="project-sidebar" id="project-sidebar">
+      <section class="project-tree" aria-label="Tệp của dự án">
+        <h2 id="local-explorer-title">{{ tr("Project folders") }}</h2>
+        <p id="tree-source" class="muted">{{ tr("No project open") }}</p>
+        <div id="project-files"{% if workbench_enabled %} hidden{% endif %}></div>
+        {% if workbench_enabled %}
+        {% include "partials/workbench_folder.html" %}
+        <div class="file-tools" id="local-controls" aria-label="Quản lý tệp" hidden>
+          <button type="button" data-file-action="file">+ Tệp</button>
+          <button type="button" data-file-action="directory">+ Thư mục</button>
+          <button type="button" data-file-action="rename" disabled>Đổi tên</button>
+        </div>
+        <p id="local-selected" class="sr-only"></p>
+        <form id="local-manage" class="file-inline-form" hidden>
+          <label for="local-target" id="local-file-label">Tên tệp</label>
+          <input id="local-target" maxlength="255" autocomplete="off" required>
+          <button type="submit">Xong</button><button type="button" id="local-file-cancel">Hủy</button>
+          <p id="local-file-status" role="status"></p>
+        </form>
+        <div class="project-file-actions" id="local-file-actions" hidden>
+          <button id="local-open-editor" type="button" hidden>{{ tr("Open in editor") }}</button>
+          <button id="local-watch-log" type="button" hidden>{{ tr("Follow as log") }}</button>
+        </div>
+        {% include "partials/workbench_explorer.html" %}
+        {% endif %}
+      </section>
+      <nav id="settings-nav" class="settings-nav" aria-label="Nhóm thiết lập" hidden>
+        <h2>{{ tr("Settings") }}</h2>
+        <button type="button" data-setting="appearance" aria-pressed="true">{{ tr("Appearance") }}</button>
+        <button type="button" data-setting="language" aria-pressed="false">{{ tr("Language") }}</button>
+        <button type="button" data-setting="remote" aria-pressed="false">{{ tr("Remote machines") }}</button>
+        <button type="button" data-setting="environments" aria-pressed="false">{{ tr("Python and packages") }}</button>
+        <button type="button" data-setting="data" aria-pressed="false">{{ tr("Data") }}</button>
+        <button type="button" data-setting="extensions" aria-pressed="false">{{ tr("Extensions") }}</button>
+      </nav>
+    </aside>
+  <main>
+    {% if workbench_enabled %}<p id="local-status" class="muted" role="status"></p>{% endif %}
+    <section id="monitor" aria-label="Theo dõi dòng log"{% if workspace_view != "monitor" %} hidden{% endif %}>
+    <div class="monitor-top">
+    <header class="workspace-bar monitor-bar">
+      <div class="monitor-context">
+        <h1>{{ tr("Project workspace") }}</h1>
+        <div class="breadcrumb"><strong id="workspace-source">{{ tr("No project open") }}</strong><span id="run-label"></span></div>
+      </div>
+      <div class="monitor-actions">
+        <span class="source-state" id="source-state"></span>
+        <button type="button" id="pause">Giữ màn hình</button>
+        {% if not workbench_enabled %}<button type="button" id="open-project-file">{{ tr("Open project") }}</button>{% endif %}
+      </div>
+    </header>
+      <details class="panel project-file" id="project-file" hidden>
+        <summary>Nguồn của dự án</summary>
+        <p class="folder-picker"{% if workbench_enabled %} hidden{% endif %}><label for="project-folder">Chọn thư mục</label>
+          <input id="project-folder" type="file" webkitdirectory>
+        </p>
+        <form id="import-form"{% if workbench_enabled %} hidden{% endif %}>
+          <label for="log-file">Tệp .log, .txt hoặc .jsonl · tối đa 1 MiB và 12.000 dòng</label>
+          <input id="log-file" type="file" accept=".log,.txt,.jsonl" required>
+          <button id="import-button" class="primary" type="submit">Mở log</button>
+        </form>
+        <p id="import-status" role="status"></p>
+      </details>
+      <div class="monitor-controls">
+      {% if workbench_enabled %}
+      <div class="run-tools">
+      <div class="scope">
+        <select id="local-runs" aria-label="{{ tr("Run history") }}"><option value="">{{ tr("Run history") }}</option></select>
+        <span id="local-run-status" role="status"></span><button id="local-stop-run" type="button" hidden>Dừng lượt chạy</button>
+      </div>
+      <button id="open-attach-run" type="button" aria-haspopup="dialog">Gắn lượt chạy</button>
+      <button id="run-compare-toggle" type="button" aria-expanded="false" aria-controls="run-compare">{{ tr("Compare two runs") }}</button>
+      </div>
+      {% endif %}
+      <div class="scope monitor-scope">
+        <span id="source-name"></span>
+          <label for="bucket"><span>{{ tr("Time range") }}</span>
+          <select id="bucket"></select>
+        </label>
+      </div>
+      </div>
+      </div>
+      <div class="monitor-visuals">
+      {% if workbench_enabled %}
+      <section id="run-compare" class="panel run-detail" aria-labelledby="run-compare-title" hidden>
+        <header class="panel-header">
+          <h2 id="run-compare-title">{{ tr("Compare two runs") }}</h2>
+          <button id="run-compare-close" type="button">{{ tr("Close") }}</button>
+        </header>
+        <form class="local-form">
+          <label>Lượt A <select name="left" required></select></label>
+          <label>Lượt B <select name="right" required></select></label>
+          <button type="submit">So sánh</button>
+        </form>
+        <p id="run-compare-status" role="status"></p>
+        <div id="run-compare-content" hidden>
+          <div class="run-compare-scroll"><table>
+            <thead><tr><th scope="col">Thông tin</th><th scope="col">Lượt A</th><th scope="col">Lượt B</th></tr></thead>
+            <tbody id="run-compare-rows"></tbody>
+          </table></div>
+          <div class="run-detail-charts">
+            <section><h3>Train loss theo epoch</h3><div id="compare-train-loss"></div></section>
+            <section><h3>Validation loss theo epoch</h3><div id="compare-validation-loss"></div></section>
+          </div>
+          <p class="muted">Lượt A nét liền · Lượt B nét đứt. Loss chỉ so trực tiếp khi cùng dữ liệu và cách tính. Tải máy là đỉnh trong các mẫu đã ghi của cả máy.</p>
+        </div>
+      </section>
+      {% endif %}
+      <div class="charts">
+        <section class="panel chart-panel" aria-label="Điều tra log">
+          <div class="pane-tabs" aria-label="Chế độ điều tra">
+            <button type="button" data-panel="activity" aria-pressed="true" aria-controls="activity">{{ tr("Anomaly activity") }}</button>
+            <button type="button" data-panel="results" aria-pressed="false" aria-controls="results">{{ tr("Results") }}</button>
+            <span class="chart-state" id="activity-state" role="status"></span>
+          </div>
+          <div id="activity" class="pane-content">
+          <header class="panel-header">
+            <h2>{{ tr("Log levels over time") }}</h2>
+            <div class="metric" id="signal-metric"></div>
+            <div class="timeline-actions" id="activity-controls" hidden>
+              <button type="button" data-activity-mode="severity" aria-pressed="true">{{ tr("Severity") }}</button>
+              <button type="button" data-activity-mode="volume" aria-pressed="false">{{ tr("Volume") }}</button>
+              <button type="button" id="activity-live" hidden>{{ tr("Return to latest log") }}</button>
+            </div>
+          </header>
+          <div id="severity-chart" class="chart-data"></div>
+          <p id="activity-detail" hidden></p>
+          </div>
+          <div id="results" class="pane-content" hidden>
+            <header class="panel-header"><h2>Log cần xem</h2><div class="metric" id="volume-metric"></div></header>
+            <div id="result-list" class="chart-data result-list"></div>
+          </div>
+        </section>
+        <section class="panel chart-panel" aria-label="Chỉ số lượt chạy">
+          <div class="pane-tabs" aria-label="Loại chỉ số">
+            <button type="button" data-panel="training" aria-pressed="true" aria-controls="training">{{ tr("Training metrics") }}</button>
+            <button type="button" data-panel="machine" aria-pressed="false" aria-controls="machine">{{ tr("Machine load") }}</button>
+            <span class="chart-state" id="training-state" role="status"></span>
+            <span class="chart-state" id="machine-state" role="status" hidden></span>
+          </div>
+          <div id="training" class="pane-content">
+          <header class="panel-header">
+            <h2>{{ tr("Loss by epoch") }}</h2>
+            <span class="data-kind">Mô phỏng</span>
+          </header>
+          <div id="training-chart" class="chart-data"></div>
+          <p id="training-sync" class="training-sync" hidden></p>
+          </div>
+          <div id="machine" class="pane-content" hidden>
+            <div id="machine-chart">
+              <div class="machine-resources" role="group" aria-label="{{ tr('Machine resources') }}">
+                {% for key, label in [('cpu', 'CPU'), ('ram', 'RAM'), ('gpu', 'GPU'), ('vram', 'VRAM')] %}
+                <button type="button" data-resource="{{ key }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">
+                  <svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
+                  <span class="machine-resource-text"><strong>{{ label }}</strong><small>—</small></span>
+                </button>
+                {% endfor %}
+              </div>
+              <section class="machine-detail" aria-labelledby="machine-title">
+                <header class="machine-heading">
+                  <div><h2 id="machine-title">CPU</h2><p id="machine-source"></p>
+                    <label id="machine-device-label" hidden>{{ tr("GPU device") }}
+                      <select id="machine-device"></select>
+                    </label>
+                  </div>
+                  <div class="machine-reading"><strong id="machine-value">—</strong><span id="machine-capacity"></span></div>
+                </header>
+                <div class="machine-grid">
+                  <div class="machine-scale" aria-hidden="true"><span>100%</span><span>50%</span><span>0%</span></div>
+                  <div id="machine-trend" tabindex="0" role="slider" aria-orientation="horizontal" aria-labelledby="machine-title">
+                    <svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true"></svg>
+                    <span id="machine-empty"></span>
+                  </div>
+                  <div class="machine-time"><time id="machine-first"></time><time id="machine-last"></time></div>
+                </div>
+                <footer class="machine-footer">
+                  <span id="machine-sample"></span>
+                  <button type="button" id="machine-latest" hidden>{{ tr('Latest sample') }}</button>
+                </footer>
+              </section>
+            </div>
+          </div>
+        </section>
+      </div>
+      {% if workbench_enabled %}<p id="local-metric-status" class="muted" role="status"></p>{% endif %}
+{% if workbench_enabled %}
+      <section id="run-detail" class="panel run-detail" aria-labelledby="run-detail-title" hidden>
+        <header class="panel-header">
+          <div><h2 id="run-detail-title">Chi tiết lượt train</h2><p id="run-detail-meta" class="muted"></p></div>
+          <button id="run-follow" type="button" aria-pressed="true">Theo mốc mới nhất</button>
+        </header>
+        <details id="run-profile" class="run-profile">
+          <summary>Hồ sơ lượt chạy</summary>
+          <div class="scope">
+            <span id="run-profile-status" role="status"></span>
+            <button id="run-profile-refresh" type="button">Cập nhật hồ sơ</button>
+          </div>
+          <dl id="run-profile-metadata" class="settings-rows"></dl>
+          <h3>Tệp đầu ra</h3>
+          <ul id="run-profile-files"></ul>
+        </details>
+        <div class="run-detail-charts">
+          <div><h3>Loss</h3><div id="run-loss"></div></div>
+          <div><h3>CPU, GPU và RAM (%)</h3><div id="run-machine"></div></div>
+        </div>
+        <div class="run-cursor">
+          <label for="run-time">Mốc điều tra (UTC)</label>
+          <input id="run-time" type="range" min="0" max="0" value="0" disabled>
+          <output id="run-time-value" for="run-time"></output>
+        </div>
+        <p id="run-coverage" class="muted"></p>
+        <div class="run-evidence">
+          <section><h3>Checkpoint ghi trong log</h3><div id="run-checkpoints"></div></section>
+          <section>
+            <h3>Log tại mốc đã chọn</h3>
+            <p id="run-log-note" class="muted" role="status"></p>
+            <pre id="run-log-context" tabindex="0"></pre>
+            <div id="run-source-links" class="run-source-links" aria-label="Tệp và dòng trong lỗi hoặc test fail"></div>
+          </section>
+        </div>
+      </section>
+      {% endif %}
+      </div>
+      <div id="monitor-terminal">
+      <section id="terminal-dock" class="panel terminal" aria-labelledby="terminal-title">
+        <header class="panel-header terminal-header">
+          <div class="terminal-title" id="terminal-title" aria-label="Công cụ dự án">
+            {% if workbench_enabled %}
+            <button type="button" data-dock-tab="terminal" aria-pressed="true" aria-controls="terminal-panes">Terminal</button>
+            <button type="button" data-dock-tab="problems" aria-pressed="false" aria-controls="dock-problems">Vấn đề <span id="dock-problem-count"></span></button>
+            <button type="button" data-dock-tab="output" aria-pressed="false" aria-controls="dock-output">Đầu ra</button>
+            <button type="button" data-dock-tab="ports" aria-pressed="false" aria-controls="dock-ports">Cổng</button>
+            <button type="button" data-dock-tab="debug" aria-pressed="false" aria-controls="dock-debug">Gỡ lỗi</button>
+            {% else %}<h2>Terminal</h2><span class="data-kind">Log cục bộ · Shell mẫu</span>{% endif %}
+          </div>
+          <div class="terminal-actions">
+            <select id="terminal-sessions" aria-label="Phiên terminal đang chọn"></select>
+            {% if workbench_enabled %}<select id="local-shell" aria-label="Loại shell"></select>{% endif %}
+            <button type="button" data-terminal-action="new" title="{{ tr('New session') }}">+ {{ tr('New session') }}</button>
+            <button type="button" data-terminal-action="log" aria-controls="terminal-log-content">{{ tr('Open log pane') }}</button>
+            <select id="terminal-split-menu" aria-label="Chia ô terminal">
+              <option value="">{{ tr("Split pane") }}</option>
+              <option value="right">Trái / phải</option>
+              <option value="down">Trên / dưới</option>
+            </select>
+            <select id="terminal-more-menu" aria-label="Thao tác với phiên terminal">
+              <option value="">{{ tr("Actions") }}</option>
+              {% if not workbench_desktop %}<option value="detach">Tách cửa sổ</option>{% endif %}
+            </select>
+            <button type="button" data-terminal-action="collapse" aria-expanded="true" aria-controls="terminal-panes">{{ tr("Collapse") }}</button>
+          </div>
+        </header>
+        <p class="terminal-status" id="terminal-status" role="status" hidden></p>
+        <div id="terminal-panes"></div>
+        {% if workbench_enabled %}
+        <div id="terminal-tool-pool" hidden>
+          <section id="dock-problems" class="dock-panel" aria-label="Vấn đề">
+            <section id="dock-code-problems" aria-label="Kiểm tra Python" hidden>
+              <p id="dock-code-problems-status" role="status"></p>
+              <ul id="dock-code-problem-rows"></ul>
+            </section>
+            <p id="dock-problems-status">Chờ nguồn log.</p><ul id="dock-problem-rows"></ul>
+          </section>
+          <section id="dock-output" class="dock-panel" aria-label="Đầu ra">
+            <div class="dock-tools" id="dock-output-run" hidden>
+              <span id="dock-output-status" role="status"></span>
+              <button type="button" id="dock-output-stop" hidden>Dừng lượt chạy</button>
+            </div>
+            <pre id="dock-output-text" tabindex="0">Chờ đầu ra của tệp log hoặc lượt chạy.</pre>
+          </section>
+          <section id="dock-ports" class="dock-panel" aria-label="Cổng TCP">
+            <div class="dock-tools"><span>Cổng TCP cục bộ · Ưu tiên cổng đang lắng nghe</span><button id="dock-ports-refresh" type="button">Làm mới</button></div>
+            <p id="dock-ports-status" role="status"></p>
+            <table><thead><tr><th scope="col">Địa chỉ</th><th scope="col">Cổng</th><th scope="col">PID</th><th scope="col">Trạng thái</th></tr></thead><tbody id="dock-port-rows"></tbody></table>
+          </section>
+          <section id="dock-debug" class="dock-panel" aria-label="Gỡ lỗi Python">
+            <div class="dock-tools"><span id="dock-debug-status" role="status">Mở một tệp Python trong Code.</span>
+              <button id="dock-debug-start" type="button" disabled>Chạy với pdb</button>
+              <button id="dock-debug-stop" type="button" hidden>Dừng</button>
+            </div>
+            <div class="live-shell" id="dock-debug-shell" hidden></div>
+          </section>
+        </div>
+        {% endif %}
+        <div id="terminal-log-pool" hidden>
+          <div id="terminal-log-content" class="terminal-log-content">
+            <div class="terminal-log-tools"><p id="terminal-scope"></p><button id="follow" type="button" aria-pressed="true">{{ tr("Follow tail") }}</button></div>
+            <div class="terminal-body" id="terminal-body" role="region" aria-label="Log gốc" tabindex="0"></div>
+          </div>
+        </div>
+      </section>
+      </div>
+    </section>
+    <section id="editor" aria-label="Code"{% if workspace_view != "editor" %} hidden{% endif %}>
+      <header class="workspace-bar">
+        <div class="breadcrumb"><span>Code</span><span aria-hidden="true">/</span><strong id="editor-project"></strong></div>
+        {% if not workbench_enabled %}<button type="button" id="editor-open-project">{{ tr("Open project") }}</button>{% endif %}
+      </header>
+      <section class="panel editor-panel" aria-label="Code">
+        <div id="editor-preview"{% if workbench_enabled %} hidden{% endif %}>
+          <div id="editor-tabs" class="editor-tabs" aria-label="Tệp đang mở"></div>
+          <p id="editor-file-path" class="editor-file-path" role="status"></p>
+          <pre id="editor-code" class="editor-code" aria-label="Nội dung tệp" tabindex="0"></pre>
+        </div>
+        {% if workbench_enabled %}
+        <div id="local-editor">
+          <div class="local-editor-tools">
+            <span id="local-editor-status" role="status"></span>
+            <select id="code-interpreter" aria-label="Interpreter Python của Code" hidden></select>
+            <button id="local-save" type="button" aria-keyshortcuts="Control+S Meta+S" title="Ctrl+S / ⌘S" disabled>Lưu tệp</button>
+            <button id="local-check-code" type="button" hidden>Kiểm tra Python</button>
+            <button id="local-format-code" type="button" hidden>Định dạng</button>
+            <button id="local-run-code" type="button" hidden>Chạy tệp</button>
+            <button id="local-run-file" type="button" title="Chạy Python và lưu log, chỉ số, lịch sử" hidden>Theo dõi lượt chạy</button>
+            <button id="code-split" type="button" aria-pressed="false" aria-controls="code-right">Chia đôi</button>
+          </div>
+          <div id="code-panes">
+            {% for side, label in [('left', 'Ô trái'), ('right', 'Ô phải')] %}
+            {% set suffix = '' if side == 'left' else '-right' %}
+            {% if side == 'right' %}
+            <div id="code-divider" role="separator" aria-label="Đổi chiều rộng hai ô" aria-orientation="vertical"
+                 aria-valuemin="25" aria-valuemax="75" aria-valuenow="50" tabindex="0" hidden></div>
+            {% endif %}
+            <section class="code-pane" id="code-{{ side }}" data-side="{{ side }}"{% if side == 'right' %} hidden{% endif %}>
+              <header class="code-pane-header">
+                <button class="code-tab" type="button" aria-pressed="{{ 'true' if side == 'left' else 'false' }}">{{ label }}</button>
+                <button class="code-close" type="button" aria-label="Đóng tệp ở {{ label|lower }}" hidden>×</button>
+              </header>
+              <p class="code-empty">Chọn tệp mã hoặc PDF trong cây dự án.</p>
+              <div class="local-editor-layer" hidden>
+                <pre class="editor-code code-highlight" aria-hidden="true"><code></code></pre>
+                <textarea id="local-code{{ suffix }}" class="editor-code code-input" aria-label="Mã nguồn · {{ label }}"
+                          spellcheck="false" wrap="off"></textarea>
+              </div>
+              <div class="pdf-preview" hidden>
+                <div class="pdf-tools">
+                  <button type="button" data-pdf="previous" aria-label="Trang trước">‹</button>
+                  <span class="pdf-page" aria-live="polite"></span>
+                  <button type="button" data-pdf="next" aria-label="Trang sau">›</button>
+                  <label>Thu phóng
+                    <select class="pdf-zoom" aria-label="Thu phóng PDF · {{ label }}">
+                      <option value="75">75%</option><option value="100" selected>100%</option>
+                      <option value="150">150%</option><option value="200">200%</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="pdf-scroll"><p class="pdf-status" role="status"></p><img class="pdf-image" alt="" hidden></div>
+              </div>
+            </section>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </section>
+      <div id="editor-terminal"></div>
+    </section>
+    <section id="settings" aria-label="Thiết lập ứng dụng"{% if workspace_view != "settings" %} hidden{% endif %}>
+      <header class="workspace-bar">
+        <div class="breadcrumb"><strong>{{ tr("Settings") }}</strong><span aria-hidden="true">/</span><span id="settings-path">{{ tr("Appearance") }}</span></div>
+      </header>
+      <section class="panel settings-panel" id="setting-appearance" aria-labelledby="appearance-title">
+        <h1 id="appearance-title">{{ tr("Appearance") }}</h1>
+        <p class="appearance-note">Bảng màu dùng chung cho các tab. Cảnh báo và lỗi giữ màu riêng để dễ nhận biết.</p>
+        <fieldset id="appearance-options">
+          <legend>{{ tr("Color theme") }}</legend>
+          <label class="theme-option"><input type="radio" name="appearance" value="graphite" checked>
+            <span class="theme-swatch" data-swatch="graphite" aria-hidden="true"></span>
+            <span><strong>{{ tr("Graphite") }}</strong><small>Nền than, chữ xám sáng.</small></span>
+          </label>
+          <label class="theme-option"><input type="radio" name="appearance" value="glass">
+            <span class="theme-swatch" data-swatch="glass" aria-hidden="true"></span>
+            <span><strong>{{ tr("Black glass") }}</strong><small>{{ tr("Dark glass with adjustable transparency in the desktop app.") }}</small></span>
+          </label>
+          <label class="theme-option"><input type="radio" name="appearance" value="glass-forest">
+            <span class="theme-swatch" data-swatch="glass-forest" aria-hidden="true"></span>
+            <span><strong>{{ tr("Forest green glass") }}</strong><small>{{ tr("Deep green glass with pale text.") }}</small></span>
+          </label>
+          <label class="theme-option"><input type="radio" name="appearance" value="glass-mint">
+            <span class="theme-swatch" data-swatch="glass-mint" aria-hidden="true"></span>
+            <span><strong>{{ tr("Light green glass") }}</strong><small>{{ tr("Mint green glass with dark text.") }}</small></span>
+          </label>
+          <label class="theme-option"><input type="radio" name="appearance" value="glass-blue">
+            <span class="theme-swatch" data-swatch="glass-blue" aria-hidden="true"></span>
+            <span><strong>{{ tr("Blue glass") }}</strong><small>{{ tr("Deep blue glass with cool highlights.") }}</small></span>
+          </label>
+          <label class="theme-option"><input type="radio" name="appearance" value="paper">
+            <span class="theme-swatch" data-swatch="paper" aria-hidden="true"></span>
+            <span><strong>{{ tr("Paper") }}</strong><small>Nền trắng ngà, chữ đen.</small></span>
+          </label>
+          <label class="theme-option"><input type="radio" name="appearance" value="mono">
+            <span class="theme-swatch" data-swatch="mono" aria-hidden="true"></span>
+            <span><strong>{{ tr("Monochrome") }}</strong><small>Nền đen, chữ trắng rõ.</small></span>
+          </label>
+          <label class="theme-option"><input type="radio" name="appearance" value="warm">
+            <span class="theme-swatch" data-swatch="warm" aria-hidden="true"></span>
+            <span><strong>{{ tr("Warm gray") }}</strong><small>Nền xám ngả be, chữ than.</small></span>
+          </label>
+        </fieldset>
+        <div id="glass-controls">
+          <label for="glass-transparency">{{ tr("Frame transparency") }}</label>
+          <div>
+            <input id="glass-transparency" type="range" min="0" max="100" step="1">
+            <output id="glass-transparency-value" for="glass-transparency"></output>
+            <button id="glass-reset" type="button">{{ tr("Reset") }}</button>
+          </div>
+        </div>
+        <p id="glass-unavailable" class="muted">{{ tr("Frame transparency is available when desktop glass is active.") }}</p>
+        <p id="appearance-status" class="muted" role="status"></p>
+      </section>
+      <section class="panel settings-panel" id="setting-language" aria-labelledby="lang-title" hidden>
+        <h1 id="lang-title">{{ tr("Language") }}</h1>
+        {% include "partials/language_picker.html" %}
+      </section>
+      <section class="panel settings-panel" id="setting-remote" aria-labelledby="remote-title" hidden>
+        <h1 id="remote-title">{{ tr("Remote machines") }}</h1>
+        {% if workbench_enabled %}
+        <p class="muted">Mở SSH trong terminal. Host key của máy đích cần có trong known_hosts của OpenSSH.</p>
+        <form id="local-ssh" class="local-form">
+          <label>Máy chủ <input name="host" maxlength="253" required></label>
+          <label>Tài khoản <input name="user" maxlength="64" required></label>
+          <label>Cổng <input name="port" type="number" min="1" max="65535" value="22" required></label>
+          <button type="submit">Mở SSH</button>
+        </form>
+        {% else %}<p>Mở qua trình khởi chạy cục bộ để dùng SSH.</p>{% endif %}
+      </section>
+      <section class="panel settings-panel" id="setting-environments" aria-labelledby="env-title" hidden>
+        <h1 id="env-title">{{ tr("Python and packages") }}</h1>
+        {% if workbench_enabled %}
+        <div class="local-form">
+          <label>Interpreter Python <select id="local-interpreter"></select></label>
+          <button id="local-list-packages" type="button">Xem gói đã cài</button>
+          <label>Tham số chạy Python dạng JSON <input id="local-run-args" placeholder='["--epochs","8"]'></label>
+          <label>Tệp cấu hình cho lượt chạy <textarea id="local-run-config" rows="2" maxlength="8200"
+            placeholder="configs/train.yaml" aria-describedby="local-run-config-note"></textarea></label>
+        </div>
+        <p id="local-run-config-note" class="muted">Tối đa 8 đường dẫn tương đối, mỗi dòng một tệp. Hồ sơ lưu SHA-256, không lưu nội dung.</p>
+        <pre id="local-package-list" class="editor-code">Chọn thư mục dự án để tìm Python và venv.</pre>
+        {% else %}<p>Mở qua trình khởi chạy cục bộ để chọn Python và kiểm tra thư viện.</p>{% endif %}
+        <dl class="settings-rows"><div><dt>Loại tệp trong dự án</dt><dd id="settings-file-types"></dd></div></dl>
+      </section>
+      <section class="panel settings-panel" id="setting-data" aria-labelledby="data-title" hidden>
+        <h1 id="data-title">{{ tr("Data") }}</h1>
+        <dl class="settings-rows">
+          <div><dt>Dự án đang xem</dt><dd id="settings-project"></dd></div>
+          <div><dt>Tệp trong cây dự án</dt><dd id="settings-file-count"></dd></div>
+          <div><dt>Nguồn log đang mở</dt><dd id="settings-log-source"></dd></div>
+          <div><dt>Dataset và kết quả phân tích</dt><dd><a class="button" href="{{ url_for('dashboard', workspace='logs') if workspace_has_database else url_for('dashboard', source='demo') }}">Mở phân tích</a></dd></div>
+          <div><dt>Luồng log mẫu</dt><dd><button type="button" id="use-demo">Mở minh họa</button></dd></div>
+        </dl>
+      </section>
+      <section class="panel settings-panel" id="setting-extensions" aria-labelledby="ext-title" hidden>
+        <h1 id="ext-title">{{ tr("Extensions") }}</h1>
+        {% if workbench_enabled %}
+        <fieldset id="local-features" class="local-form">
+          <legend>Bật hoặc tắt tiện ích tích hợp</legend>
+          <label><input type="checkbox" name="gpu"> Thu GPU và VRAM NVIDIA</label>
+          <label><input type="checkbox" name="ssh"> Phiên SSH</label>
+          <label><input type="checkbox" name="external_parsers"> Parser tệp bên ngoài</label>
+        </fieldset>
+        {% else %}<p>Mở qua trình khởi chạy cục bộ để quản lý tiện ích.</p>{% endif %}
+      </section>
+    </section>
+    <noscript><p>Bật JavaScript để mở tệp và dùng các công cụ dự án.</p></noscript>
+  </main>
+  {% if workbench_enabled %}
+  <dialog id="attach-run-dialog" class="panel" aria-labelledby="attach-run-title">
+    <form id="attach-run-form">
+      <header class="panel-header"><h2 id="attach-run-title">Gắn lượt train đang chạy</h2></header>
+      <label>Nhận diện bằng <select id="attach-run-mode"><option value="pid">PID</option><option value="run_id">run_id</option></select></label>
+      <div id="attach-run-pid-fields">
+        <label>PID <input name="pid" type="number" min="1" max="2147483647" step="1" required></label>
+        <label>Tệp log trong dự án <input name="log" maxlength="1024" placeholder="train.log"></label>
+        <label>Tệp loss trong dự án <input name="metrics" maxlength="1024" placeholder="metrics.csv"></label>
+      </div>
+      <label id="attach-run-id-field" hidden>run_id <input name="run_id" maxlength="64" disabled></label>
+      <p id="attach-run-hint" class="muted"></p>
+      <p id="attach-run-error" role="alert" hidden></p>
+      <footer><button type="button" id="attach-run-cancel">{{ tr("Cancel") }}</button><button type="submit">Theo dõi</button></footer>
+    </form>
+  </dialog>
+  {% endif %}
+  </div>
+</body>
+</html>

@@ -10,6 +10,7 @@ values match the provider. Eight paper PDFs are available; P03 failed at both th
 old mirror (404) and original author host (DNS failure). Raw downloads are ignored
 by Git. Local archive inspection and published baseline review are now available.
 
+- [Paper and dataset follow-up](PAPER_DATASET_DOWNLOADS_VI.md) records the expanded collection, artifact checksums, and sources still missing.
 - [Paper register](PAPERS.md): references, evidence inspected, and project relevance.
 - [Dataset catalog](DATASETS.md): eight distinct datasets, paper provenance,
   label semantics, public archive links, and adoption gates.
@@ -18,6 +19,7 @@ by Git. Local archive inspection and published baseline review are now available
 - [Baseline review](BASELINE_REVIEW.md): published metrics and evaluation protocols.
 - [Enterprise UI references](ENTERPRISE_UI_REFERENCES.md): six products, official
   visual sources and interaction patterns for the single-workspace design.
+- [Enterprise app architecture and code](ENTERPRISE_APP_CODE_TECH_VI.md) compares eight products, pinned source files, and H-logsen adoption tests.
 - [Download status](download_status.json): dataset verification and initial PDF attempts.
 - [Paper status](paper_download_status.json): paper download outcomes including the P03 retry.
 

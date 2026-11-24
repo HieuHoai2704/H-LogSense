@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "files_scanned": 225,
+  "actual_ignored_credentials_matched": 0,
+  "scan": "Exact known local credential values compared in memory; no values printed. Not a comprehensive security certification.",
+  "private_artifacts_ignored": true,
+  "no_push_or_merge": true,
+  "qa_runtime_shutdown": "graceful SQL SHUTDOWN after all tests; data retained",
+  "source_hash_report": "source-sha256.json"
+}

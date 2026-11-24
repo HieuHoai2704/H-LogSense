@@ -1,0 +1,283 @@
+{
+  "partitions": {
+    "later_test": {
+      "days_with_positives": 81,
+      "models": {
+        "window-lr": {
+          "daily_block_bootstrap_ci95": {
+            "fpr": [
+              0.002789218852638601,
+              0.018738654235105012
+            ],
+            "recall": [
+              0.9429019071160372,
+              0.9983931048869196
+            ]
+          },
+          "subgroups": {
+            "all_templates_seen_in_train": {
+              "auprc_average_precision": 0.9802429768605357,
+              "eligible_units": 69746,
+              "f1": 0.9886154976129269,
+              "fn": 14,
+              "fp": 17,
+              "fpr": 0.0002485888924633697,
+              "precision": 0.987527512839325,
+              "predicted_positive": 1363,
+              "recall": 0.9897058823529412,
+              "tn": 68369,
+              "tp": 1346
+            },
+            "all_templates_unseen": {
+              "auprc_average_precision": 0.9831249349032881,
+              "eligible_units": 368973,
+              "f1": 0.9590940329279589,
+              "fn": 857,
+              "fp": 3250,
+              "fpr": 0.01015723398204201,
+              "precision": 0.9367667373582116,
+              "predicted_positive": 51397,
+              "recall": 0.9825116317035344,
+              "tn": 316719,
+              "tp": 48147
+            },
+            "some_templates_unseen": {
+              "auprc_average_precision": 0.5269047149361904,
+              "eligible_units": 32112,
+              "f1": 0.6759002770083102,
+              "fn": 116,
+              "fp": 1,
+              "fpr": 3.137353328731882e-05,
+              "precision": 0.991869918699187,
+              "predicted_positive": 123,
+              "recall": 0.5126050420168067,
+              "tn": 31873,
+              "tp": 122
+            }
+          }
+        },
+        "window-xgb": {
+          "daily_block_bootstrap_ci95": {
+            "fpr": [
+              0.00029027308000518283,
+              0.007233332772324517
+            ],
+            "recall": [
+              0.9998554382029162,
+              1.0
+            ]
+          },
+          "subgroups": {
+            "all_templates_seen_in_train": {
+              "auprc_average_precision": 0.984061348879333,
+              "eligible_units": 69746,
+              "f1": 0.9934258582907232,
+              "fn": 0,
+              "fp": 18,
+              "fpr": 0.0002632117684906267,
+              "precision": 0.9869375907111756,
+              "predicted_positive": 1378,
+              "recall": 1.0,
+              "tn": 68368,
+              "tp": 1360
+            },
+            "all_templates_unseen": {
+              "auprc_average_precision": 0.9924292865482008,
+              "eligible_units": 368973,
+              "f1": 0.9905401034928849,
+              "fn": 0,
+              "fp": 936,
+              "fpr": 0.002925283386828099,
+              "precision": 0.981257509010813,
+              "predicted_positive": 49940,
+              "recall": 1.0,
+              "tn": 319033,
+              "tp": 49004
+            },
+            "some_templates_unseen": {
+              "auprc_average_precision": 0.9566197440379237,
+              "eligible_units": 32112,
+              "f1": 0.9251968503937008,
+              "fn": 3,
+              "fp": 35,
+              "fpr": 0.0010980736650561586,
+              "precision": 0.8703703703703703,
+              "predicted_positive": 270,
+              "recall": 0.9873949579831933,
+              "tn": 31839,
+              "tp": 235
+            }
+          }
+        }
+      },
+      "observed_days": 96,
+      "positive_parsed_event_count": 54723,
+      "positive_parsed_event_labels_top_6": [
+        [
+          "APPSEV",
+          32589
+        ],
+        [
+          "KERNTERM",
+          6151
+        ],
+        [
+          "KERNREC",
+          6145
+        ],
+        [
+          "KERNMNTF",
+          4107
+        ],
+        [
+          "APPRES",
+          2256
+        ],
+        [
+          "APPTO",
+          1991
+        ]
+      ]
+    },
+    "test": {
+      "days_with_positives": 27,
+      "models": {
+        "window-lr": {
+          "daily_block_bootstrap_ci95": {
+            "fpr": [
+              0.00018525729136771485,
+              0.0049574630891424075
+            ],
+            "recall": [
+              0.9977722790276577,
+              0.9993111575168976
+            ]
+          },
+          "subgroups": {
+            "all_templates_seen_in_train": {
+              "auprc_average_precision": 0.9968624456492787,
+              "eligible_units": 13972,
+              "f1": 0.9965986394557823,
+              "fn": 9,
+              "fp": 5,
+              "fpr": 0.00041974479516453995,
+              "precision": 0.997568093385214,
+              "predicted_positive": 2056,
+              "recall": 0.9956310679611651,
+              "tn": 11907,
+              "tp": 2051
+            },
+            "all_templates_unseen": {
+              "auprc_average_precision": 0.9995378012915072,
+              "eligible_units": 60678,
+              "f1": 0.9985591826636201,
+              "fn": 39,
+              "fp": 60,
+              "fpr": 0.002278509854555121,
+              "precision": 0.9982540883431298,
+              "predicted_positive": 34366,
+              "recall": 0.9988644635318096,
+              "tn": 26273,
+              "tp": 34306
+            },
+            "some_templates_unseen": {
+              "auprc_average_precision": 0.9990326384664334,
+              "eligible_units": 820,
+              "f1": 0.9929947460595446,
+              "fn": 6,
+              "fp": 2,
+              "fpr": 0.008097165991902834,
+              "precision": 0.9964850615114236,
+              "predicted_positive": 569,
+              "recall": 0.9895287958115183,
+              "tn": 245,
+              "tp": 567
+            }
+          }
+        },
+        "window-xgb": {
+          "daily_block_bootstrap_ci95": {
+            "fpr": [
+              0.00037173211585207587,
+              0.003037297878855079
+            ],
+            "recall": [
+              0.9998523305230836,
+              1.0
+            ]
+          },
+          "subgroups": {
+            "all_templates_seen_in_train": {
+              "auprc_average_precision": 0.9953226297303884,
+              "eligible_units": 13972,
+              "f1": 0.9973359166868491,
+              "fn": 1,
+              "fp": 10,
+              "fpr": 0.0008394895903290799,
+              "precision": 0.9951667472208796,
+              "predicted_positive": 2069,
+              "recall": 0.9995145631067961,
+              "tn": 11902,
+              "tp": 2059
+            },
+            "all_templates_unseen": {
+              "auprc_average_precision": 0.9999999406536804,
+              "eligible_units": 60678,
+              "f1": 0.9998398858823015,
+              "fn": 0,
+              "fp": 11,
+              "fpr": 0.00041772680666843885,
+              "precision": 0.9996798230294562,
+              "predicted_positive": 34356,
+              "recall": 1.0,
+              "tn": 26322,
+              "tp": 34345
+            },
+            "some_templates_unseen": {
+              "auprc_average_precision": 0.9858551030280278,
+              "eligible_units": 820,
+              "f1": 0.9752770673486786,
+              "fn": 1,
+              "fp": 28,
+              "fpr": 0.11336032388663968,
+              "precision": 0.9533333333333334,
+              "predicted_positive": 600,
+              "recall": 0.9982547993019197,
+              "tn": 219,
+              "tp": 572
+            }
+          }
+        }
+      },
+      "observed_days": 30,
+      "positive_parsed_event_count": 37835,
+      "positive_parsed_event_labels_top_6": [
+        [
+          "KERNMNTF",
+          26722
+        ],
+        [
+          "APPSEV",
+          9248
+        ],
+        [
+          "KERNTERM",
+          1087
+        ],
+        [
+          "KERNRTSP",
+          479
+        ],
+        [
+          "LINKIAP",
+          150
+        ],
+        [
+          "KERNMC",
+          64
+        ]
+      ]
+    }
+  },
+  "scope": "diagnostics after tests; no model or threshold changes"
+}

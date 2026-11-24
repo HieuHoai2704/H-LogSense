@@ -286,6 +286,20 @@ class PlatformMySQLTests(unittest.TestCase):
             generate_alerts(self.engine, self.dataset_id, run_id),
             {"created": 0, "suppressed": 0},
         )
+        from flask_mail import Mail
+
+        blocked_transport = MagicMock()
+        with self.app.app_context(), patch.dict(os.environ, {"SMTP_ENABLED": "1", "MAIL_SUPPRESS_SEND": "1"}):
+            with Mail().record_messages() as messages:
+                preview = deliver_notifications(self.engine, smtp_factory=blocked_transport)
+        self.assertEqual(preview, {"status": "suppressed", "sent": 0, "captured": 1})
+        blocked_transport.assert_not_called()
+        self.assertIn("<h1>H-logsen investigation alert</h1>", messages[0].html)
+        with self.app.app_context():
+            self.assertIn(b"alert-reference.csv", messages[0].as_bytes())
+        with Session(self.engine) as session:
+            pending = session.scalar(select(Notification).where(Notification.dataset_id == self.dataset_id))
+            self.assertEqual((pending.state, pending.attempts), ("pending", 0))
         smtp = MagicMock()
         with patch.dict(
             os.environ,
@@ -298,8 +312,8 @@ class PlatformMySQLTests(unittest.TestCase):
         ):
             delivered = deliver_notifications(self.engine, smtp_factory=smtp)
         self.assertEqual(delivered["sent"], 1)
-        smtp.return_value.__enter__.return_value.starttls.assert_called_once()
-        smtp.return_value.__enter__.return_value.send_message.assert_called_once()
+        smtp.return_value.starttls.assert_called_once()
+        smtp.return_value.sendmail.assert_called_once()
         self.assertEqual(
             deliver_notifications(self.engine), {"status": "disabled", "sent": 0}
         )
@@ -471,9 +485,9 @@ class PlatformMySQLTests(unittest.TestCase):
         status = self.client.get("/api/v1/detection/jobs/" + str(first.json["job_id"]))
         self.assertEqual(status.json["state"], "completed", status.json)
 
-    def test_15_upload_disabled_and_size_limit(self):
+    def test_15_upload_requires_auth_and_unrelated_size_limit(self):
         self.assertEqual(
-            self.client.post("/api/v1/uploads", data=b"test").status_code, 404
+            self.client.post("/api/v1/uploads", data=b"test").status_code, 403
         )
         self.assertEqual(
             self.client.post(

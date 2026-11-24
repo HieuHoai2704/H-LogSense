@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "bootstrap5/form.html" import render_field %}
+{% block title %}{{ tr("Dataset management") }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ tr("Dataset management") }}</h1>
+<p class="text-secondary">{{ tr("Rendered at") }} {{ moment(viewed_at).format('LLLL') }}
+  <time datetime="{{ viewed_at.isoformat() }}">{{ viewed_at.strftime('%Y-%m-%d %H:%M UTC') }}</time>
+</p>
+{% if form %}
+<section class="card card-body mb-4">
+  <h2 class="h4">{{ tr("Register dataset") }}</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    {% for error in form.csrf_token.errors %}<p class="alert alert-danger">{{ error }}</p>{% endfor %}
+    {{ render_field(form.name) }}
+    {{ render_field(form.dataset_key) }}
+    {{ render_field(form.data_mode) }}
+    {{ render_field(form.source_id) }}
+    <button class="btn btn-primary">{{ tr("Register dataset") }}</button>
+  </form>
+</section>
+{% endif %}
+<div class="table-responsive">
+  <table class="table">
+    <thead><tr><th>{{ tr("Dataset") }}</th><th>{{ tr("Key") }}</th><th>{{ tr("State") }}</th><th>{{ tr("Actions") }}</th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>{{ row.name }}</td><td>{{ row.dataset_key }}</td><td>{{ tr(row.state) }}</td>
+        <td>
+          <a href="{{ url_for('dashboard', workspace='logs', dataset_id=row.id) }}">{{ tr("View logs") }}</a>
+          {% if can_write %}<a class="ms-2" href="{{ url_for('dataset_pages.edit', dataset_id=row.id, action='rename') }}">{{ tr("Rename") }}</a>{% endif %}
+          {% if can_delete and row.input_revision == 0 %}<a class="ms-2" href="{{ url_for('dataset_pages.edit', dataset_id=row.id, action='delete') }}">{{ tr("Delete empty dataset") }}</a>{% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4">{{ tr("No datasets on this page.") }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if next_id %}<a href="{{ url_for('dataset_pages.index', after_id=next_id) }}">{{ tr("Next page") }}</a>{% endif %}
+{% endblock %}
+{% block scripts %}{{ moment.include_moment(local_js=url_for('static', filename='vendor/moment/moment.min.js')) }}{% endblock %}

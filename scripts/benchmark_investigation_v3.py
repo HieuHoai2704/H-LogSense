@@ -162,7 +162,7 @@ def main():
             with sync_playwright() as p:
                 browser = p.chromium.launch(channel='msedge', headless=True)
                 page = browser.new_page(viewport={'width':1440, 'height':900})
-                page.goto(base, wait_until='networkidle')
+                page.goto(base + '/?source=demo', wait_until='networkidle')
                 browser_rows = []
                 for name, params in [('workspace_1h', {'range':'1h'}), ('workspace_120_bins', dense)]:
                     target = '/api/v1/investigation?'+urlencode(params)

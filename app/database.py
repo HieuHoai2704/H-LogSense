@@ -63,6 +63,15 @@ def configure_database(app):
     from app.api.alerts import alerts_api
 
     app.register_blueprint(alerts_api)
+    from app.api.datasets import datasets_api
+
+    app.register_blueprint(datasets_api)
+    from app.api.forms import forms_api
+
+    app.register_blueprint(forms_api)
+    from app.api.uploads import uploads_api
+
+    app.register_blueprint(uploads_api)
 
     @app.get("/api/v1/health/database")
     def database_health():

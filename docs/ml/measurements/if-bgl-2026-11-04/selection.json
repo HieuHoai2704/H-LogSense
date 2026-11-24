@@ -1,0 +1,29 @@
+{
+  "baseline_artifact_sha256": "97b0a9190cc54059c3d277f13e06121071be1e63761a93bf7ca0cbb3c4bdee90",
+  "comparison": "<",
+  "feature_names": [
+    "log1p_event_count",
+    "high_severity_fraction",
+    "distinct_template_fraction",
+    "dominant_template_fraction",
+    "log1p_mean_message_length"
+  ],
+  "frozen_at_utc": "2026-11-04T08:45:03.194157+00:00",
+  "manifest_sha256": "5479cb97fb05b4797d734b161c92c538c07eecec5db14d4ad0c53507de348a3d",
+  "model_artifact": {
+    "key": "selected.joblib",
+    "sha256": "869dc98542f9886db6901c7c20e4f84cb803ccc3c6e20d8370cf1811ffde19e1"
+  },
+  "score_direction": "lower",
+  "selected": {
+    "features": "base",
+    "id": "base-200-1024",
+    "max_samples": 1024,
+    "n_estimators": 200,
+    "seed": 42
+  },
+  "threshold": -0.7587904039488941,
+  "threshold_policy": "labeled validation F1 maximum subject to FPR cap; no test tuning",
+  "threshold_uses_validation_labels": true,
+  "validation_sha256": "ef1eb525d149b239a0cd1b34e7585d509dbfce287728b27c79628ef8cd90b934"
+}

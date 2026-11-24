@@ -158,7 +158,9 @@ class EvidenceTests(unittest.TestCase):
 
     def test_access_denial_is_enforced_for_all_anomaly_surfaces_and_page(self):
         self.app.config['DEMO_READ_ENABLED'] = False
-        paths = ['/', '/api/v1/investigation', '/api/v1/anomalies', '/api/v1/anomalies/export',
+        self.assertEqual(self.client.get('/').status_code, 200)
+        self.assertEqual(self.client.get('/', headers={'X-Workspace-Fragment': '1'}).status_code, 403)
+        paths = ['/?source=demo', '/api/v1/investigation', '/api/v1/anomalies', '/api/v1/anomalies/export',
                  '/api/v1/anomalies/timeline', '/api/v1/anomalies/LS-1042', '/api/v1/anomalies/LS-1042/evidence',
                  '/api/v1/anomalies/LS-1042/related', '/api/v1/anomalies/LS-1042/evidence/raw', '/api/v1/anomalies/LS-1042/evidence/export']
         for path in paths:

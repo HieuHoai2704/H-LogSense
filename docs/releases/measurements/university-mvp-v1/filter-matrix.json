@@ -1,0 +1,460 @@
+{
+  "anomaly_reference_facts": 158,
+  "cases": [
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.0970655999990413,
+      "case": "all",
+      "csv_seconds_inprocess": 0.023067299989634193,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03223959999741055,
+      "case": "host_single",
+      "csv_seconds_inprocess": 0.008910000004107133,
+      "family": "anomaly",
+      "global_expected": 1,
+      "selected_expected": 1,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.026620999997248873,
+      "case": "host_OR_two",
+      "csv_seconds_inprocess": 0.007470800002920441,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 2,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.04276450000179466,
+      "case": "priority_high",
+      "csv_seconds_inprocess": 0.02255670000158716,
+      "family": "anomaly",
+      "global_expected": 153,
+      "selected_expected": 153,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.025311899997177534,
+      "case": "priority_medium",
+      "csv_seconds_inprocess": 0.007413100000121631,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03614029999880586,
+      "case": "priority_OR",
+      "csv_seconds_inprocess": 0.020367199991596863,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.043596900010015815,
+      "case": "detector_OR",
+      "csv_seconds_inprocess": 0.02252549999684561,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03398459999880288,
+      "case": "time_start_inclusive",
+      "csv_seconds_inprocess": 0.01475370000116527,
+      "family": "anomaly",
+      "global_expected": 97,
+      "selected_expected": 97,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03320720000192523,
+      "case": "time_end_exclusive",
+      "csv_seconds_inprocess": 0.012789900007192045,
+      "family": "anomaly",
+      "global_expected": 61,
+      "selected_expected": 61,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.033300399998552166,
+      "case": "time_boundary_empty",
+      "csv_seconds_inprocess": 0.0057043999986490235,
+      "family": "anomaly",
+      "global_expected": 0,
+      "selected_expected": 0,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03304310000385158,
+      "case": "search_host_literal",
+      "csv_seconds_inprocess": 0.011088700004620478,
+      "family": "anomaly",
+      "global_expected": 1,
+      "selected_expected": 1,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.027310700010275468,
+      "case": "search_detector_literal",
+      "csv_seconds_inprocess": 0.009056900002178736,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.028234099998371676,
+      "case": "search_percent_underscore_literal_empty",
+      "csv_seconds_inprocess": 0.008721199992578477,
+      "family": "anomaly",
+      "global_expected": 0,
+      "selected_expected": 0,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.0356508999975631,
+      "case": "timezone_local",
+      "csv_seconds_inprocess": 0.02103670001088176,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.037800200007040985,
+      "case": "timezone_dst_zone",
+      "csv_seconds_inprocess": 0.021123000013176352,
+      "family": "anomaly",
+      "global_expected": 158,
+      "selected_expected": 158,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03664260001096409,
+      "case": "detector_1",
+      "csv_seconds_inprocess": 0.020205799999530427,
+      "family": "anomaly",
+      "global_expected": 153,
+      "selected_expected": 153,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.02293229999486357,
+      "case": "detector_2",
+      "csv_seconds_inprocess": 0.007578100005048327,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03206050000153482,
+      "case": "run_1",
+      "csv_seconds_inprocess": 0.019477699999697506,
+      "family": "anomaly",
+      "global_expected": 153,
+      "selected_expected": 153,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.0202560000034282,
+      "case": "run_2",
+      "csv_seconds_inprocess": 0.0066026999993482605,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03200439999636728,
+      "case": "version_1",
+      "csv_seconds_inprocess": 0.019133900001179427,
+      "family": "anomaly",
+      "global_expected": 153,
+      "selected_expected": 153,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.019391599998925813,
+      "case": "version_2",
+      "csv_seconds_inprocess": 0.006716400006553158,
+      "family": "anomaly",
+      "global_expected": 5,
+      "selected_expected": 5,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.03317379999498371,
+      "case": "AND_host_priority_detector",
+      "csv_seconds_inprocess": 0.009504200002993457,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 2,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.028348299994831905,
+      "case": "AND_impossible_priority_detector",
+      "csv_seconds_inprocess": 0.008641099993837997,
+      "family": "anomaly",
+      "global_expected": 0,
+      "selected_expected": 0,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.02836820000084117,
+      "case": "selection_adds_to_host",
+      "csv_seconds_inprocess": 0.00870059999579098,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 1,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.029773300004308112,
+      "case": "selection_detector_adds_to_host",
+      "csv_seconds_inprocess": 0.026605999999446794,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 1,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "all_time_bins_match_reference": true,
+      "api_seconds_inprocess": 0.024911800006520934,
+      "case": "clear_selection_keeps_host",
+      "csv_seconds_inprocess": 0.00799469999037683,
+      "family": "anomaly",
+      "global_expected": 2,
+      "selected_expected": 2,
+      "status": "PASS",
+      "table_csv_exact_ids_match": true
+    },
+    {
+      "api_seconds_inprocess": 0.02505489999020938,
+      "case": "logs_all",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 100000,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.04933779999555554
+    },
+    {
+      "api_seconds_inprocess": 0.14512780000222847,
+      "case": "logs_severity_INFO",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 93738,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.1539848999964306
+    },
+    {
+      "api_seconds_inprocess": 0.14713599999959115,
+      "case": "logs_severity_ERROR_FATAL_OR",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 6262,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.12437980000686366
+    },
+    {
+      "api_seconds_inprocess": 0.010244300006888807,
+      "case": "logs_host",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 4865,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.00913570000557229
+    },
+    {
+      "api_seconds_inprocess": 0.01651309999579098,
+      "case": "logs_host_AND_severity",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 4865,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.014738800004124641
+    },
+    {
+      "api_seconds_inprocess": 0.28461290000996087,
+      "case": "logs_literal_percent_underscore",
+      "csv_tested": true,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 0,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.1346915999893099
+    },
+    {
+      "api_seconds_inprocess": 0.1391544999933103,
+      "case": "logs_message_literal",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 5854,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.13778889999957755
+    },
+    {
+      "api_seconds_inprocess": 0.024809099995763972,
+      "case": "logs_start_boundary_excluded",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 99995,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.04957799999101553
+    },
+    {
+      "api_seconds_inprocess": 0.025523600008455105,
+      "case": "logs_cursor_reference_first_page",
+      "csv_tested": false,
+      "family": "logs",
+      "first_page_ids_match_sql": true,
+      "sql_expected_count": 100000,
+      "status": "PASS",
+      "timeline_count_matches_sql": true,
+      "timeline_seconds_inprocess": 0.04914970000390895
+    },
+    {
+      "api_seconds_inprocess": 0.02476649999152869,
+      "case": "logs_cursor_second_page",
+      "family": "logs",
+      "stable_ids_match_independent_sql": true,
+      "status": "PASS"
+    },
+    {
+      "actual_http": 400,
+      "api_seconds_inprocess": 0.0032247999915853143,
+      "case": "logs_bad_cursor",
+      "expected_http": 400,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 400,
+      "api_seconds_inprocess": 0.0017442999960621819,
+      "case": "logs_snapshot_filter_changed",
+      "expected_http": 400,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 403,
+      "api_seconds_inprocess": 0.00176090000604745,
+      "case": "logs_other_dataset",
+      "expected_http": 403,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 403,
+      "api_seconds_inprocess": 0.001180699997348711,
+      "case": "anomaly_other_dataset",
+      "expected_http": 403,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 400,
+      "api_seconds_inprocess": 0.0010962999949697405,
+      "case": "anomaly_invalid_detector",
+      "expected_http": 400,
+      "family": "validation_isolation",
+      "status": "PASS"
+    },
+    {
+      "actual_http": 400,
+      "api_seconds_inprocess": 0.0011940999975195155,
+      "case": "anomaly_invalid_priority",
+      "expected_http": 400,
+      "family": "validation_isolation",
+      "status": "PASS"
+    }
+  ],
+  "data": "actual BGL 100K import in isolated QA MySQL on port13307",
+  "errors": [],
+  "failed_cases": 0,
+  "latency_note": "Measured per-call Flask test client, including bounded payload consumption; not network latency or a production p95 SLO.",
+  "not_run": [
+    "Native macOS",
+    "Model quality changes",
+    "Coverage proof beyond observed import"
+  ],
+  "passed_cases": 42,
+  "phase": "post-restart-only",
+  "reference_policy": "Independent Python filtering of exact SQL anomaly facts; logs COUNT/limited IDs use separate SQL, never API query helpers.",
+  "status": "PASS",
+  "wall_seconds": 4.704763999994611,
+  "writes": "Session login only; no application records, job, schema or UI mutations."
+}

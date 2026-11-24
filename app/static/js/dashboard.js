@@ -1,4 +1,5 @@
 "use strict";
+const t = window.logsenseTranslate;
 // Applied state belongs to the last successful, atomic server response.
 const initial = JSON.parse(document.getElementById("initial-state").textContent);
 let applied = initial.state;
@@ -39,7 +40,7 @@ function exportAvailability(disabled) {
 }
 function markDirty() {
   editVersion++; dirty = true; exportAvailability(true);
-  status.textContent = "Filters changed — Apply or Done to update. Results still show: " + scopeLabel(applied);
+  status.textContent = t("Filters changed — Apply or Done to update. Results still show: {0}", scopeLabel(applied));
 }
 function notify(message) {
   const toast = document.getElementById("toast"); toast.textContent = message; toast.hidden = false;
@@ -106,11 +107,11 @@ async function load(url, historyMode = "push") {
   const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, 15000);
   retryURL = url; mount.setAttribute("aria-busy", "true");
   document.getElementById("request-error").hidden = true; exportAvailability(true);
-  status.textContent = `Updating requested scope… Showing previous results: ${scopeLabel(applied)}`;
+  status.textContent = t("Updating requested scope… Showing previous results: {0}", scopeLabel(applied));
   try {
     const response = await fetch(apiURL, {signal: controller.signal});
-    const data = await response.json().catch(() => { throw new Error("Server response unavailable. Retry this query."); });
-    if (!response.ok) throw new Error(data.error?.message || "Query failed.");
+    const data = await response.json().catch(() => { throw new Error(t("Server response unavailable. Retry this query.")); });
+    if (!response.ok) throw new Error(data.error?.message || t("Query failed."));
     if (ticket !== sequence) return;
     const focus = focusDescriptor();
     const scroll = document.querySelector(".timeline-scroll")?.scrollLeft || 0;
@@ -134,14 +135,14 @@ async function load(url, historyMode = "push") {
     const canonical = stateURL();
     if (historyMode === "push" && canonical.href !== location.href) history.pushState({}, "", canonical);
     if (historyMode === "replace") history.replaceState({}, "", canonical);
-    status.textContent = `Query ready · ${data.result_count} results · ${data.query_ms} ms · ${data.mode === "database" ? "MYSQL" : "DEMO"}${dirty ? " · Unapplied filter changes" : ""}`;
+    status.textContent = t("Query ready · {0} results · {1} ms · {2}{3}", data.result_count, data.query_ms, data.mode === "database" ? "MYSQL" : "DEMO", dirty ? t(" · Unapplied filter changes") : "");
     restoreFocus(focus);
   } catch (error) {
     if ((error.name !== "AbortError" || timedOut) && ticket === sequence) {
       dirty = true;
       document.getElementById("request-error").hidden = false;
-      document.getElementById("error-message").textContent = `${timedOut ? "Query timed out after 15 seconds." : error.message} Previous results retained. Requested filters have not been applied.`;
-      status.textContent = "Query failed. Showing previous scope: " + scopeLabel(applied);
+      document.getElementById("error-message").textContent = t("{0} Previous results retained. Requested filters have not been applied.", timedOut ? t("Query timed out after 15 seconds.") : error.message);
+      status.textContent = t("Query failed. Showing previous scope: {0}", scopeLabel(applied));
     }
   } finally {
     clearTimeout(timeout);
@@ -154,7 +155,7 @@ function changeRange(url, start, end) {
   url.searchParams.set("resolution", "auto"); return url;
 }
 function navigate(action) {
-  if (dirty && !pending) { notify("Apply or revert filter changes before navigating the timeline."); return; }
+  if (dirty && !pending) { notify(t("Apply or revert filter changes before navigating the timeline.")); return; }
   const a = Date.parse(applied.start_time), b = Date.parse(applied.end_time), span = b-a;
   let start = a, end = b;
   if (action === "in") { start = a+span/4; end = b-span/4; }
@@ -163,11 +164,11 @@ function navigate(action) {
   if (action === "next") { start += span; end += span; }
   if (action === "selection") { start = Date.parse(applied.selection_start); end = Date.parse(applied.selection_end); }
   if (action === "reset") { start = Date.parse(applied.base_start_time); end = Date.parse(applied.base_end_time); }
-  if (!Number.isFinite(start+end) || end-start < 60000 || end-start > 366*86400000) { notify("Choose a range between one minute and 366 days."); return; }
+  if (!Number.isFinite(start+end) || end-start < 60000 || end-start > 366*86400000) { notify(t("Choose a range between one minute and 366 days.")); return; }
   load(changeRange(stateURL(), start, end));
 }
 function selectRange(first, last) {
-  if (dirty) { notify("Apply or revert filter changes before selecting bins."); return; }
+  if (dirty) { notify(t("Apply or revert filter changes before selecting bins.")); return; }
   const url = clearSelection(stateURL());
   url.searchParams.set("selection_start", first < last ? first : last);
   // Caller supplies chronological start and exclusive end in normal cases.
@@ -177,7 +178,7 @@ function selectRange(first, last) {
 function inspectCell(cell) {
   const severity = JSON.parse(cell.dataset.breakdown);
   const name = cell.dataset.detector ? document.querySelector(`[name="detector"][value="${CSS.escape(cell.dataset.detector)}"]`)?.parentElement.querySelector("span")?.textContent : "Overall";
-  document.getElementById("bin-inspector").textContent = `${name} · ${cell.dataset.label} · ${cell.dataset.count} anomalies · C ${severity.Critical}, H ${severity.High}, M ${severity.Medium}, L ${severity.Low} · ${cell.dataset.coverage} ${applied.source.startsWith('db-') ? 'data' : 'fixture'} coverage${cell.dataset.coverage !== "complete" ? " — observed count may be incomplete" : ""}`;
+  document.getElementById("bin-inspector").textContent = t("{0} · {1} · {2} anomalies · C {3}, H {4}, M {5}, L {6} · {7} {8} coverage{9}", name, cell.dataset.label, cell.dataset.count, severity.Critical, severity.High, severity.Medium, severity.Low, cell.dataset.coverage, applied.source.startsWith('db-') ? t("data") : t("fixture"), cell.dataset.coverage !== "complete" ? t(" — observed count may be incomplete") : "");
 }
 function previewRange(start, end) {
   mount.querySelectorAll("[data-cell]").forEach(c => c.classList.toggle("brush-preview", c.dataset.start < end && c.dataset.end > start));
@@ -199,24 +200,24 @@ function markSelectedRow() {
     row.querySelectorAll("[data-event-id]").forEach(button => {
       button.setAttribute("aria-expanded", String(selected));
       button.setAttribute("aria-controls", "detail-panel");
-      if (button.classList.contains("inspect-button")) button.textContent = selected ? "Selected" : "Inspect →";
+      if (button.classList.contains("inspect-button")) button.textContent = selected ? t("Selected") : t("Inspect →");
     });
   });
 }
 function closeDetail(restore = true) { window.EvidenceDrawer.close(restore); }
 function openDetail(id, trigger = null) { return window.EvidenceDrawer.open(id, trigger); }
 async function exportCSV(link) {
-  if (pending || dirty || link.dataset.exporting) { notify("Wait for the applied scope before exporting."); return; }
-  link.dataset.exporting = "true"; link.textContent = "Exporting…";
+  if (pending || dirty || link.dataset.exporting) { notify(t("Wait for the applied scope before exporting.")); return; }
+  link.dataset.exporting = "true"; link.textContent = t("Exporting…");
   try {
     const response = await fetch(link.href);
-    if (!response.ok) { const data = await response.json(); throw new Error(data.error?.message || "Export failed."); }
+    if (!response.ok) { const data = await response.json(); throw new Error(data.error?.message || t("Export failed.")); }
     const file = URL.createObjectURL(await response.blob());
     const download = document.createElement("a"); download.href = file; download.download = "synthetic-investigation-results.csv"; download.click();
     setTimeout(() => URL.revokeObjectURL(file), 1000);
-    notify(`Exported ${response.headers.get("X-Result-Count")} synthetic anomalies from the applied scope.`);
+    notify(t("Exported {0} anomalies from the applied scope.", response.headers.get("X-Result-Count")));
   } catch (error) { notify(error.message); }
-  finally { if (link.isConnected) link.textContent = "Export scoped CSV"; delete link.dataset.exporting; }
+  finally { if (link.isConnected) link.textContent = t("Export scoped CSV"); delete link.dataset.exporting; }
 }
 
 document.addEventListener("submit", event => { if (event.target.id === "filters") { event.preventDefault(); load(formURL()); } });
@@ -242,7 +243,7 @@ document.addEventListener("click", event => {
   if (link && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.button === 0) {
     event.preventDefault();
     if (suppressClick) return;
-    if (dirty && link.hasAttribute("data-cell")) { notify("Apply or revert filters before selecting a bin."); return; }
+    if (dirty && link.hasAttribute("data-cell")) { notify(t("Apply or revert filters before selecting a bin.")); return; }
     load(new URL(link.href)); return;
   }
   const inspect = target.closest("[data-event-id]"); if (inspect) { openDetail(inspect.dataset.eventId, inspect); return; }
@@ -260,7 +261,7 @@ document.addEventListener("click", event => {
     const select = target.id === "select-exact-range";
     const a = document.getElementById(select ? "selection-input-start" : "custom-start").value;
     const b = document.getElementById(select ? "selection-input-end" : "custom-end").value;
-    if (!a || !b || Date.parse(a+"Z") >= Date.parse(b+"Z")) { notify("Enter a valid start and exclusive end in UTC."); return; }
+    if (!a || !b || Date.parse(a+"Z") >= Date.parse(b+"Z")) { notify(t("Enter a valid start and exclusive end in UTC.")); return; }
     if (select) selectRange(new Date(a+"Z").toISOString(), new Date(b+"Z").toISOString());
     else { const url = changeRange(formURL(), Date.parse(a+"Z"), Date.parse(b+"Z")); url.searchParams.delete("base_start_time"); url.searchParams.delete("base_end_time"); load(url); }
   }

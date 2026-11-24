@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} · {{ tr(title) }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ code }} · {{ tr(title) }}</h1>
+<p>{% if code == 404 %}{{ tr("This page could not be found.") }}{% else %}{{ tr("The server could not complete the request.") }}{% endif %}</p>
+{% endblock %}

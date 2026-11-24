@@ -1,0 +1,14 @@
+{
+  "schemas": [
+    "logsense_test_18c4c8bd4895",
+    "logsense_test_3203703ddb04"
+  ],
+  "tests": 123,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "mysql_integration": "PASS",
+  "cleanup": "No database/table/volume dropped. Generated fixtures retained.",
+  "exit_code": 0,
+  "wall_seconds": 31.97859340001014
+}

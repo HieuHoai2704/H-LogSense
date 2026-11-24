@@ -1,5 +1,6 @@
 "use strict";
 (() => {
+  const t = window.logsenseTranslate;
   const form = document.getElementById("log-filters"),
     panel = document.getElementById("incident-workspace"),
     status = document.getElementById("incident-status");
@@ -8,7 +9,8 @@
     job = null,
     selected = null,
     before = null,
-    alertOpener = null;
+    alertOpener = null,
+    validatedModel = null;
   const dataset = () => Number(form.elements.dataset_id.value);
   async function request(path, method = "GET", body = null) {
     const options = { method, headers: { "Content-Type": "application/json" } };
@@ -18,7 +20,7 @@
       data = await r.json();
     if (!r.ok)
       throw new Error(
-        data.error?.message || data.error?.code || "Operation failed",
+        data.error?.message || data.error?.code || t("Operation failed"),
       );
     return data;
   }
@@ -53,9 +55,9 @@
         const td = document.createElement("td"),
           edit = document.createElement("button"),
           inspect = document.createElement("button");
-        edit.textContent = "Manage " + alert.id;
+        edit.textContent = t("Manage {0}", alert.id);
         edit.onclick = () => selectAlert(alert.id);
-        inspect.textContent = "Inspect evidence";
+        inspect.textContent = t("Inspect evidence");
         inspect.onclick = () => evidence(alert, inspect);
         td.append(edit, inspect);
         tr.append(td);
@@ -65,16 +67,23 @@
         const tr = document.createElement("tr"),
           td = document.createElement("td");
         td.colSpan = 4;
-        td.textContent = "No alerts generated for this dataset.";
+        td.textContent = t("No alerts generated for this dataset.");
         tr.append(td);
         rows.append(tr);
       }
       for (const id of ["run-window-rule", "run-window-if"])
         document.getElementById(id).disabled = role === "viewer";
+      const models = await request("/api/v1/detection/models");
+      validatedModel = models.items[0] || null;
+      const validatedButton = document.getElementById("run-validated-if");
+      const observedEnd = form.elements.dataset_id.selectedOptions[0]?.dataset.end;
+      const compatible = validatedModel && observedEnd && Date.parse(observedEnd) > Date.parse(validatedModel.inference_start_utc);
+      validatedButton.disabled = role === "viewer" || !compatible;
+      document.getElementById("validated-if-note").textContent = validatedModel ? t("{0} · scores closed windows after {1}{2}", (validatedModel.name), validatedModel.inference_start_utc, compatible ? t(" · frozen validation threshold; no retraining on this dataset.") : t(" · selected data is earlier/empty; this profile is unavailable.")) : t("Validated model artifact unavailable. Existing baseline jobs remain available.");
       for (const element of document.getElementById("alert-rule-form").elements)
         element.disabled = !["manager", "admin"].includes(role);
       status.textContent =
-        "Alert page ready · explicit dataset permission · cooldown decisions are retained.";
+        t("Alert page ready · explicit dataset permission · cooldown decisions are retained.");
     } catch (error) {
       status.textContent = error.message;
     }
@@ -105,7 +114,7 @@
     document.querySelector(".app-shell").inert = true;
     document.body.classList.add("detail-modal");
     document.getElementById("log-detail-title").textContent =
-      "DB-" + alert.anomaly_id;
+      t("DB-{0}", alert.anomaly_id);
     document.getElementById("log-detail-title").focus();
     document.getElementById("log-raw").textContent = "";
     document.getElementById("log-raw-next").hidden = true;
@@ -129,7 +138,7 @@
         2,
       );
       document.getElementById("log-detail-status").textContent =
-        "Actual anomaly evidence · first redacted raw chunk · not a confirmed cause";
+        t("Actual anomaly evidence · first redacted raw chunk · not a confirmed cause");
     } catch (e) {
       document.getElementById("log-detail-status").textContent = e.message;
     }
@@ -140,17 +149,17 @@
     };
     close.addEventListener("click", restore);
   }
-  async function queue(detector) {
+  async function queue(detector, model = null) {
     try {
       const response = await request("/api/v1/detection/jobs", "POST", {
         dataset_id: dataset(),
         idempotency_key: crypto.randomUUID(),
-        configuration: { detector, window_seconds: 300, seed: 42 },
+        configuration: model ? { detector, model_id: model.id } : { detector, window_seconds: 300, seed: 42 },
       });
       job = response.job_id;
       document.getElementById("check-analysis-job").disabled = false;
       status.textContent =
-        "Job " + job + " queued. Run the separate local worker to process it.";
+        t("Job {0} queued. Run the separate local worker to process it.", job);
     } catch (e) {
       status.textContent = e.message;
     }
@@ -160,18 +169,17 @@
   document.getElementById("run-window-rule").onclick = () => queue("rule");
   document.getElementById("run-window-if").onclick = () =>
     queue("isolation_forest");
+  document.getElementById("run-validated-if").onclick = () => {
+    if (validatedModel) queue("isolation_forest", validatedModel);
+  };
+  document.addEventListener("logsense:datasets-changed", (event) => {
+    if (event.detail?.action === "import") refresh();
+  });
   document.getElementById("check-analysis-job").onclick = async () => {
     try {
       const data = await request("/api/v1/detection/jobs/" + job);
       status.textContent =
-        "Job " +
-        job +
-        " · " +
-        data.state +
-        " · " +
-        data.processed_count +
-        " units · " +
-        JSON.stringify(data.result);
+        t("Job {0} · {1} · {2} units · {3}", job, data.state, data.processed_count, JSON.stringify(data.result));
     } catch (e) {
       status.textContent = e.message;
     }
@@ -187,9 +195,7 @@
     try {
       const data = await request("/api/v1/alert-rules", "POST", body);
       status.textContent =
-        "Created rule " +
-        data.rule_id +
-        ". New completed analysis jobs apply it.";
+        t("Created rule {0}. New completed analysis jobs apply it.", data.rule_id);
     } catch (error) {
       status.textContent = error.message;
     }

@@ -1,0 +1,17 @@
+{
+  "schemas": [
+    "logsense_test_a8ba2b463743",
+    "logsense_test_64772997743e"
+  ],
+  "tests": 63,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "mysql_integration": "PASS",
+  "cleanup": "No database/table/volume dropped. Generated fixtures retained.",
+  "command_exit_code": 0,
+  "wall_seconds": 10.318620100006228,
+  "port": 13307,
+  "unique_mysql_tests": 56,
+  "pure_guards_also_included": 7
+}

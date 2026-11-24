@@ -1,0 +1,107 @@
+{
+  "baseline": "legacy first-20000 IF(100 trees/256 samples/seed42), first-20000 validation p01; rule train p99 count",
+  "cache": {
+    "test": {
+      "count": 89119,
+      "key": "test.jsonl",
+      "sha256": "8cc5ff42c336ed4b84f31129fc15a979b18c72918b41830f461b5621e57836e7"
+    },
+    "train": {
+      "count": 390636,
+      "key": "train.jsonl",
+      "sha256": "615cd641fdc88bff8cc6f215236d96edbd4e31409615e4c03fb2e4fec19eca8f"
+    },
+    "validation": {
+      "count": 30815,
+      "key": "validation.jsonl",
+      "sha256": "5194ca72cf7f8634b01048c14f70f7b617516fe0b685986ceaffbe8a504cd7dd"
+    }
+  },
+  "candidate_grid": [
+    {
+      "features": "base",
+      "id": "base-100-256",
+      "max_samples": 256,
+      "n_estimators": 100,
+      "seed": 42
+    },
+    {
+      "features": "context",
+      "id": "context-100-256",
+      "max_samples": 256,
+      "n_estimators": 100,
+      "seed": 42
+    },
+    {
+      "features": "base",
+      "id": "base-200-1024",
+      "max_samples": 1024,
+      "n_estimators": 200,
+      "seed": 42
+    },
+    {
+      "features": "context",
+      "id": "context-200-1024",
+      "max_samples": 1024,
+      "n_estimators": 200,
+      "seed": 42
+    }
+  ],
+  "coverage": "unknown; observed imported prefix only; no invented zero-event windows",
+  "dataset_id": 3,
+  "input_revision": 2000,
+  "max_fpr": 0.01,
+  "maximum_event_id": 1110000,
+  "minimum_validation_each_class": 20,
+  "parsed_event_count": 1000000,
+  "phase_event_counts": {
+    "test": 150335,
+    "train": 772578,
+    "validation": 77082
+  },
+  "prepare_seconds": 17.136188999997103,
+  "protocol_sha256": "a97e7a1721f68b48ee39f6fb9c19e88c360c45c07145b7669075aba990fa2c46",
+  "registered_at_utc": "2026-11-04T08:43:51.940609+00:00",
+  "reservoir_limit": 20000,
+  "reservoir_seed": 42,
+  "seconds": 300,
+  "seed_sensitivity": [
+    17,
+    73
+  ],
+  "singleton_units": {
+    "test": 39111,
+    "train": 269650,
+    "validation": 26248
+  },
+  "software": {
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "python": "3.10.11",
+    "sklearn": "1.7.2"
+  },
+  "split_iso_utc": {
+    "test_end": "2005-06-25T18:50:00+00:00",
+    "train_end": "2005-06-14T20:45:00+00:00",
+    "train_start": "2005-06-03T22:40:00+00:00",
+    "validation_end": "2005-06-20T07:45:00+00:00"
+  },
+  "splits": {
+    "test_end": 1119725400,
+    "train_end": 1118781900,
+    "train_start": 1117838400,
+    "validation_end": 1119253500
+  },
+  "study_id": "92195e61ec414ff092e20a795670408a",
+  "test_policy": "same untouched later chronological holdout for all primary methods; no tuning or reselection after test",
+  "threshold_policy": "strict native score < threshold; validation labels used ONLY for calibration/selection",
+  "threshold_sensitivity_quantiles": [
+    0.001,
+    0.005,
+    0.01,
+    0.02,
+    0.05
+  ],
+  "unit": "completed observed UTC host-window; any original BGL alert among ALL observed events",
+  "validation_objective": "maximum F1 subject to empirical FPR <= 0.01; then AP, lower FPR, candidate ID"
+}

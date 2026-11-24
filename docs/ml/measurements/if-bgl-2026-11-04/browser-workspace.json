@@ -1,0 +1,29 @@
+{
+  "passed": [
+    "Single workspace, Overall, four detectors and persistent DEMO",
+    "Severity/Volume switch changes encoding without result membership",
+    "Cell inspection, precise selection and linked result",
+    "Server CSV matches selected scope and labels synthetic rows",
+    "Evidence from API, modal focus loop and close preserves selection/focus",
+    "OR hosts, AND priority, truthful facets, removable chips and URL state",
+    "Pointer brush, backend zoom recomputation and reset to initial range",
+    "Keyboard range selection matches pointer interval semantics",
+    "Timezone labels, adaptive long-range resolution, browser back and reload",
+    "Distinct empty, unprocessed and partial/missing coverage fixtures",
+    "Query failure retains labelled old scope; Retry applies new scope",
+    "Rapid filters: aborted/delayed old response cannot overwrite latest results",
+    "Evidence error/retry does not invent or retain another record evidence",
+    "Related evidence comes from the selected same-host fixture record",
+    "Custom UTC query range and exact interval form work without dragging",
+    "Results pagination preserves global scope",
+    "Duplicate submissions reuse one pending query",
+    "Unsubmitted edits survive an older pending query commit",
+    "Slow/hung query timeout retains old results and supports revert",
+    "1920/1440/1366/1024/390 layouts: no document-level horizontal overflow",
+    "Detector search, group collapse and picker Escape focus"
+  ],
+  "count": 21,
+  "page_errors": [],
+  "api_request_count": 50,
+  "scope": "Synthetic six-anomaly fixture only; not a large-data, SQL, or assistive-technology certification."
+}

@@ -1,0 +1,66 @@
+{
+  "audit_date": "2026-11-04",
+  "search_scope": [
+    "project tracked/untracked source and docs",
+    "accessible conversation attachment filenames and relevant text attachments"
+  ],
+  "primary_lecturer_rubric": "NOT FOUND IN SEARCHED SCOPE",
+  "original_course_labs_chapters": "NOT FOUND IN SEARCHED SCOPE",
+  "sources": [
+    {
+      "attachment_id": "14cd1cb6-7377-4929-9f69-0a1dede0ffa1",
+      "file_name": "Văn bản đã dán.txt",
+      "kind": "user-supplied planning master, not lecturer rubric",
+      "sha256": "57bcac530d5002749ad6aae03426b3e03ceb9a073fafcde8974c7c17a0a2c078",
+      "line_count": 1484,
+      "relevant_line_locations": {
+        "planning_label": [
+          5,
+          5
+        ],
+        "project_technology_requirement": [
+          72,
+          88
+        ],
+        "do_not_infer_grading": [
+          110,
+          118
+        ],
+        "mysql_topics": [
+          165,
+          176
+        ],
+        "http_json_exceptions": [
+          178,
+          191
+        ],
+        "flask_chapters": [
+          193,
+          207
+        ],
+        "conditional_tkinter": [
+          209,
+          217
+        ],
+        "planned_wtf": [
+          1081,
+          1091
+        ]
+      }
+    },
+    {
+      "attachment_id": "fe572890-c460-49c6-a6ef-1f8ee1fd9250",
+      "file_name": "Văn bản đã dán.txt",
+      "kind": "user-supplied project proposal, not lecturer rubric",
+      "sha256": "90c3593690af7ec0989c7ad4f04d7a5860213bcdf5aea65ba17afe00f871e53a",
+      "line_count": 2047,
+      "relevant_line_locations": {
+        "explicit_nonrubric_mapping": [
+          361,
+          378
+        ]
+      }
+    }
+  ],
+  "implementation_gate": "No lecturer-mandated missing feature established; course-conformance changes are documentation-only. Explicit project requirement Flask-WTF remains open."
+}

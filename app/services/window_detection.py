@@ -47,7 +47,7 @@ def second(stamp):
     return delta.days * 86400 + delta.seconds
 
 
-def aggregate_windows(rows, seconds=300):
+def aggregate_windows(rows, seconds=300, include_templates=False):
     current = None
     groups = {}
 
@@ -55,7 +55,7 @@ def aggregate_windows(rows, seconds=300):
         for host, group in sorted(groups.items()):
             n = group["n"]
             templates = group["templates"]
-            yield {
+            unit = {
                 "host": host,
                 "bucket": current,
                 "count": n,
@@ -68,6 +68,9 @@ def aggregate_windows(rows, seconds=300):
                     math.log1p(group["chars"] / n),
                 ],
             }
+            if include_templates:
+                unit["templates"] = dict(templates)
+            yield unit
 
     for row in rows:
         bucket = second(row.timestamp) // seconds
@@ -96,6 +99,14 @@ def aggregate_windows(rows, seconds=300):
 
 
 def run_windows(engine, dataset_id, job_key, configuration):
+    if "model_id" in configuration:
+        from app.services.validated_if import run_validated
+
+        return run_validated(engine, dataset_id, job_key, configuration)
+    if "study_id" in configuration:
+        from app.services.window_deployment import run_study
+
+        return run_study(engine, dataset_id, job_key, configuration)
     kind = configuration.get("detector", "rule")
     seconds = int(configuration.get("window_seconds", 300))
     seed = int(configuration.get("seed", 42))
@@ -364,7 +375,9 @@ def persist_predictions(
     threshold,
     reference,
     seconds,
+    feature_names=None,
 ):
+    feature_names = FEATURE_NAMES if feature_names is None else feature_names
     matrix = np.asarray([r["features"] for r in rows])
     scores = np.expm1(matrix[:, 0]) if model is None else model.score_samples(matrix)
     with Session(engine) as session, session.begin():
@@ -429,7 +442,7 @@ def persist_predictions(
                     unit_id=unit.id,
                     score=float(score),
                     predicted=flagged,
-                    features={"names": FEATURE_NAMES, "values": row["features"]},
+                    features={"names": feature_names, "values": row["features"]},
                 )
             )
             if flagged:
@@ -446,7 +459,7 @@ def persist_predictions(
                             "reference": reference,
                             "threshold": threshold,
                             "comparison": ">" if model is None else "<",
-                            "feature_names": FEATURE_NAMES,
+                            "feature_names": feature_names,
                             "feature_values": row["features"],
                             "explanation": "Configured count threshold exceeded"
                             if model is None

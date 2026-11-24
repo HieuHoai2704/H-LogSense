@@ -1,0 +1,24 @@
+{
+  "found": 34,
+  "verified": 34,
+  "doi_verified": 31,
+  "pdf_downloaded": 28,
+  "fulltext_reviewed": 30,
+  "abstract_only": 3,
+  "metadata_only": 1,
+  "code_links_verified": 17,
+  "code_links_with_license": 16,
+  "pdf_unavailable": [
+    "S16",
+    "S29",
+    "S30",
+    "S31",
+    "S32",
+    "S33"
+  ],
+  "duplicate_titles_dois_pdf_hashes": 0,
+  "pdf_reader_recoverable_warnings": [
+    "S19",
+    "S20"
+  ]
+}

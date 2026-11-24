@@ -1,0 +1,124 @@
+{
+  "baseline_thresholds": {
+    "if": -0.7874179733694656,
+    "rule": 1.0
+  },
+  "dataset_id": 3,
+  "input_revision": 2000,
+  "manifest_sha256": "5479cb97fb05b4797d734b161c92c538c07eecec5db14d4ad0c53507de348a3d",
+  "maximum_event_id": 1110000,
+  "metrics": {
+    "legacy_if": {
+      "auprc_average_precision": 0.0828007415893587,
+      "eligible_units": 89119,
+      "f1": 0.17276544691061788,
+      "fn": 514,
+      "fp": 865,
+      "fpr": 0.009778320389776286,
+      "precision": 0.14271555996035679,
+      "predicted_positive": 1009,
+      "recall": 0.2188449848024316,
+      "tn": 87596,
+      "tp": 144
+    },
+    "legacy_rule": {
+      "auprc_average_precision": 0.10140270293376831,
+      "eligible_units": 89119,
+      "f1": 0.025974025974025976,
+      "fn": 0,
+      "fp": 49350,
+      "fpr": 0.5578729609658494,
+      "precision": 0.013157894736842105,
+      "predicted_positive": 50008,
+      "recall": 1.0,
+      "tn": 39111,
+      "tp": 658
+    },
+    "selected_if": {
+      "auprc_average_precision": 0.184520796558286,
+      "eligible_units": 89119,
+      "f1": 0.42018196856906537,
+      "fn": 404,
+      "fp": 297,
+      "fpr": 0.0033574117407671176,
+      "precision": 0.46098003629764067,
+      "predicted_positive": 551,
+      "recall": 0.3860182370820669,
+      "tn": 88164,
+      "tp": 254
+    }
+  },
+  "parsed_event_count": 1000000,
+  "peak_working_set_mib": 191.3125,
+  "phase_events": {
+    "test": 150335,
+    "train": 772578,
+    "validation": 77082
+  },
+  "phase_units": {
+    "test": 89119,
+    "train": 390636,
+    "validation": 30815
+  },
+  "prediction_sha256": "a2948396bce846ea458eb205d5f990eec6d22acca5fcdf8a2b3af616a646db03",
+  "selected": {
+    "baseline_artifact_sha256": "97b0a9190cc54059c3d277f13e06121071be1e63761a93bf7ca0cbb3c4bdee90",
+    "comparison": "<",
+    "feature_names": [
+      "log1p_event_count",
+      "high_severity_fraction",
+      "distinct_template_fraction",
+      "dominant_template_fraction",
+      "log1p_mean_message_length"
+    ],
+    "frozen_at_utc": "2026-11-04T08:45:03.194157+00:00",
+    "manifest_sha256": "5479cb97fb05b4797d734b161c92c538c07eecec5db14d4ad0c53507de348a3d",
+    "model_artifact": {
+      "key": "selected.joblib",
+      "sha256": "869dc98542f9886db6901c7c20e4f84cb803ccc3c6e20d8370cf1811ffde19e1"
+    },
+    "score_direction": "lower",
+    "selected": {
+      "features": "base",
+      "id": "base-200-1024",
+      "max_samples": 1024,
+      "n_estimators": 200,
+      "seed": 42
+    },
+    "threshold": -0.7587904039488941,
+    "threshold_policy": "labeled validation F1 maximum subject to FPR cap; no test tuning",
+    "threshold_uses_validation_labels": true,
+    "validation_sha256": "ef1eb525d149b239a0cd1b34e7585d509dbfce287728b27c79628ef8cd90b934"
+  },
+  "selection_sha256": "c996733d7a4214fe17f12a7656969929aac4d55bfe6702c10c56dee8a2401000",
+  "semantics": {
+    "auprc": "sklearn average precision, not trapezoid PR area",
+    "coverage": "unknown; observed imported prefix only; no invented zero-event windows",
+    "generalization": "one BGL prefix, one temporal split; no cross-dataset claim",
+    "score": "native lower score more anomalous; not probability; no point adjustment",
+    "unit": "completed observed UTC host-window; any original BGL alert among ALL observed events"
+  },
+  "singleton_units": {
+    "test": 39111,
+    "train": 269650,
+    "validation": 26248
+  },
+  "software": {
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "python": "3.10.11",
+    "sklearn": "1.7.2"
+  },
+  "splits": {
+    "test_end": "2005-06-25T18:50:00+00:00",
+    "train_end": "2005-06-14T20:45:00+00:00",
+    "train_start": "2005-06-03T22:40:00+00:00",
+    "validation_end": "2005-06-20T07:45:00+00:00"
+  },
+  "status": "MEASURED; no selection changes permitted after this evaluation",
+  "study_id": "92195e61ec414ff092e20a795670408a",
+  "test_negatives": 88461,
+  "test_positives": 658,
+  "test_prevalence": 0.0073833862588224735,
+  "test_seconds": 5.662518299999647
+}

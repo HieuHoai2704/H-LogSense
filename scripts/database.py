@@ -21,8 +21,12 @@ def main():
     user_command.add_argument(
         "--role", choices=["viewer", "analyst", "manager", "admin"], required=True
     )
-    user_command.add_argument("--dataset", type=int, action="append", required=True)
-    commands.add_parser("notify")
+    access = user_command.add_mutually_exclusive_group(required=True)
+    access.add_argument("--dataset", type=int, action="append", default=[])
+    access.add_argument("--no-dataset", action="store_true",
+                        help="Create an account with no initial dataset grants.")
+    notify = commands.add_parser("notify")
+    notify.add_argument("--alert-id", type=int, help="Restrict processing to this alert.")
     ingest = commands.add_parser("ingest-bgl")
     ingest.add_argument("--dataset", type=int, required=True)
     ingest.add_argument("--archive", required=True)
@@ -76,7 +80,9 @@ def main():
         elif args.command == "notify":
             from app.services.alerts import deliver_notifications
 
-            result = deliver_notifications(db.engine)
+            if args.alert_id is not None and args.alert_id < 1:
+                parser.error("--alert-id must be positive")
+            result = deliver_notifications(db.engine, alert_id=args.alert_id)
         elif args.command == "register-bgl":
             from sqlalchemy import select
 

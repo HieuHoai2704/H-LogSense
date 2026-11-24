@@ -1,0 +1,127 @@
+﻿id,check,url,http_or_error,resolved_url
+S01,crossref,https://api.crossref.org/works/10.1016/j.mlwa.2023.100470,200,https://api.crossref.org/works/10.1016/j.mlwa.2023.100470
+S01,pdf,https://www.skopik.at/ait/2023_dl-survey.pdf,200,https://www.skopik.at/ait/2023_dl-survey.pdf
+S02,crossref,https://api.crossref.org/works/10.1145/3660768,200,https://api.crossref.org/works/10.1145/3660768
+S02,pdf,https://www.skopik.at/ait/2024_fse.pdf,200,https://www.skopik.at/ait/2024_fse.pdf
+S03,crossref,https://api.crossref.org/works/10.1145/3510003.3510155,200,https://api.crossref.org/works/10.1145/3510003.3510155
+S03,pdf,https://arxiv.org/pdf/2202.04301,200,https://arxiv.org/pdf/2202.04301
+S03,code metadata,https://api.github.com/repos/LogIntelligence/LogADEmpirical,200,https://api.github.com/repos/LogIntelligence/LogADEmpirical
+S04,pdf,https://arxiv.org/pdf/2307.16714,200,https://arxiv.org/pdf/2307.16714
+S05,pdf,https://dl.ifip.org/db/conf/cnsm/cnsm2025/1571164872.pdf,200,https://dl.ifip.org/db/conf/cnsm/cnsm2025/1571164872.pdf
+S05,code metadata,https://api.github.com/repos/xsedla10/LogADComp,404,https://api.github.com/repos/xsedla10/LogADComp
+S06,crossref,https://api.crossref.org/works/10.1109/ISSRE.2016.21,429,https://api.crossref.org/works/10.1109/ISSRE.2016.21
+S06,pdf,https://jiemingzhu.github.io/pub/slhe_issre2016.pdf,200,https://jiemingzhu.github.io/pub/slhe_issre2016.pdf
+S06,code metadata,https://api.github.com/repos/logpai/loglizer,200,https://api.github.com/repos/logpai/loglizer
+S07,crossref,https://api.crossref.org/works/10.1145/1629575.1629587,429,https://api.crossref.org/works/10.1145/1629575.1629587
+S07,pdf,https://people.eecs.berkeley.edu/~jordan/papers/xu-etal-sosp09.pdf,200,https://people.eecs.berkeley.edu/~jordan/papers/xu-etal-sosp09.pdf
+S08,crossref,https://api.crossref.org/works/10.1109/ICDM.2008.17,200,https://api.crossref.org/works/10.1109/ICDM.2008.17
+S08,pdf,https://www.lamda.nju.edu.cn/publication/icdm08b.pdf,200,https://www.lamda.nju.edu.cn/publication/icdm08b.pdf
+S08,code metadata,https://api.github.com/repos/scikit-learn/scikit-learn,200,https://api.github.com/repos/scikit-learn/scikit-learn
+S09,crossref,https://api.crossref.org/works/10.1023/A%3A1010933404324,200,https://api.crossref.org/works/10.1023/A%3A1010933404324
+S09,pdf,https://www.stat.berkeley.edu/~breiman/randomforest2001.pdf,200,https://www.stat.berkeley.edu/~breiman/randomforest2001.pdf
+S09,code metadata,https://api.github.com/repos/scikit-learn/scikit-learn,200,https://api.github.com/repos/scikit-learn/scikit-learn
+S10,crossref,https://api.crossref.org/works/10.1145/3133956.3134015,429,https://api.crossref.org/works/10.1145/3133956.3134015
+S10,pdf,https://nlp.cs.utah.edu/assets/pdfs/du2017deeplog.pdf,200,https://nlp.cs.utah.edu/assets/pdfs/du2017deeplog.pdf
+S10,code metadata,https://api.github.com/repos/LogIntelligence/LogADEmpirical,200,https://api.github.com/repos/LogIntelligence/LogADEmpirical
+S11,crossref,https://api.crossref.org/works/10.24963/ijcai.2019/658,200,https://api.crossref.org/works/10.24963/ijcai.2019/658
+S11,pdf,https://www.ijcai.org/Proceedings/2019/0658.pdf,200,https://ijcai.org/Proceedings/2019/0658.pdf
+S11,code metadata,https://api.github.com/repos/LogIntelligence/LogADEmpirical,200,https://api.github.com/repos/LogIntelligence/LogADEmpirical
+S12,pdf,https://xgdsmileboy.github.io/files/paper/plelog-icse21.pdf,200,https://xgdsmileboy.github.io/files/paper/plelog-icse21.pdf
+S12,code metadata,https://api.github.com/repos/LeonYang95/PLELog,200,https://api.github.com/repos/LeonYang95/PLELog
+S13,crossref,https://api.crossref.org/works/10.1109/IJCNN52387.2021.9534113,200,https://api.crossref.org/works/10.1109/IJCNN52387.2021.9534113
+S13,pdf,https://arxiv.org/pdf/2103.04475,200,https://arxiv.org/pdf/2103.04475
+S13,code metadata,https://api.github.com/repos/HelenGuohx/logbert,200,https://api.github.com/repos/HelenGuohx/logbert
+S14,crossref,https://api.crossref.org/works/10.1145/3338906.3338931,200,https://api.crossref.org/works/10.1145/3338906.3338931
+S14,pdf,https://www.microsoft.com/en-us/research/wp-content/uploads/2019/05/LogRobust.pdf,404,https://www.microsoft.com/en-us/research/wp-content/uploads/2019/05/LogRobust.pdf
+S14,code metadata,https://api.github.com/repos/LogIntelligence/LogADEmpirical,200,https://api.github.com/repos/LogIntelligence/LogADEmpirical
+S15,crossref,https://api.crossref.org/works/10.1145/3588918,200,https://api.crossref.org/works/10.1145/3588918
+S15,pdf,https://dl.acm.org/doi/pdf/10.1145/3588918,403,https://dl.acm.org/doi/pdf/10.1145/3588918
+S16,pdf,https://www.usenix.org/legacy/event/lisa07/tech/full_papers/oliner/oliner.pdf,404,https://www.usenix.org/legacy/event/lisa07/tech/full_papers/oliner/oliner.pdf
+S17,crossref,https://api.crossref.org/works/10.1137/1.9781611972771.42,200,https://api.crossref.org/works/10.1137/1.9781611972771.42
+S17,pdf,https://www.cs.upc.edu/~abifet/ADWIN.pdf,403,https://www.cs.upc.edu/~abifet/ADWIN.pdf
+S17,pdf,https://www.cs.upc.edu/~gavalda/papers/adwin06.pdf,200,https://www.cs.upc.edu/~gavalda/papers/adwin06.pdf
+S17,code metadata,https://api.github.com/repos/online-ml/river,200,https://api.github.com/repos/online-ml/river
+S18,crossref,https://api.crossref.org/works/10.1145/2523813,200,https://api.crossref.org/works/10.1145/2523813
+S18,pdf,https://eprints.bournemouth.ac.uk/22491/1/Gama_ACMCS_2014.pdf,404,https://eprints.bournemouth.ac.uk/22491/1/Gama_ACMCS_2014.pdf
+S19,pdf,https://proceedings.neurips.cc/paper/2021/file/0d441de75945e5acbc865406fc9a2559-Paper.pdf,200,https://proceedings.neurips.cc/paper/2021/file/0d441de75945e5acbc865406fc9a2559-Paper.pdf
+S20,crossref,https://api.crossref.org/works/10.1126/sciadv.aao1659,200,https://api.crossref.org/works/10.1126/sciadv.aao1659
+S20,pdf,https://arxiv.org/pdf/1608.03109,200,https://arxiv.org/pdf/1608.03109
+S20,code metadata,https://cran.r-project.org/package=nproc,200,https://cran.r-project.org/web/packages/nproc/index.html
+S21,pdf,https://openreview.net/pdf?id=33XGfHLtZg,403,https://openreview.net/pdf?id=33XGfHLtZg
+S21,pdf,https://arxiv.org/pdf/2208.02814,200,https://arxiv.org/pdf/2208.02814
+S22,crossref,https://api.crossref.org/works/10.5591/978-1-57735-516-8/IJCAI11-254,404,https://api.crossref.org/works/10.5591/978-1-57735-516-8/IJCAI11-254
+S22,pdf,https://www.ijcai.org/Proceedings/11/Papers/254.pdf,200,https://ijcai.org/proceedings/2011/0254.pdf
+S22,code metadata,https://api.github.com/repos/online-ml/river,200,https://api.github.com/repos/online-ml/river
+S23,crossref,https://api.crossref.org/works/10.1109/ISSRE59848.2023.00071,200,https://api.crossref.org/works/10.1109/ISSRE59848.2023.00071
+S23,pdf,https://arxiv.org/pdf/2008.06448,200,https://arxiv.org/pdf/2008.06448
+S23,code metadata,https://api.github.com/repos/logpai/loghub,200,https://api.github.com/repos/logpai/loghub
+S24,crossref,https://api.crossref.org/works/10.1109/ICWS.2017.13,200,https://api.crossref.org/works/10.1109/ICWS.2017.13
+S24,pdf,https://jiemingzhu.github.io/pub/pjhe_icws2017.pdf,200,https://jiemingzhu.github.io/pub/pjhe_icws2017.pdf
+S24,code metadata,https://api.github.com/repos/logpai/logparser,200,https://api.github.com/repos/logpai/logparser
+S25,crossref,https://api.crossref.org/works/10.1371/journal.pone.0118432,200,https://api.crossref.org/works/10.1371/journal.pone.0118432
+S25,pdf,https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0118432&type=printable,200,https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0118432&type=printable
+S26,crossref,https://api.crossref.org/works/10.1145/3660800,200,https://api.crossref.org/works/10.1145/3660800
+S26,pdf,https://arxiv.org/pdf/2404.11294,200,https://arxiv.org/pdf/2404.11294
+S27,crossref,https://api.crossref.org/works/10.1145/3786705,200,https://api.crossref.org/works/10.1145/3786705
+S27,pdf,https://dl.acm.org/doi/pdf/10.1145/3786705,403,https://dl.acm.org/doi/pdf/10.1145/3786705
+S27,code metadata,https://api.github.com/repos/ZhuoxingZhang/UnseenLog,200,https://api.github.com/repos/ZhuoxingZhang/UnseenLog
+S28,crossref,https://api.crossref.org/works/10.1080/00401706.1959.10489860,200,https://api.crossref.org/works/10.1080/00401706.1959.10489860
+S29,crossref,https://api.crossref.org/works/10.1093/biomet/41.1-2.100,429,https://api.crossref.org/works/10.1093/biomet/41.1-2.100
+S30,crossref,https://api.crossref.org/works/10.1002/smr.2650,200,https://api.crossref.org/works/10.1002/smr.2650
+S04,confirmed primary venue/author identity,https://link.springer.com/article/10.1007/s10664-025-10669-3,verified in source,https://link.springer.com/article/10.1007/s10664-025-10669-3
+S06,confirmed primary venue/author identity,https://ieeexplore.ieee.org/document/7774521/,verified in source,https://ieeexplore.ieee.org/document/7774521/
+S07,confirmed primary venue/author identity,https://dl.acm.org/doi/10.1145/1629575.1629587,verified in source,https://dl.acm.org/doi/10.1145/1629575.1629587
+S10,confirmed primary venue/author identity,https://dl.acm.org/doi/10.1145/3133956.3134015,verified in source,https://dl.acm.org/doi/10.1145/3133956.3134015
+S12,confirmed primary venue/author identity,https://doi.org/10.1109/ICSE43902.2021.00130,verified in source,https://doi.org/10.1109/ICSE43902.2021.00130
+S16,confirmed primary venue/author identity,https://ieeexplore.ieee.org/document/4273008/,verified in source,https://ieeexplore.ieee.org/document/4273008/
+S22,confirmed primary venue/author identity,https://ijcai.org/proceedings/2011/254,verified in source,https://ijcai.org/proceedings/2011/254
+S29,confirmed primary venue/author identity,https://doi.org/10.1093/biomet/41.1-2.100,verified in source,https://doi.org/10.1093/biomet/41.1-2.100
+S31,publisher/venue identity,https://doi.org/10.1109/ASE56229.2023.00043,verified publication metadata,https://doi.org/10.1109/ASE56229.2023.00043
+S32,publisher/venue identity,https://doi.org/10.1109/ISSRE52982.2021.00021,verified publication metadata,https://doi.org/10.1109/ISSRE52982.2021.00021
+S18,public PDF fallback,https://www.cs.upc.edu/~abifet/ACMCS_Concept_Drift.pdf,403,https://www.cs.upc.edu/~abifet/ACMCS_Concept_Drift.pdf
+S14,public PDF fallback,https://hongyujohn.github.io/FSE19b.pdf,200,https://hongyujohn.github.io/FSE19b.pdf
+S15,public PDF fallback,https://dl.acm.org/doi/pdf/10.1145/3588918?download=true,403,https://dl.acm.org/doi/pdf/10.1145/3588918?download=true
+S16,public PDF fallback,https://citeseerx.ist.psu.edu/document?doi=01b5c01835a57f63c250b4eed923b7f736707624&repid=rep1&type=pdf,TimeoutError,https://citeseerx.ist.psu.edu/document?doi=01b5c01835a57f63c250b4eed923b7f736707624&repid=rep1&type=pdf
+S05,corrected code metadata,https://api.github.com/repos/xsedla1o/LogADComp,200,https://api.github.com/repos/xsedla1o/LogADComp
+S33,publisher PDF,https://link.springer.com/content/pdf/10.1007/s11227-023-05379-w.pdf,AssertionError,https://link.springer.com/content/pdf/10.1007/s11227-023-05379-w.pdf
+S34,publisher PDF,https://ejournals.itda.ac.id/index.php/avitec/article/viewFile/3974/pdf,403,https://ejournals.itda.ac.id/index.php/avitec/article/viewFile/3974/pdf
+S04,author replication package,https://api.figshare.com/v2/articles/22756871,200,https://api.figshare.com/v2/articles/22756871
+S26,author code metadata,https://api.github.com/repos/ilwoof/logsd,200,https://api.github.com/repos/ilwoof/logsd
+S33,publisher full-text read,https://link.springer.com/article/10.1007/s11227-023-05379-w,verified in text,https://link.springer.com/article/10.1007/s11227-023-05379-w
+S34,publisher full-text read,https://ejournals.itda.ac.id/index.php/avitec/article/view/3974,verified in text,https://ejournals.itda.ac.id/index.php/avitec/article/view/3974
+S01,local SHA-256 and page count,01_surveys_reviews/2023_Landauer_DL_Survey.pdf,PASS,01_surveys_reviews/2023_Landauer_DL_Survey.pdf
+S02,local SHA-256 and page count,09_datasets_benchmarks/2024_Landauer_Dataset_Critical_Review.pdf,PASS,09_datasets_benchmarks/2024_Landauer_Dataset_Critical_Review.pdf
+S03,local SHA-256 and page count,10_evaluation_methodology/2022_Le_How_Far_Are_We.pdf,PASS,10_evaluation_methodology/2022_Le_How_Far_Are_We.pdf
+S04,local SHA-256 and page count,10_evaluation_methodology/2025_Ali_Comprehensive_ML.pdf,PASS,10_evaluation_methodology/2025_Ali_Comprehensive_ML.pdf
+S05,local SHA-256 and page count,10_evaluation_methodology/2025_Sedlacek_Comparative_Study.pdf,PASS,10_evaluation_methodology/2025_Sedlacek_Comparative_Study.pdf
+S06,local SHA-256 and page count,02_classical_statistical/2016_He_System_Log_Analysis.pdf,PASS,02_classical_statistical/2016_He_System_Log_Analysis.pdf
+S07,local SHA-256 and page count,02_classical_statistical/2009_Xu_Mining_Console_Logs.pdf,PASS,02_classical_statistical/2009_Xu_Mining_Console_Logs.pdf
+S08,local SHA-256 and page count,03_machine_learning/2008_Liu_Isolation_Forest.pdf,PASS,03_machine_learning/2008_Liu_Isolation_Forest.pdf
+S09,local SHA-256 and page count,03_machine_learning/2001_Breiman_Random_Forests.pdf,PASS,03_machine_learning/2001_Breiman_Random_Forests.pdf
+S10,local SHA-256 and page count,04_deep_learning/2017_Du_DeepLog.pdf,PASS,04_deep_learning/2017_Du_DeepLog.pdf
+S11,local SHA-256 and page count,04_deep_learning/2019_Meng_LogAnomaly.pdf,PASS,04_deep_learning/2019_Meng_LogAnomaly.pdf
+S12,local SHA-256 and page count,04_deep_learning/2021_Yang_PLELog.pdf,PASS,04_deep_learning/2021_Yang_PLELog.pdf
+S13,local SHA-256 and page count,04_deep_learning/2021_Guo_LogBERT.pdf,PASS,04_deep_learning/2021_Guo_LogBERT.pdf
+S14,local SHA-256 and page count,04_deep_learning/2019_Zhang_LogRobust.pdf,PASS,04_deep_learning/2019_Zhang_LogRobust.pdf
+S17,local SHA-256 and page count,06_concept_drift_adaptation/2007_Bifet_ADWIN.pdf,PASS,06_concept_drift_adaptation/2007_Bifet_ADWIN.pdf
+S19,local SHA-256 and page count,07_threshold_calibration/2021_Gibbs_Adaptive_Conformal.pdf,PASS,07_threshold_calibration/2021_Gibbs_Adaptive_Conformal.pdf
+S20,local SHA-256 and page count,07_threshold_calibration/2018_Tong_NP_ROC.pdf,PASS,07_threshold_calibration/2018_Tong_NP_ROC.pdf
+S21,local SHA-256 and page count,07_threshold_calibration/2024_Angelopoulos_Conformal_Risk_Control.pdf,PASS,07_threshold_calibration/2024_Angelopoulos_Conformal_Risk_Control.pdf
+S22,local SHA-256 and page count,08_online_streaming_detection/2011_Tan_Streaming_HST.pdf,PASS,08_online_streaming_detection/2011_Tan_Streaming_HST.pdf
+S23,local SHA-256 and page count,09_datasets_benchmarks/2023_Zhu_Loghub.pdf,PASS,09_datasets_benchmarks/2023_Zhu_Loghub.pdf
+S24,local SHA-256 and page count,09_datasets_benchmarks/2017_He_Drain.pdf,PASS,09_datasets_benchmarks/2017_He_Drain.pdf
+S25,local SHA-256 and page count,10_evaluation_methodology/2015_Saito_Precision_Recall.pdf,PASS,10_evaluation_methodology/2015_Saito_Precision_Recall.pdf
+S26,local SHA-256 and page count,04_deep_learning/2024_Zhang_LogSD.pdf,PASS,04_deep_learning/2024_Zhang_LogSD.pdf
+S20,component license,https://cran.r-project.org/web/packages/nproc/index.html,verified from upstream license,https://cran.r-project.org/web/packages/nproc/index.html
+S24,component license,https://github.com/logpai/logparser/blob/main/LICENSE.md,verified from upstream license,https://github.com/logpai/logparser/blob/main/LICENSE.md
+S29,follow-up full text,https://www.jstor.org/stable/pdf/2333009.pdf,HTML,https://www.jstor.org/stable/pdf/2333009.pdf
+S29,follow-up full text,https://academic.oup.com/biomet/article-pdf/41/1-2/100/1243987/41-1-2-100.pdf,403,https://academic.oup.com/biomet/article-pdf/41/1-2/100/1243987/41-1-2-100.pdf
+S30,follow-up full text,https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/smr.2650,403,https://onlinelibrary.wiley.com/doi/pdfdirect/10.1002/smr.2650
+S31,follow-up full text,https://conferences.computer.org/asepub/pdfs/ASE2023-6K30T7i4dAPKikJkXaEquL/299600a141/299600a141.pdf,401,https://conferences.computer.org/asepub/pdfs/ASE2023-6K30T7i4dAPKikJkXaEquL/299600a141/299600a141.pdf
+S32,follow-up full text,https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=9700306,418,https://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=9700306
+S15,follow-up full text,https://upenn.ferric.systems/dbscholar/sigmod_papers/2023/3588918.pdf,200,https://upenn.ferric.systems/dbscholar/sigmod_papers/2023/3588918.pdf
+S16,follow-up full text,https://citeseerx.ist.psu.edu/document?doi=01b5c01835a57f63c250b4eed923b7f736707624&repid=rep1&type=pdf,PDF via web cache,https://citeseerx.ist.psu.edu/document?doi=01b5c01835a57f63c250b4eed923b7f736707624&repid=rep1&type=pdf
+S18,follow-up full text,https://eprints.bournemouth.ac.uk/22491/1/ACM%20computing%20surveys.pdf,200,https://eprints.bournemouth.ac.uk/22491/1/ACM%20computing%20surveys.pdf
+S27,follow-up full text,https://upenn.ferric.systems/dbscholar/sigmod_papers/2026/article_091_3786705.pdf,200,https://upenn.ferric.systems/dbscholar/sigmod_papers/2026/article_091_3786705.pdf
+S28,follow-up full text,https://www.stat.cmu.edu/technometrics/59-69/VOL-01-03/v0103239.pdf,200,https://www.stat.cmu.edu/technometrics/59-69/VOL-01-03/v0103239.pdf
+S34,publisher PDF follow-up,https://ejournals.itda.ac.id/index.php/avitec/article/download/3974/pdf,200,https://ejournals.itda.ac.id/index.php/avitec/article/download/3974/pdf

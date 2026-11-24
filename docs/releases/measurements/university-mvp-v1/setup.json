@@ -1,0 +1,102 @@
+{
+  "data": "actual immutable Loghub BGL prefix",
+  "dataset_id": 1,
+  "environment": {
+    "platform": "Windows-10-10.0.26300-SP0",
+    "python": "3.10.11"
+  },
+  "imports": [
+    {
+      "result": {
+        "checkpoint_byte": 148000,
+        "dataset_id": 1,
+        "malformed_rows": 0,
+        "parsed_events": 1000,
+        "physical_lines": 1000
+      },
+      "seconds": 0.36741009999241214,
+      "target": 1000
+    },
+    {
+      "result": {
+        "checkpoint_byte": 1471334,
+        "dataset_id": 1,
+        "malformed_rows": 0,
+        "parsed_events": 10000,
+        "physical_lines": 10000
+      },
+      "seconds": 1.5075049000006402,
+      "target": 10000
+    },
+    {
+      "result": {
+        "checkpoint_byte": 13259718,
+        "dataset_id": 1,
+        "malformed_rows": 0,
+        "parsed_events": 100000,
+        "physical_lines": 100000
+      },
+      "seconds": 13.262063700007275,
+      "target": 100000
+    }
+  ],
+  "lines": 100000,
+  "log_query_explain": [
+    {
+      "Extra": "Using where; Using index",
+      "filtered": 100.0,
+      "id": 1,
+      "key": "ix_events_dataset_time_id",
+      "key_len": "16",
+      "partitions": null,
+      "possible_keys": "uq_log_events_dataset_id_id,uq_log_events_dataset_id_raw_id_parser_version_emit_index,ix_events_dataset_time_id,ix_events_dataset_host_time",
+      "ref": null,
+      "rows": 50750,
+      "select_type": "SIMPLE",
+      "table": "log_events",
+      "type": "range"
+    }
+  ],
+  "migrations": {
+    "head": "0004",
+    "model_diff": [],
+    "seconds": 1.3949450999934925,
+    "status": "PASS"
+  },
+  "mysql": "8.4.7",
+  "port": 13307,
+  "provenance": {
+    "checkpoint_byte": 13259718,
+    "duplicate_lines": 0,
+    "ground_truth_labels": 100000,
+    "labels_exact_match": "PASS",
+    "log_events": 100000,
+    "parsed_fields_exact_match": "PASS",
+    "provenance": "PASS",
+    "raw_log_records": 100000,
+    "raw_prefix_sha256": "d6b55a02a67d9ab027abae4b60c365edbf9a892fcb6810ff780528512ca01c83",
+    "source_prefix_sha256": "d6b55a02a67d9ab027abae4b60c365edbf9a892fcb6810ff780528512ca01c83",
+    "verified_lines": 100000
+  },
+  "provenance_seconds": 9.114728499989724,
+  "repeat_import": {
+    "result": {
+      "checkpoint_byte": 13259718,
+      "dataset_id": 1,
+      "malformed_rows": 0,
+      "parsed_events": 100000,
+      "physical_lines": 100000
+    },
+    "seconds": 0.057713599991984665,
+    "status": "PASS"
+  },
+  "restricted_dataset_id": 2,
+  "restricted_dataset_imported_lines": 1000,
+  "rollback": {
+    "checkpoint_after_injected_failure": 1000,
+    "status": "PASS"
+  },
+  "schema": "logsense_bench_03d27f987e05",
+  "status": "PASS",
+  "timezone": "+00:00"
+}

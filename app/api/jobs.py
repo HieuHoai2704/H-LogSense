@@ -1,11 +1,11 @@
 """Authenticated job submission. Worker execution never runs in Flask requests."""
 
 from flask import Blueprint, jsonify, request, g
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import ProcessingJob, Dataset
+from app.models import ProcessingJob, Dataset, LogEvent
 from app.security import roles, require_dataset
 from app.services.investigation import integer, QueryError
 
@@ -31,8 +31,34 @@ def submit():
             "seed",
             "start_time",
             "end_time",
+            "study_id",
+            "model_id",
         }:
             raise QueryError("Unknown detector configuration.")
+        if "model_id" in config:
+            from app.services.validated_if import DEFAULT_MODEL_ID, model_card
+            from datetime import datetime
+            if set(config) != {"detector", "model_id"} or config.get("detector") != "isolation_forest" or config.get("model_id") != DEFAULT_MODEL_ID:
+                raise QueryError("Use the registered validated model without parameter overrides.")
+            try:
+                card = model_card(config["model_id"])
+            except (ValueError, OSError):
+                return jsonify(error={"code": "model_unavailable", "message": "The trusted validated model is not available."}), 503
+            last = db.session.scalar(select(func.max(LogEvent.timestamp)).where(LogEvent.dataset_id == dataset_id))
+            if last is None or last < datetime.fromisoformat(card["inference_start_utc"]):
+                return jsonify(error={"code": "model_time_incompatible", "message": "This model scores only closed BGL windows after its calibration cutoff: " + card["inference_start_utc"]}), 409
+        if "study_id" in config:
+            import re
+
+            if (
+                set(config) != {"detector", "study_id"}
+                or config["detector"] != "isolation_forest"
+                or not isinstance(config["study_id"], str)
+                or not re.fullmatch(r"[a-f0-9]{32}", config["study_id"])
+            ):
+                raise QueryError(
+                    "A frozen study accepts only isolation_forest and a valid study_id."
+                )
         if config.get("detector", "rule") not in {
             "rule",
             "isolation_forest",
@@ -134,3 +160,13 @@ def retry(job_id):
         return jsonify(job_id=job_id, state="queued"), 202
     except RuntimeError:
         return jsonify(error={"code": "worker_active"}), 409
+
+
+@jobs_api.get("/api/v1/detection/models")
+@roles("viewer", "analyst", "manager", "admin")
+def models():
+    from app.services.validated_if import model_card
+    try:
+        return jsonify(items=[model_card()], availability="ready")
+    except (ValueError, OSError):
+        return jsonify(items=[], availability="unavailable", message="Install the trusted frozen BGL model artifact before using this profile.")

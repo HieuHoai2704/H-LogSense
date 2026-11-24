@@ -1,0 +1,53 @@
+{
+  "default_discovery": {
+    "tests": 166,
+    "passed": 110,
+    "failed": 0,
+    "skipped": 56,
+    "seconds": 8.446,
+    "note": "All56skips explicitly guarded MySQL tests, executed separately."
+  },
+  "guarded_mysql": {
+    "tests": 63,
+    "passed": 63,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 9.322,
+    "unique_mysql_tests": 56,
+    "pure_guard_tests_also_included": 7
+  },
+  "browser_regression": {
+    "workspace_groups": 21,
+    "drawer_groups": 13,
+    "page_errors": 0,
+    "scope": "Syntheticfixtures only; real frozenIFREST/evidence verified separately in persistence.json"
+  },
+  "new_tests": {
+    "calibration": 10,
+    "features": 9,
+    "study_guards": 11,
+    "artifact_guards": 7,
+    "mysql_adapter": 4
+  },
+  "security": {
+    "private_credential_exact_match_scan": "PASS",
+    "files_scanned": 23,
+    "hits": 0,
+    "note": "Compared against actual ignored local credentials in memory; not a comprehensive security certification."
+  },
+  "checks": {
+    "diff_whitespace": "PASS",
+    "ui_changes": "NONE",
+    "migrations_or_schema_changes": "NONE",
+    "git_push_or_merge": "NONE",
+    "frozen_curated_reports_match_original_bytes": "PASS"
+  },
+  "not_run": [
+    "native macOS execution",
+    "entire BGL archive study",
+    "future-import inference",
+    "new frozen profile browser E2E",
+    "p50/p95 repetition",
+    "persistent replay total runtime not recorded"
+  ]
+}

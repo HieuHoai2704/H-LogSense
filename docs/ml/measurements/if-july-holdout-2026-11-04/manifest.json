@@ -1,0 +1,140 @@
+{
+  "archive_sha256": "d67fd82a711aea0157a9b83175892c6ee60e384a2ddf5bc51f39118453816da8",
+  "cache": {
+    "test": {
+      "count": 172529,
+      "key": "test.jsonl",
+      "sha256": "36216ccdec8e243a6b06e39595b698b1a6a5bb4ecca099486474d941e87df93c"
+    },
+    "train": {
+      "count": 580095,
+      "key": "train.jsonl",
+      "sha256": "5153ea311d4936721e69acc9c6821ce088d9132061732ef0477e4cce47dd12a3"
+    },
+    "validation": {
+      "count": 232151,
+      "key": "validation.jsonl",
+      "sha256": "de1f5d420949cf85eab4ecd59f75ff547eabb2480221c62ff086bd2ca84fb2b6"
+    }
+  },
+  "candidate_grid": [
+    {
+      "features": "base",
+      "id": "base-100-256",
+      "max_samples": 256,
+      "n_estimators": 100,
+      "seed": 42
+    },
+    {
+      "features": "context",
+      "id": "context-100-256",
+      "max_samples": 256,
+      "n_estimators": 100,
+      "seed": 42
+    },
+    {
+      "features": "base",
+      "id": "base-200-1024",
+      "max_samples": 1024,
+      "n_estimators": 200,
+      "seed": 42
+    },
+    {
+      "features": "context",
+      "id": "context-200-1024",
+      "max_samples": 1024,
+      "n_estimators": 200,
+      "seed": 42
+    }
+  ],
+  "coverage": "unknown source time completeness; no zero-host windows invented",
+  "exposed_old_test_end_utc": "2005-06-25T18:50:00Z",
+  "external_chunks": 32,
+  "external_sort": {
+    "key": [
+      "epoch_seconds",
+      "physical_source_line"
+    ],
+    "merge": "heapq.merge",
+    "rows_per_chunk": 50000
+  },
+  "full_member_sha256": "666130b15ef44eb32fd02bd053e6c6e007c37696b5e7e8b9d8e45b729876a5d2",
+  "label_use": "no labels in references/features/fitting; validation labels ONLY for calibration/selection; test labels after selection freeze",
+  "legacy_if": "100 trees, max_samples256, seed42, validation first20000 native-score p01",
+  "legacy_rule": "first20000 training counts p99, strict greater comparison",
+  "legacy_training": "first 20000 chronological training units",
+  "malformed_selected_events": 537,
+  "max_fpr": 0.01,
+  "maximum_units_per_phase": 1000000,
+  "member": "BGL.log",
+  "member_bytes": 743185031,
+  "member_crc32": 1334389820,
+  "minimum_validation_each_class": 20,
+  "missing_host_events": {
+    "test": 17,
+    "train": 23,
+    "validation": 25
+  },
+  "native_comparison": "<",
+  "native_score_direction": "lower",
+  "objective": "validation maximum F1 subject to empirical FPR<=0.01; ties AP, lower FPR, candidate ID",
+  "phase_events": {
+    "test": 313594,
+    "train": 835053,
+    "validation": 403051
+  },
+  "physical_source_lines": 4747963,
+  "prepare_seconds": 42.47876670000551,
+  "protocol_sha256": "3bf3ac14eb0def07650c46f952d0ad269660778af68d3067b2260953c0d870c7",
+  "quantile_sensitivity": [
+    0.001,
+    0.005,
+    0.01,
+    0.02,
+    0.05
+  ],
+  "raw_member_bytes": 743185031,
+  "registered_at_utc": "2026-11-04T12:39:01.905488+00:00",
+  "reservoir_limit": 20000,
+  "reservoir_seed": 42,
+  "seconds": 300,
+  "seed_sensitivity": [
+    17,
+    73
+  ],
+  "selected_raw_sha256": "53be3e731ac024aa1782f816dfb7c636646035abe0350eb0a4d92544b9b7099c",
+  "singleton_units": {
+    "test": 39300,
+    "train": 339881,
+    "validation": 70649
+  },
+  "software": {
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "python": "3.10.11",
+    "sklearn": "1.7.2"
+  },
+  "source_epoch_max": 1136390405,
+  "source_epoch_min": 1117838570,
+  "source_time_reversals": 0,
+  "split_utc": {
+    "test_end": "2005-07-28T00:00:00+00:00",
+    "train_end": "2005-07-14T00:00:00+00:00",
+    "train_start": "2005-07-01T00:00:00+00:00",
+    "validation_end": "2005-07-21T00:00:00+00:00"
+  },
+  "splits": {
+    "test_end": 1122508800,
+    "train_end": 1121299200,
+    "train_start": 1120176000,
+    "validation_end": 1121904000
+  },
+  "study_id": "f3e5a88403ab48fb84ea36904214e867",
+  "test_policy": "one evaluation of frozen legacy rule/IF and selected IF on identical new test; no test-driven reselection",
+  "unit": "nonempty completed observed host-window UTC [start,end); any original BGL alert among ALL observed events",
+  "unit_counts": {
+    "test": 172529,
+    "train": 580095,
+    "validation": 232151
+  }
+}

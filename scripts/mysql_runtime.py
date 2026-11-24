@@ -5,6 +5,7 @@
     python -m scripts.mysql_runtime start
     python -m scripts.mysql_runtime backup --schema logsense_dev --output .local/dev.sql
     python -m scripts.mysql_runtime restore --input .local/dev.sql
+    python -m scripts.mysql_runtime grant-dataset-crud --schema logsense_dev
 
 Provision an official native MySQL 8.4 distribution first. This tool does not
 download executables, install services, change global config or reuse databases.
@@ -137,6 +138,46 @@ def stop(root):
                 return {"status": "stopped", "shutdown": "graceful SQL SHUTDOWN"}
         time.sleep(0.25)
     raise RuntimeError("Shutdown not confirmed; do not kill unrelated processes.")
+
+
+def grant_dataset_crud(root, schema):
+    """Grant DELETE on two metadata tables, never on the complete schema.
+
+    Migrations must already have created both tables. This operator command
+    changes privileges only; it never deletes data or broadens raw-log access.
+    """
+    if not isinstance(schema, str) or not re.fullmatch(r"[A-Za-z0-9_]{1,64}", schema):
+        raise ValueError("Use a bounded alphanumeric/underscore schema name.")
+    root = owned_root(root)
+    ready = status(root)  # Authenticate and verify the protected datadir/binding.
+    info = load(root)
+    if ready["port"] != info.get("port", 13306):
+        raise ValueError("Server port does not match the owned runtime.")
+    tables = ("datasets", "user_datasets")
+    with connect(info) as connection, connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT TABLE_NAME FROM information_schema.tables "
+            "WHERE TABLE_SCHEMA=%s AND TABLE_NAME IN (%s,%s) "
+            "AND TABLE_TYPE='BASE TABLE'",
+            (schema, *tables),
+        )
+        if {row[0] for row in cursor.fetchall()} != set(tables):
+            raise ValueError("Apply dataset/auth migrations before granting CRUD privileges.")
+        # GRANT is DCL and auto-commits in MySQL. Both table names are fixed;
+        # the sole interpolated schema identifier was validated above. Repeating
+        # these same grants is safe if an earlier connection was interrupted.
+        for table in tables:
+            cursor.execute(
+                f"GRANT DELETE ON `{schema}`.`{table}` TO 'logsense_app'@'localhost'"
+            )
+    return {
+        "status": "granted",
+        "schema": schema,
+        "account": "logsense_app@localhost",
+        "privilege": "DELETE",
+        "tables_granted": list(tables),
+        "data_deleted": False,
+    }
 
 
 def backup(root, schema, output):
@@ -364,6 +405,10 @@ def main():
     dump.add_argument("--output", required=True)
     restored = sub.add_parser("restore")
     restored.add_argument("--input", required=True)
+    dataset_grant = sub.add_parser(
+        "grant-dataset-crud", help="Grant DELETE only on migrated dataset/ACL metadata tables"
+    )
+    dataset_grant.add_argument("--schema", required=True)
     execute = sub.add_parser(
         "exec", help="Run this venv Python with a private, process-local DATABASE_URL"
     )
@@ -377,6 +422,8 @@ def main():
         result = backup(root, args.schema, args.output)
     elif args.command == "restore":
         result = restore(root, args.input)
+    elif args.command == "grant-dataset-crud":
+        result = grant_dataset_crud(root, args.schema)
     elif args.command == "exec":
         from sqlalchemy.engine import URL
 

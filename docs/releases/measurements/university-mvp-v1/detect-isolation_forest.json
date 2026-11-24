@@ -1,0 +1,82 @@
+{
+  "anomaly_outputs": 5,
+  "configuration": {
+    "detector": "isolation_forest",
+    "feature_file_sha256": "72d1ddca9af2bcf77a70c5da48f03d2c47450a57fa850fe893dda73eb76beaa7",
+    "feature_version": "observed-host-window-1",
+    "features": [
+      "log1p_event_count",
+      "high_severity_fraction",
+      "distinct_template_fraction",
+      "dominant_template_fraction",
+      "log1p_mean_message_length"
+    ],
+    "input_revision": 200,
+    "maximum_event_id": 100500,
+    "model_artifact": {
+      "key": "cc5db5931ce748baa2202ccf41883574.joblib",
+      "sha256": "cda45a7fd5051d063c2b88b05c3ffb40d278f1ccb1ea9a2acd5ee7335f11b696"
+    },
+    "reference": {
+      "mean_event_count": 1.509180474697716,
+      "threshold": -0.8209836085366523
+    },
+    "score_direction": "lower",
+    "seed": 42,
+    "sklearn": "1.7.2",
+    "split_counts": {
+      "test": 79109,
+      "train": 11165,
+      "validation": 60
+    },
+    "template_policy": "replace whole decimal/hex tokens with <*> then SHA256; v1",
+    "test_end": "2005-06-05T16:40:00Z",
+    "threshold": -0.8209836085366523,
+    "threshold_policy": "validation native-score p01, no labels",
+    "train_end": "2005-06-04T19:40:00Z",
+    "train_start": "2005-06-03T22:40:00Z",
+    "training_used": 11165,
+    "validation_end": "2005-06-05T06:10:00Z",
+    "validation_used": 60,
+    "window_seconds": 300
+  },
+  "evaluated_units": 79109,
+  "job_id": 8,
+  "kind": "isolation_forest",
+  "metrics": {
+    "auprc_average_precision": 0.2545639511332459,
+    "eligible_units": 79109,
+    "f1": 0.0,
+    "fn": 529,
+    "fp": 5,
+    "fpr": 6.362942224484602e-05,
+    "label_policy": "any original BGL alert among ALL observed events in this window",
+    "label_source": "loghub-bgl original",
+    "no_event_level_comparison": true,
+    "precision": 0.0,
+    "recall": 0.0,
+    "scope": "chronological test split only",
+    "source_time_completeness": "unknown; imported observations only",
+    "tn": 78575,
+    "tp": 0,
+    "unit": "observed host-window",
+    "unlabeled_units": 0
+  },
+  "peak_rss_mib_sampled_20ms": 673.140625,
+  "queue_seconds_inprocess": 0.013866499997675419,
+  "run_id": 2,
+  "sampling_note": "Existing legacy policy, unchanged. Functional E2E, not model selection.",
+  "status": "PASS",
+  "timing_note": "Feature stream includes DB reads; persist includes score calls and SQL. Timings overlap and must not be summed.",
+  "timings": {
+    "evaluation_seconds": 4.60098879999714,
+    "feature_stream_seconds": 1.3630389012541855,
+    "feature_units": 90334,
+    "fit_seconds": 0.07129939999140333,
+    "persist_seconds": 110.50756110005022,
+    "score_seconds": 0.9082865000673337,
+    "sql_seconds": 55.281250104133505,
+    "sql_statements": 318057
+  },
+  "worker_seconds": 117.46289159999287
+}

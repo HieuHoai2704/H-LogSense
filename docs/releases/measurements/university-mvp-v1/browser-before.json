@@ -1,0 +1,146 @@
+{
+  "checks": [
+    {
+      "max_page_rows": 100,
+      "name": "login, explicit dataset ACL and bounded real-log rendering",
+      "observed_parsed_count": 100000,
+      "status": "PASS"
+    },
+    {
+      "name": "stable keyset next/previous within the imported snapshot",
+      "status": "PASS"
+    },
+    {
+      "csv_rows": 7,
+      "csv_sha256": "57bdb38943fec8c15a160c6e710d6dc2a23b230c3b22131b9c6da447064e4070",
+      "filtered_count": 7,
+      "name": "log host filter/table/timeline/CSV scope and raw provenance",
+      "status": "PASS"
+    },
+    {
+      "name": "network error retains old scope; retry succeeds; invalid API input rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "Log Explorer at 1366/1440/1920 without document overflow",
+      "status": "PASS"
+    },
+    {
+      "anomaly_outputs": 158,
+      "name": "server anomaly aggregation equals persisted outputs; Severity/Volume preserves membership",
+      "selected_run_ids": [
+        "1",
+        "2"
+      ],
+      "status": "PASS"
+    },
+    {
+      "csv_rows": 4,
+      "csv_sha256": "17e04dd28573c1f88a1df4e36cae32def2d1aa4480788464744fb488b0a23deb",
+      "name": "timeline selection/results/CSV use identical additional scope",
+      "scope_count": 158,
+      "selection_count": 4,
+      "status": "PASS"
+    },
+    {
+      "anomaly_id": "DB-4",
+      "evidence_kind": "rule",
+      "name": "actual Evidence Drawer provenance/version/threshold; closing preserves selection/focus; cross-dataset denial",
+      "source_line": 17386,
+      "status": "PASS"
+    },
+    {
+      "name": "evidence error does not expose stale content; retry restores actual evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "Investigation at 1366/1440/1920 without document overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "12 warm loopback HTTP latency samples per endpoint; full response body received",
+      "status": "PASS"
+    },
+    {
+      "demo_count": 6,
+      "name": "DEMO remains explicitly synthetic; anonymous real-data access denied",
+      "status": "PASS"
+    }
+  ],
+  "data": "actual imported Loghub BGL; isolated QA MySQL; no synthetic anomaly injection",
+  "dataset_id": 1,
+  "latency": {
+    "evidence_http": {
+      "max_ms": 19.282099994597957,
+      "measurement": "authenticated loopback HTTP GET through Playwright; body fully received; warm database; not SQL-only latency",
+      "min_ms": 16.51329999731388,
+      "p50_ms": 18.00145000743214,
+      "p95_ms": 19.041034991823835,
+      "payload_bytes_max": 3370,
+      "payload_bytes_min": 3370,
+      "samples": 12
+    },
+    "investigation_browser_navigation": {
+      "dom_content_loaded_ms": 124.3999999910593,
+      "load_end_ms": 125.3999999910593,
+      "meaning": "navigation-to-observed-ready includes server response, assets, script execution and QA observation; not isolated paint/render CPU",
+      "ready_observed_ms": 690.2999999970198,
+      "response_end_ms": 94.19999998807907
+    },
+    "investigation_http": {
+      "max_ms": 64.10969998978544,
+      "measurement": "authenticated loopback HTTP GET through Playwright; body fully received; warm database; not SQL-only latency",
+      "min_ms": 36.89390000363346,
+      "p50_ms": 38.198750000447035,
+      "p95_ms": 50.724405000801184,
+      "payload_bytes_max": 183673,
+      "payload_bytes_min": 183672,
+      "samples": 12
+    },
+    "investigation_navigation_to_ready_ms": 692.4845000030473,
+    "login_to_log_ready_browser_ms": 215.0,
+    "login_to_log_render_ms": 216.2703999929363,
+    "logs_http": {
+      "max_ms": 44.15050000534393,
+      "measurement": "authenticated loopback HTTP GET through Playwright; body fully received; warm database; not SQL-only latency",
+      "min_ms": 27.849699996295385,
+      "p50_ms": 28.50734999810811,
+      "p95_ms": 37.23853999763377,
+      "payload_bytes_max": 11653,
+      "payload_bytes_min": 11653,
+      "samples": 12
+    },
+    "selected_csv_http": {
+      "max_ms": 12.96120000188239,
+      "measurement": "authenticated loopback HTTP GET through Playwright; body fully received; warm database; not SQL-only latency",
+      "min_ms": 10.656600003130734,
+      "p50_ms": 11.388900005840696,
+      "p95_ms": 12.797795006190427,
+      "payload_bytes_max": 562,
+      "payload_bytes_min": 562,
+      "samples": 12
+    },
+    "timeline_http": {
+      "max_ms": 30.680800002301112,
+      "measurement": "authenticated loopback HTTP GET through Playwright; body fully received; warm database; not SQL-only latency",
+      "min_ms": 29.127599991625175,
+      "p50_ms": 30.234249999921303,
+      "p95_ms": 30.6095199957781,
+      "payload_bytes_max": 21980,
+      "payload_bytes_min": 21980,
+      "samples": 12
+    }
+  },
+  "not_run": [
+    "native macOS browser",
+    "screen-reader certification",
+    "external SMTP delivery"
+  ],
+  "other_dataset_id": 2,
+  "page_errors": [],
+  "passed_groups": 12,
+  "phase": "before",
+  "screenshots": "private QA_OUTPUT; actual raw source content is not committed",
+  "status": "PASS",
+  "wall_seconds": 6.304395700004534
+}

@@ -1,1 +1,4 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Invalid investigation query</title><link rel="stylesheet" href="{{ url_for('static',filename='css/console.css') }}"><main class="workspace-main"><h1>Invalid investigation query</h1><p role="alert">{{ message }}</p><a href="{{ url_for('dashboard') }}">Return to the synthetic workspace</a></main></html>
+<!doctype html><html lang="{{ interface_language }}"{% if workbench_enabled %} data-workspace-theme{% endif %}><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ tr("Invalid investigation query") }} · {{ app_name }}</title><link rel="stylesheet" href="{{ url_for('static',filename='css/console.css') }}">{% include "partials/language_assets.html" %}
+{% include "partials/workspace_assets.html" %}
+{% include "partials/workspace_navigation.html" %}
+<main class="workspace-main"><h1>{{ tr("Invalid investigation query") }}</h1><p role="alert">{{ message }}</p><a href="{{ url_for('dashboard') }}">{{ tr("Return to the synthetic workspace") }}</a></main></html>

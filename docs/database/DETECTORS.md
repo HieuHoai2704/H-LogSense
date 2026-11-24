@@ -92,3 +92,13 @@ split has 79,109 host windows. Rule: TP=92/FP=61/FN=437; IF: TP=0/FP=5/FN=529.
 The IF threshold gives zero recall despite nonzero ranking average precision.
 Neither baseline is approved for operational alerting. Do not compare these
 numbers with the earlier **event-level** evaluation as if they used the same unit.
+
+## Controlled IF V2 audit and opt-in replay
+
+See [the BGL IF audit](../ml/ISOLATION_FOREST_AUDIT.md) for the preregistered
+1M-prefix study, train/validation/test boundaries, validation-only calibration
+and sensitivity analysis, independent test before/after, and frozen-study job
+configuration. V2 model fitting remains label blind; its threshold explicitly
+uses validation labels. Context features were tested but not selected. The
+frozen profile replays its fixed test snapshot through existing MySQL evidence
+tables; it does not silently replace the legacy default or score future imports.

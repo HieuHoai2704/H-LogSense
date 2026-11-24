@@ -1,0 +1,7 @@
+"""Legacy source launcher. Installed distributions provide the h-logsen command."""
+
+from app.workbench.__main__ import main
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,62 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "anonymous denial; signed-in admin sees inline granted metadata without page navigation",
+      "status": "PASS"
+    },
+    {
+      "name": "register/creator grant/detail and safe text rendering; existing Explorer scope preserved",
+      "status": "PASS",
+      "new_empty_dataset_id": 8
+    },
+    {
+      "name": "duplicate key receives 409 without removing current metadata or creating another dataset",
+      "status": "PASS"
+    },
+    {
+      "name": "rename updates only display metadata through the existing workspace",
+      "status": "PASS"
+    },
+    {
+      "name": "populated retained dataset rejects delete with409; metadata unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "cancel preserves dataset; explicit confirmation physically deletes only new empty metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "metadata request error is visible; retry restores granted metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "inline panel retains laptop/desktop layout at1366/1440/1920",
+      "status": "PASS"
+    },
+    {
+      "name": "live forms require both Flask-WTF signed CSRF and the existing role/header CSRF guard",
+      "status": "PASS"
+    },
+    {
+      "name": "actual signed upload\u2192queued worker\u2192MySQL\u2192Explorer/raw provenance; imported data protected",
+      "status": "PASS",
+      "uploaded_dataset_id": 10,
+      "parsed_events": 100000,
+      "malformed_rows": 0,
+      "original_sha256": "d6b55a02a67d9ab027abae4b60c365edbf9a892fcb6810ff780528512ca01c83",
+      "worker_to_verified_explorer_seconds": 29.36050370000885,
+      "timing_note": "Includes worker execution, status/Explorer/raw evidence and protected-delete checks; excludes upload staging."
+    },
+    {
+      "name": "logout hides private metadata; viewer receives no mutation controls",
+      "status": "PASS"
+    }
+  ],
+  "page_errors": [],
+  "not_run": [],
+  "data_safety": "Only a newly registered empty dataset is renamed and physically deleted. Existing dataset metadata/logs remain unchanged.",
+  "wall_seconds": 37.47250350000104,
+  "passed_groups": 11,
+  "screenshots": "Private QA_OUTPUT only; no passwords/raw research logs committed."
+}

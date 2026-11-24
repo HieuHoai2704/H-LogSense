@@ -1,0 +1,110 @@
+{
+  "archive_sha256": "d67fd82a711aea0157a9b83175892c6ee60e384a2ddf5bc51f39118453816da8",
+  "full_member_sha256": "666130b15ef44eb32fd02bd053e6c6e007c37696b5e7e8b9d8e45b729876a5d2",
+  "manifest_sha256": "8f126554aa0b3f82c8e429ead642cb9419d5c05f75a13551dc2486846b9c7a4d",
+  "metrics": {
+    "legacy_if": {
+      "auprc_average_precision": 0.02597728401833818,
+      "eligible_units": 172529,
+      "f1": 0.003617916551968225,
+      "fn": 0,
+      "fp": 101348,
+      "fpr": 0.5880530331602309,
+      "precision": 0.001812236536264429,
+      "predicted_positive": 101532,
+      "recall": 1.0,
+      "tn": 70997,
+      "tp": 184
+    },
+    "legacy_rule": {
+      "auprc_average_precision": 0.02931225850659958,
+      "eligible_units": 172529,
+      "f1": 0.004445855827246745,
+      "fn": 177,
+      "fp": 2958,
+      "fpr": 0.017163248136006268,
+      "precision": 0.002360876897133221,
+      "predicted_positive": 2965,
+      "recall": 0.03804347826086957,
+      "tn": 169387,
+      "tp": 7
+    },
+    "selected_if": {
+      "auprc_average_precision": 0.2656097620691372,
+      "eligible_units": 172529,
+      "f1": 0.3202511773940345,
+      "fn": 82,
+      "fp": 351,
+      "fpr": 0.002036612608430764,
+      "precision": 0.2251655629139073,
+      "predicted_positive": 453,
+      "recall": 0.5543478260869565,
+      "tn": 171994,
+      "tp": 102
+    }
+  },
+  "peak_working_set_mib": 179.66015625,
+  "phase_events": {
+    "test": 313594,
+    "train": 835053,
+    "validation": 403051
+  },
+  "prediction_sha256": "5f361109822f8591ef5c0bdaa426ec530df93427a1df1a026beee48c97c9e900",
+  "selected_raw_sha256": "53be3e731ac024aa1782f816dfb7c636646035abe0350eb0a4d92544b9b7099c",
+  "selection": {
+    "baseline_artifact_sha256": "8e5554e864b3415216c364f146289db3a19b43befc96c81f8e8ade0c2ad87ca3",
+    "comparison": "<",
+    "frozen_at_utc": "2026-11-04T12:41:38.395349+00:00",
+    "manifest_sha256": "8f126554aa0b3f82c8e429ead642cb9419d5c05f75a13551dc2486846b9c7a4d",
+    "score_direction": "lower",
+    "selected": {
+      "features": "base",
+      "id": "base-100-256",
+      "max_samples": 256,
+      "n_estimators": 100,
+      "seed": 42
+    },
+    "selected_artifact_sha256": "530af8801f567e1e31d5dc0efad23b92b555c86061f5088024d253d96721b01b",
+    "threshold": -0.7700419045395783,
+    "threshold_uses_validation_labels": true,
+    "validation_sha256": "4bd0cbda40fd857e35cc0f102d1a0f8b4bd7e1ae1ce214df0d0403213b7c03bd"
+  },
+  "selection_sha256": "746effaa8a9d1a8747ef145b2a58c7dde33403c7673c0748864d7c8f1b78f0f9",
+  "semantics": {
+    "auprc": "sklearn average precision, not trapezoidal PR area",
+    "comparison": "same cohort; no point adjustment; no event/window mixing",
+    "coverage": "unknown source time completeness; no zero-host windows invented",
+    "deployment": "offline experiment only; no default detector, UI or MySQL data changed",
+    "scores": "native lower score more anomalous; not probability",
+    "unit": "nonempty completed observed host-window UTC [start,end); any original BGL alert among ALL observed events"
+  },
+  "singleton_units": {
+    "test": 39300,
+    "train": 339881,
+    "validation": 70649
+  },
+  "software": {
+    "numpy": "2.2.6",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "python": "3.10.11",
+    "sklearn": "1.7.2"
+  },
+  "source": "actual full Loghub BGL archive, fixed July UTC slice",
+  "split_utc": {
+    "test_end": "2005-07-28T00:00:00+00:00",
+    "train_end": "2005-07-14T00:00:00+00:00",
+    "train_start": "2005-07-01T00:00:00+00:00",
+    "validation_end": "2005-07-21T00:00:00+00:00"
+  },
+  "status": "MEASURED",
+  "study_id": "f3e5a88403ab48fb84ea36904214e867",
+  "test_negatives": 172345,
+  "test_positives": 184,
+  "test_prevalence": 0.0010664873731372696,
+  "test_seconds": 9.818865799999912,
+  "unit_counts": {
+    "test": 172529,
+    "train": 580095,
+    "validation": 232151
+  }
+}

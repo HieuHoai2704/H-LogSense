@@ -1,6 +1,7 @@
 "use strict";
 // Evidence is read from explicit contracts; no prose or importance is generated.
 window.EvidenceDrawer = (() => {
+  const t = window.logsenseTranslate;
   const panel = document.getElementById("detail-panel");
   const byId = id => document.getElementById(id);
   let current = null, currentId = null, opener = null, originScroll = 0;
@@ -9,7 +10,7 @@ window.EvidenceDrawer = (() => {
   let raw = null, related = null, relatedCursor = "", cursorHistory = [];
   let rawOffset = 0, requestedRawOffset = 0, mainLoading = false, rawLoading = false, relatedLoading = false;
   const app = () => window.Investigation;
-  const unavailable = value => value == null || value === "" ? "Unavailable — not supplied" : typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
+  const unavailable = value => value == null || value === "" ? t("Unavailable — not supplied") : typeof value === "object" ? JSON.stringify(value, null, 2) : String(value);
 
   function url(path, extras = {}) {
     const target = app().stateURL(); target.pathname = path;
@@ -30,11 +31,11 @@ window.EvidenceDrawer = (() => {
     const timer = setTimeout(() => { timeout = true; controller.abort(); }, 15000);
     try {
       const response = await fetch(target, {signal: controller.signal});
-      const payload = await response.json().catch(() => { throw new Error("Evidence server response unavailable."); });
-      if (!response.ok) throw new Error(payload.error?.message || "Evidence unavailable.");
+      const payload = await response.json().catch(() => { throw new Error(t("Evidence server response unavailable.")); });
+      if (!response.ok) throw new Error(payload.error?.message || t("Evidence unavailable."));
       return payload;
     } catch (error) {
-      if (timeout) throw new Error("Evidence query timed out. Retry or close the panel.");
+      if (timeout) throw new Error(t("Evidence query timed out. Retry or close the panel."));
       throw error;
     } finally { clearTimeout(timer); }
   }
@@ -53,9 +54,7 @@ window.EvidenceDrawer = (() => {
   }
   function refreshContext() {
     const state = app().state();
-    byId("evidence-scope").textContent = state.selection_start
-      ? `Timeline selection: ${state.selection_start} – ${state.selection_end}${state.selection_detector ? ` · ${state.selection_detector}` : ""}`
-      : `Result scope: ${state.source} · ${state.start_time} – ${state.end_time}`;
+    byId("evidence-scope").textContent = state.selection_start ? t("Timeline selection: {0} – {1}{2}", state.selection_start, state.selection_end, state.selection_detector ? ` · ${state.selection_detector}` : "") : t("Result scope: {0} · {1} – {2}", state.source, state.start_time, state.end_time);
   }
   function rawHighlight(text) {
     const pre = byId("detail-raw"); pre.replaceChildren();
@@ -72,10 +71,10 @@ window.EvidenceDrawer = (() => {
   }
   function renderRaw(page) {
     raw = page; rawOffset = page.offset; byId("raw-retry").hidden = true; rawHighlight(page.text);
-    byId("raw-position").textContent = page.total_chars ? `${page.offset+1}–${page.offset+page.text.length} / ${page.total_chars} characters` : "Empty raw text";
+    byId("raw-position").textContent = page.total_chars ? t("{0}–{1} / {2} characters", page.offset+1, page.offset+page.text.length, page.total_chars) : t("Empty raw text");
     byId("raw-previous").disabled = page.offset === 0;
     byId("raw-next").disabled = !page.has_more;
-    byId("raw-note").textContent = `${current?.mode === "database" ? "Imported source evidence (a sample for window units)." : "Synthetic text; original log unavailable."} Redaction applied.${page.has_more ? " More text available in chunks." : ""}`;
+    byId("raw-note").textContent = t("{0} Redaction applied.{1}", current?.mode === "database" ? t("Imported source evidence (a sample for window units).") : t("Synthetic text; original log unavailable."), page.has_more ? t(" More text available in chunks.") : "");
     byId("raw-redaction-note").textContent = page.redaction_note;
   }
   function renderRelated(data) {
@@ -89,8 +88,8 @@ window.EvidenceDrawer = (() => {
       const reason = document.createElement("p"); reason.textContent = event.relationship_reasons.join(" · ");
       row.append(button, meta, reason); container.append(row);
     }
-    if (!data.items.length) container.textContent = current?.mode === "database" ? "No related anomalies match this explicit context." : "No related fixture records match this relationship and context interval.";
-    byId("related-status").textContent = `${data.items.length} records on this page · ${data.interval.start} – ${data.interval.end} · ${current?.mode === "database" ? "related anomaly references; parsed context available in Log Explorer" : "original raw context logs unavailable"}`;
+    if (!data.items.length) container.textContent = current?.mode === "database" ? t("No related anomalies match this explicit context.") : t("No related fixture records match this relationship and context interval.");
+    byId("related-status").textContent = t("{0} records on this page · {1} – {2} · {3}", data.items.length, data.interval.start, data.interval.end, current?.mode === "database" ? t("related anomaly references; parsed context available in Log Explorer") : t("original raw context logs unavailable"));
     byId("related-previous").disabled = !cursorHistory.length;
     byId("related-next").disabled = !data.has_more;
     byId("related-retry").hidden = true;
@@ -103,13 +102,13 @@ window.EvidenceDrawer = (() => {
     const a = data.anomaly, d = data.detector_evidence, p = data.raw_event.provenance;
     current = data;
     byId("detail-title").textContent = a.id;
-    byId("detail-message").textContent = data.summary.observed_signal ?? "Signal statement unavailable.";
-    byId("detail-priority").textContent = a.severity ?? "Priority unavailable";
+    byId("detail-message").textContent = data.summary.observed_signal ?? t("Signal statement unavailable.");
+    byId("detail-priority").textContent = a.severity ? t(a.severity) : t("Priority unavailable");
     byId("detail-priority").className = `severity severity-${(a.severity || "").toLowerCase()}`;
-    putFields("detail-fields", [["Detection timestamp · UTC", a.timestamp], ["Host", a.host], ["Service", a.service],
-      ["Detector", a.detector], ["Detection unit", a.unit], ["Dataset", `${a.dataset_name} · ${a.dataset_id}`], ["Model run", a.model_run_id]]);
-    putFields("raw-provenance", [[data.mode === "database" ? "Original timestamp string" : "Raw fixture timestamp", p.raw_timestamp], [data.mode === "database" ? "Parsed UTC timestamp" : "Adapted UTC timestamp", p.parsed_timestamp], ["Host", p.host],
-      ["Source file", p.source_file], ["Source line", p.source_line], ["Event reference", p.event_reference], ["Parsing status", p.parsing_status]]);
+    putFields("detail-fields", [[t("Detection timestamp · UTC"), a.timestamp], [t("Host"), a.host], [t("Service"), a.service],
+      [t("Detector"), a.detector], [t("Detection unit"), a.unit], [t("Dataset"), `${a.dataset_name} · ${a.dataset_id}`], [t("Model run"), a.model_run_id]]);
+    putFields("raw-provenance", [[data.mode === "database" ? t("Original timestamp string") : t("Raw fixture timestamp"), p.raw_timestamp], [data.mode === "database" ? t("Parsed UTC timestamp") : t("Adapted UTC timestamp"), p.parsed_timestamp], [t("Host"), p.host],
+      [t("Source file"), p.source_file], [t("Source line"), p.source_line], [t("Event reference"), p.event_reference], [t("Parsing status"), p.parsing_status]]);
     byId("detail-parsed").textContent = JSON.stringify(data.parsed_fields, null, 2);
     byId("detail-actual").textContent = unavailable(d.observed_value);
     byId("detail-typical").textContent = unavailable(d.reference_statistics);
@@ -124,7 +123,7 @@ window.EvidenceDrawer = (() => {
     byId("detail-disclaimer").textContent = d.score_interpretation;
     byId("previous-anomaly").disabled = !data.navigation.previous_id;
     byId("next-anomaly").disabled = !data.navigation.next_id;
-    byId("detail-status").textContent = data.navigation.in_result_scope ? (data.mode === "database" ? "MYSQL · Actual persisted supporting evidence" : "DEMO · Selected synthetic supporting record") : data.navigation.note;
+    byId("detail-status").textContent = data.navigation.in_result_scope ? data.mode === "database" ? t("MYSQL · Actual persisted supporting evidence") : t("DEMO · Selected synthetic supporting record") : data.navigation.note;
     byId("previous-anomaly").title = byId("next-anomaly").title = data.navigation.note;
     byId("filter-evidence-host").hidden = !a.host;
     byId("filter-evidence-service").hidden = !a.service;
@@ -144,7 +143,7 @@ window.EvidenceDrawer = (() => {
     byId("detail-title").textContent = id; byId("detail-title").focus({preventScroll: true});
     byId("detail-content").hidden = true; byId("retry-detail").hidden = true;
     byId("previous-anomaly").disabled = byId("next-anomaly").disabled = true;
-    byId("detail-status").textContent = "Loading selected evidence…"; refreshContext(); availability();
+    byId("detail-status").textContent = t("Loading selected evidence…"); refreshContext(); availability();
     mainController = new AbortController();
     try {
       const data = await fetchJSON(url(endpoint(), contextParams("")), mainController);
@@ -171,13 +170,13 @@ window.EvidenceDrawer = (() => {
     rawController?.abort(); rawController = new AbortController(); rawLoading = true;
     requestedRawOffset = offset; byId("raw-retry").hidden = true;
     byId("raw-previous").disabled = byId("raw-next").disabled = true;
-    byId("detail-raw").textContent = "Loading raw evidence chunk…"; availability();
+    byId("detail-raw").textContent = t("Loading raw evidence chunk…"); availability();
     try {
       const data = await fetchJSON(url(endpoint("/raw"), {raw_offset: offset, raw_limit: raw?.limit || 2048}), rawController);
       if (ticket === rawSequence && owner === generation) renderRaw(data.raw_event);
     } catch (error) {
       if (error.name !== "AbortError" && ticket === rawSequence && owner === generation) {
-        byId("detail-raw").textContent = `Raw evidence unavailable: ${error.message}`; raw = null;
+        byId("detail-raw").textContent = t("Raw evidence unavailable: {0}", error.message); raw = null;
         byId("raw-retry").hidden = false; byId("raw-previous").disabled = byId("raw-next").disabled = true;
       }
     } finally { if (ticket === rawSequence && owner === generation) { rawLoading = false; availability(); } }
@@ -185,7 +184,7 @@ window.EvidenceDrawer = (() => {
   async function loadRelated(cursor = "") {
     const ticket = ++relatedSequence, owner = generation;
     relatedController?.abort(); relatedController = new AbortController(); relatedLoading = true;
-    byId("detail-related").replaceChildren(); byId("related-status").textContent = "Loading bounded related records…";
+    byId("detail-related").replaceChildren(); byId("related-status").textContent = t("Loading bounded related records…");
     byId("related-retry").hidden = true; byId("related-previous").disabled = byId("related-next").disabled = true; related = null; availability();
     try {
       const data = await fetchJSON(url(`/api/v1/anomalies/${encodeURIComponent(currentId)}/related`, contextParams(cursor)), relatedController);
@@ -198,22 +197,22 @@ window.EvidenceDrawer = (() => {
   }
   async function copy(text) {
     try {
-      if (!navigator.clipboard) throw new Error("Clipboard is unavailable in this browser context.");
-      await navigator.clipboard.writeText(text); app().notify("Copied redacted evidence.");
-    } catch (error) { app().notify(`Copy failed: ${error.message}`); }
+      if (!navigator.clipboard) throw new Error(t("Clipboard is unavailable in this browser context."));
+      await navigator.clipboard.writeText(text); app().notify(t("Copied redacted evidence."));
+    } catch (error) { app().notify(t("Copy failed: {0}", error.message)); }
   }
   async function exportEvidence() {
     if (!current || !raw || !related || mainLoading || rawLoading || relatedLoading) return;
     const button = byId("export-evidence"), controller = new AbortController();
     const id = currentId;
-    button.disabled = true; button.textContent = "Exporting evidence…";
+    button.disabled = true; button.textContent = t("Exporting evidence…");
     try {
       const data = await fetchJSON(url(endpoint("/export"), {...contextParams(), raw_offset: raw.offset, raw_limit: raw.limit}), controller);
       const file = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: "application/json"}));
       const link = document.createElement("a"); link.href = file; link.download = `${current?.mode === "database" ? "mysql" : "synthetic"}-evidence-${id}.json`; link.click();
-      setTimeout(() => URL.revokeObjectURL(file), 1000); app().notify("Exported current redacted evidence page; omitted data is identified in availability.");
-    } catch (error) { app().notify(`Evidence export failed: ${error.message}`); }
-    finally { button.textContent = "Export evidence JSON"; availability(); }
+      setTimeout(() => URL.revokeObjectURL(file), 1000); app().notify(t("Exported current redacted evidence page; omitted data is identified in availability."));
+    } catch (error) { app().notify(t("Evidence export failed: {0}", error.message)); }
+    finally { button.textContent = t("Export evidence JSON"); availability(); }
   }
   function filterDimension(key, value) {
     if (!current || !value) return;

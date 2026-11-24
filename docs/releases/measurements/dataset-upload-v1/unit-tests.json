@@ -1,0 +1,10 @@
+{
+  "exit_code": 0,
+  "wall_seconds": 17.688349299991387,
+  "log": "----------------------------------------------------------------------\nRan 264 tests in 15.772s\n\nOK (skipped=111)\n",
+  "tests": 264,
+  "passed": 153,
+  "guarded_skipped": 111,
+  "internal_seconds": 15.772,
+  "semantics": "Default discovery does not execute MySQL; explicit123 suite covers111 guarded DB cases plus12 overlapping pure guards. Do not sum these as unique tests."
+}

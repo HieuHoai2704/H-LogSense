@@ -57,6 +57,7 @@ instance/
 /data/imports/
 /research/papers/
 /research/text/
+/papers/**/*.pdf
 
 # Model binaries; Python model/ORM source directories remain trackable.
 /model_artifacts/

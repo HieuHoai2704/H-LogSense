@@ -20,6 +20,10 @@ from app.models import (
 from app.parsers.bgl import iter_records, VERSION
 
 
+class ImportBusyError(RuntimeError):
+    """Another live process owns the requested connection-bound import lease."""
+
+
 def fingerprint(path):
     digest = hashlib.sha256()
     with open(path, "rb") as stream:
@@ -56,7 +60,7 @@ def import_lease(engine, dataset_id):
         ).scalar_one()
         connection.commit()
         if acquired != 1:
-            raise RuntimeError("An import already owns this dataset.")
+            raise ImportBusyError("An import already owns this dataset.")
         try:
             yield
         finally:
@@ -74,6 +78,10 @@ def ingest_bgl(
     batch_size=500,
     progress=None,
     before_commit=None,
+    label_source="loghub-bgl",
+    label_version="original",
+    event_metadata=None,
+    job_started=None,
 ):
     with import_lease(engine, dataset_id):
         return _ingest_bgl(
@@ -85,6 +93,10 @@ def ingest_bgl(
             batch_size=batch_size,
             progress=progress,
             before_commit=before_commit,
+            label_source=label_source,
+            label_version=label_version,
+            event_metadata=event_metadata,
+            job_started=job_started,
         )
 
 
@@ -98,6 +110,10 @@ def _ingest_bgl(
     batch_size=500,
     progress=None,
     before_commit=None,
+    label_source="loghub-bgl",
+    label_version="original",
+    event_metadata=None,
+    job_started=None,
 ):
     """Import up to an absolute physical-line checkpoint; None means EOF.
 
@@ -107,6 +123,11 @@ def _ingest_bgl(
     """
     if not 1 <= batch_size <= 2000 or (limit is not None and limit < 1):
         raise ValueError("Invalid import limits.")
+    if any(not isinstance(value, str) or not 1 <= len(value) <= 64
+           for value in (label_source, label_version)):
+        raise ValueError("Invalid supplied label provenance.")
+    if event_metadata is not None and not callable(event_metadata):
+        raise ValueError("Event metadata must be a trusted callable.")
     validate_member(member)
     archive = Path(archive)
     checksum = fingerprint(archive)
@@ -160,6 +181,8 @@ def _ingest_bgl(
             session.flush()
             job_id = job.id
         try:
+            if job_started:
+                job_started(job_id)
             with zipped.open(info) as stream:
                 while True:
                     with Session(engine) as session, session.begin():
@@ -239,7 +262,8 @@ def _ingest_bgl(
                                         service=r.attributes["component"],
                                         severity=r.attributes["level"],
                                         message=r.message,
-                                        attributes=r.attributes,
+                                        attributes=(dict(r.attributes, upload=event_metadata(r))
+                                                    if event_metadata else r.attributes),
                                     )
                                     for r in valid
                                 ],
@@ -260,8 +284,8 @@ def _ingest_bgl(
                                     dict(
                                         dataset_id=dataset_id,
                                         event_id=event_ids[raw_ids[r.line_number]],
-                                        source="loghub-bgl",
-                                        version="original",
+                                        source=label_source,
+                                        version=label_version,
                                         label=r.label,
                                     )
                                     for r in valid
