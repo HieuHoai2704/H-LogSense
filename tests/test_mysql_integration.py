@@ -51,17 +51,10 @@ def assert_isolated(app):
         or not re.fullmatch(r"logsense_test_[0-9a-f]{12}", url.database or "")
         or not os.environ.get("LOGSENSE_TEST_TOKEN")
     ):
-        raise RuntimeError(
-            "Refusing integration tests without an isolated test schema and token."
-        )
+        raise RuntimeError("Refusing integration tests without an isolated test schema and token.")
     with app.app_context(), db.engine.connect() as connection:
-        token = connection.execute(
-            text("SELECT token_hash FROM logsense_test_guard")
-        ).scalar_one()
-        if (
-            token
-            != hashlib.sha256(os.environ["LOGSENSE_TEST_TOKEN"].encode()).hexdigest()
-        ):
+        token = connection.execute(text("SELECT token_hash FROM logsense_test_guard")).scalar_one()
+        if token != hashlib.sha256(os.environ["LOGSENSE_TEST_TOKEN"].encode()).hexdigest():
             raise RuntimeError("Test schema ownership check failed.")
 
 
@@ -152,9 +145,7 @@ class MySQLIntegrationTests(unittest.TestCase):
         detector = Detector(detector_key=uuid4().hex, family="rule")
         session.add(detector)
         session.flush()
-        version = DetectorVersion(
-            detector_id=detector.id, version="1", configuration={"threshold": 1}
-        )
+        version = DetectorVersion(detector_id=detector.id, version="1", configuration={"threshold": 1})
         session.add(version)
         session.flush()
         run = DetectorRun(
@@ -172,14 +163,10 @@ class MySQLIntegrationTests(unittest.TestCase):
 
     def test_01_connectivity_and_utc(self):
         with self.engine.connect() as connection:
-            version, zone = connection.execute(
-                text("SELECT VERSION(), @@time_zone")
-            ).one()
+            version, zone = connection.execute(text("SELECT VERSION(), @@time_zone")).one()
             self.assertTrue(version.startswith("8."))
             self.assertEqual(zone, "+00:00")
-        self.assertEqual(
-            self.app.test_client().get("/api/v1/health/database").status_code, 200
-        )
+        self.assertEqual(self.app.test_client().get("/api/v1/health/database").status_code, 200)
 
     def test_02_migration_schema_matches_models(self):
         with self.engine.connect() as connection:
@@ -187,16 +174,15 @@ class MySQLIntegrationTests(unittest.TestCase):
                 connection,
                 opts={
                     "compare_type": True,
-                    "include_object": lambda obj, name, kind, reflected, compare: name
-                    != "logsense_test_guard",
+                    "include_object": lambda obj, name, kind, reflected, compare: (
+                        name != "logsense_test_guard"
+                    ),
                 },
             )
             diff = compare_metadata(context, db.metadata)
             self.assertEqual(diff, [])
             self.assertEqual(
-                connection.execute(
-                    text("SELECT version_num FROM alembic_version")
-                ).scalar_one(),
+                connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one(),
                 "0004",
             )
             tables = inspect(connection).get_table_names()
@@ -205,9 +191,7 @@ class MySQLIntegrationTests(unittest.TestCase):
     def test_03_dataset_archive_relationship(self):
         with self.session.begin():
             archive_dataset(self.session, self.dataset_id)
-            self.assertEqual(
-                self.session.get(Dataset, self.dataset_id).state, "archived"
-            )
+            self.assertEqual(self.session.get(Dataset, self.dataset_id).state, "archived")
             self.assertIsNotNone(self.session.get(Dataset, self.dataset_id).source)
 
     def test_04_raw_bytes_exact_and_json_roundtrip(self):
@@ -216,18 +200,14 @@ class MySQLIntegrationTests(unittest.TestCase):
             raw = self.session.get(RawLogRecord, event.raw_id)
             self.session.expire_all()
             self.assertEqual(raw.raw_bytes, LINE)
-            self.assertEqual(
-                event.attributes, {"unicode": "Viá»‡t Nam", "list": [1, 2]}
-            )
+            self.assertEqual(event.attributes, {"unicode": "Viá»‡t Nam", "list": [1, 2]})
 
     def test_05_half_open_range_and_keyset_ties(self):
         with self.session.begin():
             first = self.event(self.session)
             second = self.event(self.session)
             self.event(self.session, timestamp=NOW + timedelta(seconds=1))
-            page = page_events(
-                self.session, self.dataset_id, NOW, NOW + timedelta(seconds=1), limit=1
-            )
+            page = page_events(self.session, self.dataset_id, NOW, NOW + timedelta(seconds=1), limit=1)
             self.assertEqual([e.id for e in page], [first.id])
             page = page_events(
                 self.session,
@@ -239,9 +219,7 @@ class MySQLIntegrationTests(unittest.TestCase):
             )
             self.assertEqual([e.id for e in page], [second.id])
             self.assertEqual(
-                page_events(
-                    self.session, self.other_id, NOW, NOW + timedelta(seconds=1)
-                ),
+                page_events(self.session, self.other_id, NOW, NOW + timedelta(seconds=1)),
                 [],
             )
 
@@ -272,9 +250,7 @@ class MySQLIntegrationTests(unittest.TestCase):
             )
             self.session.add(unit)
             self.session.flush()
-            self.session.add(
-                UnitEvent(dataset_id=self.other_id, unit_id=unit.id, event_id=event.id)
-            )
+            self.session.add(UnitEvent(dataset_id=self.other_id, unit_id=unit.id, event_id=event.id))
             self.session.flush()
 
     def test_08_cross_dataset_anomaly_run_rejected(self):
@@ -342,9 +318,7 @@ class MySQLIntegrationTests(unittest.TestCase):
             raise RuntimeError("Injected failure")
         with self.session.begin():
             count = self.session.scalar(
-                select(func.count())
-                .select_from(LogEvent)
-                .where(LogEvent.dataset_id == self.dataset_id)
+                select(func.count()).select_from(LogEvent).where(LogEvent.dataset_id == self.dataset_id)
             )
             self.assertEqual(count, 0)
 
@@ -442,28 +416,20 @@ class MySQLIntegrationTests(unittest.TestCase):
                 raise RuntimeError("Injected batch failure")
 
         with self.assertRaises(RuntimeError):
-            ingest_bgl(
-                self.engine, self.dataset_id, path, batch_size=2, before_commit=fail
-            )
+            ingest_bgl(self.engine, self.dataset_id, path, batch_size=2, before_commit=fail)
         with self.session.begin():
             artifact = self.session.scalar(
-                select(SourceArtifact).where(
-                    SourceArtifact.dataset_id == self.dataset_id
-                )
+                select(SourceArtifact).where(SourceArtifact.dataset_id == self.dataset_id)
             )
             self.assertEqual((artifact.checkpoint_line, artifact.parsed_count), (2, 2))
             self.assertEqual(
                 self.session.scalar(
-                    select(func.count())
-                    .select_from(LogEvent)
-                    .where(LogEvent.dataset_id == self.dataset_id)
+                    select(func.count()).select_from(LogEvent).where(LogEvent.dataset_id == self.dataset_id)
                 ),
                 2,
             )
         self.assertEqual(
-            ingest_bgl(self.engine, self.dataset_id, path, batch_size=2)[
-                "parsed_events"
-            ],
+            ingest_bgl(self.engine, self.dataset_id, path, batch_size=2)["parsed_events"],
             4,
         )
 
@@ -485,19 +451,15 @@ class MySQLIntegrationTests(unittest.TestCase):
             DATABASE_ALLOWED_DATASETS=(self.dataset_id,),
         )
         client = self.app.test_client()
-        url = f'/api/v1/database/anomalies?dataset_id={self.dataset_id}&run_id={result["run_id"]}'
+        url = f"/api/v1/database/anomalies?dataset_id={self.dataset_id}&run_id={result['run_id']}"
         self.assertEqual(client.get(url).status_code, 403)
-        response = client.get(
-            url, headers={"Authorization": "Bearer synthetic-test-token"}
-        )
+        response = client.get(url, headers={"Authorization": "Bearer synthetic-test-token"})
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.json["score_is_probability"])
         self.assertEqual(len(response.json["anomalies"]), 1)
         anomaly_id = response.json["anomalies"][0]["id"]
         evidence_url = f"/api/v1/database/anomalies/{anomaly_id}/evidence?dataset_id={self.dataset_id}"
-        evidence = client.get(
-            evidence_url, headers={"Authorization": "Bearer synthetic-test-token"}
-        )
+        evidence = client.get(evidence_url, headers={"Authorization": "Bearer synthetic-test-token"})
         self.assertEqual(evidence.status_code, 200)
         self.assertEqual(
             evidence.json["raw_event"]["raw_sha256"],
@@ -509,18 +471,14 @@ class MySQLIntegrationTests(unittest.TestCase):
         self.assertEqual(client.get(evidence_url).status_code, 403)
         self.assertEqual(
             client.get(
-                evidence_url.replace(
-                    f"dataset_id={self.dataset_id}", f"dataset_id={self.other_id}"
-                ),
+                evidence_url.replace(f"dataset_id={self.dataset_id}", f"dataset_id={self.other_id}"),
                 headers={"Authorization": "Bearer synthetic-test-token"},
             ).status_code,
             403,
         )
         self.assertEqual(
             client.get(
-                url.replace(
-                    f"dataset_id={self.dataset_id}", f"dataset_id={self.other_id}"
-                ),
+                url.replace(f"dataset_id={self.dataset_id}", f"dataset_id={self.other_id}"),
                 headers={"Authorization": "Bearer synthetic-test-token"},
             ).status_code,
             403,
@@ -528,15 +486,9 @@ class MySQLIntegrationTests(unittest.TestCase):
         self.app.config.update(DATABASE_READ_TOKEN=None, DATABASE_ALLOWED_DATASETS=())
 
     def test_20_isolation_forest_persistence(self):
-        training = b"".join(
-            LINE.replace(b"example", b"word " * n) for n in range(1, 21)
-        )
+        training = b"".join(LINE.replace(b"example", b"word " * n) for n in range(1, 21))
         path = self.zipped(
-            training
-            + LINE.replace(b"INFO", b"ERROR").replace(
-                b"example", b"long rare message " * 50
-            )
-            * 4
+            training + LINE.replace(b"INFO", b"ERROR").replace(b"example", b"long rare message " * 50) * 4
         )
         ingest_bgl(self.engine, self.dataset_id, path)
         with tempfile.TemporaryDirectory() as directory:
@@ -565,14 +517,10 @@ class MySQLIntegrationTests(unittest.TestCase):
         assert_isolated(app)
         with app.app_context():
             upgrade()
-            self.assertTrue(
-                set(db.metadata.tables) <= set(inspect(db.engine).get_table_names())
-            )
+            self.assertTrue(set(db.metadata.tables) <= set(inspect(db.engine).get_table_names()))
             with db.engine.connect() as connection:
                 self.assertEqual(
-                    connection.execute(
-                        text("SELECT COUNT(*) FROM log_events")
-                    ).scalar_one(),
+                    connection.execute(text("SELECT COUNT(*) FROM log_events")).scalar_one(),
                     0,
                 )
 
@@ -622,9 +570,7 @@ class MySQLIntegrationTests(unittest.TestCase):
 
     def test_25_abandoned_job_recovered_after_lease_release(self):
         with self.session.begin():
-            job = ProcessingJob(
-                dataset_id=self.dataset_id, kind="ingestion", state="running"
-            )
+            job = ProcessingJob(dataset_id=self.dataset_id, kind="ingestion", state="running")
             self.session.add(job)
             self.session.flush()
             job_id = job.id
@@ -632,9 +578,7 @@ class MySQLIntegrationTests(unittest.TestCase):
         with self.session.begin():
             self.session.expire_all()
             job = self.session.get(ProcessingJob, job_id)
-            self.assertEqual(
-                (job.state, job.error_code), ("failed", "worker_interrupted")
-            )
+            self.assertEqual((job.state, job.error_code), ("failed", "worker_interrupted"))
 
     def test_26_byte_budget_keeps_every_line(self):
         long_line = LINE.replace(b"example", b"x" * 131000)
@@ -643,9 +587,7 @@ class MySQLIntegrationTests(unittest.TestCase):
         self.assertEqual((result["physical_lines"], result["parsed_events"]), (70, 70))
         self.assertEqual(result["checkpoint_byte"], len(long_line) * 70)
         with self.session.begin():
-            self.assertGreaterEqual(
-                self.session.get(Dataset, self.dataset_id).input_revision, 2
-            )
+            self.assertGreaterEqual(self.session.get(Dataset, self.dataset_id).input_revision, 2)
 
     def test_27_private_api_validation_and_unicode_auth(self):
         self.app.config.update(
@@ -653,15 +595,11 @@ class MySQLIntegrationTests(unittest.TestCase):
             DATABASE_ALLOWED_DATASETS=(self.dataset_id,),
         )
         self.addCleanup(
-            lambda: self.app.config.update(
-                DATABASE_READ_TOKEN=None, DATABASE_ALLOWED_DATASETS=()
-            )
+            lambda: self.app.config.update(DATABASE_READ_TOKEN=None, DATABASE_ALLOWED_DATASETS=())
         )
         client = self.app.test_client()
         url = f"/api/v1/database/anomalies?dataset_id={self.dataset_id}&run_id=1"
-        self.assertEqual(
-            client.get(url, headers={"Authorization": "Bearer é"}).status_code, 403
-        )
+        self.assertEqual(client.get(url, headers={"Authorization": "Bearer é"}).status_code, 403)
         headers = {"Authorization": "Bearer synthetic-validation-token"}
         self.assertEqual(client.get(url + "&limit=0", headers=headers).status_code, 400)
         self.assertEqual(
@@ -670,9 +608,7 @@ class MySQLIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(
             client.get(
-                url.replace(
-                    f"dataset_id={self.dataset_id}", "dataset_id=" + str(2**70)
-                ),
+                url.replace(f"dataset_id={self.dataset_id}", "dataset_id=" + str(2**70)),
                 headers=headers,
             ).status_code,
             400,
@@ -706,9 +642,7 @@ class MySQLIntegrationTests(unittest.TestCase):
 
     def test_29_timezone_and_microsecond_roundtrip(self):
         with self.session.begin():
-            local = datetime(
-                2026, 11, 4, 7, 0, 0, 123456, tzinfo=timezone(timedelta(hours=7))
-            )
+            local = datetime(2026, 11, 4, 7, 0, 0, 123456, tzinfo=timezone(timedelta(hours=7)))
             event = self.event(self.session, timestamp=local)
             self.session.expire(event)
             self.assertEqual(event.timestamp, NOW + timedelta(microseconds=123456))

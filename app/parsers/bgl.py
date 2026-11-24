@@ -66,19 +66,16 @@ def parse_line(raw: bytes, line_number: int, byte_offset: int, version: str = VE
     try:
         if not epoch.isascii() or not epoch.isdigit():
             raise ValueError()
-        timestamp = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(
-            seconds=int(epoch)
-        )
+        timestamp = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(seconds=int(epoch))
         printed_date = datetime.strptime(date, "%Y.%m.%d").replace(tzinfo=timezone.utc)
         datetime.strptime(printed_time, "%Y-%m-%d-%H.%M.%S.%f")
-        if version != LEGACY_VERSION and abs(timestamp - printed_date - timedelta(hours=12)) > timedelta(days=1.5):
+        if version != LEGACY_VERSION and abs(timestamp - printed_date - timedelta(hours=12)) > timedelta(
+            days=1.5
+        ):
             raise ValueError()  # e.g. epoch 0 or year 9999 with a 2005 date
     except (ValueError, OverflowError):
         return BGLRecord(**base, error="invalid_timestamp")
-    if any(
-        len(x) > limit
-        for x, limit in ((label, 128), (node, 128), (component, 128), (level, 32))
-    ):
+    if any(len(x) > limit for x, limit in ((label, 128), (node, 128), (component, 128), (level, 32))):
         return BGLRecord(**base, error="field_too_long")
     return BGLRecord(
         **base,
@@ -100,9 +97,7 @@ def parse_line(raw: bytes, line_number: int, byte_offset: int, version: str = VE
     )
 
 
-def iter_records(
-    stream: BinaryIO, *, first_line=1, byte_offset=0, version=VERSION
-) -> Iterator[BGLRecord]:
+def iter_records(stream: BinaryIO, *, first_line=1, byte_offset=0, version=VERSION) -> Iterator[BGLRecord]:
     """Read bounded physical lines. Offset is relative to the uncompressed member.
 
     Oversized lines abort without advancing a persistent checkpoint. They are not

@@ -45,11 +45,19 @@ def predict(output):
             break
     if not passes:
         raise ValueError("No complete pass in the prediction interval")
-    result = {"source": TLE_URL, "input_sha256": sha256(raw).hexdigest(),
-              "tle_epoch_utc": satellite.epoch.utc_iso(), "generated_at": now.isoformat(),
-              "skyfield": skyfield.__version__, "norad_id": 25544,
-              "lat": LATITUDE, "lon": LONGITUDE, "elevation_threshold_degrees": 0.0,
-              "method": "Local Skyfield SGP4 geometric pass prediction", "response": passes}
+    result = {
+        "source": TLE_URL,
+        "input_sha256": sha256(raw).hexdigest(),
+        "tle_epoch_utc": satellite.epoch.utc_iso(),
+        "generated_at": now.isoformat(),
+        "skyfield": skyfield.__version__,
+        "norad_id": 25544,
+        "lat": LATITUDE,
+        "lon": LONGITUDE,
+        "elevation_threshold_degrees": 0.0,
+        "method": "Local Skyfield SGP4 geometric pass prediction",
+        "response": passes,
+    }
     output.mkdir(parents=True, exist_ok=False)
     (output / "iss.tle").write_bytes(raw)
     (output / "iss_pass_prediction.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
@@ -60,4 +68,3 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     predict(parser.parse_args().output)
-

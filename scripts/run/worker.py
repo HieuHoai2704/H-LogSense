@@ -73,8 +73,11 @@ def main():
         if "sqlalchemy" not in app.extensions:
             raise SystemExit("Configure MySQL (DATABASE_URL) before starting the analysis worker.")
         engine = db.engine
-        serve(partial(run_once, engine), once=args.once,
-              reclaim=partial(reclaim_interrupted, engine, "analysis", "analysis-job-"))
+        serve(
+            partial(run_once, engine),
+            once=args.once,
+            reclaim=partial(reclaim_interrupted, engine, "analysis", "analysis-job-"),
+        )
 
 
 if __name__ == "__main__":

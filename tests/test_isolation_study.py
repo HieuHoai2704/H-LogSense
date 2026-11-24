@@ -57,7 +57,12 @@ class IsolationStudyTests(unittest.TestCase):
             "parsed_event_count": 128,
             "seconds": 300,
             "splits": {"train_start": 0, "train_end": 14400, "validation_end": 26400, "test_end": 38400},
-            "split_iso_utc": {"train_start": "1970-01-01T00:00:00+00:00", "train_end": "1970-01-01T04:00:00+00:00", "validation_end": "1970-01-01T07:20:00+00:00", "test_end": "1970-01-01T10:40:00+00:00"},
+            "split_iso_utc": {
+                "train_start": "1970-01-01T00:00:00+00:00",
+                "train_end": "1970-01-01T04:00:00+00:00",
+                "validation_end": "1970-01-01T07:20:00+00:00",
+                "test_end": "1970-01-01T10:40:00+00:00",
+            },
             "candidate_grid": study.CANDIDATES,
             "reservoir_limit": 20000,
             "reservoir_seed": 42,
@@ -73,11 +78,18 @@ class IsolationStudyTests(unittest.TestCase):
         cache = {}
         for phase, length, start in (("train", 48, 0), ("validation", 40, 48), ("test", 40, 88)):
             path = root / (phase + ".jsonl")
-            path.write_text("".join(json.dumps(self.unit(i, start, label="NOT_A_FEATURE")) + "\n" for i in range(length)), encoding="utf-8")
+            path.write_text(
+                "".join(json.dumps(self.unit(i, start, label="NOT_A_FEATURE")) + "\n" for i in range(length)),
+                encoding="utf-8",
+            )
             cache[phase] = {"key": path.name, "sha256": study.digest(path), "count": length}
-        manifest = dict(protocol, protocol_sha256=study.digest(root / "protocol.json"), cache=cache,
-                        phase_event_counts={"train": 168, "validation": 136, "test": 136},
-                        singleton_units={"train": 8, "validation": 7, "test": 7})
+        manifest = dict(
+            protocol,
+            protocol_sha256=study.digest(root / "protocol.json"),
+            cache=cache,
+            phase_event_counts={"train": 168, "validation": 136, "test": 136},
+            singleton_units={"train": 8, "validation": 7, "test": 7},
+        )
         study.write_json(root / "manifest.json", manifest)
         return root
 
@@ -97,7 +109,10 @@ class IsolationStudyTests(unittest.TestCase):
                 raise AssertionError("Validation opened future test features")
             return actual_open(path, *args, **kwargs)
 
-        with patch.object(study, "labels", side_effect=validation_labels), patch.object(Path, "open", guarded_open):
+        with (
+            patch.object(study, "labels", side_effect=validation_labels),
+            patch.object(Path, "open", guarded_open),
+        ):
             study.validate(self.engine, root.name)
         self.assertEqual(requested, ["validation"])
         return study.read_json(root / "selection.json")
@@ -105,7 +120,10 @@ class IsolationStudyTests(unittest.TestCase):
     def test_prepare_registers_protocol_before_features_and_refuses_overwrite(self):
         session = MagicMock()
         session.get.return_value = SimpleNamespace(state="partial", input_revision=7)
-        session.execute.side_effect = [SimpleNamespace(one=lambda: (study.EPOCH, study.EPOCH + timedelta(seconds=3599), 3, 3)), []]
+        session.execute.side_effect = [
+            SimpleNamespace(one=lambda: (study.EPOCH, study.EPOCH + timedelta(seconds=3599), 3, 3)),
+            [],
+        ]
         manager = MagicMock()
         manager.__enter__.return_value = session
         root = self.root / self.study_id
@@ -115,7 +133,11 @@ class IsolationStudyTests(unittest.TestCase):
             self.assertFalse((root / "manifest.json").exists())
             return [self.unit(0), self.unit(0, 6), self.unit(0, 9)]
 
-        with patch.object(study, "Session", return_value=manager), patch.object(study, "aggregate_windows", side_effect=aggregate), patch.object(study, "labels", side_effect=AssertionError("Prepare must not query labels")):
+        with (
+            patch.object(study, "Session", return_value=manager),
+            patch.object(study, "aggregate_windows", side_effect=aggregate),
+            patch.object(study, "labels", side_effect=AssertionError("Prepare must not query labels")),
+        ):
             study.prepare(self.engine, 3, self.study_id)
             before = (root / "protocol.json").read_bytes()
             with self.assertRaises(FileExistsError):
@@ -138,7 +160,10 @@ class IsolationStudyTests(unittest.TestCase):
 
     def test_test_refuses_missing_selection_and_never_accesses_labels(self):
         root = self.fixture()
-        with patch.object(study, "labels", side_effect=AssertionError("Must refuse before labels")), self.assertRaises(FileNotFoundError):
+        with (
+            patch.object(study, "labels", side_effect=AssertionError("Must refuse before labels")),
+            self.assertRaises(FileNotFoundError),
+        ):
             study.test(self.engine, root.name)
         self.assertFalse((root / "test-access.json").exists())
 
@@ -147,7 +172,10 @@ class IsolationStudyTests(unittest.TestCase):
         self.validate(root)
         with (root / "manifest.json").open("a", encoding="utf-8") as stream:
             stream.write("\n")
-        with patch.object(study, "labels", side_effect=AssertionError("Must refuse before labels")), self.assertRaisesRegex(ValueError, "Frozen configuration changed"):
+        with (
+            patch.object(study, "labels", side_effect=AssertionError("Must refuse before labels")),
+            self.assertRaisesRegex(ValueError, "Frozen configuration changed"),
+        ):
             study.test(self.engine, root.name)
         self.assertFalse((root / "test-access.json").exists())
 
@@ -156,13 +184,19 @@ class IsolationStudyTests(unittest.TestCase):
         manifest = study.read_json(root / "manifest.json")
         manifest["max_fpr"] = 1.0
         (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
-        with patch.object(study, "labels", side_effect=AssertionError("Changed protocol queried labels")), self.assertRaises(ValueError):
+        with (
+            patch.object(study, "labels", side_effect=AssertionError("Changed protocol queried labels")),
+            self.assertRaises(ValueError),
+        ):
             study.validate(self.engine, root.name)
         self.assertFalse((root / "selection.json").exists())
 
     def test_validation_refuses_insufficient_classes_without_test_fallback(self):
         root = self.fixture()
-        with patch.object(study, "labels", return_value=np.zeros(40, dtype=np.int8)) as label_query, self.assertRaisesRegex(ValueError, "Insufficient validation classes"):
+        with (
+            patch.object(study, "labels", return_value=np.zeros(40, dtype=np.int8)) as label_query,
+            self.assertRaisesRegex(ValueError, "Insufficient validation classes"),
+        ):
             study.validate(self.engine, root.name)
         self.assertEqual(label_query.call_args.args[2], "validation")
         self.assertEqual(label_query.call_count, 1)
@@ -174,7 +208,12 @@ class IsolationStudyTests(unittest.TestCase):
         selected = study.read_json(root / "selection.json")
         selected["threshold"] = selected["threshold"] + 0.1
         (root / "selection.json").write_text(json.dumps(selected), encoding="utf-8")
-        with patch.object(study, "labels", side_effect=AssertionError("Changed threshold accessed test labels")), self.assertRaises(ValueError):
+        with (
+            patch.object(
+                study, "labels", side_effect=AssertionError("Changed threshold accessed test labels")
+            ),
+            self.assertRaises(ValueError),
+        ):
             study.test(self.engine, root.name)
         self.assertFalse((root / "test-access.json").exists())
 
@@ -183,7 +222,11 @@ class IsolationStudyTests(unittest.TestCase):
         self.validate(root)
         with (root / "selected.joblib").open("ab") as stream:
             stream.write(b"altered")
-        with patch.object(study.joblib, "load", side_effect=AssertionError("Untrusted model loaded")), patch.object(study, "labels", side_effect=AssertionError("Must refuse before labels")), self.assertRaisesRegex(ValueError, "artifact checksum mismatch"):
+        with (
+            patch.object(study.joblib, "load", side_effect=AssertionError("Untrusted model loaded")),
+            patch.object(study, "labels", side_effect=AssertionError("Must refuse before labels")),
+            self.assertRaisesRegex(ValueError, "artifact checksum mismatch"),
+        ):
             study.test(self.engine, root.name)
         self.assertFalse((root / "test-access.json").exists())
 
@@ -203,7 +246,10 @@ class IsolationStudyTests(unittest.TestCase):
         with patch.object(study, "labels", side_effect=test_labels):
             study.test(self.engine, root.name)
         self.assertTrue((root / "test-results.json").exists())
-        with patch.object(study, "labels", side_effect=AssertionError("Repeat accessed test labels")), self.assertRaisesRegex(ValueError, "already accessed"):
+        with (
+            patch.object(study, "labels", side_effect=AssertionError("Repeat accessed test labels")),
+            self.assertRaisesRegex(ValueError, "already accessed"),
+        ):
             study.test(self.engine, root.name)
 
     def test_future_feature_perturbation_cannot_change_validation_selection(self):
@@ -214,7 +260,14 @@ class IsolationStudyTests(unittest.TestCase):
         (second / "test.jsonl").write_text("future data deliberately invalid\n", encoding="utf-8")
         selected_a = self.validate(first)
         selected_b = self.validate(second)
-        for key in ("selected", "threshold", "comparison", "feature_names", "model_artifact", "baseline_artifact_sha256"):
+        for key in (
+            "selected",
+            "threshold",
+            "comparison",
+            "feature_names",
+            "model_artifact",
+            "baseline_artifact_sha256",
+        ):
             self.assertEqual(selected_a[key], selected_b[key], key)
 
     def test_label_fields_never_enter_unsupervised_fit_matrix(self):

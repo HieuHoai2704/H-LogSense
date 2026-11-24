@@ -67,8 +67,10 @@ def desktop_options():
 
 def shell_profiles():
     system = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
-    return {"PowerShell": [str(system / "WindowsPowerShell/v1.0/powershell.exe"), "-NoLogo", "-NoProfile"],
-            "CMD": [str(system / "cmd.exe"), "/D"]}
+    return {
+        "PowerShell": [str(system / "WindowsPowerShell/v1.0/powershell.exe"), "-NoLogo", "-NoProfile"],
+        "CMD": [str(system / "cmd.exe"), "/D"],
+    }
 
 
 def open_terminal(command, directory, environment):
@@ -96,9 +98,11 @@ def install_shortcuts():
     executable = Path(sys.executable).with_name("pythonw.exe")
     if not executable.is_file() or not ICON.is_file():
         raise RuntimeError("Install H-logsen before creating shortcuts.")
+
     def new_link():
-        return pythoncom.CoCreateInstance(shell.CLSID_ShellLink, None, pythoncom.CLSCTX_INPROC_SERVER,
-                                          shell.IID_IShellLink)
+        return pythoncom.CoCreateInstance(
+            shell.CLSID_ShellLink, None, pythoncom.CLSCTX_INPROC_SERVER, shell.IID_IShellLink
+        )
 
     for location in (shellcon.CSIDL_DESKTOPDIRECTORY, shellcon.CSIDL_PROGRAMS):
         directory = Path(shell.SHGetFolderPath(0, location, 0, 0))
@@ -107,7 +111,11 @@ def install_shortcuts():
             existing = new_link()
             existing.QueryInterface(pythoncom.IID_IPersistFile).Load(str(path))
             target, _ = existing.GetPath(0)
-            app_id = existing.QueryInterface(propsys.IID_IPropertyStore).GetValue(pscon.PKEY_AppUserModel_ID).GetValue()
+            app_id = (
+                existing.QueryInterface(propsys.IID_IPropertyStore)
+                .GetValue(pscon.PKEY_AppUserModel_ID)
+                .GetValue()
+            )
             if app_id != APP_ID and Path(target).name.casefold() != "h-logsen-desktop.exe":
                 print(f"Skipped existing shortcut: {path}")
                 continue

@@ -75,7 +75,11 @@ def verify(directory, desktop=False):
             subprocess.run([python, "-I", "-m", "pip", "--isolated", "install", wheel], cwd=work, check=True)
         else:
             # Keep the Linux application-menu launcher inside the temporary directory.
-            installer_env = {**os.environ, "H_LOGSEN_PYTHON": sys.executable, "XDG_DATA_HOME": str(work / "xdg-data")}
+            installer_env = {
+                **os.environ,
+                "H_LOGSEN_PYTHON": sys.executable,
+                "XDG_DATA_HOME": str(work / "xdg-data"),
+            }
             subprocess.run(["sh", install / "Install-H-logsen.sh"], cwd=work, env=installer_env, check=True)
             subprocess.run(["sh", install / "Open-H-logsen.sh", "--help"], cwd=work, check=True)
             if sys.platform == "linux":
@@ -84,19 +88,35 @@ def verify(directory, desktop=False):
                     raise ValueError("The Linux launcher does not start the installed environment.")
         if sys.platform == "linux":
             # The Linux venv uses --system-site-packages; distribution packages are out of scope.
-            subprocess.run([python, "-I", "-m", "app.workbench.platforms.linux", "check"], cwd=work, check=True)
+            subprocess.run(
+                [python, "-I", "-m", "app.workbench.platforms.linux", "check"], cwd=work, check=True
+            )
         else:
             subprocess.run([python, "-I", "-m", "pip", "check"], cwd=work, check=True)
         subprocess.run([python, "-I", "-m", "app.workbench", "--help"], cwd=work, check=True)
         version = subprocess.check_output([python, "-I", "-c", SMOKE], cwd=work, text=True).strip()
         subprocess.run([python, "-m", "unittest", "discover", "-s", "tests"], cwd=source, check=True)
         if desktop:
-            subprocess.run([python, "-I", source / "scripts/qa/qa_workbench_desktop.py"], cwd=work, check=True, timeout=45)
-        packages = subprocess.check_output([python, "-I", "-m", "pip", "list", "--format=json"], cwd=work, text=True)
-        return {"os": platform.platform(), "python": platform.python_version(), "app": version,
-                "source_archive": source_zip.name, "source_sha256": digests[source_zip.name],
-                "install_archive": install_zip.name, "install_sha256": digests[install_zip.name],
-                "desktop_smoke": "PASS" if desktop else "NOT RUN", "packages": json.loads(packages)}
+            subprocess.run(
+                [python, "-I", source / "scripts/qa/qa_workbench_desktop.py"],
+                cwd=work,
+                check=True,
+                timeout=45,
+            )
+        packages = subprocess.check_output(
+            [python, "-I", "-m", "pip", "list", "--format=json"], cwd=work, text=True
+        )
+        return {
+            "os": platform.platform(),
+            "python": platform.python_version(),
+            "app": version,
+            "source_archive": source_zip.name,
+            "source_sha256": digests[source_zip.name],
+            "install_archive": install_zip.name,
+            "install_sha256": digests[install_zip.name],
+            "desktop_smoke": "PASS" if desktop else "NOT RUN",
+            "packages": json.loads(packages),
+        }
 
 
 def main():

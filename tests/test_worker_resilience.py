@@ -18,8 +18,12 @@ from scripts.run.supervision import serve
 
 class ServeLoopTest(unittest.TestCase):
     def test_database_outage_backs_off_and_recovers(self):
-        outcomes = [OperationalError("SELECT 1", {}, Exception("down")), OperationalError("SELECT 1", {}, Exception("down")),
-                    True, KeyboardInterrupt()]
+        outcomes = [
+            OperationalError("SELECT 1", {}, Exception("down")),
+            OperationalError("SELECT 1", {}, Exception("down")),
+            True,
+            KeyboardInterrupt(),
+        ]
         sleeps = []
 
         def step():
@@ -65,21 +69,40 @@ class OutboxDispatchTest(unittest.TestCase):
         self.context.push()
         self.addCleanup(self.context.pop)
         self.engine = create_engine("sqlite://")
-        event.listen(self.engine, "connect", lambda connection, _: connection.execute("PRAGMA foreign_keys=OFF"))
+        event.listen(
+            self.engine, "connect", lambda connection, _: connection.execute("PRAGMA foreign_keys=OFF")
+        )
         Notification.__table__.create(self.engine)
         with Session(self.engine) as session, session.begin():
-            session.add(Notification(id=1, dataset_id=7, alert_id=11, state="pending", attempts=0,
-                                     next_attempt=datetime.now(timezone.utc) - timedelta(minutes=1)))
-        self.mail_state = mail.init_mail({"MAIL_SERVER": "smtp.invalid", "MAIL_PORT": 587, "MAIL_USE_TLS": True,
-                                          "MAIL_SUPPRESS_SEND": False})
+            session.add(
+                Notification(
+                    id=1,
+                    dataset_id=7,
+                    alert_id=11,
+                    state="pending",
+                    attempts=0,
+                    next_attempt=datetime.now(timezone.utc) - timedelta(minutes=1),
+                )
+            )
+        self.mail_state = mail.init_mail(
+            {
+                "MAIL_SERVER": "smtp.invalid",
+                "MAIL_PORT": 587,
+                "MAIL_USE_TLS": True,
+                "MAIL_SUPPRESS_SEND": False,
+            }
+        )
         self.query = alerts.select(Notification).where(
-            Notification.state.in_(["pending", "retry", "sending"]), Notification.attempts < 3,
-            Notification.next_attempt <= datetime.now(timezone.utc))  # same filter as deliver_notifications
+            Notification.state.in_(["pending", "retry", "sending"]),
+            Notification.attempts < 3,
+            Notification.next_attempt <= datetime.now(timezone.utc),
+        )  # same filter as deliver_notifications
 
     def dispatch(self, factory):
         with patch.object(alerts.Session, "begin", alerts.Session.begin):
-            return alerts._dispatch_notifications(self.engine, self.mail_state, factory, "a@example.invalid",
-                                                  ["b@example.invalid"], self.query)
+            return alerts._dispatch_notifications(
+                self.engine, self.mail_state, factory, "a@example.invalid", ["b@example.invalid"], self.query
+            )
 
     def row(self):
         with Session(self.engine) as session:
@@ -92,7 +115,9 @@ class OutboxDispatchTest(unittest.TestCase):
         self.assertEqual(self.row(), ("sent", 1, None))
 
     def test_rendering_error_is_counted_not_a_poison_row(self):
-        with patch.object(alerts, "notification_message", side_effect=UnicodeEncodeError("utf-8", "x", 0, 1, "bad")):
+        with patch.object(
+            alerts, "notification_message", side_effect=UnicodeEncodeError("utf-8", "x", 0, 1, "bad")
+        ):
             self.dispatch(MagicMock())
         self.assertEqual(self.row(), ("failed", 1, "message_failed"))
 

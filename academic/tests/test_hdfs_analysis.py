@@ -9,7 +9,14 @@ from tempfile import TemporaryDirectory
 import unittest
 from zipfile import ZipFile
 
-from academic.experiments.hdfs_analysis import LABEL_MEMBER, LOG_MEMBER, SCHEMA, ingest_blocks, label_rows, run
+from academic.experiments.hdfs_analysis import (
+    LABEL_MEMBER,
+    LOG_MEMBER,
+    SCHEMA,
+    ingest_blocks,
+    label_rows,
+    run,
+)
 
 
 class HDFSAnalysisTests(unittest.TestCase):
@@ -24,14 +31,22 @@ class HDFSAnalysisTests(unittest.TestCase):
             b"bad row\n"
         )
         count = ingest_blocks(db, source)
-        self.assertEqual(count, dict(raw_lines=4, parsed_lines=3, malformed=1, block_references=3, lines_without_block=1))
-        self.assertEqual(db.execute(
-            "SELECT event_count,warn_error,packet_responder,name_system,first_line,last_line FROM blocks WHERE block_id='blk_1'"
-        ).fetchone(), (2, 1, 1, 1, 1, 2))
-        self.assertEqual(db.execute("SELECT first_wall < last_wall FROM blocks WHERE block_id='blk_1'").fetchone(), (1,))
+        self.assertEqual(
+            count, dict(raw_lines=4, parsed_lines=3, malformed=1, block_references=3, lines_without_block=1)
+        )
+        self.assertEqual(
+            db.execute(
+                "SELECT event_count,warn_error,packet_responder,name_system,first_line,last_line FROM blocks WHERE block_id='blk_1'"
+            ).fetchone(),
+            (2, 1, 1, 1, 1, 2),
+        )
+        self.assertEqual(
+            db.execute("SELECT first_wall < last_wall FROM blocks WHERE block_id='blk_1'").fetchone(), (1,)
+        )
 
     def test_invalid_labels_are_rejected(self):
         from io import StringIO
+
         with self.assertRaises(ValueError):
             list(label_rows(StringIO("BlockId,Label\nblk_1,maybe\n")))
 
@@ -47,7 +62,12 @@ class HDFSAnalysisTests(unittest.TestCase):
                 stamp = base + timedelta(seconds=seconds)
                 records.append(f"{stamp:%y%m%d %H%M%S} 1 INFO dfs.FSNamesystem: blk_{idx}")
                 labels.append(f"blk_{idx}," + ("Anomaly" if idx % 2 else "Normal"))
-            records.extend(["081109 200000 1 INFO dfs.FSNamesystem: blk_100", "081109 200050 1 INFO dfs.FSNamesystem: blk_100"])
+            records.extend(
+                [
+                    "081109 200000 1 INFO dfs.FSNamesystem: blk_100",
+                    "081109 200050 1 INFO dfs.FSNamesystem: blk_100",
+                ]
+            )
             labels.append("blk_100,Normal")
             with ZipFile(archive_path, "w") as archive:
                 archive.writestr(LOG_MEMBER, "\n".join(records) + "\n")
@@ -62,6 +82,11 @@ class HDFSAnalysisTests(unittest.TestCase):
                     rows = list(csv.DictReader(output))
                 self.assertNotIn("blk_100", {row["unit_id"] for row in rows}, method)
                 self.assertEqual(len(rows), result["cohorts"]["test"]["labeled"])
-                self.assertTrue(all(int(row["prediction"]) == int(float(row["score"]) > report["threshold"]) for row in rows))
+                self.assertTrue(
+                    all(
+                        int(row["prediction"]) == int(float(row["score"]) > report["threshold"])
+                        for row in rows
+                    )
+                )
             with self.assertRaises(FileExistsError):
                 run(archive_path, folder / "out")

@@ -40,9 +40,7 @@ def main():
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     base = f"http://127.0.0.1:{server.server_port}"
-    opener = urllib.request.build_opener(
-        urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar())
-    )
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
     request = urllib.request.Request(
         base + "/api/v1/auth/login",
         data=json.dumps(
@@ -58,9 +56,7 @@ def main():
     peak = process.memory_info().rss
     try:
         opener.open(request, timeout=20).read()
-        datasets = json.loads(opener.open(base + "/api/v1/logs/datasets").read())[
-            "datasets"
-        ]
+        datasets = json.loads(opener.open(base + "/api/v1/logs/datasets").read())["datasets"]
         for dataset in datasets:
             query = urllib.parse.urlencode(
                 {
@@ -101,9 +97,7 @@ def main():
         sizes = []
         for _ in range(20):
             started = time.perf_counter()
-            raw = opener.open(
-                base + f"/api/v1/investigation?source=db-{dataset_id}", timeout=30
-            ).read()
+            raw = opener.open(base + f"/api/v1/investigation?source=db-{dataset_id}", timeout=30).read()
             values.append((time.perf_counter() - started) * 1000)
             sizes.append(len(raw))
             data = json.loads(raw)
@@ -123,22 +117,18 @@ def main():
                 q = "SELECT id,timestamp FROM log_events WHERE dataset_id=:ds AND timestamp>=:start AND timestamp<:end ORDER BY timestamp,id LIMIT 50"
                 binds = {
                     "ds": dataset["id"],
-                    "start": datetime.fromisoformat(
-                        dataset["start_time"].replace("Z", "+00:00")
-                    ).replace(tzinfo=None),
-                    "end": datetime.fromisoformat(
-                        dataset["end_time"].replace("Z", "+00:00")
-                    ).replace(tzinfo=None),
+                    "start": datetime.fromisoformat(dataset["start_time"].replace("Z", "+00:00")).replace(
+                        tzinfo=None
+                    ),
+                    "end": datetime.fromisoformat(dataset["end_time"].replace("Z", "+00:00")).replace(
+                        tzinfo=None
+                    ),
                 }
                 plans[str(dataset["id"])] = {
                     "json": json.loads(
-                        connection.execute(
-                            text("EXPLAIN FORMAT=JSON " + q), binds
-                        ).scalar_one()
+                        connection.execute(text("EXPLAIN FORMAT=JSON " + q), binds).scalar_one()
                     ),
-                    "analyze": connection.execute(
-                        text("EXPLAIN ANALYZE " + q), binds
-                    ).scalar_one(),
+                    "analyze": connection.execute(text("EXPLAIN ANALYZE " + q), binds).scalar_one(),
                 }
             mysql = connection.execute(text("SELECT VERSION()")).scalar_one()
         result = {
@@ -154,11 +144,7 @@ def main():
         (REPO_ROOT / "docs/database/measurements/api-performance.json").write_text(
             json.dumps(result, indent=2)
         )
-        print(
-            json.dumps(
-                {k: v for k, v in result.items() if k != "sql_explain"}, indent=2
-            )
-        )
+        print(json.dumps({k: v for k, v in result.items() if k != "sql_explain"}, indent=2))
     finally:
         server.shutdown()
         thread.join(timeout=5)

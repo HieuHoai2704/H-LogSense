@@ -36,8 +36,13 @@ class RootSandboxTest(unittest.TestCase):
     def test_system_home_temp_and_hidden_roots_are_refused(self):
         hidden = self.folder / "work" / ".secrets"
         hidden.mkdir()
-        candidates = [Path.home(), Path(self.folder.anchor), Path(os.path.realpath(__import__("tempfile").gettempdir())),
-                      hidden, self.state]
+        candidates = [
+            Path.home(),
+            Path(self.folder.anchor),
+            Path(os.path.realpath(__import__("tempfile").gettempdir())),
+            hidden,
+            self.state,
+        ]
         if os.name != "nt":
             candidates += [Path("/etc"), Path("/usr/bin"), Path("/var")]
         for path in candidates:
@@ -67,7 +72,9 @@ class RootSandboxTest(unittest.TestCase):
         mount(app, "tok", self.state, port=8760)
         client = app.test_client()
         headers = {"Authorization": "Bearer tok", "X-Workspace": "project"}
-        response = client.post(PREFIX + "/project", base_url=BASE, headers=headers, json={"path": str(self.folder)})
+        response = client.post(
+            PREFIX + "/project", base_url=BASE, headers=headers, json={"path": str(self.folder)}
+        )
         self.assertEqual(response.status_code, 400)
         self.addCleanup(app.extensions["workbench"]["terminals"].shutdown)
 
@@ -127,7 +134,9 @@ class RuntimeBackupTest(unittest.TestCase):
     def test_backup_inside_the_runtime_directory_is_refused(self):
         from scripts.run import mysql_runtime
 
-        root = Path(mysql_runtime.__file__).resolve().parents[2] / ".local" / "unit-test-runtime-never-created"
+        root = (
+            Path(mysql_runtime.__file__).resolve().parents[2] / ".local" / "unit-test-runtime-never-created"
+        )
         with patch.object(mysql_runtime, "status"), patch.object(mysql_runtime, "load", return_value={}):
             with self.assertRaises(ValueError):
                 mysql_runtime.backup(root, "logsense_dev", root / "backup.sql")

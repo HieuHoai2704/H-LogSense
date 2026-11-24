@@ -22,9 +22,11 @@ def show_fatal_error(message):
     import shutil
 
     text = str(message)
-    for command in (["zenity", "--error", "--no-markup", "--title=H-logsen", "--text", text],
-                    ["kdialog", "--title", "H-logsen", "--error", text],
-                    ["notify-send", "--app-name=H-logsen", "H-logsen", text]):
+    for command in (
+        ["zenity", "--error", "--no-markup", "--title=H-logsen", "--text", text],
+        ["kdialog", "--title", "H-logsen", "--error", text],
+        ["notify-send", "--app-name=H-logsen", "H-logsen", text],
+    ):
         if shutil.which(command[0]):
             try:
                 subprocess.run(command, timeout=300, check=False, stdin=subprocess.DEVNULL)
@@ -116,7 +118,9 @@ def set_window_theme(window, dark, background, foreground):
         if screen is not None:
             if not _title_bar_css:
                 provider = Gtk.CssProvider()
-                Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+                Gtk.StyleContext.add_provider_for_screen(
+                    screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+                )
                 _title_bar_css.append(provider)
             _title_bar_css[0].load_from_data(css)
         return False
@@ -187,31 +191,36 @@ def _string_value(value):
 
 def desktop_entry(python, working_directory, icon=ICON):
     # Exec quoting is applied first, then the general string escape that doubles backslashes.
-    command = _string_value(" ".join(_exec_argument(part)
-                                     for part in (python, "-I", "-m", "app.workbench", "--desktop")))
-    return "\n".join((
-        "[Desktop Entry]",
-        "Type=Application",
-        "Version=1.5",
-        "Name=H-logsen",
-        "GenericName=Log and training-run workbench",
-        "Comment=Investigate logs, training runs and code in a local workspace",
-        f"Exec={command}",
-        f"Path={_string_value(working_directory)}",
-        f"Icon={_string_value(icon)}",
-        "Terminal=false",
-        "Categories=Development;IDE;",
-        "Keywords=log;training;terminal;analysis;",
-        f"StartupWMClass={APP_ID}",
-        "StartupNotify=true",
-        DESKTOP_MARKER,
-        "",
-    ))
+    command = _string_value(
+        " ".join(_exec_argument(part) for part in (python, "-I", "-m", "app.workbench", "--desktop"))
+    )
+    return "\n".join(
+        (
+            "[Desktop Entry]",
+            "Type=Application",
+            "Version=1.5",
+            "Name=H-logsen",
+            "GenericName=Log and training-run workbench",
+            "Comment=Investigate logs, training runs and code in a local workspace",
+            f"Exec={command}",
+            f"Path={_string_value(working_directory)}",
+            f"Icon={_string_value(icon)}",
+            "Terminal=false",
+            "Categories=Development;IDE;",
+            "Keywords=log;training;terminal;analysis;",
+            f"StartupWMClass={APP_ID}",
+            "StartupNotify=true",
+            DESKTOP_MARKER,
+            "",
+        )
+    )
 
 
 def applications_directory():
     data_home = os.environ.get("XDG_DATA_HOME")
-    base = Path(data_home) if data_home and Path(data_home).is_absolute() else Path.home() / ".local" / "share"
+    base = (
+        Path(data_home) if data_home and Path(data_home).is_absolute() else Path.home() / ".local" / "share"
+    )
     return base / "applications"
 
 
@@ -241,7 +250,9 @@ def install_launcher(python=None, working_directory=None, directory=None):
     if not python.is_file() or not ICON.is_file():
         raise RuntimeError("Install H-logsen before creating the launcher.")
     path = directory / f"{APP_ID}.desktop"
-    if path.is_symlink() or (path.exists() and DESKTOP_MARKER not in path.read_text("utf-8", errors="replace")):
+    if path.is_symlink() or (
+        path.exists() and DESKTOP_MARKER not in path.read_text("utf-8", errors="replace")
+    ):
         print(f"Skipped existing launcher: {path}")
         return None
     directory.mkdir(parents=True, exist_ok=True)

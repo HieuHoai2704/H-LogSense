@@ -6,7 +6,10 @@ import pickle
 import unittest
 
 from app.services.window_features import (
-    BASE_FEATURE_NAMES, CONTEXT_FEATURE_NAMES, FEATURE_NAMES, TrainReference,
+    BASE_FEATURE_NAMES,
+    CONTEXT_FEATURE_NAMES,
+    FEATURE_NAMES,
+    TrainReference,
 )
 
 
@@ -64,6 +67,7 @@ class WindowContextFeaturesTests(unittest.TestCase):
                 if key in ("label", "ground_truth", "is_anomaly"):
                     raise AssertionError("Ground truth was read")
                 return super().__getitem__(key)
+
         train = NoLabelReads(record(label="ALERT", ground_truth=True))
         ref = TrainReference.fit([train])
         clean = TrainReference.fit([record(label="-")])
@@ -82,10 +86,15 @@ class WindowContextFeaturesTests(unittest.TestCase):
     def test_histogram_mismatch_and_invalid_vectors_rejected(self):
         ref = TrainReference.fit([record()])
         invalid = [
-            record(2, templates={"a": 1}), record(templates={"a": 0}),
-            record(templates={"a": True}), record(count=0), record(host=""),
-            record(features=[0.0] * 4), record(features=[math.nan] * 5),
-            record(features=[math.inf] * 5), record(features=[True] * 5),
+            record(2, templates={"a": 1}),
+            record(templates={"a": 0}),
+            record(templates={"a": True}),
+            record(count=0),
+            record(host=""),
+            record(features=[0.0] * 4),
+            record(features=[math.nan] * 5),
+            record(features=[math.inf] * 5),
+            record(features=[True] * 5),
         ]
         for value in invalid:
             with self.subTest(value=value):

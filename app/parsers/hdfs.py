@@ -37,8 +37,15 @@ def parse_hdfs(line):
     if not match:
         raise ValueError("Invalid HDFS header.")
     date, time, thread, level, component, message = match.groups()
-    return Record(date + " " + time, wall_seconds(date, time), thread, level,
-                  component, message, tuple(dict.fromkeys(BLOCK.findall(message))))
+    return Record(
+        date + " " + time,
+        wall_seconds(date, time),
+        thread,
+        level,
+        component,
+        message,
+        tuple(dict.fromkeys(BLOCK.findall(message))),
+    )
 
 
 def physical_lines(stream):

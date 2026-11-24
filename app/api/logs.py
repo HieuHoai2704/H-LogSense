@@ -138,9 +138,7 @@ def volume():
 @logs_api.get("/api/v1/logs/<int:event_id>")
 def details(event_id):
     scope = parse_scope(db.session, request.args)
-    event = db.session.scalar(
-        select(LogEvent).where(*predicates(scope), LogEvent.id == event_id)
-    )
+    event = db.session.scalar(select(LogEvent).where(*predicates(scope), LogEvent.id == event_id))
     if event is None:
         raise NotFound()
     raw = db.session.get(RawLogRecord, event.raw_id)
@@ -160,8 +158,13 @@ def details(event_id):
     return jsonify(
         event=serialize(event),
         ground_truth_label=redact(annotation.label) if annotation else None,
-        ground_truth_label_provenance={"source": annotation.source, "version": annotation.version,
-            "note": "Imported annotation; not an unsupervised model feature."} if annotation else None,
+        ground_truth_label_provenance={
+            "source": annotation.source,
+            "version": annotation.version,
+            "note": "Imported annotation; not an unsupervised model feature.",
+        }
+        if annotation
+        else None,
         raw={
             "text": text[offset : offset + 8192],
             "next_offset": offset + 8192 if offset + 8192 < len(text) else None,
@@ -174,7 +177,9 @@ def details(event_id):
             "byte_offset": raw.byte_offset,
             "parser_version": event.parser_version,
             "upload": redact((event.attributes or {}).get("upload")),
-            "source_kind": "normalized-upload" if (event.attributes or {}).get("upload") else "operator-source",
+            "source_kind": "normalized-upload"
+            if (event.attributes or {}).get("upload")
+            else "operator-source",
         },
     )
 
@@ -182,9 +187,7 @@ def details(event_id):
 @logs_api.get("/api/v1/logs/export")
 def export():
     scope = parse_scope(db.session, request.args)
-    count = db.session.scalar(
-        select(func.count()).select_from(LogEvent).where(*predicates(scope))
-    )
+    count = db.session.scalar(select(func.count()).select_from(LogEvent).where(*predicates(scope)))
     if count > 100000:
         return jsonify(
             error={
@@ -209,10 +212,7 @@ def export():
             else (LogEvent.timestamp.desc(), LogEvent.id.desc())
         )
         rows = db.session.scalars(
-            select(LogEvent)
-            .where(*predicates(scope))
-            .order_by(*order)
-            .execution_options(yield_per=50)
+            select(LogEvent).where(*predicates(scope)).order_by(*order).execution_options(yield_per=50)
         )
         for row in rows:
             output.seek(0)

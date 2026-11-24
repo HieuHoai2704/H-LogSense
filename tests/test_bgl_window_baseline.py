@@ -27,8 +27,10 @@ class BGLWindowBaselineTest(unittest.TestCase):
     def test_collect_respects_date_and_host_bounds_and_keeps_label_out_of_text(self):
         date = "2005-08-01"
         start = epoch(date)
+
         def row(label, time, host, message):
             return f"{label} {time} 2005.08.01 {host} 2005-08-01-00.00.00.000000 {host} RAS KERNEL INFO {message}\n"
+
         lines = [
             row("BEFORE", start - 1, "R00", "before"),
             row("-", start, "R00", "status 42"),
@@ -56,8 +58,11 @@ class BGLWindowBaselineTest(unittest.TestCase):
         counts = csr_matrix(np.eye(len(catalog), dtype=np.int32))
         trained = fit_representation({"catalog": catalog, "counts": counts})
         vocabulary = dict(trained["vectorizer"].vocabulary_)
-        held_out = {"catalog": ["unseen zzq signature"], "counts": csr_matrix([[2]]),
-                    "base": np.ones((1, 5), dtype=np.float32)}
+        held_out = {
+            "catalog": ["unseen zzq signature"],
+            "counts": csr_matrix([[2]]),
+            "base": np.ones((1, 5), dtype=np.float32),
+        }
         result = transform(held_out, trained)
         self.assertEqual(trained["vectorizer"].vocabulary_, vocabulary)
         self.assertNotIn(held_out["catalog"][0], trained["template_df"])

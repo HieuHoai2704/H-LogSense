@@ -25,8 +25,7 @@ def load_evidence(session, dataset_id, anomaly_id, *, raw_offset=0, raw_limit=20
         select(AnomalyOutput)
         .join(
             DetectorRun,
-            (DetectorRun.id == AnomalyOutput.run_id)
-            & (DetectorRun.dataset_id == AnomalyOutput.dataset_id),
+            (DetectorRun.id == AnomalyOutput.run_id) & (DetectorRun.dataset_id == AnomalyOutput.dataset_id),
         )
         .where(
             AnomalyOutput.dataset_id == dataset_id,
@@ -45,9 +44,7 @@ def load_evidence(session, dataset_id, anomaly_id, *, raw_offset=0, raw_limit=20
     version = session.get(DetectorVersion, run.version_id)
     event = (
         session.scalar(
-            select(LogEvent).where(
-                LogEvent.dataset_id == dataset_id, LogEvent.id == unit.event_id
-            )
+            select(LogEvent).where(LogEvent.dataset_id == dataset_id, LogEvent.id == unit.event_id)
         )
         if unit.event_id
         else None
@@ -88,11 +85,7 @@ def load_evidence(session, dataset_id, anomaly_id, *, raw_offset=0, raw_limit=20
 
     dataset = session.get(Dataset, dataset_id)
     result["synthetic"] = (
-        True
-        if dataset.data_mode == "synthetic"
-        else False
-        if dataset.data_mode == "real"
-        else None
+        True if dataset.data_mode == "synthetic" else False if dataset.data_mode == "real" else None
     )
     result["data_mode"] = dataset.data_mode
     if event is None:
@@ -123,9 +116,7 @@ def load_evidence(session, dataset_id, anomaly_id, *, raw_offset=0, raw_limit=20
         "text": text[raw_offset : raw_offset + raw_limit],
         "offset": raw_offset,
         "total_chars": len(text),
-        "next_offset": raw_offset + raw_limit
-        if raw_offset + raw_limit < len(text)
-        else None,
+        "next_offset": raw_offset + raw_limit if raw_offset + raw_limit < len(text) else None,
         "redacted": True,
         "raw_sha256": hashlib.sha256(raw_bytes).hexdigest(),
         "raw_timestamp": event.raw_timestamp,
@@ -169,7 +160,5 @@ def load_evidence(session, dataset_id, anomaly_id, *, raw_offset=0, raw_limit=20
             )
             for r in rows[:10]
         ]
-        result["availability"]["related"] = (
-            "first_10_only" if len(rows) > 10 else "available"
-        )
+        result["availability"]["related"] = "first_10_only" if len(rows) > 10 else "available"
     return result

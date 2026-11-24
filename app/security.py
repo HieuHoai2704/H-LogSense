@@ -23,11 +23,7 @@ def identity():
     if "sqlalchemy" not in current_app.extensions or not session.get("user_id"):
         return None
     user = db.session.get(User, session["user_id"])
-    if (
-        user is None
-        or not user.active
-        or session.get("auth_version") != user.auth_version
-    ):
+    if user is None or not user.active or session.get("auth_version") != user.auth_version:
         return None
     return user
 
@@ -37,18 +33,10 @@ def authorized_datasets():
 
     user = identity()
     if user:
-        return set(
-            db.session.scalars(
-                select(UserDataset.dataset_id).where(UserDataset.user_id == user.id)
-            )
-        )
-    token = current_app.config.get("DATABASE_READ_TOKEN") or os.environ.get(
-        "DATABASE_READ_TOKEN"
-    )
+        return set(db.session.scalars(select(UserDataset.dataset_id).where(UserDataset.user_id == user.id)))
+    token = current_app.config.get("DATABASE_READ_TOKEN") or os.environ.get("DATABASE_READ_TOKEN")
     supplied = request.headers.get("Authorization", "")
-    if token and secrets.compare_digest(
-        supplied.encode(), ("Bearer " + token).encode()
-    ):
+    if token and secrets.compare_digest(supplied.encode(), ("Bearer " + token).encode()):
         return set(current_app.config.get("DATABASE_ALLOWED_DATASETS", ()))
     return set()
 
@@ -71,9 +59,7 @@ def roles(*allowed):
                 raise Forbidden()
             if request.method not in {"GET", "HEAD", "OPTIONS"}:
                 token = request.headers.get("X-CSRF-Token", "")
-                if not token or not secrets.compare_digest(
-                    token.encode(), session.get("csrf", "").encode()
-                ):
+                if not token or not secrets.compare_digest(token.encode(), session.get("csrf", "").encode()):
                     raise Forbidden()
             g.user = user
             return function(*args, **kwargs)
@@ -119,9 +105,7 @@ def login():
     if user is None or not user.active or not valid:
         return jsonify(error={"code": "invalid_credentials"}), 401
     session.clear()
-    session.update(
-        user_id=user.id, auth_version=user.auth_version, csrf=secrets.token_hex(32)
-    )
+    session.update(user_id=user.id, auth_version=user.auth_version, csrf=secrets.token_hex(32))
     return jsonify(
         user={"id": user.id, "username": user.username, "role": user.role},
         csrf_token=session["csrf"],
@@ -149,20 +133,17 @@ def initialize_security(app):
     # This deterministic public dummy is not an account credential.
     from werkzeug.security import generate_password_hash
 
-    app.config.setdefault(
-        "DUMMY_PASSWORD_HASH", generate_password_hash(secrets.token_hex(32))
-    )
+    app.config.setdefault("DUMMY_PASSWORD_HASH", generate_password_hash(secrets.token_hex(32)))
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Strict",
-        SESSION_COOKIE_SECURE=app.config.get("SESSION_COOKIE_SECURE") or os.environ.get("COOKIE_SECURE") == "1",
+        SESSION_COOKIE_SECURE=app.config.get("SESSION_COOKIE_SECURE")
+        or os.environ.get("COOKIE_SECURE") == "1",
         MAX_CONTENT_LENGTH=1024 * 1024,
     )
     if os.environ.get("DATABASE_ALLOWED_DATASETS"):
         try:
-            allowed = tuple(
-                int(x) for x in os.environ["DATABASE_ALLOWED_DATASETS"].split(",")
-            )
+            allowed = tuple(int(x) for x in os.environ["DATABASE_ALLOWED_DATASETS"].split(","))
             if len(allowed) > 100 or any(not 1 <= x < 2**63 for x in allowed):
                 raise ValueError()
             app.config["DATABASE_ALLOWED_DATASETS"] = allowed
@@ -196,13 +177,21 @@ def initialize_security(app):
         if isinstance(error, IntegrityError):
             return failure("conflict", "The change conflicts with existing data.", 409, "Conflict")
         if isinstance(error, DataError):
-            return failure("invalid_data", "A value is outside the stored range or format.", 400, "Bad Request")
-        return failure("database_unavailable", "Database operation unavailable; retry safely.", 503,
-                       "Service Unavailable")
+            return failure(
+                "invalid_data", "A value is outside the stored range or format.", 400, "Bad Request"
+            )
+        return failure(
+            "database_unavailable",
+            "Database operation unavailable; retry safely.",
+            503,
+            "Service Unavailable",
+        )
 
     @app.errorhandler(RequestEntityTooLarge)
     def oversized(error):
-        return failure("payload_too_large", "Request exceeds the configured size limit.", 413, "Payload Too Large")
+        return failure(
+            "payload_too_large", "Request exceeds the configured size limit.", 413, "Payload Too Large"
+        )
 
     @app.errorhandler(HTTPException)
     def http_error(error):
@@ -231,7 +220,9 @@ def initialize_security(app):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "same-origin"
         response.headers["X-Frame-Options"] = "DENY"
-        if request.path.startswith("/api/") or (request.path == "/" and request.args.get("source", "").startswith("db-")):
+        if request.path.startswith("/api/") or (
+            request.path == "/" and request.args.get("source", "").startswith("db-")
+        ):
             # Private MySQL-backed pages and API data are never cached.
             response.headers["Cache-Control"] = "no-store"
         return response

@@ -91,9 +91,7 @@ def aggregate_windows(rows, seconds=300, include_templates=False):
         if len(group["sample"]) < 20:
             group["sample"].append(row.id)
         if len(groups) > 50000 or len(group["templates"]) > 50000:
-            raise ValueError(
-                "Observed window exceeds bounded feature resources; choose shorter windows."
-            )
+            raise ValueError("Observed window exceeds bounded feature resources; choose shorter windows.")
     if current is not None:
         yield from emit()
 
@@ -134,9 +132,7 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
         if dataset is None or dataset.state not in {"partial", "imported"}:
             raise ValueError("Dataset unavailable.")
         revision = dataset.input_revision
-        maximum = session.scalar(
-            select(func.max(LogEvent.id)).where(LogEvent.dataset_id == dataset_id)
-        )
+        maximum = session.scalar(select(func.max(LogEvent.id)).where(LogEvent.dataset_id == dataset_id))
         first, last = session.execute(
             select(func.min(LogEvent.timestamp), func.max(LogEvent.timestamp)).where(
                 LogEvent.dataset_id == dataset_id
@@ -164,12 +160,8 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
     ):
         raise ValueError("Use positive UTC-aligned whole windows, at most 366 days.")
     span = second(end) - second(start)
-    train_end = EPOCH + timedelta(
-        seconds=second(start) + (span // 2 // seconds) * seconds
-    )
-    validation_end = EPOCH + timedelta(
-        seconds=second(start) + (span * 3 // 4 // seconds) * seconds
-    )
+    train_end = EPOCH + timedelta(seconds=second(start) + (span // 2 // seconds) * seconds)
+    validation_end = EPOCH + timedelta(seconds=second(start) + (span * 3 // 4 // seconds) * seconds)
     if not start < train_end < validation_end < end:
         raise ValueError("Range too short for disjoint temporal splits.")
     root = WINDOW_FEATURES_DIR
@@ -199,13 +191,7 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
         )
         for unit in aggregate_windows(rows, seconds):
             stamp = EPOCH + timedelta(seconds=unit["bucket"] * seconds)
-            phase = (
-                "train"
-                if stamp < train_end
-                else "validation"
-                if stamp < validation_end
-                else "test"
-            )
+            phase = "train" if stamp < train_end else "validation" if stamp < validation_end else "test"
             unit["phase"] = phase
             counts[phase] += 1
             output.write(json.dumps(unit) + "\n")
@@ -256,31 +242,23 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
         training_used=len(training),
         validation_used=len(validation),
         threshold=threshold,
-        threshold_policy="training count p99"
-        if model is None
-        else "validation native-score p01, no labels",
+        threshold_policy="training count p99" if model is None else "validation native-score p01, no labels",
         score_direction="higher" if model is None else "lower",
         reference=reference,
         model_artifact=artifact,
         sklearn=sklearn.__version__,
         input_revision=revision,
         maximum_event_id=maximum,
-        feature_file_sha256=__import__(
-            "app.services.bgl_ingestion", fromlist=["fingerprint"]
-        ).fingerprint(file),
+        feature_file_sha256=__import__("app.services.bgl_ingestion", fromlist=["fingerprint"]).fingerprint(
+            file
+        ),
     )
-    version_key = hashlib.sha256(
-        json.dumps(config, sort_keys=True).encode()
-    ).hexdigest()
+    version_key = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
     with Session(engine) as session, session.begin():
-        ds = session.scalar(
-            select(Dataset).where(Dataset.id == dataset_id).with_for_update()
-        )
+        ds = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
         if ds.input_revision != revision:
             raise ValueError("Dataset changed during feature creation.")
-        detector = session.scalar(
-            select(Detector).where(Detector.detector_key == "host-window-" + kind)
-        )
+        detector = session.scalar(select(Detector).where(Detector.detector_key == "host-window-" + kind))
         if detector is None:
             detector = Detector(
                 detector_key="host-window-" + kind,
@@ -289,9 +267,7 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
             session.add(detector)
             session.flush()
         run = session.scalar(
-            select(DetectorRun).where(
-                DetectorRun.dataset_id == dataset_id, DetectorRun.run_key == job_key
-            )
+            select(DetectorRun).where(DetectorRun.dataset_id == dataset_id, DetectorRun.run_key == job_key)
         )
         if run is None:
             version = DetectorVersion(
@@ -329,9 +305,7 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
                 "threshold",
             )
         ):
-            raise ValueError(
-                "Cannot retry against a different input or detector configuration."
-            )
+            raise ValueError("Cannot retry against a different input or detector configuration.")
         if run.state == "completed":
             return {"run_id": run.id, "state": "completed", "retry": "idempotent"}
         run.state = "running"
@@ -401,9 +375,7 @@ def persist_predictions(
     matrix = np.asarray([r["features"] for r in rows])
     scores = np.expm1(matrix[:, 0]) if model is None else model.score_samples(matrix)
     with Session(engine) as session, session.begin():
-        dataset = session.scalar(
-            select(Dataset).where(Dataset.id == dataset_id).with_for_update()
-        )
+        dataset = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
         if dataset.input_revision != revision or dataset.state == "archived":
             raise ValueError("Input revision changed.")
         run = session.get(DetectorRun, run_id)
@@ -440,10 +412,7 @@ def persist_predictions(
                 session.add(unit)
                 session.flush()
                 session.add_all(
-                    [
-                        UnitEvent(dataset_id=dataset_id, unit_id=unit.id, event_id=i)
-                        for i in row["sample_ids"]
-                    ]
+                    [UnitEvent(dataset_id=dataset_id, unit_id=unit.id, event_id=i) for i in row["sample_ids"]]
                 )
             existing = session.scalar(
                 select(DetectionPrediction.id).where(
@@ -536,9 +505,7 @@ def evaluate_windows(engine, dataset_id, run_id):
         run = session.get(DetectorRun, run_id)
         config = run.configuration
         seconds = config["window_seconds"]
-        micros = func.timestampdiff(
-            text("MICROSECOND"), EPOCH.replace(tzinfo=None), LogEvent.timestamp
-        )
+        micros = func.timestampdiff(text("MICROSECOND"), EPOCH.replace(tzinfo=None), LogEvent.timestamp)
         divisor = seconds * 1000000
         bucket = micros.op("DIV", precedence=100)(divisor) - case(
             ((micros < 0) & (func.mod(micros, divisor) != 0), 1), else_=0
@@ -608,20 +575,22 @@ def evaluate_windows(engine, dataset_id, run_id):
                     continue
                 truth.append(int(label[1]))
                 predictions.append(prediction.predicted)
-                ranks.append(
-                    prediction.score
-                    if config["score_direction"] == "higher"
-                    else -prediction.score
-                )
+                ranks.append(prediction.score if config["score_direction"] == "higher" else -prediction.score)
             return truth, predictions, ranks, skipped
 
-        metrics = window_metrics(*score(window_labels(*TRUSTED_LABELS)), "loghub-bgl original",
-                                 "any original BGL alert among ALL observed events in this window")
+        metrics = window_metrics(
+            *score(window_labels(*TRUSTED_LABELS)),
+            "loghub-bgl original",
+            "any original BGL alert among ALL observed events in this window",
+        )
         supplied = window_labels(*SUPPLIED_LABELS)
         if supplied:
             metrics["supplied_labels"] = dict(
-                window_metrics(*score(supplied), "uploaded-bgl supplied (user-provided, not verified)",
-                               "any supplied alert label among ALL observed events in this window"),
+                window_metrics(
+                    *score(supplied),
+                    "uploaded-bgl supplied (user-provided, not verified)",
+                    "any supplied alert label among ALL observed events in this window",
+                ),
                 trusted=False,
             )
         report = session.scalar(
@@ -631,9 +600,7 @@ def evaluate_windows(engine, dataset_id, run_id):
             )
         )
         if report is None:
-            session.add(
-                EvaluationReport(dataset_id=dataset_id, run_id=run_id, metrics=metrics)
-            )
+            session.add(EvaluationReport(dataset_id=dataset_id, run_id=run_id, metrics=metrics))
         else:
             report.metrics = metrics
         return metrics

@@ -19,9 +19,19 @@ def main(argv=None):
     parser.add_argument("--port", type=int, default=0, help="Loopback port. Zero selects an available port.")
     parser.add_argument("--state-dir", type=Path, default=Path.home() / ".h-logsen")
     modes = parser.add_mutually_exclusive_group()
-    modes.add_argument("--desktop", dest="mode", action="store_const", const="desktop", help="Open the desktop window.")
-    modes.add_argument("--browser", dest="mode", action="store_const", const="browser", help="Open in the default browser.")
-    modes.add_argument("--no-browser", dest="mode", action="store_const", const="headless", help="Print the private launch URL.")
+    modes.add_argument(
+        "--desktop", dest="mode", action="store_const", const="desktop", help="Open the desktop window."
+    )
+    modes.add_argument(
+        "--browser", dest="mode", action="store_const", const="browser", help="Open in the default browser."
+    )
+    modes.add_argument(
+        "--no-browser",
+        dest="mode",
+        action="store_const",
+        const="headless",
+        help="Print the private launch URL.",
+    )
     parser.set_defaults(mode="desktop" if sys.platform in RENDERERS else "browser")
     args = parser.parse_args(argv)
     if not 0 <= args.port <= 65535:

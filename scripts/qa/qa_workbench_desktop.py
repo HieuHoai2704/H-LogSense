@@ -13,7 +13,9 @@ from app.workbench.desktop import RENDERERS
 
 
 def verify_desktop_glass(window):
-    reduced = window.evaluate_js("matchMedia('(prefers-reduced-transparency: reduce), (forced-colors: active)').matches")
+    reduced = window.evaluate_js(
+        "matchMedia('(prefers-reduced-transparency: reduce), (forced-colors: active)').matches"
+    )
     native = window.native
     if sys.platform == "win32":
         from System import Boolean, Func
@@ -21,12 +23,19 @@ def verify_desktop_glass(window):
         supported = sys.getwindowsversion().build >= 22621 and not reduced
 
         def matches(expected):
-            return native.Invoke(Func[Boolean](lambda: native.Opacity == 1.0 and
-                                 (native.webview.DefaultBackgroundColor.A == 0) == expected))
+            return native.Invoke(
+                Func[Boolean](
+                    lambda: (
+                        native.Opacity == 1.0 and (native.webview.DefaultBackgroundColor.A == 0) == expected
+                    )
+                )
+            )
     elif sys.platform == "darwin":
         from AppKit import NSWorkspace
 
-        supported = not reduced and not NSWorkspace.sharedWorkspace().accessibilityDisplayShouldReduceTransparency()
+        supported = (
+            not reduced and not NSWorkspace.sharedWorkspace().accessibilityDisplayShouldReduceTransparency()
+        )
 
         def matches(expected):
             return window.transparent
@@ -36,6 +45,7 @@ def verify_desktop_glass(window):
 
         def matches(expected):
             return window.transparent
+
     palettes = (
         ("glass", supported),
         ("glass-forest", supported),
@@ -55,7 +65,10 @@ def verify_desktop_glass(window):
             time.sleep(0.05)
         else:
             raise RuntimeError(f"Unexpected desktop glass backdrop or content opacity for {palette}.")
-        if palette == "glass" and expected and not window.evaluate_js("""
+        if (
+            palette == "glass"
+            and expected
+            and not window.evaluate_js("""
             (() => {
                 const slider = document.getElementById('glass-transparency');
                 if (slider.value !== '39' || getComputedStyle(slider.parentElement.parentElement).display === 'none') return false;
@@ -69,8 +82,11 @@ def verify_desktop_glass(window):
                 return changed && clearTerminal && slider.value === '39' &&
                     getComputedStyle(document.documentElement).backgroundColor === 'rgba(8, 10, 11, 0.61)';
             })()
-        """):
-            raise RuntimeError("The frame transparency control did not update or reset the native glass tint.")
+        """)
+        ):
+            raise RuntimeError(
+                "The frame transparency control did not update or reset the native glass tint."
+            )
     print(f"Desktop backdrop and full foreground opacity passed (native glass supported: {supported}).")
 
 
@@ -111,8 +127,11 @@ def verify():
 
     with TemporaryDirectory(prefix="h-logsen-desktop-") as state:
         arguments = ["h-logsen", "--desktop", "--state-dir", str(Path(state))]
-        with patch.object(webview, "start", start_with_probe), patch.object(webview, "create_window", create_for_test), \
-                patch.object(sys, "argv", arguments):
+        with (
+            patch.object(webview, "start", start_with_probe),
+            patch.object(webview, "create_window", create_for_test),
+            patch.object(sys, "argv", arguments),
+        ):
             main()
     expected = RENDERERS[sys.platform][1]
     if checked != [expected]:

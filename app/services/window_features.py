@@ -70,8 +70,9 @@ def _validate_record(record):
     base = record["features"]
     if len(base) != len(BASE_FEATURE_NAMES):
         raise ValueError("Expected five base window features")
-    if any(isinstance(value, bool) or not isinstance(value, Real)
-           or not math.isfinite(value) for value in base):
+    if any(
+        isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value) for value in base
+    ):
         raise ValueError("Base window features must be finite numbers")
     return int(count), host, histogram, [float(value) for value in base]
 
@@ -90,8 +91,7 @@ class TrainReference:
             ("max_templates", max_templates, MAX_TEMPLATES),
             ("max_hosts", max_hosts, MAX_HOSTS),
         ):
-            if isinstance(limit, bool) or not isinstance(limit, Integral) \
-                    or not 1 <= limit <= maximum:
+            if isinstance(limit, bool) or not isinstance(limit, Integral) or not 1 <= limit <= maximum:
                 raise ValueError(f"{name} must be between 1 and {maximum}")
         result = cls()
         result._templates = {}

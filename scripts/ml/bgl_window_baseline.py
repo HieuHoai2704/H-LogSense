@@ -50,9 +50,20 @@ MODELS = ("count-rule", "isolation-forest", *SUPERVISED)
 NEGATIVE_LIMIT = 400_000
 IF_LIMIT = 20_000
 THREADS = 6
-XGB_PARAMS = {"tree_method": "hist", "n_estimators": 120, "max_depth": 5, "learning_rate": 0.10,
-              "max_bin": 128, "min_child_weight": 5, "subsample": 0.85, "colsample_bytree": 0.85,
-              "reg_lambda": 2, "n_jobs": THREADS, "random_state": SEED, "eval_metric": "logloss"}
+XGB_PARAMS = {
+    "tree_method": "hist",
+    "n_estimators": 120,
+    "max_depth": 5,
+    "learning_rate": 0.10,
+    "max_bin": 128,
+    "min_child_weight": 5,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "reg_lambda": 2,
+    "n_jobs": THREADS,
+    "random_state": SEED,
+    "eval_metric": "logloss",
+}
 
 
 @dataclass
@@ -75,8 +86,13 @@ class Window:
 
     def features(self):
         size = self.size
-        return (math.log1p(size), self.severe / size, len(self.templates) / size,
-                max(self.templates.values()) / size, math.log1p(self.chars / size))
+        return (
+            math.log1p(size),
+            self.severe / size,
+            len(self.templates) / size,
+            max(self.templates.values()) / size,
+            math.log1p(self.chars / size),
+        )
 
 
 def sha(path):
@@ -161,29 +177,55 @@ def collect(archive, date_range):
     if current is not None:
         emit(current)
     y = np.frombuffer(labels, dtype=np.uint8)
-    matrix = csr_matrix((np.frombuffer(counts, dtype=np.int32), np.frombuffer(indices, dtype=np.int32),
-                         np.frombuffer(offsets, dtype=np.int32)), shape=(len(y), len(catalog)))
+    matrix = csr_matrix(
+        (
+            np.frombuffer(counts, dtype=np.int32),
+            np.frombuffer(indices, dtype=np.int32),
+            np.frombuffer(offsets, dtype=np.int32),
+        ),
+        shape=(len(y), len(catalog)),
+    )
     if int(matrix.sum(dtype=np.int64)) != parsed or seen != parsed + sum(dropped.values()):
         raise ValueError("Source rows and window counts do not reconcile.")
-    meta = {"utc": date_range, "raw_rows": seen, "parsed_rows": parsed, "dropped": dict(dropped),
-            "invalid_epoch_unassigned_seen_in_prefix": invalid_epoch, "source_slice_sha256": source.hexdigest(),
-            "windows": len(y), "positives": int(y.sum()), "negatives": len(y) - int(y.sum()),
-            "templates": len(catalog)}
-    return {"catalog": list(catalog), "counts": matrix, "base": np.frombuffer(features, dtype=np.float32).reshape(-1, 5),
-            "y": y, "bucket": np.frombuffer(buckets, dtype=np.int32),
-            "first_source_line": np.frombuffer(sample, dtype=np.int32), "source": meta}
+    meta = {
+        "utc": date_range,
+        "raw_rows": seen,
+        "parsed_rows": parsed,
+        "dropped": dict(dropped),
+        "invalid_epoch_unassigned_seen_in_prefix": invalid_epoch,
+        "source_slice_sha256": source.hexdigest(),
+        "windows": len(y),
+        "positives": int(y.sum()),
+        "negatives": len(y) - int(y.sum()),
+        "templates": len(catalog),
+    }
+    return {
+        "catalog": list(catalog),
+        "counts": matrix,
+        "base": np.frombuffer(features, dtype=np.float32).reshape(-1, 5),
+        "y": y,
+        "bucket": np.frombuffer(buckets, dtype=np.int32),
+        "first_source_line": np.frombuffer(sample, dtype=np.int32),
+        "source": meta,
+    }
 
 
 def fit_representation(train):
     catalog = train["catalog"]
     presence = np.bincount(train["counts"].indices, minlength=len(catalog))
     top = sorted(range(len(catalog)), key=lambda i: (-presence[i], catalog[i]))[:256]
-    vectorizer = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), min_df=2, max_features=8192,
-                                 dtype=np.float32)
+    vectorizer = TfidfVectorizer(
+        analyzer="char_wb", ngram_range=(3, 5), min_df=2, max_features=8192, dtype=np.float32
+    )
     vectors = vectorizer.fit_transform(catalog)
     reducer = TruncatedSVD(n_components=24, n_iter=7, random_state=SEED).fit(vectors)
-    return {"top": {catalog[i]: j for j, i in enumerate(top)}, "template_df": dict(zip(catalog, presence.tolist())), "train_windows": train["counts"].shape[0],
-            "vectorizer": vectorizer, "reducer": reducer}
+    return {
+        "top": {catalog[i]: j for j, i in enumerate(top)},
+        "template_df": dict(zip(catalog, presence.tolist())),
+        "train_windows": train["counts"].shape[0],
+        "vectorizer": vectorizer,
+        "reducer": reducer,
+    }
 
 
 def transform(data, representation):
@@ -192,14 +234,18 @@ def transform(data, representation):
     embedding = representation["reducer"].transform(representation["vectorizer"].transform(catalog))
     totals = np.asarray(counts.sum(axis=1)).ravel()
     text = np.asarray(counts @ embedding, dtype=np.float32) / totals[:, None].astype(np.float32)
-    rarity = np.array([math.log((1 + representation["train_windows"]) / (1 + df.get(key, 0)))
-                       for key in catalog], dtype=np.float32)
+    rarity = np.array(
+        [math.log((1 + representation["train_windows"]) / (1 + df.get(key, 0))) for key in catalog],
+        dtype=np.float32,
+    )
     mean_rarity = (counts @ rarity) / totals
     rows = np.repeat(np.arange(counts.shape[0], dtype=np.int32), np.diff(counts.indptr))
     mapping = np.array([top.get(key, -1) for key in catalog], dtype=np.int32)[counts.indices]
     keep = mapping >= 0
-    known = csr_matrix((np.log1p(counts.data[keep]).astype(np.float32), (rows[keep], mapping[keep])),
-                       shape=(len(base), len(top)))
+    known = csr_matrix(
+        (np.log1p(counts.data[keep]).astype(np.float32), (rows[keep], mapping[keep])),
+        shape=(len(base), len(top)),
+    )
     core = np.column_stack((base, mean_rarity.astype(np.float32)))
     count = hstack((csr_matrix(core), known), format="csr")
     hybrid = hstack((count, csr_matrix(text)), format="csr")
@@ -209,7 +255,12 @@ def transform(data, representation):
 def calibrate(y, scores):
     """Maximize recall at a fixed FPR, including or excluding each score tie as a whole."""
     y, scores = np.asarray(y), np.asarray(scores, dtype=np.float64)
-    if y.ndim != 1 or scores.shape != y.shape or not np.isin(y, (0, 1)).all() or not np.isfinite(scores).all():
+    if (
+        y.ndim != 1
+        or scores.shape != y.shape
+        or not np.isin(y, (0, 1)).all()
+        or not np.isfinite(scores).all()
+    ):
         raise ValueError("Calibration requires binary labels and aligned finite scores.")
     positive = int(y.sum())
     negative = len(y) - positive
@@ -236,9 +287,12 @@ def fit_models(values, y, xgb_classifier):
         raise ValueError("Both classes required for supervised training.")
     chosen = np.sort(np.r_[pos, rng.choice(neg, size=min(len(neg), NEGATIVE_LIMIT), replace=False)])
     if_sample = rng.choice(len(y), size=min(len(y), IF_LIMIT), replace=False)
-    models = {"count-rule": None, "isolation-forest": IsolationForest(
-        n_estimators=100, max_samples=256, random_state=SEED, n_jobs=THREADS
-    ).fit(values["base"][if_sample])}
+    models = {
+        "count-rule": None,
+        "isolation-forest": IsolationForest(
+            n_estimators=100, max_samples=256, random_state=SEED, n_jobs=THREADS
+        ).fit(values["base"][if_sample]),
+    }
     for name in SUPERVISED:
         started = time.perf_counter()
         x = values["hybrid" if name.startswith("window-") else "count"][chosen]
@@ -246,14 +300,19 @@ def fit_models(values, y, xgb_classifier):
         if name.endswith("-lr"):
             scaler = StandardScaler(with_mean=False)
             x = scaler.fit_transform(x)
-            estimator = LogisticRegression(C=1.0, solver="liblinear", random_state=SEED, max_iter=300,
-                                           class_weight="balanced").fit(x, labels)
+            estimator = LogisticRegression(
+                C=1.0, solver="liblinear", random_state=SEED, max_iter=300, class_weight="balanced"
+            ).fit(x, labels)
             models[name] = (scaler, estimator)
         else:
             weight = math.sqrt((len(labels) - int(labels.sum())) / int(labels.sum()))
             models[name] = xgb_classifier(**XGB_PARAMS, scale_pos_weight=weight).fit(x, labels)
         print(f"fit {name} {time.perf_counter() - started:.1f}s", flush=True)
-    return models, {"supervised_windows": len(chosen), "positive_windows": len(pos), "if_sample": len(if_sample)}
+    return models, {
+        "supervised_windows": len(chosen),
+        "positive_windows": len(pos),
+        "if_sample": len(if_sample),
+    }
 
 
 def score(name, model, values):
@@ -273,8 +332,10 @@ def score(name, model, values):
 
 def memory_mib():
     info = psutil.Process().memory_info()
-    return {"rss_mib": round(info.rss / 2**20, 2),
-            "peak_working_set_mib": round(info.peak_wset / 2**20, 2) if hasattr(info, "peak_wset") else None}
+    return {
+        "rss_mib": round(info.rss / 2**20, 2),
+        "peak_working_set_mib": round(info.peak_wset / 2**20, 2) if hasattr(info, "peak_wset") else None,
+    }
 
 
 def collect_timed(archive, phase):
@@ -290,14 +351,28 @@ def prepare(archive, out, archive_sha):
 
     started = time.perf_counter()
     out.mkdir(parents=True)
-    protocol = {"archive_sha256": archive_sha, "code_sha256": sha(Path(__file__)), "parser_version": PARSER_VERSION,
-                "unit_seconds": SECONDS, "ranges_utc_half_open": RANGES, "max_fpr": MAX_FPR, "seed": SEED,
-                "models": MODELS, "select_among": SUPERVISED, "negative_sample_limit": NEGATIVE_LIMIT,
-                "if_sample_limit": IF_LIMIT, "xgboost": XGB_PARAMS, "selection_order": "recall, AP, lower FPR, ID",
-                "threshold": "maximize recall on calibration at empirical FPR cap; ties prefer fewer FP",
-                "fit_access": "train only; selection/calibration after fit; both tests after freeze",
-                "python": platform.python_version(), "numpy": np.__version__, "sklearn": sklearn.__version__,
-                "xgboost_version": xgboost.__version__, "platform": platform.platform()}
+    protocol = {
+        "archive_sha256": archive_sha,
+        "code_sha256": sha(Path(__file__)),
+        "parser_version": PARSER_VERSION,
+        "unit_seconds": SECONDS,
+        "ranges_utc_half_open": RANGES,
+        "max_fpr": MAX_FPR,
+        "seed": SEED,
+        "models": MODELS,
+        "select_among": SUPERVISED,
+        "negative_sample_limit": NEGATIVE_LIMIT,
+        "if_sample_limit": IF_LIMIT,
+        "xgboost": XGB_PARAMS,
+        "selection_order": "recall, AP, lower FPR, ID",
+        "threshold": "maximize recall on calibration at empirical FPR cap; ties prefer fewer FP",
+        "fit_access": "train only; selection/calibration after fit; both tests after freeze",
+        "python": platform.python_version(),
+        "numpy": np.__version__,
+        "sklearn": sklearn.__version__,
+        "xgboost_version": xgboost.__version__,
+        "platform": platform.platform(),
+    }
     write_json(out / "protocol.json", protocol)
     train = collect_timed(archive, "train")
     representation = fit_representation(train)
@@ -307,9 +382,18 @@ def prepare(archive, out, archive_sha):
 
     selection = collect_timed(archive, "selection")
     selection_values = transform(selection, representation)
-    candidates = {name: calibrate(selection["y"], score(name, models[name], selection_values))[1] for name in MODELS}
-    champion = max(SUPERVISED, key=lambda name: (
-        candidates[name]["recall"], candidates[name]["auprc_average_precision"], -candidates[name]["fpr"], name))
+    candidates = {
+        name: calibrate(selection["y"], score(name, models[name], selection_values))[1] for name in MODELS
+    }
+    champion = max(
+        SUPERVISED,
+        key=lambda name: (
+            candidates[name]["recall"],
+            candidates[name]["auprc_average_precision"],
+            -candidates[name]["fpr"],
+            name,
+        ),
+    )
     selection_meta = selection["source"]
     del selection, selection_values
 
@@ -317,16 +401,35 @@ def prepare(archive, out, archive_sha):
     calibration_values = transform(calibration, representation)
     thresholds, calibrated = {}, {}
     for name in MODELS:
-        thresholds[name], calibrated[name] = calibrate(calibration["y"], score(name, models[name], calibration_values))
-    frozen = {"champion": champion, "thresholds": thresholds, "models": models, "representation": representation}
+        thresholds[name], calibrated[name] = calibrate(
+            calibration["y"], score(name, models[name], calibration_values)
+        )
+    frozen = {
+        "champion": champion,
+        "thresholds": thresholds,
+        "models": models,
+        "representation": representation,
+    }
     path = out / "models.joblib"
     joblib.dump(frozen, path, compress=3)
-    write_json(out / "freeze.json", {"frozen_at_utc": datetime.now(timezone.utc).isoformat(),
-               "protocol_sha256": sha(out / "protocol.json"), "artifact_sha256": sha(path),
-               "selected": champion, "thresholds": thresholds, "selection": candidates, "calibration": calibrated,
-               "train_sampling": sample, "train": train_meta, "selection_source": selection_meta,
-               "calibration_source": calibration["source"], "elapsed_seconds": round(time.perf_counter() - started, 3),
-               "memory": memory_mib()})
+    write_json(
+        out / "freeze.json",
+        {
+            "frozen_at_utc": datetime.now(timezone.utc).isoformat(),
+            "protocol_sha256": sha(out / "protocol.json"),
+            "artifact_sha256": sha(path),
+            "selected": champion,
+            "thresholds": thresholds,
+            "selection": candidates,
+            "calibration": calibrated,
+            "train_sampling": sample,
+            "train": train_meta,
+            "selection_source": selection_meta,
+            "calibration_source": calibration["source"],
+            "elapsed_seconds": round(time.perf_counter() - started, 3),
+            "memory": memory_mib(),
+        },
+    )
     print(f"Frozen champion: {champion}", flush=True)
 
 
@@ -334,25 +437,42 @@ def evaluate(archive, out, archive_sha):
     protocol = read_json(out / "protocol.json")
     freeze = read_json(out / "freeze.json")
     path = out / "models.joblib"
-    if (protocol["archive_sha256"] != archive_sha or protocol["code_sha256"] != sha(Path(__file__))
-            or freeze["protocol_sha256"] != sha(out / "protocol.json") or freeze["artifact_sha256"] != sha(path)):
+    if (
+        protocol["archive_sha256"] != archive_sha
+        or protocol["code_sha256"] != sha(Path(__file__))
+        or freeze["protocol_sha256"] != sha(out / "protocol.json")
+        or freeze["artifact_sha256"] != sha(path)
+    ):
         raise ValueError("Frozen inputs changed. Use an unchanged registered experiment.")
     # Only open this locally generated and hash-checked experiment artifact.
     frozen = joblib.load(path)
-    write_json(out / "test-access.json", {"opened_at_utc": datetime.now(timezone.utc).isoformat(),
-               "freeze_sha256": sha(out / "freeze.json")})
+    write_json(
+        out / "test-access.json",
+        {"opened_at_utc": datetime.now(timezone.utc).isoformat(), "freeze_sha256": sha(out / "freeze.json")},
+    )
     report = {"champion": frozen["champion"], "fpr_budget": MAX_FPR, "partitions": {}}
     for phase in ("test", "later_test"):
         started = time.perf_counter()
         data = collect_timed(archive, phase)
         values = transform(data, frozen["representation"])
         scores = {name: score(name, frozen["models"][name], values) for name in MODELS}
-        results = {name: binary_metrics(data["y"], native, frozen["thresholds"][name], "higher")
-                   for name, native in scores.items()}
-        np.savez_compressed(out / (phase + "-scores.npz"), y=data["y"], bucket=data["bucket"],
-                            first_source_line=data["first_source_line"], **scores)
-        report["partitions"][phase] = {"source": data["source"], "models": results,
-                                       "seconds": round(time.perf_counter() - started, 3), "memory": memory_mib()}
+        results = {
+            name: binary_metrics(data["y"], native, frozen["thresholds"][name], "higher")
+            for name, native in scores.items()
+        }
+        np.savez_compressed(
+            out / (phase + "-scores.npz"),
+            y=data["y"],
+            bucket=data["bucket"],
+            first_source_line=data["first_source_line"],
+            **scores,
+        )
+        report["partitions"][phase] = {
+            "source": data["source"],
+            "models": results,
+            "seconds": round(time.perf_counter() - started, 3),
+            "memory": memory_mib(),
+        }
         print(phase, json.dumps(results), flush=True)
         del data, values, scores
     write_json(out / "test-results.json", report)

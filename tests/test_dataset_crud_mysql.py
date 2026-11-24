@@ -21,7 +21,11 @@ from werkzeug.security import generate_password_hash
 import test_mysql_integration as baseline
 from app.domain import User, UserDataset
 from app.models import (
-    CoverageInterval, DataSource, Dataset, ProcessingJob, SourceArtifact,
+    CoverageInterval,
+    DataSource,
+    Dataset,
+    ProcessingJob,
+    SourceArtifact,
 )
 
 
@@ -48,10 +52,9 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         try:
             with admin.begin() as connection:
                 for table in ("datasets", "user_datasets"):
-                    connection.execute(text(
-                        f"GRANT DELETE ON `{url.database}`.`{table}` "
-                        f"TO '{url.username}'@'localhost'"
-                    ))
+                    connection.execute(
+                        text(f"GRANT DELETE ON `{url.database}`.`{table}` TO '{url.username}'@'localhost'")
+                    )
         finally:
             admin.dispose()
         # New connections observe the exact newly granted table privileges.
@@ -60,12 +63,14 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
     def setUp(self):
         baseline.MySQLIntegrationTests.setUp(self)
         from app.security import attempts
+
         attempts.clear()
         self.app.config["SECRET_KEY"] = "synthetic-dataset-crud-session-secret"
         self.client = self.app.test_client()
 
     def login(self, role="admin", *, grant=True):
         from app.security import attempts
+
         attempts.clear()
         with Session(self.engine) as session, session.begin():
             user = User(
@@ -78,9 +83,13 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
             self.user_id, username = user.id, user.username
             if grant:
                 session.add(UserDataset(user_id=user.id, dataset_id=self.dataset_id))
-        result = self.client.post("/api/v1/auth/login", json={
-            "username": username, "password": "synthetic-password-123",
-        })
+        result = self.client.post(
+            "/api/v1/auth/login",
+            json={
+                "username": username,
+                "password": "synthetic-password-123",
+            },
+        )
         self.assertEqual(result.status_code, 200, result.json)
         self.csrf = result.json["csrf_token"]
         return self.user_id
@@ -108,13 +117,15 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         dataset_id = item["id"]
         self.assertEqual(item["name"], "Dữ liệu kiểm thử")
         self.assertEqual((item["state"], item["input_revision"]), ("registered", 0))
-        self.assertEqual(self.count(UserDataset, UserDataset.user_id == creator,
-                                    UserDataset.dataset_id == dataset_id), 1)
+        self.assertEqual(
+            self.count(UserDataset, UserDataset.user_id == creator, UserDataset.dataset_id == dataset_id), 1
+        )
         detail = self.client.get(f"/api/v1/datasets/{dataset_id}")
         self.assertEqual(detail.status_code, 200, detail.json)
         self.assertEqual(self.resource(detail)["id"], dataset_id)
-        updated = self.client.patch(f"/api/v1/datasets/{dataset_id}",
-            json={"name": "Renamed fixture"}, headers=self.headers())
+        updated = self.client.patch(
+            f"/api/v1/datasets/{dataset_id}", json={"name": "Renamed fixture"}, headers=self.headers()
+        )
         self.assertEqual(updated.status_code, 200, updated.json)
         self.assertEqual(self.resource(updated)["name"], "Renamed fixture")
         self.assertEqual(self.resource(updated)["input_revision"], 0)
@@ -144,12 +155,16 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.assertIn(b"Dataset created.", self.client.get(created.location).data)
         self.assertEqual(self.count(Dataset, Dataset.dataset_key == key), 1)
         row = next(x for x in self.client.get("/api/v1/datasets").json["items"] if x["dataset_key"] == key)
-        rename = f'{path}/{row["id"]}/rename'
-        response = self.client.post(rename, data={"csrf_token": form_token(rename), "name": "Renamed in HTML"})
+        rename = f"{path}/{row['id']}/rename"
+        response = self.client.post(
+            rename, data={"csrf_token": form_token(rename), "name": "Renamed in HTML"}
+        )
         self.assertEqual(response.status_code, 303)
         self.assertIn(b"Renamed in HTML", self.client.get(response.location).data)
-        delete_path = f'{path}/{row["id"]}/delete'
-        response = self.client.post(delete_path, data={"csrf_token": form_token(delete_path), "confirmation": "y"})
+        delete_path = f"{path}/{row['id']}/delete"
+        response = self.client.post(
+            delete_path, data={"csrf_token": form_token(delete_path), "confirmation": "y"}
+        )
         self.assertEqual(response.status_code, 303)
         self.assertEqual(self.count(Dataset, Dataset.id == row["id"]), 0)
         self.login("viewer")
@@ -164,8 +179,11 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
                 self.assertEqual(self.client.get(f"/api/v1/datasets/{self.dataset_id}").status_code, 200)
                 result = self.create()
                 self.assertEqual(result.status_code, 201 if role in {"manager", "admin"} else 403)
-                changed = self.client.patch(f"/api/v1/datasets/{self.dataset_id}",
-                    json={"name": "Name after " + role}, headers=self.headers())
+                changed = self.client.patch(
+                    f"/api/v1/datasets/{self.dataset_id}",
+                    json={"name": "Name after " + role},
+                    headers=self.headers(),
+                )
                 self.assertEqual(changed.status_code, 200 if role in {"manager", "admin"} else 403)
                 deleted = self.client.delete(f"/api/v1/datasets/{self.dataset_id}", headers=self.headers())
                 self.assertEqual(deleted.status_code, 204 if role == "admin" else 403)
@@ -177,10 +195,16 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         for dataset_id in (self.other_id, 2**63 - 1):
             with self.subTest(dataset=dataset_id):
                 self.assertEqual(self.client.get(f"/api/v1/datasets/{dataset_id}").status_code, 403)
-                self.assertEqual(self.client.patch(f"/api/v1/datasets/{dataset_id}",
-                    json={"name": "Forbidden"}, headers=self.headers()).status_code, 403)
-                self.assertEqual(self.client.delete(f"/api/v1/datasets/{dataset_id}",
-                    headers=self.headers()).status_code, 403)
+                self.assertEqual(
+                    self.client.patch(
+                        f"/api/v1/datasets/{dataset_id}", json={"name": "Forbidden"}, headers=self.headers()
+                    ).status_code,
+                    403,
+                )
+                self.assertEqual(
+                    self.client.delete(f"/api/v1/datasets/{dataset_id}", headers=self.headers()).status_code,
+                    403,
+                )
 
     def test_04_empty_authenticated_list_and_anonymous_denial(self):
         self.assertEqual(self.client.get("/api/v1/logs/datasets").status_code, 403)
@@ -208,14 +232,15 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
 
     def test_05_read_token_cannot_mutate_or_bypass_session_roles(self):
         token = "synthetic-read-only-token"
-        self.app.config.update(DATABASE_READ_TOKEN=token,
-                               DATABASE_ALLOWED_DATASETS=(self.dataset_id,))
+        self.app.config.update(DATABASE_READ_TOKEN=token, DATABASE_ALLOWED_DATASETS=(self.dataset_id,))
         self.addCleanup(self.app.config.pop, "DATABASE_READ_TOKEN", None)
         self.addCleanup(self.app.config.pop, "DATABASE_ALLOWED_DATASETS", None)
         headers = {"Authorization": "Bearer " + token}
         self.assertEqual(self.client.get("/api/v1/datasets", headers=headers).status_code, 403)
         self.assertEqual(self.client.post("/api/v1/datasets", json={}, headers=headers).status_code, 403)
-        self.assertEqual(self.client.delete(f"/api/v1/datasets/{self.dataset_id}", headers=headers).status_code, 403)
+        self.assertEqual(
+            self.client.delete(f"/api/v1/datasets/{self.dataset_id}", headers=headers).status_code, 403
+        )
         # Existing read-only Explorer contract stays available to operator tools.
         self.assertEqual(self.client.get("/api/v1/logs/datasets", headers=headers).status_code, 200)
 
@@ -223,12 +248,24 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.login("admin")
         for headers in ({}, {"X-CSRF-Token": "incorrect"}):
             with self.subTest(headers=bool(headers)):
-                self.assertEqual(self.client.post("/api/v1/datasets", json={
-                    "name": "No CSRF", "dataset_key": uuid4().hex}, headers=headers).status_code, 403)
-                self.assertEqual(self.client.patch(f"/api/v1/datasets/{self.dataset_id}",
-                    json={"name": "No CSRF"}, headers=headers).status_code, 403)
-                self.assertEqual(self.client.delete(f"/api/v1/datasets/{self.dataset_id}",
-                    headers=headers).status_code, 403)
+                self.assertEqual(
+                    self.client.post(
+                        "/api/v1/datasets",
+                        json={"name": "No CSRF", "dataset_key": uuid4().hex},
+                        headers=headers,
+                    ).status_code,
+                    403,
+                )
+                self.assertEqual(
+                    self.client.patch(
+                        f"/api/v1/datasets/{self.dataset_id}", json={"name": "No CSRF"}, headers=headers
+                    ).status_code,
+                    403,
+                )
+                self.assertEqual(
+                    self.client.delete(f"/api/v1/datasets/{self.dataset_id}", headers=headers).status_code,
+                    403,
+                )
         self.assertEqual(self.count(Dataset, Dataset.id == self.dataset_id), 1)
 
     def test_07_duplicate_create_rolls_back_dataset_and_creator_grant(self):
@@ -270,7 +307,11 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
     def test_10_invalid_creation_and_mass_assignment(self):
         self.login("admin")
         invalid = [
-            [], None, {}, {"name": "Only name"}, {"dataset_key": "only-key"},
+            [],
+            None,
+            {},
+            {"name": "Only name"},
+            {"dataset_key": "only-key"},
             {"name": "", "dataset_key": "key"},
             {"name": "   ", "dataset_key": "key"},
             {"name": "x" * 201, "dataset_key": "key"},
@@ -299,11 +340,23 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
     def test_11_immutable_fields_and_invalid_patch_leave_metadata_unchanged(self):
         self.login("admin")
         original = self.resource(self.client.get(f"/api/v1/datasets/{self.dataset_id}"))
-        for body in ([], {}, {"name": ""}, {"name": "x" * 201}, {"name": False},
-                     {"dataset_key": "changed"}, {"source_id": 1}, {"data_mode": "real"},
-                     {"state": "imported"}, {"input_revision": 12}, {"name": "ok", "id": 99}):
+        for body in (
+            [],
+            {},
+            {"name": ""},
+            {"name": "x" * 201},
+            {"name": False},
+            {"dataset_key": "changed"},
+            {"source_id": 1},
+            {"data_mode": "real"},
+            {"state": "imported"},
+            {"input_revision": 12},
+            {"name": "ok", "id": 99},
+        ):
             with self.subTest(body_type=type(body).__name__):
-                response = self.client.patch(f"/api/v1/datasets/{self.dataset_id}", json=body, headers=self.headers())
+                response = self.client.patch(
+                    f"/api/v1/datasets/{self.dataset_id}", json=body, headers=self.headers()
+                )
                 self.assertEqual(response.status_code, 400, response.json)
         current = self.resource(self.client.get(f"/api/v1/datasets/{self.dataset_id}"))
         self.assertEqual(current, original)
@@ -319,8 +372,10 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         first = self.client.get("/api/v1/datasets", query_string={"q": prefix, "limit": 2})
         self.assertEqual(first.status_code, 200, first.json)
         self.assertEqual(len(first.json["items"]), 2)
-        second = self.client.get("/api/v1/datasets", query_string={
-            "q": prefix, "limit": 2, "after_id": first.json["next_after_id"]})
+        second = self.client.get(
+            "/api/v1/datasets",
+            query_string={"q": prefix, "limit": 2, "after_id": first.json["next_after_id"]},
+        )
         ids = [r["id"] for r in first.json["items"] + second.json["items"]]
         self.assertEqual(ids, expected)
         self.assertIsNone(second.json["next_after_id"])
@@ -331,8 +386,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         keyed = self.resource(self.create(name="Name deliberately differs", dataset_key=key_search))
         by_key = self.client.get("/api/v1/datasets", query_string={"q": key_search})
         self.assertEqual([row["id"] for row in by_key.json["items"]], [keyed["id"]])
-        for args in ({"limit": 0}, {"limit": 101}, {"after_id": -1},
-                     {"after_id": 2**63}, {"q": "x" * 201}):
+        for args in ({"limit": 0}, {"limit": 101}, {"after_id": -1}, {"after_id": 2**63}, {"q": "x" * 201}):
             self.assertEqual(self.client.get("/api/v1/datasets", query_string=args).status_code, 400)
 
     def test_13_numeric_path_ids_are_validated_before_sql(self):
@@ -340,14 +394,28 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         for invalid in (0, 2**63):
             with self.subTest(invalid=invalid):
                 self.assertEqual(self.client.get(f"/api/v1/datasets/{invalid}").status_code, 400)
-                self.assertEqual(self.client.patch(f"/api/v1/datasets/{invalid}", json={"name": "x"}, headers=self.headers()).status_code, 400)
-                self.assertEqual(self.client.delete(f"/api/v1/datasets/{invalid}", headers=self.headers()).status_code, 400)
+                self.assertEqual(
+                    self.client.patch(
+                        f"/api/v1/datasets/{invalid}", json={"name": "x"}, headers=self.headers()
+                    ).status_code,
+                    400,
+                )
+                self.assertEqual(
+                    self.client.delete(f"/api/v1/datasets/{invalid}", headers=self.headers()).status_code, 400
+                )
 
     def test_14_source_artifact_blocks_delete_without_losing_grants(self):
         self.login("admin")
         with Session(self.engine) as session, session.begin():
-            session.add(SourceArtifact(dataset_id=self.dataset_id, artifact_key=uuid4().hex,
-                sha256="a" * 64, byte_length=0, parser_version="synthetic-test"))
+            session.add(
+                SourceArtifact(
+                    dataset_id=self.dataset_id,
+                    artifact_key=uuid4().hex,
+                    sha256="a" * 64,
+                    byte_length=0,
+                    parser_version="synthetic-test",
+                )
+            )
         before_grants = self.count(UserDataset, UserDataset.dataset_id == self.dataset_id)
         result = self.client.delete(f"/api/v1/datasets/{self.dataset_id}", headers=self.headers())
         self.assertEqual(result.status_code, 409, result.json)
@@ -361,8 +429,9 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
             result = self.create()
             dataset_id = self.resource(result)["id"]
             with Session(self.engine) as session, session.begin():
-                job = ProcessingJob(dataset_id=dataset_id, kind="analysis", state=state,
-                                    job_key=uuid4().hex, configuration={})
+                job = ProcessingJob(
+                    dataset_id=dataset_id, kind="analysis", state=state, job_key=uuid4().hex, configuration={}
+                )
                 session.add(job)
                 session.flush()
                 job_id = job.id
@@ -383,8 +452,15 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
     def test_16_coverage_child_blocks_deletion(self):
         self.login("admin")
         with Session(self.engine) as session, session.begin():
-            session.add(CoverageInterval(dataset_id=self.dataset_id, layer="ingestion",
-                state="unknown", start_time=baseline.NOW, end_time=baseline.NOW + timedelta(minutes=1)))
+            session.add(
+                CoverageInterval(
+                    dataset_id=self.dataset_id,
+                    layer="ingestion",
+                    state="unknown",
+                    start_time=baseline.NOW,
+                    end_time=baseline.NOW + timedelta(minutes=1),
+                )
+            )
         result = self.client.delete(f"/api/v1/datasets/{self.dataset_id}", headers=self.headers())
         self.assertEqual(result.status_code, 409, result.json)
 
@@ -417,7 +493,12 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
                 operations.append("delete_grants")
             elif sql.startswith("DELETE FROM DATASETS"):
                 operations.append("delete_parent")
-                raise OperationalError("Synthetic deletion failure", {}, RuntimeError("owned rollback injection"), hide_parameters=True)
+                raise OperationalError(
+                    "Synthetic deletion failure",
+                    {},
+                    RuntimeError("owned rollback injection"),
+                    hide_parameters=True,
+                )
 
         event.listen(self.engine, "before_cursor_execute", fail_parent)
         try:
@@ -455,8 +536,12 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         def fail_membership(connection, cursor, statement, params, context, many):
             sql = " ".join(statement.replace("`", "").upper().split())
             if sql.startswith("INSERT INTO USER_DATASETS"):
-                raise OperationalError("Synthetic grant failure", {},
-                    RuntimeError("owned create rollback injection"), hide_parameters=True)
+                raise OperationalError(
+                    "Synthetic grant failure",
+                    {},
+                    RuntimeError("owned create rollback injection"),
+                    hide_parameters=True,
+                )
 
         event.listen(self.engine, "before_cursor_execute", fail_membership)
         try:
@@ -473,16 +558,23 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.login("admin")
         self.assertEqual(self.client.get(f"/api/v1/datasets/{self.dataset_id}").status_code, 200)
         with Session(self.engine) as session, session.begin():
-            session.execute(delete(UserDataset).where(
-                UserDataset.user_id == self.user_id,
-                UserDataset.dataset_id == self.dataset_id,
-            ))
+            session.execute(
+                delete(UserDataset).where(
+                    UserDataset.user_id == self.user_id,
+                    UserDataset.dataset_id == self.dataset_id,
+                )
+            )
         self.assertEqual(self.client.get("/api/v1/datasets").json["items"], [])
         self.assertEqual(self.client.get(f"/api/v1/datasets/{self.dataset_id}").status_code, 403)
-        self.assertEqual(self.client.patch(f"/api/v1/datasets/{self.dataset_id}",
-            json={"name": "Not granted"}, headers=self.headers()).status_code, 403)
-        self.assertEqual(self.client.delete(f"/api/v1/datasets/{self.dataset_id}",
-            headers=self.headers()).status_code, 403)
+        self.assertEqual(
+            self.client.patch(
+                f"/api/v1/datasets/{self.dataset_id}", json={"name": "Not granted"}, headers=self.headers()
+            ).status_code,
+            403,
+        )
+        self.assertEqual(
+            self.client.delete(f"/api/v1/datasets/{self.dataset_id}", headers=self.headers()).status_code, 403
+        )
 
     def test_23_concurrent_first_registrations_share_one_personal_source(self):
         actor_id = self.login("manager")
@@ -504,9 +596,14 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         def register(key):
             client = self.app.test_client()
             client.set_cookie(cookie_name, cookie.value)
-            response = client.post("/api/v1/datasets", json={
-                "name": "Concurrent owned metadata", "dataset_key": key,
-            }, headers=csrf)
+            response = client.post(
+                "/api/v1/datasets",
+                json={
+                    "name": "Concurrent owned metadata",
+                    "dataset_key": key,
+                },
+                headers=csrf,
+            )
             return response.status_code, response.json
 
         keys = [uuid4().hex, uuid4().hex]
@@ -525,10 +622,17 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.assertEqual(len({item["source_id"] for item in items}), 1)
         self.assertEqual({item["dataset_key"] for item in items}, set(keys))
         with Session(self.engine) as session:
-            self.assertEqual(session.scalar(select(func.count()).select_from(DataSource).where(
-                DataSource.source_key == "api-user-" + str(actor_id))), 1)
-            grants = set(session.scalars(select(UserDataset.dataset_id).where(
-                UserDataset.user_id == actor_id)))
+            self.assertEqual(
+                session.scalar(
+                    select(func.count())
+                    .select_from(DataSource)
+                    .where(DataSource.source_key == "api-user-" + str(actor_id))
+                ),
+                1,
+            )
+            grants = set(
+                session.scalars(select(UserDataset.dataset_id).where(UserDataset.user_id == actor_id))
+            )
         self.assertEqual(grants, ids | {self.dataset_id})
         self.assertNotIn(self.other_id, grants)
 

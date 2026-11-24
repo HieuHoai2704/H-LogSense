@@ -75,8 +75,11 @@ def evidence(identity, args):
         from app.models import RawLogRecord, SourceArtifact
 
         parsed = db.session.get(E, sample) if sample else None
-        size = parsed and db.session.scalar(select(func.length(RawLogRecord.raw_bytes)).where(
-            RawLogRecord.dataset_id == dataset_id, RawLogRecord.id == parsed.raw_id))
+        size = parsed and db.session.scalar(
+            select(func.length(RawLogRecord.raw_bytes)).where(
+                RawLogRecord.dataset_id == dataset_id, RawLogRecord.id == parsed.raw_id
+            )
+        )
         if parsed is not None and size is not None and size <= 262144:  # same inline bound as load_evidence
             # Resolve a genuine sample raw row without pretending it represents the
             # whole window. The original unit remains the window in the contract.
@@ -188,14 +191,10 @@ def evidence(identity, args):
     host = metadata["host"]
     service = metadata["service"]
     if relation == "same_host":
-        related_query = (
-            related_query.where(HOST == host) if host else related_query.where(A.id < 0)
-        )
+        related_query = related_query.where(HOST == host) if host else related_query.where(A.id < 0)
     if relation == "same_service":
         related_query = (
-            related_query.where(E.service == service)
-            if service
-            else related_query.where(A.id < 0)
+            related_query.where(E.service == service) if service else related_query.where(A.id < 0)
         )
     if relation == "before":
         related_query = related_query.where(A.anchor_time < anomaly.anchor_time)
@@ -214,9 +213,7 @@ def evidence(identity, args):
             ]
         ).encode()
     ).hexdigest()
-    signer = URLSafeTimedSerializer(
-        current_app.config["EVIDENCE_CURSOR_SECRET"], salt="mysql-related"
-    )
+    signer = URLSafeTimedSerializer(current_app.config["EVIDENCE_CURSOR_SECRET"], salt="mysql-related")
     cursor = args.get("context_cursor")
     if cursor:
         try:
@@ -230,12 +227,9 @@ def evidence(identity, args):
             )
         except (BadData, ValueError, KeyError):
             raise QueryError("Related cursor expired or scope changed.") from None
-    related_rows = db.session.execute(
-        related_query.order_by(A.anchor_time, A.id).limit(limit + 1)
-    ).all()
+    related_rows = db.session.execute(related_query.order_by(A.anchor_time, A.id).limit(limit + 1)).all()
     items = [
-        row_summary(r, scope)
-        | {"relationship_reasons": [relation, "Within explicit context [start,end)"]}
+        row_summary(r, scope) | {"relationship_reasons": [relation, "Within explicit context [start,end)"]}
         for r in related_rows[:limit]
     ]
     next_cursor = (
@@ -259,11 +253,7 @@ def evidence(identity, args):
         available_relations=[
             dict(
                 value=k,
-                available=(
-                    unit.end_time is not None
-                    if k == "same_window"
-                    else k != "same_session"
-                ),
+                available=(unit.end_time is not None if k == "same_window" else k != "same_session"),
             )
             for k in [
                 "same_host",
@@ -301,7 +291,9 @@ def evidence(identity, args):
                     "parsing_status": supplied.get("parsing_status", "unavailable"),
                     "original_log_available": bool(supplied.get("source_line")),
                     "upload": (supplied.get("parsed_attributes") or {}).get("upload"),
-                    "source_kind": "normalized-upload" if (supplied.get("parsed_attributes") or {}).get("upload") else "operator-source",
+                    "source_kind": "normalized-upload"
+                    if (supplied.get("parsed_attributes") or {}).get("upload")
+                    else "operator-source",
                 },
             },
             parsed_fields=supplied.get("parsed_attributes"),
@@ -315,9 +307,7 @@ def evidence(identity, args):
                 "feature_evidence": e.get("feature_values"),
                 "rule_id": detector.detector_key if not model else None,
                 "rule_version": version.version if not model else None,
-                "observed_value": e.get(
-                    "observed_event_count", e.get("feature_values")
-                ),
+                "observed_value": e.get("observed_event_count", e.get("feature_values")),
                 "configured_threshold": e.get("threshold"),
                 "reference_statistics": e.get("reference"),
                 "observation_window": {

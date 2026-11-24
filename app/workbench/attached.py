@@ -26,7 +26,9 @@ def process_for(root, pid, created=None):
         raise psutil.NoSuchProcess(pid)
     if not process.is_running() or process.status() == psutil.STATUS_ZOMBIE:
         raise psutil.NoSuchProcess(pid)
-    if process.username() != psutil.Process().username() or not Path(process.cwd()).resolve().is_relative_to(root):
+    if process.username() != psutil.Process().username() or not Path(process.cwd()).resolve().is_relative_to(
+        root
+    ):
         raise WorkspaceError("The PID must belong to the current account and run in the project folder.", 403)
     return process
 
@@ -116,9 +118,18 @@ def sample(folder, record, root, lock):
         percent = None
         if interval > 0 and previous_cpu is not None and cpu_total >= previous_cpu:
             percent = min(100, 100 * (cpu_total - previous_cpu) / interval / (os.cpu_count() or 1))
-        data = {"timestamp": timestamp(stamp), "cpu_percent": percent, "ram_percent": used / total * 100 if total else None,
-                "ram_used_bytes": used, "ram_total_bytes": total, "_sampled_at": stamp, "_cpu_seconds": cpu_total}
-        atomic_write(path, ("\n".join([*lines[-(MAX_SAMPLES - 1):], json.dumps(data)]) + "\n").encode("utf-8"))
+        data = {
+            "timestamp": timestamp(stamp),
+            "cpu_percent": percent,
+            "ram_percent": used / total * 100 if total else None,
+            "ram_used_bytes": used,
+            "ram_total_bytes": total,
+            "_sampled_at": stamp,
+            "_cpu_seconds": cpu_total,
+        }
+        atomic_write(
+            path, ("\n".join([*lines[-(MAX_SAMPLES - 1) :], json.dumps(data)]) + "\n").encode("utf-8")
+        )
 
 
 def register(root, identifier, pid, log, metrics):

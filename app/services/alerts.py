@@ -39,25 +39,19 @@ def generate_alerts(engine, dataset_id, run_id):
             raise ValueError("Completed scoped run required.")
         rules = list(
             session.scalars(
-                select(AlertRule.id).where(
-                    AlertRule.dataset_id == dataset_id, AlertRule.enabled == True
-                )
+                select(AlertRule.id).where(AlertRule.dataset_id == dataset_id, AlertRule.enabled == True)
             )
         )
     for rule_id in rules:
         while True:
             with Session(engine) as session, session.begin():
-                rule = session.scalar(
-                    select(AlertRule).where(AlertRule.id == rule_id).with_for_update()
-                )
+                rule = session.scalar(select(AlertRule).where(AlertRule.id == rule_id).with_for_update())
                 if rule.detector_id is not None and rule.detector_id != run.detector_id:
                     break
                 query = select(AnomalyOutput).where(
                     AnomalyOutput.dataset_id == dataset_id,
                     AnomalyOutput.run_id == run_id,
-                    AnomalyOutput.priority.in_(
-                        PRIORITIES[PRIORITIES.index(rule.min_priority) :]
-                    ),
+                    AnomalyOutput.priority.in_(PRIORITIES[PRIORITIES.index(rule.min_priority) :]),
                     ~exists(
                         select(AlertDecision.id).where(
                             AlertDecision.dataset_id == dataset_id,
@@ -68,29 +62,20 @@ def generate_alerts(engine, dataset_id, run_id):
                 )
                 if rule.host:
                     query = (
-                        query.join(
-                            DetectionUnit, DetectionUnit.id == AnomalyOutput.unit_id
-                        )
+                        query.join(DetectionUnit, DetectionUnit.id == AnomalyOutput.unit_id)
                         .outerjoin(LogEvent, LogEvent.id == DetectionUnit.event_id)
                         .where(
                             (DetectionUnit.host == rule.host)
-                            | (
-                                (DetectionUnit.host == None)
-                                & (LogEvent.host == rule.host)
-                            )
+                            | ((DetectionUnit.host == None) & (LogEvent.host == rule.host))
                         )
                     )
-                outputs = list(
-                    session.scalars(query.order_by(AnomalyOutput.id).limit(500))
-                )
+                outputs = list(session.scalars(query.order_by(AnomalyOutput.id).limit(500)))
                 if not outputs:
                     break
                 for output in outputs:
                     now = datetime.now(timezone.utc)
-                    cooling = (
-                        rule.last_alert_at is not None
-                        and now - rule.last_alert_at
-                        < timedelta(seconds=rule.cooldown_seconds)
+                    cooling = rule.last_alert_at is not None and now - rule.last_alert_at < timedelta(
+                        seconds=rule.cooldown_seconds
                     )
                     session.add(
                         AlertDecision(
@@ -154,12 +139,11 @@ class VerifiedSMTPConnection(Connection):
 def notification_message(notification, sender, recipients):
     alert_id, dataset_id = notification.alert_id, notification.dataset_id
     message = Message(
-        subject=f"{APP_NAME} investigation alert {alert_id}", sender=sender,
+        subject=f"{APP_NAME} investigation alert {alert_id}",
+        sender=sender,
         recipients=recipients,
         body=f"Alert {alert_id}, dataset {dataset_id}. Review the evidence in {APP_NAME}.",
-        html=render_template(
-            "mail/alert.html", app_name=APP_NAME, alert_id=alert_id, dataset_id=dataset_id
-        ),
+        html=render_template("mail/alert.html", app_name=APP_NAME, alert_id=alert_id, dataset_id=dataset_id),
     )
     message.msgId = f"<logsense-alert-{dataset_id}-{alert_id}@local.invalid>"
     message.attach("alert-reference.csv", "text/csv", f"dataset_id,alert_id\r\n{dataset_id},{alert_id}\r\n")
@@ -175,8 +159,11 @@ def deliver_notifications(engine, *, smtp_factory=None, alert_id=None):
         mail.init_app(app)
         context = app.app_context()
     with context:
-        suppressed = bool(current_app.testing or current_app.config.get("MAIL_SUPPRESS_SEND")
-                          or os.environ.get("MAIL_SUPPRESS_SEND") == "1")
+        suppressed = bool(
+            current_app.testing
+            or current_app.config.get("MAIL_SUPPRESS_SEND")
+            or os.environ.get("MAIL_SUPPRESS_SEND") == "1"
+        )
         host = os.environ.get("SMTP_HOST", "")
         recipient = os.environ.get("SMTP_TO", "")
         sender = os.environ.get("SMTP_FROM", "")
@@ -189,15 +176,25 @@ def deliver_notifications(engine, *, smtp_factory=None, alert_id=None):
         recipients = recipients or ["preview@example.invalid"]
         if len(recipients) > 20 or any("@" not in address for address in [sender, *recipients]):
             raise ValueError("Provide a sender and at most 20 recipient email addresses.")
-        state = mail.init_mail({
-            "MAIL_SERVER": host, "MAIL_PORT": int(os.environ.get("SMTP_PORT", "587")),
-            "MAIL_USERNAME": os.environ.get("SMTP_USER"), "MAIL_PASSWORD": os.environ.get("SMTP_PASSWORD"),
-            "MAIL_USE_TLS": True, "MAIL_SUPPRESS_SEND": suppressed,
-        })
-        query = select(Notification).where(
-            Notification.state.in_(["pending", "retry", "sending"]), Notification.attempts < 3,
-            Notification.next_attempt <= datetime.now(timezone.utc),
-        ).order_by(Notification.id)
+        state = mail.init_mail(
+            {
+                "MAIL_SERVER": host,
+                "MAIL_PORT": int(os.environ.get("SMTP_PORT", "587")),
+                "MAIL_USERNAME": os.environ.get("SMTP_USER"),
+                "MAIL_PASSWORD": os.environ.get("SMTP_PASSWORD"),
+                "MAIL_USE_TLS": True,
+                "MAIL_SUPPRESS_SEND": suppressed,
+            }
+        )
+        query = (
+            select(Notification)
+            .where(
+                Notification.state.in_(["pending", "retry", "sending"]),
+                Notification.attempts < 3,
+                Notification.next_attempt <= datetime.now(timezone.utc),
+            )
+            .order_by(Notification.id)
+        )
         if alert_id is not None:
             query = query.where(Notification.alert_id == alert_id)
         return _dispatch_notifications(engine, state, smtp_factory or smtplib.SMTP, sender, recipients, query)
@@ -215,10 +212,14 @@ def _dispatch_notifications(engine, mail_state, factory, sender, recipients, que
     # A claim that expired after the last allowed attempt cannot be retried: close it.
     with Session(engine) as session, session.begin():
         for stale in session.scalars(
-            select(Notification).where(
-                Notification.state == "sending", Notification.attempts >= 3,
+            select(Notification)
+            .where(
+                Notification.state == "sending",
+                Notification.attempts >= 3,
                 Notification.next_attempt <= datetime.now(timezone.utc),
-            ).with_for_update(skip_locked=True).limit(100)
+            )
+            .with_for_update(skip_locked=True)
+            .limit(100)
         ):
             stale.state, stale.error_code = "failed", "delivery_unknown"
     sent = 0
@@ -248,7 +249,9 @@ def _dispatch_notifications(engine, mail_state, factory, sender, recipients, que
                 with VerifiedSMTPConnection(mail_state, factory) as connection:
                     connection.send(message)
             except (OSError, smtplib.SMTPException) as error:
-                log.warning("notification %s: SMTP delivery failed (%s)", notification_id, type(error).__name__)
+                log.warning(
+                    "notification %s: SMTP delivery failed (%s)", notification_id, type(error).__name__
+                )
                 outcome, code = "retry", "smtp_failed"
             except Exception:
                 log.exception("notification %s could not be sent", notification_id)

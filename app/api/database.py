@@ -1,6 +1,5 @@
 """Opt-in private result API; not connected to the public demo workspace."""
 
-
 from flask import Blueprint, current_app, jsonify, request
 from sqlalchemy import select
 
@@ -69,11 +68,7 @@ def anomalies():
         run_id = int(request.args["run_id"])
         after = int(request.args.get("after_id", "0"))
         limit = int(request.args.get("limit", "50"))
-        if (
-            not 1 <= run_id <= 2**63 - 1
-            or not 0 <= after <= 2**63 - 1
-            or not 1 <= limit <= 100
-        ):
+        if not 1 <= run_id <= 2**63 - 1 or not 0 <= after <= 2**63 - 1 or not 1 <= limit <= 100:
             raise ValueError()
     except (ValueError, KeyError):
         return jsonify(error={"code": "invalid_query"}), 400

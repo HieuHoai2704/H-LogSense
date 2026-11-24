@@ -99,7 +99,9 @@ def main():
     try:
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(
-                channel=os.environ.get("LOGSENSE_BROWSER_CHANNEL", "msedge" if sys.platform == "win32" else "chromium"),
+                channel=os.environ.get(
+                    "LOGSENSE_BROWSER_CHANNEL", "msedge" if sys.platform == "win32" else "chromium"
+                ),
                 headless=True,
             )
             context = browser.new_context(viewport={"width": 1440, "height": 1000})
@@ -117,7 +119,9 @@ def main():
             expect(page.locator("#logs-status")).to_contain_text("MySQL ready", timeout=30000)
             expect(page.locator("#login-panel")).to_be_hidden()
             report["latency"]["login_to_log_render_ms"] = (time.perf_counter() - started) * 1000
-            report["latency"]["login_to_log_ready_browser_ms"] = page.evaluate("performance.now()") - browser_started
+            report["latency"]["login_to_log_ready_browser_ms"] = (
+                page.evaluate("performance.now()") - browser_started
+            )
             granted = page.request.get(base + "/api/v1/logs/datasets").json()["datasets"]
             granted_ids = {d["id"] for d in granted}
             assert dataset in granted_ids and other not in granted_ids
@@ -126,10 +130,19 @@ def main():
             assert 0 < page.locator("#log-rows tr").count() <= 100
             cookies = context.cookies()
             assert any(c["httpOnly"] and c["sameSite"] == "Strict" for c in cookies)
-            params = {"dataset_id": dataset, "start_time": info["start_time"], "end_time": info["end_time"], "limit": 50}
+            params = {
+                "dataset_id": dataset,
+                "start_time": info["start_time"],
+                "end_time": info["end_time"],
+                "limit": 50,
+            }
             forbidden = dict(params, dataset_id=other)
             assert page.request.get(query_url(base, "/api/v1/logs", forbidden)).status == 403
-            passed("login, explicit dataset ACL and bounded real-log rendering", observed_parsed_count=parsed_count, max_page_rows=100)
+            passed(
+                "login, explicit dataset ACL and bounded real-log rendering",
+                observed_parsed_count=parsed_count,
+                max_page_rows=100,
+            )
 
             stage = "keyset pagination"
             first = page.locator("#log-rows tr").first.inner_text()
@@ -151,7 +164,9 @@ def main():
             for row in page.locator("#log-rows tr").all():
                 assert host in row.inner_text()
             filtered_count = int(page.locator("#logs-count").inner_text())
-            timeline_count = sum(int(x) for x in page.locator("#log-bins button").all_text_contents() if x.isdigit())
+            timeline_count = sum(
+                int(x) for x in page.locator("#log-bins button").all_text_contents() if x.isdigit()
+            )
             assert timeline_count == filtered_count
             export_url = base + page.locator("#logs-export").get_attribute("href")
             exported = page.request.get(export_url)
@@ -170,7 +185,12 @@ def main():
             expect(page.locator("#log-detail")).to_be_hidden()
             expect(raw_button).to_be_focused()
             assert page.url == prior_url
-            passed("log host filter/table/timeline/CSV scope and raw provenance", filtered_count=filtered_count, csv_rows=len(rows), csv_sha256=hashlib.sha256(exported.body()).hexdigest())
+            passed(
+                "log host filter/table/timeline/CSV scope and raw provenance",
+                filtered_count=filtered_count,
+                csv_rows=len(rows),
+                csv_sha256=hashlib.sha256(exported.body()).hexdigest(),
+            )
 
             stage = "log error handling"
             retained_count = page.locator("#logs-count").inner_text()
@@ -182,7 +202,10 @@ def main():
             page.locator("#log-filters").get_by_role("button", name="Apply", exact=True).click()
             expect(page.locator("#logs-status")).to_contain_text("MySQL ready")
             assert page.request.get(query_url(base, "/api/v1/logs", dict(params, limit=101))).status == 400
-            assert page.request.get(query_url(base, "/api/v1/logs", dict(params, start_time="invalid"))).status == 400
+            assert (
+                page.request.get(query_url(base, "/api/v1/logs", dict(params, start_time="invalid"))).status
+                == 400
+            )
             passed("network error retains old scope; retry succeeds; invalid API input rejected")
 
             for width in (1366, 1440, 1920):
@@ -196,7 +219,7 @@ def main():
             started = time.perf_counter()
             page.goto(base + f"/?source=db-{dataset}", wait_until="networkidle")
             expect(page.locator(".demo-notice")).to_contain_text("MYSQL")
-            expect(page.locator('#range option:checked')).to_have_text('Full imported range')
+            expect(page.locator("#range option:checked")).to_have_text("Full imported range")
             expect(page.locator("#workspace-results")).to_have_attribute("aria-busy", "false")
             report["latency"]["investigation_navigation_to_ready_ms"] = (time.perf_counter() - started) * 1000
             report["latency"]["investigation_browser_navigation"] = page.evaluate("""() => {
@@ -213,22 +236,33 @@ def main():
             assert investigation["result_count"] == all_count
             assert sum(cell["count"] for cell in investigation["timeline"]["overall"]) == all_count
             with app.app_context():
-                expected_count = db.session.scalar(select(func.count()).select_from(AnomalyOutput).where(
-                    AnomalyOutput.dataset_id == dataset,
-                    AnomalyOutput.run_id.in_([int(x) for x in state["run_id"]]),
-                    AnomalyOutput.anchor_time >= instant(state["start_time"]),
-                    AnomalyOutput.anchor_time < instant(state["end_time"]),
-                ))
+                expected_count = db.session.scalar(
+                    select(func.count())
+                    .select_from(AnomalyOutput)
+                    .where(
+                        AnomalyOutput.dataset_id == dataset,
+                        AnomalyOutput.run_id.in_([int(x) for x in state["run_id"]]),
+                        AnomalyOutput.anchor_time >= instant(state["start_time"]),
+                        AnomalyOutput.anchor_time < instant(state["end_time"]),
+                    )
+                )
             assert all_count == expected_count
             assert int(page.locator("#events-title span").inner_text()) == all_count
             assert page.locator("[data-row-id]").count() <= 100
-            assert all(text != 'None' for text in page.locator('[data-row-id] td:nth-child(4) small').all_text_contents())
+            assert all(
+                text != "None"
+                for text in page.locator("[data-row-id] td:nth-child(4) small").all_text_contents()
+            )
             page.locator("[data-mode=volume]").click()
             expect(page.locator(".timeline-panel")).to_have_class(re.compile("mode-volume"))
             assert int(page.locator("#events-title span").inner_text()) == all_count
             page.locator("[data-mode=severity]").click()
             expect(page.locator(".timeline-panel")).not_to_have_class(re.compile("mode-volume"))
-            passed("server anomaly aggregation equals persisted outputs; Severity/Volume preserves membership", anomaly_outputs=all_count, selected_run_ids=state["run_id"])
+            passed(
+                "server anomaly aggregation equals persisted outputs; Severity/Volume preserves membership",
+                anomaly_outputs=all_count,
+                selected_run_ids=state["run_id"],
+            )
 
             stage = "timeline selection and anomaly CSV scope"
             cell = page.locator(".overall-row [data-cell]:not([data-count='0'])").first
@@ -247,8 +281,17 @@ def main():
             csv_rows = list(csv.DictReader(io.StringIO(anomaly_csv.text())))
             assert len(csv_rows) == selected_count == int(anomaly_csv.headers["x-result-count"])
             assert len({row["id"] for row in csv_rows}) == len(csv_rows)
-            assert all(row["id"].startswith("DB-") and row["run_id"] in state["run_id"] and row["version_id"] for row in csv_rows)
-            passed("timeline selection/results/CSV use identical additional scope", scope_count=all_count, selection_count=selected_count, csv_rows=len(csv_rows), csv_sha256=hashlib.sha256(anomaly_csv.body()).hexdigest())
+            assert all(
+                row["id"].startswith("DB-") and row["run_id"] in state["run_id"] and row["version_id"]
+                for row in csv_rows
+            )
+            passed(
+                "timeline selection/results/CSV use identical additional scope",
+                scope_count=all_count,
+                selection_count=selected_count,
+                csv_rows=len(csv_rows),
+                csv_sha256=hashlib.sha256(anomaly_csv.body()).hexdigest(),
+            )
 
             stage = "actual evidence drawer"
             opener = page.locator(".inspect-button").first
@@ -280,9 +323,16 @@ def main():
             expect(opener).to_be_focused()
             assert page.url == selection_url
             wrong_scope = dict(parse_qsl(scoped_query), source=f"db-{other}")
-            wrong_response = page.request.get(query_url(base, f"/api/v1/anomalies/{anomaly_id}/evidence", wrong_scope))
+            wrong_response = page.request.get(
+                query_url(base, f"/api/v1/anomalies/{anomaly_id}/evidence", wrong_scope)
+            )
             assert wrong_response.status == 403
-            passed("actual Evidence Drawer provenance/version/threshold; closing preserves selection/focus; cross-dataset denial", anomaly_id=anomaly_id, evidence_kind=evidence["detector_evidence"]["kind"], source_line=evidence["raw_event"]["provenance"]["source_line"])
+            passed(
+                "actual Evidence Drawer provenance/version/threshold; closing preserves selection/focus; cross-dataset denial",
+                anomaly_id=anomaly_id,
+                evidence_kind=evidence["detector_evidence"]["kind"],
+                source_line=evidence["raw_event"]["provenance"]["source_line"],
+            )
 
             stage = "evidence network error and retry"
             page.route(f"**/api/v1/anomalies/{anomaly_id}/evidence?*", lambda route: route.abort("failed"))
@@ -304,7 +354,9 @@ def main():
 
             stage = "authenticated latency samples"
             report["latency"]["logs_http"] = sample_get(page.request, query_url(base, "/api/v1/logs", params))
-            report["latency"]["timeline_http"] = sample_get(page.request, base + f"/api/v1/anomalies/timeline?source=db-{dataset}")
+            report["latency"]["timeline_http"] = sample_get(
+                page.request, base + f"/api/v1/anomalies/timeline?source=db-{dataset}"
+            )
             report["latency"]["investigation_http"] = sample_get(page.request, investigation_url)
             report["latency"]["evidence_http"] = sample_get(page.request, evidence_url)
             report["latency"]["selected_csv_http"] = sample_get(page.request, anomaly_export_url)
@@ -323,9 +375,12 @@ def main():
             anonymous.close()
             page.goto(base + "/?source=demo", wait_until="networkidle")
             expect(page.locator(".demo-notice")).to_contain_text("DEMO")
-            expect(page.locator('#range option:checked')).to_have_text('Sample period · 60 min')
+            expect(page.locator("#range option:checked")).to_have_text("Sample period · 60 min")
             assert page.locator("[data-row-id^='DB-']").count() == 0
-            passed("DEMO remains explicitly synthetic; anonymous real-data access denied", demo_count=demo["scope_count"])
+            passed(
+                "DEMO remains explicitly synthetic; anonymous real-data access denied",
+                demo_count=demo["scope_count"],
+            )
             assert not report["page_errors"]
             report["status"] = "PASS"
             browser.close()
@@ -345,7 +400,10 @@ def main():
         report["passed_groups"] = len(report["checks"])
         report["screenshots"] = "private QA_OUTPUT; actual raw source content is not committed"
         (output / f"browser-{phase}.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        print(json.dumps({k: report[k] for k in ("phase", "status", "passed_groups", "wall_seconds")}), flush=True)
+        print(
+            json.dumps({k: report[k] for k in ("phase", "status", "passed_groups", "wall_seconds")}),
+            flush=True,
+        )
 
 
 if __name__ == "__main__":

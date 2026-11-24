@@ -38,15 +38,33 @@ def submit():
         if "model_id" in config:
             from app.services.validated_if import DEFAULT_MODEL_ID, model_card
             from datetime import datetime
-            if set(config) != {"detector", "model_id"} or config.get("detector") != "isolation_forest" or config.get("model_id") != DEFAULT_MODEL_ID:
+
+            if (
+                set(config) != {"detector", "model_id"}
+                or config.get("detector") != "isolation_forest"
+                or config.get("model_id") != DEFAULT_MODEL_ID
+            ):
                 raise QueryError("Use the registered validated model without parameter overrides.")
             try:
                 card = model_card(config["model_id"])
             except (ValueError, OSError):
-                return jsonify(error={"code": "model_unavailable", "message": "The trusted validated model is not available."}), 503
-            last = db.session.scalar(select(func.max(LogEvent.timestamp)).where(LogEvent.dataset_id == dataset_id))
+                return jsonify(
+                    error={
+                        "code": "model_unavailable",
+                        "message": "The trusted validated model is not available.",
+                    }
+                ), 503
+            last = db.session.scalar(
+                select(func.max(LogEvent.timestamp)).where(LogEvent.dataset_id == dataset_id)
+            )
             if last is None or last < datetime.fromisoformat(card["inference_start_utc"]):
-                return jsonify(error={"code": "model_time_incompatible", "message": "This model scores only closed BGL windows after its calibration cutoff: " + card["inference_start_utc"]}), 409
+                return jsonify(
+                    error={
+                        "code": "model_time_incompatible",
+                        "message": "This model scores only closed BGL windows after its calibration cutoff: "
+                        + card["inference_start_utc"],
+                    }
+                ), 409
         if "study_id" in config:
             import re
 
@@ -56,18 +74,17 @@ def submit():
                 or not isinstance(config["study_id"], str)
                 or not re.fullmatch(r"[a-f0-9]{32}", config["study_id"])
             ):
-                raise QueryError(
-                    "A frozen study accepts only isolation_forest and a valid study_id."
-                )
+                raise QueryError("A frozen study accepts only isolation_forest and a valid study_id.")
         detector, window = config.get("detector", "rule"), config.get("window_seconds", 300)
         # Type checks first: a JSON list or object is unhashable and must be a 400, not a 500.
-        if (not isinstance(detector, str) or detector not in {"rule", "isolation_forest"}
-                or type(window) is not int or window not in {60, 300, 900, 3600}):
-            raise QueryError("Unsupported detector/window.")
         if (
-            type(config.get("seed", 42)) is not int
-            or not 0 <= config.get("seed", 42) <= 2**31 - 1
+            not isinstance(detector, str)
+            or detector not in {"rule", "isolation_forest"}
+            or type(window) is not int
+            or window not in {60, 300, 900, 3600}
         ):
+            raise QueryError("Unsupported detector/window.")
+        if type(config.get("seed", 42)) is not int or not 0 <= config.get("seed", 42) <= 2**31 - 1:
             raise QueryError("Invalid seed.")
         if bool(config.get("start_time")) != bool(config.get("end_time")):
             raise QueryError("Both explicit UTC boundaries are required.")
@@ -86,20 +103,14 @@ def submit():
                 or second(start) % width
                 or second(end) % width
             ):
-                raise QueryError(
-                    "Choose aligned positive UTC windows, at most 366 days."
-                )
+                raise QueryError("Choose aligned positive UTC windows, at most 366 days.")
     except QueryError as error:
         return jsonify(error={"code": "invalid_query", "message": translate(str(error))}), 400
-    dataset = db.session.scalar(
-        select(Dataset).where(Dataset.id == dataset_id).with_for_update()
-    )
+    dataset = db.session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
     if dataset is None:
         return jsonify(error={"code": "not_found"}), 404
     job = db.session.scalar(
-        select(ProcessingJob).where(
-            ProcessingJob.dataset_id == dataset_id, ProcessingJob.job_key == key
-        )
+        select(ProcessingJob).where(ProcessingJob.dataset_id == dataset_id, ProcessingJob.job_key == key)
     )
     if job is not None:
         if job.configuration != config:
@@ -146,9 +157,7 @@ def retry(job_id):
         with import_lease(db.engine, "analysis-job-" + str(job_id)):
             with Session(db.engine) as session, session.begin():
                 job = session.scalar(
-                    select(ProcessingJob)
-                    .where(ProcessingJob.id == job_id)
-                    .with_for_update()
+                    select(ProcessingJob).where(ProcessingJob.id == job_id).with_for_update()
                 )
                 if job is None:
                     return jsonify(error={"code": "not_found"}), 404
@@ -166,7 +175,12 @@ def retry(job_id):
 @roles("viewer", "analyst", "manager", "admin")
 def models():
     from app.services.validated_if import model_card
+
     try:
         return jsonify(items=[model_card()], availability="ready")
     except (ValueError, OSError):
-        return jsonify(items=[], availability="unavailable", message="Install the trusted frozen BGL model artifact before using this profile.")
+        return jsonify(
+            items=[],
+            availability="unavailable",
+            message="Install the trusted frozen BGL model artifact before using this profile.",
+        )

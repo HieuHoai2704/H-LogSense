@@ -18,7 +18,15 @@ class DetectorCalibrationTests(unittest.TestCase):
             {"train_start": 0, "train_end": 1500, "validation_end": 2100, "test_end": 3000},
         )
         self.assertEqual(temporal_split(-3000, 0, 300)["train_end"], -1500)
-        for args in ((0, 0, 300), (0, 600, 300), (1, 3000, 300), (0, 3001, 300), (0, 3000, 0), (False, 3000, 300), (0.0, 3000, 300)):
+        for args in (
+            (0, 0, 300),
+            (0, 600, 300),
+            (1, 3000, 300),
+            (0, 3001, 300),
+            (0, 3000, 0),
+            (False, 3000, 300),
+            (0.0, 3000, 300),
+        ):
             with self.subTest(args=args), self.assertRaises(ValueError):
                 temporal_split(*args)
 
@@ -88,7 +96,9 @@ class DetectorCalibrationTests(unittest.TestCase):
         truth = [1, 0, 1, 0]
         scores = [-0.8, -0.7, -0.6, -0.5]
         measured = binary_metrics(truth, scores, -0.75)
-        self.assertAlmostEqual(measured["auprc_average_precision"], average_precision_score(truth, -np.asarray(scores)))
+        self.assertAlmostEqual(
+            measured["auprc_average_precision"], average_precision_score(truth, -np.asarray(scores))
+        )
 
     def test_invalid_inputs_rejected(self):
         for truth, scores in (([1], []), ([[1]], [0]), ([2], [0]), ([0], [np.nan]), ([1], [np.inf])):

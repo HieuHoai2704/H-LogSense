@@ -50,16 +50,20 @@ def catalog(language):
 
 @lru_cache(maxsize=1)
 def workspace_labels():
-    return json.loads(Path(__file__).with_name("locales").joinpath("workspace.json").read_text(encoding="utf-8"))
+    return json.loads(
+        Path(__file__).with_name("locales").joinpath("workspace.json").read_text(encoding="utf-8")
+    )
 
 
 def translate(message, *values):
     result = catalog(current_language()).get(message, message)
     if not values:
         return result
-    return re.sub(r"\{(\d+)\}", lambda match: (
-        str(values[int(match[1])]) if int(match[1]) < len(values) else match[0]
-    ), result)
+    return re.sub(
+        r"\{(\d+)\}",
+        lambda match: str(values[int(match[1])]) if int(match[1]) < len(values) else match[0],
+        result,
+    )
 
 
 @locale_pages.post("/preferences/language")
@@ -89,9 +93,12 @@ def select_language():
             target = url_for("dashboard", workspace="logs")
     response = redirect(target, code=303)
     response.set_cookie(
-        COOKIE, language, max_age=365 * 24 * 60 * 60,
+        COOKIE,
+        language,
+        max_age=365 * 24 * 60 * 60,
         secure=bool(current_app.config["SESSION_COOKIE_SECURE"]),
-        httponly=True, samesite="Lax",
+        httponly=True,
+        samesite="Lax",
     )
     response.headers["Cache-Control"] = "no-store"
     return response
@@ -103,8 +110,12 @@ def initialize_i18n(app):
     @app.context_processor
     def interface_language():
         language = current_language()
-        return {"tr": translate, "interface_language": language,
-                "languages": LANGUAGES, "interface_catalog": catalog(language)}
+        return {
+            "tr": translate,
+            "interface_language": language,
+            "languages": LANGUAGES,
+            "interface_catalog": catalog(language),
+        }
 
     @app.after_request
     def language_headers(response):

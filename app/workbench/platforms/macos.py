@@ -8,9 +8,18 @@ def show_fatal_error(message):
     """Alert dialog for Finder/Dock launches; the text is passed as an argument, never as script."""
     import subprocess
 
-    script = ['-e', 'on run argv', '-e', 'display alert "H-logsen" message (item 1 of argv) as critical', '-e', 'end run']
+    script = [
+        "-e",
+        "on run argv",
+        "-e",
+        'display alert "H-logsen" message (item 1 of argv) as critical',
+        "-e",
+        "end run",
+    ]
     try:
-        subprocess.run(["osascript", *script, "--", str(message)], timeout=300, check=False, stdin=subprocess.DEVNULL)
+        subprocess.run(
+            ["osascript", *script, "--", str(message)], timeout=300, check=False, stdin=subprocess.DEVNULL
+        )
         return True
     except (OSError, subprocess.SubprocessError):
         return False
@@ -38,5 +47,9 @@ def desktop_options():
 def set_window_glass(window, enabled):
     from AppKit import NSWorkspace
 
-    return bool(window and window.transparent and enabled
-                and not NSWorkspace.sharedWorkspace().accessibilityDisplayShouldReduceTransparency())
+    return bool(
+        window
+        and window.transparent
+        and enabled
+        and not NSWorkspace.sharedWorkspace().accessibilityDisplayShouldReduceTransparency()
+    )

@@ -76,15 +76,15 @@ def inspect_study(study_id, dataset_id):
         raise ValueError("Invalid frozen scoring contract.")
     seconds = manifest.get("seconds")
     splits = manifest.get("splits", {})
-    bounds = [splits.get(key) for key in (
-        "train_start", "train_end", "validation_end", "test_end"
-    )]
+    bounds = [splits.get(key) for key in ("train_start", "train_end", "validation_end", "test_end")]
     if (
         not isinstance(seconds, int)
         or isinstance(seconds, bool)
         or seconds not in {60, 300, 900, 3600}
-        or not all(isinstance(value, int) and not isinstance(value, bool)
-                   and value % seconds == 0 for value in bounds)
+        or not all(
+            isinstance(value, int) and not isinstance(value, bool) and value % seconds == 0
+            for value in bounds
+        )
         or bounds != sorted(set(bounds))
         or not isinstance(cache.get("count"), int)
         or cache["count"] < 1
@@ -98,9 +98,7 @@ def run_study(engine, dataset_id, job_key, configuration):
     from app.services.investigation import iso
     from app.services.window_detection import EPOCH, persist_predictions, evaluate_windows
 
-    if set(configuration) != {"detector", "study_id"} or configuration.get(
-        "detector"
-    ) != "isolation_forest":
+    if set(configuration) != {"detector", "study_id"} or configuration.get("detector") != "isolation_forest":
         raise ValueError("Frozen study configuration cannot override its model or scope.")
     manifest, selection, paths = inspect_study(configuration["study_id"], dataset_id)
     selection_hash = digest(paths["selection.json"])
@@ -131,9 +129,7 @@ def run_study(engine, dataset_id, job_key, configuration):
     for key, value in splits.items():
         config[key] = iso(EPOCH + timedelta(seconds=value))
     with Session(engine) as session, session.begin():
-        dataset = session.scalar(
-            select(Dataset).where(Dataset.id == dataset_id).with_for_update()
-        )
+        dataset = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
         actual_maximum = session.scalar(
             select(func.max(LogEvent.id)).where(LogEvent.dataset_id == dataset_id)
         )
@@ -144,9 +140,9 @@ def run_study(engine, dataset_id, job_key, configuration):
             or actual_maximum != maximum
         ):
             raise ValueError("Frozen study input snapshot changed or is unavailable.")
-        existing = session.scalar(select(DetectorRun).where(
-            DetectorRun.dataset_id == dataset_id, DetectorRun.run_key == job_key
-        ))
+        existing = session.scalar(
+            select(DetectorRun).where(DetectorRun.dataset_id == dataset_id, DetectorRun.run_key == job_key)
+        )
         if existing is not None:
             if existing.configuration != config:
                 raise ValueError("Run key already refers to a different configuration.")
@@ -155,26 +151,28 @@ def run_study(engine, dataset_id, job_key, configuration):
             existing.state = "running"
             run_id = existing.id
         else:
-            detector = session.scalar(select(Detector).where(
-                Detector.detector_key == "host-window-isolation_forest-v2"
-            ))
+            detector = session.scalar(
+                select(Detector).where(Detector.detector_key == "host-window-isolation_forest-v2")
+            )
             if detector is None:
-                detector = Detector(
-                    detector_key="host-window-isolation_forest-v2", family="classical_ml"
-                )
+                detector = Detector(detector_key="host-window-isolation_forest-v2", family="classical_ml")
                 session.add(detector)
                 session.flush()
-            version = session.scalar(select(DetectorVersion).where(
-                DetectorVersion.detector_id == detector.id,
-                DetectorVersion.version == selection_hash,
-            ))
+            version = session.scalar(
+                select(DetectorVersion).where(
+                    DetectorVersion.detector_id == detector.id,
+                    DetectorVersion.version == selection_hash,
+                )
+            )
             if version is None:
                 version = DetectorVersion(
                     detector_id=detector.id,
                     version=selection_hash,
                     configuration=config,
                     feature_schema={
-                        "names": names, "version": "2", "label_free": True,
+                        "names": names,
+                        "version": "2",
+                        "label_free": True,
                         "threshold_uses_validation_labels": True,
                     },
                     score_direction="lower",
@@ -182,8 +180,12 @@ def run_study(engine, dataset_id, job_key, configuration):
                 session.add(version)
                 session.flush()
             run = DetectorRun(
-                dataset_id=dataset_id, detector_id=detector.id, version_id=version.id,
-                run_key=job_key, state="running", input_revision=revision,
+                dataset_id=dataset_id,
+                detector_id=detector.id,
+                version_id=version.id,
+                run_key=job_key,
+                state="running",
+                input_revision=revision,
                 configuration=config,
             )
             session.add(run)
@@ -225,13 +227,17 @@ def run_study(engine, dataset_id, job_key, configuration):
                     or not isinstance(record["count"], int)
                     or record["count"] < 1
                     or len(record.get("sample_ids", [])) > 20
-                    or any(not isinstance(i, int) or not 0 < i <= maximum
-                           for i in record.get("sample_ids", []))
+                    or any(
+                        not isinstance(i, int) or not 0 < i <= maximum for i in record.get("sample_ids", [])
+                    )
                 ):
                     raise ValueError("Cached unit is outside frozen test scope.")
                 previous = order
-                values = (record["features"] if bundle["features"] == "base"
-                          else bundle["reference"].transform(record))
+                values = (
+                    record["features"]
+                    if bundle["features"] == "base"
+                    else bundle["reference"].transform(record)
+                )
                 if len(values) != len(names) or not all(math.isfinite(x) for x in values):
                     raise ValueError("Invalid frozen feature vector.")
                 row = dict(record, features=values)
@@ -239,16 +245,34 @@ def run_study(engine, dataset_id, job_key, configuration):
                 count += 1
                 if len(batch) == 200:
                     persist_predictions(
-                        engine, dataset_id, revision, maximum, run_id, batch,
-                        bundle["model"], threshold, reference, seconds, feature_names=names,
+                        engine,
+                        dataset_id,
+                        revision,
+                        maximum,
+                        run_id,
+                        batch,
+                        bundle["model"],
+                        threshold,
+                        reference,
+                        seconds,
+                        feature_names=names,
                     )
                     batch = []
         if count != manifest["cache"]["test"]["count"]:
             raise ValueError("Cached test count differs from frozen manifest.")
         if batch:
             persist_predictions(
-                engine, dataset_id, revision, maximum, run_id, batch,
-                bundle["model"], threshold, reference, seconds, feature_names=names,
+                engine,
+                dataset_id,
+                revision,
+                maximum,
+                run_id,
+                batch,
+                bundle["model"],
+                threshold,
+                reference,
+                seconds,
+                feature_names=names,
             )
         evaluate_windows(engine, dataset_id, run_id)
         with Session(engine) as session, session.begin():

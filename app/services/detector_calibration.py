@@ -22,12 +22,7 @@ def temporal_split(start_epoch, end_epoch, seconds):
     start_epoch = _integer(start_epoch, "start_epoch")
     end_epoch = _integer(end_epoch, "end_epoch")
     seconds = _integer(seconds, "seconds")
-    if (
-        seconds <= 0
-        or end_epoch <= start_epoch
-        or start_epoch % seconds
-        or end_epoch % seconds
-    ):
+    if seconds <= 0 or end_epoch <= start_epoch or start_epoch % seconds or end_epoch % seconds:
         raise ValueError("Use a positive UTC-aligned range and bin width.")
     span = end_epoch - start_epoch
     train_end = start_epoch + (span // 2 // seconds) * seconds

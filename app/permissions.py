@@ -27,9 +27,11 @@ def check_private(path):
     path = Path(path)
     if os.name == "nt" or not path.stat().st_mode & 0o077:
         return True
-    message = (f"{path} is accessible to other accounts because its filesystem ignores POSIX permissions. "
-               "Keep private data on an owner-only filesystem or set LOGSENSE_LOCAL_DIR to a folder in your "
-               "home directory.")
+    message = (
+        f"{path} is accessible to other accounts because its filesystem ignores POSIX permissions. "
+        "Keep private data on an owner-only filesystem or set LOGSENSE_LOCAL_DIR to a folder in your "
+        "home directory."
+    )
     if strict():
         raise InsecurePermissions(message)
     folder = str(path if path.is_dir() else path.parent)

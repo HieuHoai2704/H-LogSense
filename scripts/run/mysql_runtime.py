@@ -31,9 +31,7 @@ def owned_root(value):
     root = Path(value).resolve()
     allowed = (Path(__file__).resolve().parents[2] / ".local").resolve()
     if not root.is_relative_to(allowed) or root == allowed:
-        raise ValueError(
-            "Runtime must be a dedicated directory beneath project .local."
-        )
+        raise ValueError("Runtime must be a dedicated directory beneath project .local.")
     return root
 
 
@@ -62,11 +60,7 @@ def connect(info):
 
 
 def hidden_options():
-    return (
-        {"creationflags": subprocess.CREATE_NO_WINDOW}
-        if os.name == "nt"
-        else {"start_new_session": True}
-    )
+    return {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {"start_new_session": True}
 
 
 def binary(root, info, name):
@@ -74,9 +68,7 @@ def binary(root, info, name):
     suffix = ".exe" if os.name == "nt" else ""
     path = base / "bin" / (name + suffix)
     if not path.is_file():
-        raise ValueError(
-            "Native MySQL binary missing; use the distribution for this operating system/CPU."
-        )
+        raise ValueError("Native MySQL binary missing; use the distribution for this operating system/CPU.")
     return str(path)
 
 
@@ -107,14 +99,10 @@ def start(root):
         args.append("--init-file=" + str(root / "bootstrap.sql"))
     # Explicit config path is one argv value on Windows and POSIX (spaces safe).
     with (root / "launcher.log").open("ab") as log:
-        process = subprocess.Popen(
-            args, stdin=subprocess.DEVNULL, stdout=log, stderr=log, **hidden_options()
-        )
+        process = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=log, stderr=log, **hidden_options())
     for _ in range(30):
         if process.poll() is not None:
-            raise RuntimeError(
-                "MySQL exited during startup; inspect private server log."
-            )
+            raise RuntimeError("MySQL exited during startup; inspect private server log.")
         try:
             result = status(root)
             info.update(bootstrapped=True, pid=process.pid)
@@ -169,9 +157,7 @@ def grant_dataset_crud(root, schema):
         # the sole interpolated schema identifier was validated above. Repeating
         # these same grants is safe if an earlier connection was interrupted.
         for table in tables:
-            cursor.execute(
-                f"GRANT DELETE ON `{schema}`.`{table}` TO 'logsense_app'@'localhost'"
-            )
+            cursor.execute(f"GRANT DELETE ON `{schema}`.`{table}` TO 'logsense_app'@'localhost'")
     return {
         "status": "granted",
         "schema": schema,
@@ -220,9 +206,7 @@ def backup(root, schema, output):
             **hidden_options(),
         )
     if result.returncode:
-        raise RuntimeError(
-            "Backup failed; incomplete output retained, never restored automatically."
-        )
+        raise RuntimeError("Backup failed; incomplete output retained, never restored automatically.")
     from app.services.bgl_ingestion import fingerprint
 
     result = {
@@ -244,9 +228,7 @@ def restore(root, input_file):
     source = owned_root(input_file)
     from app.services.bgl_ingestion import fingerprint
 
-    manifest = json.loads(
-        source.with_suffix(source.suffix + ".manifest.json").read_text()
-    )
+    manifest = json.loads(source.with_suffix(source.suffix + ".manifest.json").read_text())
     if manifest.get("sha256") != fingerprint(source):
         raise ValueError("Backup checksum does not match its manifest.")
     # An operator-created dump is still executed with a NEW narrowly scoped user.
@@ -255,12 +237,8 @@ def restore(root, input_file):
     user = "ls_restore_" + secrets.token_hex(6)
     password = secrets.token_hex(32)
     with connect(info) as connection, connection.cursor() as cursor:
-        cursor.execute(
-            f"CREATE DATABASE `{schema}` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs"
-        )
-        cursor.execute(
-            f"CREATE USER '{user}'@'localhost' IDENTIFIED BY %s", (password,)
-        )
+        cursor.execute(f"CREATE DATABASE `{schema}` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs")
+        cursor.execute(f"CREATE USER '{user}'@'localhost' IDENTIFIED BY %s", (password,))
         cursor.execute(
             f"GRANT SELECT,INSERT,UPDATE,CREATE,ALTER,INDEX,REFERENCES ON `{schema}`.* TO '{user}'@'localhost'"
         )
@@ -287,9 +265,7 @@ def restore(root, input_file):
             **hidden_options(),
         )
     if result.returncode:
-        raise RuntimeError(
-            "Restore failed in a new schema; existing schemas were not reset."
-        )
+        raise RuntimeError("Restore failed in a new schema; existing schemas were not reset.")
     return {
         "status": "restored",
         "new_schema": schema,
@@ -302,23 +278,17 @@ def initialize(root, basedir, port):
         raise ValueError("Refusing to initialize over an existing runtime directory.")
     if not 1024 <= port <= 65535:
         raise ValueError("Invalid local port.")
-    if any(
-        character in str(root) + str(basedir) for character in ("\n", "\r", '"', "\x00")
-    ):
+    if any(character in str(root) + str(basedir) for character in ("\n", "\r", '"', "\x00")):
         raise ValueError("Unsupported characters in a MySQL configuration path.")
     if os.name != "nt" and len(str(root / "mysql.sock").encode()) > 100:
-        raise ValueError(
-            "Choose a shorter project/runtime path for the native Unix socket."
-        )
+        raise ValueError("Choose a shorter project/runtime path for the native Unix socket.")
     with socket.socket() as sock:
         if sock.connect_ex(("127.0.0.1", port)) == 0:
             raise ValueError("Port is already in use.")
     root.mkdir(parents=True, mode=0o700)
     check_private(root)
     if os.name == "nt":
-        identity = subprocess.run(
-            ["whoami"], capture_output=True, text=True, check=True
-        ).stdout.strip()
+        identity = subprocess.run(["whoami"], capture_output=True, text=True, check=True).stdout.strip()
         subprocess.run(
             [
                 "icacls",
@@ -367,13 +337,9 @@ def initialize(root, basedir, port):
         root / "bootstrap.sql",
         "ALTER USER 'root'@'localhost' IDENTIFIED BY '" + info["root_password"] + "';\n"
         "CREATE DATABASE logsense_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;\n"
-        "CREATE USER 'logsense_app'@'localhost' IDENTIFIED BY '"
-        + info["app_password"]
-        + "';\n"
+        "CREATE USER 'logsense_app'@'localhost' IDENTIFIED BY '" + info["app_password"] + "';\n"
         "GRANT SELECT,INSERT,UPDATE ON logsense_dev.* TO 'logsense_app'@'localhost';\n"
-        "CREATE USER 'logsense_migrator'@'localhost' IDENTIFIED BY '"
-        + info["migrator_password"]
-        + "';\n"
+        "CREATE USER 'logsense_migrator'@'localhost' IDENTIFIED BY '" + info["migrator_password"] + "';\n"
         "GRANT SELECT,INSERT,UPDATE,CREATE,ALTER,INDEX,REFERENCES ON logsense_dev.* TO 'logsense_migrator'@'localhost';\n",
     )
     # Initialization has no network listener. First start sets the random password
@@ -388,9 +354,7 @@ def initialize(root, basedir, port):
         **hidden_options(),
     )
     if result.returncode:
-        raise RuntimeError(
-            "Initialization failed; inspect private logs, do not reinitialize in place."
-        )
+        raise RuntimeError("Initialization failed; inspect private logs, do not reinitialize in place.")
     return {"status": "initialized", "port": port, "next": "start"}
 
 
@@ -412,9 +376,7 @@ def main():
         "grant-dataset-crud", help="Grant DELETE only on migrated dataset/ACL metadata tables"
     )
     dataset_grant.add_argument("--schema", required=True)
-    execute = sub.add_parser(
-        "exec", help="Run this venv Python with a private, process-local DATABASE_URL"
-    )
+    execute = sub.add_parser("exec", help="Run this venv Python with a private, process-local DATABASE_URL")
     execute.add_argument("--role", choices=["app", "migrate"], default="app")
     execute.add_argument("python_args", nargs=argparse.REMAINDER)
     args = parser.parse_args()
@@ -431,9 +393,7 @@ def main():
         from sqlalchemy.engine import URL
 
         info = load(root)
-        arguments = (
-            args.python_args[1:] if args.python_args[:1] == ["--"] else args.python_args
-        )
+        arguments = args.python_args[1:] if args.python_args[:1] == ["--"] else args.python_args
         if not arguments:
             raise ValueError("Python arguments required after --.")
         role = "logsense_app" if args.role == "app" else "logsense_migrator"
@@ -462,7 +422,5 @@ if __name__ == "__main__":
         main()
     except Exception as error:
         raise SystemExit(
-            "Local MySQL operation failed ("
-            + type(error).__name__
-            + "); inspect private diagnostics."
+            "Local MySQL operation failed (" + type(error).__name__ + "); inspect private diagnostics."
         ) from None

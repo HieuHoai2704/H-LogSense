@@ -74,12 +74,8 @@ class AlertRule(Scoped, db.Model):
     __tablename__ = "alert_rules"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
-        CheckConstraint(
-            "cooldown_seconds >= 0 AND cooldown_seconds <= 86400", name="cooldown"
-        ),
-        CheckConstraint(
-            "min_priority IN ('Low','Medium','High','Critical')", name="priority"
-        ),
+        CheckConstraint("cooldown_seconds >= 0 AND cooldown_seconds <= 86400", name="cooldown"),
+        CheckConstraint("min_priority IN ('Low','Medium','High','Critical')", name="priority"),
         options(),
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -118,9 +114,7 @@ class Alert(Scoped, db.Model):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")
     assigned_to: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     acknowledged_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
-    created_at: Mapped[datetime] = mapped_column(
-        UTCDateTime, nullable=False, default=now
-    )
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False, default=now)
 
 
 class AlertAudit(Scoped, db.Model):
@@ -130,9 +124,7 @@ class AlertAudit(Scoped, db.Model):
     actor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     action: Mapped[str] = mapped_column(String(40), nullable=False)
     details: Mapped[dict] = mapped_column(JSON, nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(
-        UTCDateTime, nullable=False, default=now
-    )
+    timestamp: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False, default=now)
 
 
 class Notification(Scoped, db.Model):
@@ -148,9 +140,7 @@ class Notification(Scoped, db.Model):
     alert_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     state: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    next_attempt: Mapped[datetime] = mapped_column(
-        UTCDateTime, nullable=False, default=now
-    )
+    next_attempt: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False, default=now)
     error_code: Mapped[str | None] = mapped_column(String(32))
 
 

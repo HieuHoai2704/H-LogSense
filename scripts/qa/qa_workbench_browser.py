@@ -82,7 +82,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
             expect(folder_button).to_be_enabled()
         except AssertionError as error:
             status = self.page.locator("#local-status").text_content()
-            raise AssertionError(f"Folder picker did not initialize: {status!r}, {self.page_errors!r}") from error
+            raise AssertionError(
+                f"Folder picker did not initialize: {status!r}, {self.page_errors!r}"
+            ) from error
         folder_button.click()
         self.page.locator("#local-root").fill(str(self.project))
         self.page.locator("#local-project-form button[type=submit]").click()
@@ -95,7 +97,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         page.locator('#local-tree button[data-path="train.py"]').click()
         expect(page.locator("#monitor")).to_be_visible()
         page.locator("#local-open-editor").click()
-        with page.expect_response(lambda response: response.url.endswith("/runs") and response.request.method == "POST") as created:
+        with page.expect_response(
+            lambda response: response.url.endswith("/runs") and response.request.method == "POST"
+        ) as created:
             page.locator("#local-run-file").click()
         run_id = created.value.json()["id"]
         detail = page.locator("#run-detail")
@@ -134,9 +138,12 @@ class WorkbenchBrowserTest(unittest.TestCase):
         self.assertEqual(self.page_errors, [])
 
     def test_attach_existing_python_process_investigates_its_files_and_pid(self):
-        (self.project / "external.log").write_text("2026-11-08T02:00:00Z INFO external training\n", encoding="utf-8")
+        (self.project / "external.log").write_text(
+            "2026-11-08T02:00:00Z INFO external training\n", encoding="utf-8"
+        )
         (self.project / "external.csv").write_text(
-            "epoch,train_loss,timestamp\n1,0.6,2026-11-08T02:00:00Z\n", encoding="utf-8")
+            "epoch,train_loss,timestamp\n1,0.6,2026-11-08T02:00:00Z\n", encoding="utf-8"
+        )
         process = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(40)"], cwd=self.project)
         try:
             self.open_project()
@@ -174,7 +181,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
 
         (self.project / "data.csv").write_bytes(b"epoch,loss\n1,0.2\n1,0.2\n2,\n")
         (self.project / "data.jsonl").write_bytes(b'{"a":1,"b":"<b>literal</b>"}\n{"a":2}\nmalformed\n')
-        parquet.write_table(arrow.table({"epoch": [1, 2], "loss": [0.2, None]}), self.project / "data.parquet")
+        parquet.write_table(
+            arrow.table({"epoch": [1, 2], "loss": [0.2, None]}), self.project / "data.parquet"
+        )
         page = self.page
         page.get_by_role("link", name="Phân tích", exact=True).click()
         expect(page.locator("#local-active-root")).to_have_text(str(self.project))
@@ -229,9 +238,7 @@ class WorkbenchBrowserTest(unittest.TestCase):
     def test_glass_frame_transparency_persists_and_resets(self):
         page = self.page
         root = page.locator("html")
-        (self.project / "glass.log").write_text(
-            "2026-11-08T10:00:00Z WARN qa-glass\n", encoding="utf-8"
-        )
+        (self.project / "glass.log").write_text("2026-11-08T10:00:00Z WARN qa-glass\n", encoding="utf-8")
         self.open_project()
         page.locator('#local-tree button[data-path="glass.log"]').click()
         neutral_bin = page.locator(".heatmap button:not([data-tone])").first
@@ -257,8 +264,12 @@ class WorkbenchBrowserTest(unittest.TestCase):
         slider.press("End")
         expect(page.locator("#glass-transparency-value")).to_have_text("100%")
         expect(root).to_have_css("background-color", "rgba(8, 10, 11, 0)")
-        expect(page.locator(".xterm-scrollable-element").first).to_have_css("background-color", "rgba(0, 0, 0, 0)")
-        expect(page.locator(".monitor-visuals .chart-panel").first).to_have_css("background-color", "rgba(0, 0, 0, 0)")
+        expect(page.locator(".xterm-scrollable-element").first).to_have_css(
+            "background-color", "rgba(0, 0, 0, 0)"
+        )
+        expect(page.locator(".monitor-visuals .chart-panel").first).to_have_css(
+            "background-color", "rgba(0, 0, 0, 0)"
+        )
         expect(neutral_bin).to_have_css("background-color", "rgba(8, 10, 11, 0)")
         expect(warning_bin).not_to_have_css("background-color", "rgba(0, 0, 0, 0)")
         for selector in ("#terminal-panes .live-shell", ".xterm-viewport", ".code-pane", ".editor-panel"):
@@ -299,8 +310,14 @@ class WorkbenchBrowserTest(unittest.TestCase):
 
         page.get_by_role("link", name="Phân tích", exact=True).click()
         root.evaluate("(node) => node.setAttribute('data-native-glass', '')")
-        for selector in ("#external-preview", ".demo-notice", "#search", ".timeline-panel",
-                         ".investigation", ".heat.priority-0.coverage-complete"):
+        for selector in (
+            "#external-preview",
+            ".demo-notice",
+            "#search",
+            ".timeline-panel",
+            ".investigation",
+            ".heat.priority-0.coverage-complete",
+        ):
             expect(page.locator(selector).first).to_have_css("background-color", clear_tint)
         expect(page.locator(".heat.priority-4").first).to_have_css("background-color", "rgb(174, 36, 66)")
         self.assertEqual(self.page_errors, [])
@@ -335,7 +352,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         page = self.page
         page.get_by_role("link", name="Thiết lập", exact=True).click()
         page.locator('input[name="appearance"][value="paper"]').check()
-        project_color = page.locator(".project-shell").evaluate("(el) => getComputedStyle(el).backgroundColor")
+        project_color = page.locator(".project-shell").evaluate(
+            "(el) => getComputedStyle(el).backgroundColor"
+        )
         page.locator('[data-setting="language"]').click()
         page.locator("#interface-language").select_option("en")
         expect(page.locator("html")).to_have_attribute("lang", "en")
@@ -365,7 +384,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
             }""")
             self.assertLess(layout["top"], 105)
             self.assertAlmostEqual(layout["charts"], layout["terminal"], delta=1)
-            self.assertAlmostEqual(layout["top"] + layout["charts"] + layout["terminal"], layout["height"], delta=1)
+            self.assertAlmostEqual(
+                layout["top"] + layout["charts"] + layout["terminal"], layout["height"], delta=1
+            )
             self.assertAlmostEqual(layout["bottom"], height, delta=2)
             self.assertAlmostEqual(layout["paneBottom"], height, delta=2)
         page.locator('[data-terminal-action="collapse"]').click()
@@ -445,7 +466,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         page.locator("#code-left .code-tab").press("Control+s")
         expect(page.locator("#local-status")).to_have_text("Đã lưu train.py.")
         editor.fill("print('meta')\n")
-        with page.expect_response(lambda response: response.url.endswith("/file") and response.request.method == "PUT") as saved:
+        with page.expect_response(
+            lambda response: response.url.endswith("/file") and response.request.method == "PUT"
+        ) as saved:
             editor.press("Meta+s")
         self.assertTrue(saved.value.ok)
         self.assertEqual((code / "train.py").read_text(encoding="utf-8"), "print('meta')\n")
@@ -473,8 +496,14 @@ class WorkbenchBrowserTest(unittest.TestCase):
         import json
 
         def gpu(index, name, used, utilization):
-            return {"index": index, "uuid": "test-" + str(index), "name": name, "percent": utilization,
-                    "vram_used_mib": used, "vram_total_mib": 8192}
+            return {
+                "index": index,
+                "uuid": "test-" + str(index),
+                "name": name,
+                "percent": utilization,
+                "vram_used_mib": used,
+                "vram_total_mib": 8192,
+            }
 
         first = "2026-11-08T02:00:00Z"
         middle = "2026-11-08T02:00:04Z"
@@ -486,9 +515,12 @@ class WorkbenchBrowserTest(unittest.TestCase):
         ]
         (self.project / "machine.jsonl").write_text("\n".join(map(json.dumps, records)), encoding="utf-8")
         (self.project / "metrics.csv").write_text(
-            f"epoch,train_loss,val_loss,timestamp\n1,0.8,0.9,{first}\n2,0.3,0.4,{last}\n", encoding="utf-8")
+            f"epoch,train_loss,val_loss,timestamp\n1,0.8,0.9,{first}\n2,0.3,0.4,{last}\n", encoding="utf-8"
+        )
         (self.project / "train.log").write_text(
-            f"{first} INFO first epoch\n{middle} WARN checkpoint from actual log\n{last} INFO last epoch\n", encoding="utf-8")
+            f"{first} INFO first epoch\n{middle} WARN checkpoint from actual log\n{last} INFO last epoch\n",
+            encoding="utf-8",
+        )
         self.open_project()
         page = self.page
         page.locator('[data-panel="machine"]').click()
@@ -502,7 +534,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         graph = page.locator("#machine-trend")
         graph.press("ArrowLeft")
         expect(page.locator("#machine-value")).to_have_text("—")
-        expect(page.locator("#terminal-body .machine-log-anchor")).to_contain_text("checkpoint from actual log")
+        expect(page.locator("#terminal-body .machine-log-anchor")).to_contain_text(
+            "checkpoint from actual log"
+        )
         expect(page.locator("#terminal-scope")).to_contain_text("Log trùng mốc")
         page.locator('[data-panel="training"]').click()
         expect(page.locator("#training-sync")).to_contain_text("Lệch 4 s")
@@ -537,7 +571,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         open_branches()
         page.locator('button[data-path="nested/inner/program.py"]').click()
         expect(page.locator("#local-code")).to_have_value("print('restored editor')\n")
-        with page.expect_response(lambda response: "/view-state" in response.url and response.request.method == "PUT"):
+        with page.expect_response(
+            lambda response: "/view-state" in response.url and response.request.method == "PUT"
+        ):
             page.locator("#code-split").click()
         page.reload()
         expect(page.locator("#local-code")).to_have_value("print('restored editor')\n")
@@ -545,17 +581,23 @@ class WorkbenchBrowserTest(unittest.TestCase):
         expect(page.locator('button[data-path="nested/inner/program.py"]')).to_be_visible()
         page.get_by_role("link", name="Dự án", exact=True).click()
         expect(page.locator('button[data-path="nested/inner/live.log"]')).to_be_visible()
-        expect(page.locator("#terminal-panes .live-shell")).to_have_attribute("title", re.compile(re.escape(str(self.project))))
+        expect(page.locator("#terminal-panes .live-shell")).to_have_attribute(
+            "title", re.compile(re.escape(str(self.project)))
+        )
         expect(page.locator("#terminal-body")).to_be_hidden()
         page.locator('[data-terminal-action="log"]').click()
         expect(page.locator("#terminal-body")).to_be_visible()
         expect(page.locator("#terminal-body")).to_contain_text("restored log")
         page.get_by_role("link", name="Phân tích", exact=True).click()
         open_branches()
-        with page.expect_response(lambda response: "/view-state" in response.url and response.request.method == "PUT"):
+        with page.expect_response(
+            lambda response: "/view-state" in response.url and response.request.method == "PUT"
+        ):
             page.locator('button[data-path="nested/inner/data.csv"]').click()
         page.reload()
-        expect(page.locator('button[data-path="nested/inner/data.csv"]')).to_have_attribute("aria-pressed", "true")
+        expect(page.locator('button[data-path="nested/inner/data.csv"]')).to_have_attribute(
+            "aria-pressed", "true"
+        )
         expect(page.locator('#external-preview [name="path"]')).to_have_value("nested/inner/data.csv")
         self.assertEqual(self.page_errors, [])
 
@@ -786,9 +828,11 @@ class WorkbenchBrowserTest(unittest.TestCase):
 
     def test_live_timeline_drills_into_severity_and_returns_to_latest(self):
         log = self.project / "worker.log"
-        log.write_bytes(b"2026-11-08T10:00:00Z WARN queue busy\n"
-                        b"2026-11-08T10:00:00Z ERROR request failed\n"
-                        b"2026-11-08T10:00:00Z FATAL process stopped\n")
+        log.write_bytes(
+            b"2026-11-08T10:00:00Z WARN queue busy\n"
+            b"2026-11-08T10:00:00Z ERROR request failed\n"
+            b"2026-11-08T10:00:00Z FATAL process stopped\n"
+        )
         self.open_project()
         page = self.page
         page.locator('#local-tree button[data-path="worker.log"]').click()
@@ -832,18 +876,28 @@ class WorkbenchBrowserTest(unittest.TestCase):
         for name, outcome in (("run_a.py", "completed"), ("run_b.py", "failed")):
             page.locator(f'#local-tree button[data-path="{name}"]').click(timeout=10000)
             page.locator("#local-open-editor").click()
-            with page.expect_response(lambda res: res.url.endswith("/runs") and res.request.method == "POST") as created:
+            with page.expect_response(
+                lambda res: res.url.endswith("/runs") and res.request.method == "POST"
+            ) as created:
                 page.locator("#local-run-file").click()
             runs.append(created.value.json()["id"])
             expect(page.locator("#run-detail-meta")).to_contain_text(outcome, timeout=12000)
         source = page.locator("#run-source-links").get_by_role("button", name="Mở run_b.py:4")
         source.click()
         expect(page.locator("#local-editor-status")).to_contain_text("run_b.py · dòng 4")
-        selected = page.locator("#local-code").evaluate("(el) => el.value.slice(el.selectionStart, el.selectionEnd)")
+        selected = page.locator("#local-code").evaluate(
+            "(el) => el.value.slice(el.selectionStart, el.selectionEnd)"
+        )
         self.assertEqual(selected, "raise RuntimeError('known location')")
-        link = page.evaluate("() => window.WorkbenchSourceLinks.reference('tests/test_x.py:17: AssertionError', 'C:/project')")
+        link = page.evaluate(
+            "() => window.WorkbenchSourceLinks.reference('tests/test_x.py:17: AssertionError', 'C:/project')"
+        )
         self.assertEqual((link["path"], link["line"]), ("tests/test_x.py", 17))
-        self.assertIsNone(page.evaluate("() => window.WorkbenchSourceLinks.reference('File \"C:/other/test_x.py\", line 3', 'C:/project')"))
+        self.assertIsNone(
+            page.evaluate(
+                "() => window.WorkbenchSourceLinks.reference('File \"C:/other/test_x.py\", line 3', 'C:/project')"
+            )
+        )
         page.get_by_role("link", name="Dự án", exact=True).click()
         panel = page.locator("#run-compare")
         top = page.locator(".monitor-top")
@@ -860,7 +914,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         expect(row).to_contain_text("0,25")
         expect(page.locator("#compare-train-loss svg")).to_be_visible()
         expect(page.locator("#run-compare-rows tr").filter(has_text="Đỉnh CPU")).to_contain_text("mẫu")
-        expect(page.locator("#run-compare-rows tr").filter(has_text="SHA-256 mã chạy")).to_have_attribute("data-changed", "true")
+        expect(page.locator("#run-compare-rows tr").filter(has_text="SHA-256 mã chạy")).to_have_attribute(
+            "data-changed", "true"
+        )
         page.locator("#run-compare-close").press("Escape")
         expect(panel).to_be_hidden()
         expect(page.locator("#run-compare-toggle")).to_be_focused()
@@ -893,7 +949,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
 
         page.route("**/api/local/v1/terminals/*", intercept)
         page.locator("#local-shell").select_option("CMD" if os.name == "nt" else "sh")
-        with page.expect_response(lambda response: response.url.endswith("/terminals") and response.request.method == "POST") as created:
+        with page.expect_response(
+            lambda response: response.url.endswith("/terminals") and response.request.method == "POST"
+        ) as created:
             page.locator('[data-terminal-action="new"]').click()
         session = created.value.json()["id"]
         pane = page.locator("#terminal-panes .live-shell")
@@ -902,8 +960,10 @@ class WorkbenchBrowserTest(unittest.TestCase):
         output = pane.locator(".xterm-rows")
         console = pane.locator(".xterm-helper-textarea")
         console.focus()
-        command = (f'"{sys.executable}" -u -c "import time; print(347629); time.sleep(2); '
-                   'print(347630); time.sleep(0.4); print(347631)"')
+        command = (
+            f'"{sys.executable}" -u -c "import time; print(347629); time.sleep(2); '
+            'print(347630); time.sleep(0.4); print(347631)"'
+        )
         # The echoed shell command contains the digits. Match the full output row.
         page.keyboard.insert_text(command)
         page.keyboard.press("Enter")
@@ -925,11 +985,13 @@ class WorkbenchBrowserTest(unittest.TestCase):
         for number in ("347629", "347630", "347631"):
             expect(output.get_by_text(number, exact=True)).to_have_count(1)
         self.assertEqual(terminal_ids, {session})
-        self.assertIn((False, offline[0]), transport[transport.index((True, offline[0])):])
+        self.assertIn((False, offline[0]), transport[transport.index((True, offline[0])) :])
         pane.locator("xpath=..").locator("button[aria-label^='Phóng to']").click()
         console.focus()
-        command = (f'"{sys.executable}" -u -c "from pathlib import Path; '
-                   "print(str(Path('train.py').resolve()) + ':3:1')\"")
+        command = (
+            f'"{sys.executable}" -u -c "from pathlib import Path; '
+            "print(str(Path('train.py').resolve()) + ':3:1')\""
+        )
         page.keyboard.insert_text(command)
         page.keyboard.press("Enter")
         reference = output.get_by_text(str(self.project / "train.py") + ":3:1", exact=True)
@@ -954,18 +1016,22 @@ class WorkbenchBrowserTest(unittest.TestCase):
         (self.project / "code.py").write_text(
             "import sys\nfrom pathlib import Path\n"
             "Path('used-python.txt').write_text(sys.prefix, encoding='utf-8')\n"
-            "print('PYTHON_FROM_PROJECT')\n", encoding="utf-8")
+            "print('PYTHON_FROM_PROJECT')\n",
+            encoding="utf-8",
+        )
         (self.project / "wait.py").write_text(
             "import os, time\nfrom pathlib import Path\n"
             "Path('wait-pid.txt').write_text(str(os.getpid()), encoding='utf-8')\n"
-            "print('PTY_WAIT_STARTED', flush=True)\ntime.sleep(30)\n", encoding="utf-8")
+            "print('PTY_WAIT_STARTED', flush=True)\ntime.sleep(30)\n",
+            encoding="utf-8",
+        )
         self.open_project()
         page = self.page
         page.get_by_role("link", name="Code", exact=True).click()
         choice = page.locator("#code-interpreter")
         expect(choice).to_have_value(".venv")
         page.locator("#terminal-panes [data-pane-close]").click()
-        for shell in (("PowerShell", "CMD") if os.name == "nt" else ("sh",)):
+        for shell in ("PowerShell", "CMD") if os.name == "nt" else ("sh",):
             with self.subTest(shell=shell):
                 marker = self.project / "used-python.txt"
                 marker.unlink(missing_ok=True)
@@ -988,7 +1054,7 @@ class WorkbenchBrowserTest(unittest.TestCase):
                 child.wait(timeout=7)
                 prompt = re.escape(str(self.project)) + r">\s*$" if os.name == "nt" else r"[$#]\s*$"
                 expect(output).to_have_text(re.compile(prompt), use_inner_text=True)
-                page.keyboard.insert_text("python -c \"print(546389)\"")
+                page.keyboard.insert_text('python -c "print(546389)"')
                 page.keyboard.press("Enter")
                 expect(output.get_by_text("546389", exact=True)).to_have_count(1, timeout=10000)
                 pane.locator("xpath=..").locator("[data-pane-close]").click()
@@ -1036,17 +1102,22 @@ class WorkbenchBrowserTest(unittest.TestCase):
         select_shell(second)
         command("for %I in (.) do @echo %~nxI" if windows else 'printf "%s\\n" "${PWD##*/}"')
         expect(second.locator(".xterm-rows").get_by_text(self.project.name, exact=True)).to_have_count(1)
-        command("if not defined HLOGSEN_SPLIT_TEST echo SPLIT_ISOLATED" if windows else
-                "test -z \"$HLOGSEN_SPLIT_TEST\" && echo SPLIT_ISOLATED")
+        command(
+            "if not defined HLOGSEN_SPLIT_TEST echo SPLIT_ISOLATED"
+            if windows
+            else 'test -z "$HLOGSEN_SPLIT_TEST" && echo SPLIT_ISOLATED'
+        )
         expect(second.locator(".xterm-rows").get_by_text("SPLIT_ISOLATED", exact=True)).to_have_count(1)
         second.locator("xpath=..").locator("[data-pane-close]").click()
 
         expect(first.locator(".xterm-helper-textarea")).to_be_focused()
-        command("Write-Output $env:HLOGSEN_SPLIT_TEST" if windows else "echo \"$HLOGSEN_SPLIT_TEST\"")
+        command("Write-Output $env:HLOGSEN_SPLIT_TEST" if windows else 'echo "$HLOGSEN_SPLIT_TEST"')
         expect(first.locator(".xterm-rows").get_by_text("first", exact=True)).to_have_count(1)
         self.assertEqual(self.page_errors, [])
 
-    @unittest.skipUnless(os.environ.get("HLOGSEN_QA_TOOLS"), "requires a fixture with Ruff, Pyright and Prettier")
+    @unittest.skipUnless(
+        os.environ.get("HLOGSEN_QA_TOOLS"), "requires a fixture with Ruff, Pyright and Prettier"
+    )
     def test_real_project_tools_check_jump_format_and_run(self):
         fixture = Path(os.environ["HLOGSEN_QA_TOOLS"])
         shutil.copytree(fixture / ".venv", self.project / ".venv")
@@ -1080,7 +1151,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         editor.press("Control+s")
         expect(page.locator("#local-status")).to_have_text("Đã lưu train.py.")
         page.locator("#local-run-code").click()
-        terminal = page.locator(".terminal-pane").filter(has=page.get_by_role("button", name=re.compile(r"^\d+ · train\.py$")))
+        terminal = page.locator(".terminal-pane").filter(
+            has=page.get_by_role("button", name=re.compile(r"^\d+ · train\.py$"))
+        )
         expect(terminal.locator(".xterm-rows")).to_contain_text("42", timeout=12000)
 
         page.locator('#local-tree button[data-path="report.js"]').click()
@@ -1089,7 +1162,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         editor.press("Control+s")
         expect(page.locator("#local-status")).to_have_text("Đã lưu report.js.")
         page.locator("#local-run-code").click()
-        terminal = page.locator(".terminal-pane").filter(has=page.get_by_role("button", name=re.compile(r"^\d+ · report\.js$")))
+        terminal = page.locator(".terminal-pane").filter(
+            has=page.get_by_role("button", name=re.compile(r"^\d+ · report\.js$"))
+        )
         expect(terminal.locator(".xterm-rows")).to_contain_text("43", timeout=12000)
         self.assertEqual(self.page_errors, [])
 
@@ -1113,7 +1188,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
         editor.dispatch_event("compositionend")
         expect(layer).to_have_attribute("data-highlight", "true")
         expect(layer.locator("code")).to_contain_text("# tiếng Việt thử")
-        with page.expect_response(lambda response: response.url.endswith("/file") and response.request.method == "PUT") as saved:
+        with page.expect_response(
+            lambda response: response.url.endswith("/file") and response.request.method == "PUT"
+        ) as saved:
             editor.press("Control+s")
         self.assertTrue(saved.value.ok)
         expect(page.locator("#local-status")).to_contain_text("Đã lưu train.py")
@@ -1129,12 +1206,16 @@ class WorkbenchBrowserTest(unittest.TestCase):
         expect(page.locator("#terminal-body")).to_be_hidden()
         if os.name == "nt":
             expect(page.locator("#local-shell")).to_have_value("CMD")
-            expect(pane.locator(".xterm-rows").get_by_text(str(Path.home()) + ">", exact=True)).to_be_visible()
+            expect(
+                pane.locator(".xterm-rows").get_by_text(str(Path.home()) + ">", exact=True)
+            ).to_be_visible()
         command = "echo HLOGSEN_HOME_SHELL" if os.name == "nt" else "printf '%s%s\\n' HLOGSEN_HOME_ SHELL"
         page.keyboard.insert_text(command)
         page.keyboard.press("Enter")
         expect(pane.locator(".xterm-rows").get_by_text("HLOGSEN_HOME_SHELL", exact=True)).to_have_count(1)
-        expect(pane).to_have_attribute("title", re.compile(re.escape("Thư mục khi mở phiên: " + str(Path.home())) + r"\nPython: .+"))
+        expect(pane).to_have_attribute(
+            "title", re.compile(re.escape("Thư mục khi mở phiên: " + str(Path.home())) + r"\nPython: .+")
+        )
         log = page.locator('[data-terminal-action="log"]')
         log.click()
         log.click()

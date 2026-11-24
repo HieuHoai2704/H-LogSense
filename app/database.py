@@ -16,9 +16,7 @@ def configure_database(app):
 
     configured = app.config.get("SQLALCHEMY_DATABASE_URI")
     if not configured:
-        configured = os.environ.get(
-            "TEST_DATABASE_URL" if app.testing else "DATABASE_URL"
-        )
+        configured = os.environ.get("TEST_DATABASE_URL" if app.testing else "DATABASE_URL")
     if configured:
         try:
             url = make_url(configured)
@@ -26,9 +24,7 @@ def configure_database(app):
                 raise ValueError()
             url = url.update_query_dict({"charset": "utf8mb4"})
         except Exception:
-            raise ValueError(
-                "A valid mysql+pymysql database URL is required."
-            ) from None
+            raise ValueError("A valid mysql+pymysql database URL is required.") from None
         app.config.update(
             SQLALCHEMY_DATABASE_URI=url,
             SQLALCHEMY_TRACK_MODIFICATIONS=False,
@@ -36,7 +32,11 @@ def configure_database(app):
                 "pool_pre_ping": True,
                 "pool_recycle": 1800,
                 "hide_parameters": True,
-                "connect_args": {"connect_timeout": 5, "read_timeout": 600, "write_timeout": 600},  # a stalled server frees the thread
+                "connect_args": {
+                    "connect_timeout": 5,
+                    "read_timeout": 600,
+                    "write_timeout": 600,
+                },  # a stalled server frees the thread
             },
         )
         db.init_app(app)

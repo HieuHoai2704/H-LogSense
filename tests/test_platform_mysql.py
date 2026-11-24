@@ -89,9 +89,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.login("viewer")
         self.assertEqual(self.client.get("/api/v1/auth/me").status_code, 200)
         self.assertEqual(
-            self.client.post(
-                "/api/v1/detection/jobs", json={}, headers=self.headers()
-            ).status_code,
+            self.client.post("/api/v1/detection/jobs", json={}, headers=self.headers()).status_code,
             403,
         )
         self.assertEqual(self.client.post("/api/v1/auth/logout").status_code, 403)
@@ -102,9 +100,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.assertEqual(self.client.get("/api/v1/auth/me").status_code, 403)
 
     def test_02_invalid_login_rate_limit_and_json(self):
-        self.assertEqual(
-            self.client.post("/api/v1/auth/login", json=["bad"]).status_code, 401
-        )
+        self.assertEqual(self.client.post("/api/v1/auth/login", json=["bad"]).status_code, 401)
         for _ in range(5):
             self.assertEqual(
                 self.client.post(
@@ -146,29 +142,19 @@ class PlatformMySQLTests(unittest.TestCase):
         with self.session.begin():
             self.event(self.session, timestamp=NOW + timedelta(seconds=2))
         second = self.client.get(
-            url
-            + "&scope_token="
-            + first["scope_token"]
-            + "&cursor="
-            + first["next_cursor"]
+            url + "&scope_token=" + first["scope_token"] + "&cursor=" + first["next_cursor"]
         ).json
         self.assertEqual(second["count"], 4)
-        self.assertFalse(
-            set(r["id"] for r in first["items"]) & set(r["id"] for r in second["items"])
-        )
+        self.assertFalse(set(r["id"] for r in first["items"]) & set(r["id"] for r in second["items"]))
         self.assertEqual(self.client.get(url).json["count"], 5)
         self.assertEqual(
-            self.client.get(
-                url + "&host=other&scope_token=" + first["scope_token"]
-            ).status_code,
+            self.client.get(url + "&host=other&scope_token=" + first["scope_token"]).status_code,
             400,
         )
 
     def test_05_validation_isolation_and_empty(self):
         self.login()
-        self.assertEqual(
-            self.client.get(self.log_url(dataset_id=self.other_id)).status_code, 403
-        )
+        self.assertEqual(self.client.get(self.log_url(dataset_id=self.other_id)).status_code, 403)
         for change in (
             {"limit": 0},
             {"sort": "bad"},
@@ -185,11 +171,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.login()
         page = self.client.get(self.log_url()).json
         event_id = page["items"][0]["id"]
-        url = (
-            self.log_url().replace("/logs?", f"/logs/{event_id}?")
-            + "&scope_token="
-            + page["scope_token"]
-        )
+        url = self.log_url().replace("/logs?", f"/logs/{event_id}?") + "&scope_token=" + page["scope_token"]
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["raw"]["text"], LINE.decode())
@@ -221,19 +203,12 @@ class PlatformMySQLTests(unittest.TestCase):
         selection = next(c for c in data["timeline"]["overall"] if c["count"])
         params.setlist("selection_start", [selection["start"]])
         params.setlist("selection_end", [selection["end"]])
-        selected = self.client.get(
-            "/api/v1/investigation?" + urlencode(list(params.items(multi=True)))
-        ).json
-        export = self.client.get(
-            "/api/v1/anomalies/export?" + urlencode(list(params.items(multi=True)))
-        )
-        self.assertEqual(
-            int(export.headers["X-Result-Count"]), selected["result_count"]
-        )
+        selected = self.client.get("/api/v1/investigation?" + urlencode(list(params.items(multi=True)))).json
+        export = self.client.get("/api/v1/anomalies/export?" + urlencode(list(params.items(multi=True))))
+        self.assertEqual(int(export.headers["X-Result-Count"]), selected["result_count"])
         identity = data["events"][0]["id"]
         evidence = self.client.get(
-            f"/api/v1/anomalies/{identity}/evidence?"
-            + urlencode(list(params.items(multi=True)))
+            f"/api/v1/anomalies/{identity}/evidence?" + urlencode(list(params.items(multi=True)))
         )
         self.assertEqual(evidence.status_code, 200, evidence.text[:1000])
         self.assertEqual(evidence.json["mode"], "database")
@@ -254,9 +229,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.rule_run()
         detect(self.engine, self.dataset_id)
         self.login()
-        data = self.client.get(
-            f"/api/v1/investigation?source=db-{self.dataset_id}"
-        ).json
+        data = self.client.get(f"/api/v1/investigation?source=db-{self.dataset_id}").json
         self.assertEqual(data["scope_count"], 3)
         self.assertEqual(len(data["state"]["run_id"]), 1)
 
@@ -305,9 +278,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.assertEqual(delivered["sent"], 1)
         smtp.return_value.starttls.assert_called_once()
         smtp.return_value.sendmail.assert_called_once()
-        self.assertEqual(
-            deliver_notifications(self.engine), {"status": "disabled", "sent": 0}
-        )
+        self.assertEqual(deliver_notifications(self.engine), {"status": "disabled", "sent": 0})
 
     def test_10_incident_rbac_csrf_status_notes_and_history(self):
         run_id = self.rule_run()
@@ -326,9 +297,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.assertEqual(listing.status_code, 200)
         alert_id = listing.json["items"][0]["id"]
         url = f"/api/v1/alerts/{alert_id}"
-        self.assertEqual(
-            self.client.patch(url, json={"status": "acknowledged"}).status_code, 403
-        )
+        self.assertEqual(self.client.patch(url, json={"status": "acknowledged"}).status_code, 403)
         result = self.client.patch(
             url,
             json={"status": "acknowledged", "note": "password=synthetic-value"},
@@ -338,9 +307,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.assertEqual(result.json["status"], "acknowledged")
         self.assertNotIn("synthetic-value", json.dumps(result.json["history"]))
         self.assertEqual(
-            self.client.patch(
-                url, json={"status": "open"}, headers=self.headers()
-            ).status_code,
+            self.client.patch(url, json={"status": "open"}, headers=self.headers()).status_code,
             409,
         )
         self.assertEqual(
@@ -377,39 +344,29 @@ class PlatformMySQLTests(unittest.TestCase):
             for _ in range(3):
                 with self.session.begin():
                     for item in self.session.scalars(
-                        select(Notification).where(
-                            Notification.dataset_id == self.dataset_id
-                        )
+                        select(Notification).where(Notification.dataset_id == self.dataset_id)
                     ):
                         item.next_attempt = NOW - timedelta(days=365)
                 deliver_notifications(self.engine, smtp_factory=smtp)
         with self.session.begin():
-            item = self.session.scalar(
-                select(Notification).where(Notification.dataset_id == self.dataset_id)
-            )
+            item = self.session.scalar(select(Notification).where(Notification.dataset_id == self.dataset_id))
             self.assertEqual((item.attempts, item.state), (3, "failed"))
 
     def window_source(self):
         lines = []
         for window in range(96):
-            stamp = datetime(2005, 6, 3, tzinfo=timezone.utc) + timedelta(
-                minutes=window * 5
-            )
+            stamp = datetime(2005, 6, 3, tzinfo=timezone.utc) + timedelta(minutes=window * 5)
             epoch = str(int(stamp.timestamp())).encode()
             for _ in range(40 if window >= 80 else window % 5 + 1):
                 raw = LINE.replace(b"1117838570", epoch)
                 if window >= 80:
-                    raw = raw.replace(b"- ", b"TESTALERT ", 1).replace(
-                        b"INFO", b"ERROR"
-                    )
+                    raw = raw.replace(b"- ", b"TESTALERT ", 1).replace(b"INFO", b"ERROR")
                 lines.append(raw)
         return self.zipped(b"".join(lines))
 
     def test_12_window_features_deterministic_no_labels(self):
         rows = [
-            SimpleNamespace(
-                id=i, timestamp=NOW, host="host", severity="INFO", message=f"value {i}"
-            )
+            SimpleNamespace(id=i, timestamp=NOW, host="host", severity="INFO", message=f"value {i}")
             for i in range(4)
         ]
         first = list(aggregate_windows(rows))
@@ -420,18 +377,12 @@ class PlatformMySQLTests(unittest.TestCase):
 
     def test_13_window_rule_predictions_retry_evaluation(self):
         ingest_bgl(self.engine, self.dataset_id, self.window_source())
-        first = run_windows(
-            self.engine, self.dataset_id, "test-window-rule", {"detector": "rule"}
-        )
-        again = run_windows(
-            self.engine, self.dataset_id, "test-window-rule", {"detector": "rule"}
-        )
+        first = run_windows(self.engine, self.dataset_id, "test-window-rule", {"detector": "rule"})
+        again = run_windows(self.engine, self.dataset_id, "test-window-rule", {"detector": "rule"})
         self.assertEqual(first["run_id"], again["run_id"])
         with self.session.begin():
             report = self.session.scalar(
-                select(EvaluationReport).where(
-                    EvaluationReport.run_id == first["run_id"]
-                )
+                select(EvaluationReport).where(EvaluationReport.run_id == first["run_id"])
             )
             self.assertEqual(report.metrics["unit"], "observed host-window")
             self.assertGreater(report.metrics["eligible_units"], 0)
@@ -453,21 +404,15 @@ class PlatformMySQLTests(unittest.TestCase):
             "idempotency_key": "window-job",
             "configuration": {"detector": "isolation_forest"},
         }
-        first = self.client.post(
-            "/api/v1/detection/jobs", json=body, headers=self.headers()
-        )
+        first = self.client.post("/api/v1/detection/jobs", json=body, headers=self.headers())
         self.assertEqual(first.status_code, 202)
         self.assertEqual(
-            self.client.post(
-                "/api/v1/detection/jobs", json=body, headers=self.headers()
-            ).json["job_id"],
+            self.client.post("/api/v1/detection/jobs", json=body, headers=self.headers()).json["job_id"],
             first.json["job_id"],
         )
         body["configuration"] = {"detector": "rule"}
         self.assertEqual(
-            self.client.post(
-                "/api/v1/detection/jobs", json=body, headers=self.headers()
-            ).status_code,
+            self.client.post("/api/v1/detection/jobs", json=body, headers=self.headers()).status_code,
             409,
         )
         from scripts.run.worker import run_once
@@ -477,9 +422,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.assertEqual(status.json["state"], "completed", status.json)
 
     def test_15_upload_requires_auth_and_unrelated_size_limit(self):
-        self.assertEqual(
-            self.client.post("/api/v1/uploads", data=b"test").status_code, 403
-        )
+        self.assertEqual(self.client.post("/api/v1/uploads", data=b"test").status_code, 403)
         self.assertEqual(
             self.client.post(
                 "/api/v1/auth/login",
@@ -511,9 +454,7 @@ class PlatformMySQLTests(unittest.TestCase):
             403,
         )
         self.assertEqual(
-            self.client.post(
-                "/api/v1/alert-rules", json=["invalid"], headers=self.headers()
-            ).status_code,
+            self.client.post("/api/v1/alert-rules", json=["invalid"], headers=self.headers()).status_code,
             400,
         )
 
@@ -525,9 +466,7 @@ class PlatformMySQLTests(unittest.TestCase):
             "configuration": {"start_time": "2026-01-01"},
         }
         self.assertEqual(
-            self.client.post(
-                "/api/v1/detection/jobs", json=body, headers=self.headers()
-            ).status_code,
+            self.client.post("/api/v1/detection/jobs", json=body, headers=self.headers()).status_code,
             400,
         )
 
@@ -577,23 +516,17 @@ class PlatformMySQLTests(unittest.TestCase):
         from app.services.bgl_ingestion import import_lease
 
         with import_lease(self.engine, "analysis-job-" + str(job_id)):
-            self.assertEqual(
-                self.client.post(url, headers=self.headers()).status_code, 409
-            )
+            self.assertEqual(self.client.post(url, headers=self.headers()).status_code, 409)
         self.assertEqual(self.client.post(url, headers=self.headers()).status_code, 202)
         self.assertEqual(self.client.post(url, headers=self.headers()).status_code, 409)
 
     def test_20_log_bin_exact_microsecond_boundary(self):
         with self.session.begin():
-            self.event(
-                self.session, timestamp=NOW + timedelta(minutes=1, microseconds=-1)
-            )
+            self.event(self.session, timestamp=NOW + timedelta(minutes=1, microseconds=-1))
             self.event(self.session, timestamp=NOW + timedelta(minutes=1))
             self.event(self.session, timestamp=NOW + timedelta(hours=1))
         self.login()
-        result = self.client.get(
-            self.log_url().replace("/logs?", "/logs/timeline?") + "&bins=60"
-        )
+        result = self.client.get(self.log_url().replace("/logs?", "/logs/timeline?") + "&bins=60")
         self.assertEqual(result.status_code, 200)
         self.assertEqual(result.json["count"], 2)
         self.assertEqual([b["event_count"] for b in result.json["bins"][:2]], [1, 1])
@@ -602,9 +535,7 @@ class PlatformMySQLTests(unittest.TestCase):
         with self.session.begin():
             run = self.make_run(self.session)
             for offset in (timedelta(minutes=5, microseconds=-1), timedelta(minutes=5)):
-                unit = self.unit(
-                    self.session, self.event(self.session, timestamp=NOW + offset)
-                )
+                unit = self.unit(self.session, self.event(self.session, timestamp=NOW + offset))
                 self.session.add(
                     AnomalyOutput(
                         dataset_id=self.dataset_id,
@@ -626,26 +557,18 @@ class PlatformMySQLTests(unittest.TestCase):
         }
         result = self.client.get("/api/v1/investigation?" + urlencode(params))
         self.assertEqual(result.status_code, 200, result.text[:1000])
-        self.assertEqual(
-            [b["count"] for b in result.json["timeline"]["overall"][:2]], [1, 1]
-        )
+        self.assertEqual([b["count"] for b in result.json["timeline"]["overall"][:2]], [1, 1])
 
     def test_22_mysql_presets_use_observed_end_and_custom_validates(self):
         self.rule_run()
         self.login()
-        result = self.client.get(
-            f"/api/v1/investigation?source=db-{self.dataset_id}&range=6h"
-        )
+        result = self.client.get(f"/api/v1/investigation?source=db-{self.dataset_id}&range=6h")
         self.assertEqual(result.status_code, 200)
         state = result.json["state"]
         parse = lambda value: datetime.fromisoformat(value.replace("Z", "+00:00"))
-        self.assertEqual(
-            parse(state["end_time"]) - parse(state["start_time"]), timedelta(hours=6)
-        )
+        self.assertEqual(parse(state["end_time"]) - parse(state["start_time"]), timedelta(hours=6))
         self.assertEqual(state["range"], "6h")
         self.assertEqual(
-            self.client.get(
-                f"/api/v1/investigation?source=db-{self.dataset_id}&range=custom"
-            ).status_code,
+            self.client.get(f"/api/v1/investigation?source=db-{self.dataset_id}&range=custom").status_code,
             400,
         )

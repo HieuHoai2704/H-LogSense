@@ -5,3 +5,5 @@
 *.bat text eol=crlf
 packaging/windows/** text eol=crlf
 packaging/posix/** text eol=lf
+# Python sources are LF everywhere (ruff format enforces it too).
+*.py text eol=lf

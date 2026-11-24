@@ -44,8 +44,12 @@ class PosixTerminal:
         try:
             self.process = subprocess.Popen(
                 [sys.executable, "-I", "-c", launcher, *command],
-                stdin=slave, stdout=slave, stderr=slave, cwd=directory,
-                env=environment, start_new_session=True,
+                stdin=slave,
+                stdout=slave,
+                stderr=slave,
+                cwd=directory,
+                env=environment,
+                start_new_session=True,
             )
             self.setwinsize(24, 80)
         except BaseException:
@@ -66,7 +70,7 @@ class PosixTerminal:
     def write(self, value):
         remaining = memoryview(value.encode("utf-8"))
         while remaining:
-            remaining = remaining[os.write(self.fd, remaining):]
+            remaining = remaining[os.write(self.fd, remaining) :]
 
     def setwinsize(self, rows, cols):
         import fcntl

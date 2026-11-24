@@ -9,12 +9,16 @@ from threading import Lock
 from .files import WORKSPACES, WorkspaceError
 from .platforms import current as platform_backend
 
+
 class DesktopUnavailable(RuntimeError):
     """The native window cannot open here (no graphical session or no webview); browser mode can."""
 
 
-RENDERERS = {"win32": ("edgechromium", "edgechromium"), "darwin": ("cocoa", "wkwebview"),
-             "linux": ("gtk", "gtkwebkit2")}
+RENDERERS = {
+    "win32": ("edgechromium", "edgechromium"),
+    "darwin": ("cocoa", "wkwebview"),
+    "linux": ("gtk", "gtkwebkit2"),
+}
 
 
 class DesktopBridge:
@@ -69,18 +73,30 @@ def desktop_window(url, token, store):
     try:
         import webview
     except ImportError:
-        raise DesktopUnavailable("The desktop window needs pywebview; install H-logsen with the platform installer.") from None
+        raise DesktopUnavailable(
+            "The desktop window needs pywebview; install H-logsen with the platform installer."
+        ) from None
 
     window_options, start_options = platform_backend.desktop_options()
 
     bridge = DesktopBridge(token, store, webview.FileDialog.FOLDER)
-    window = webview.create_window("H-logsen", url, width=1440, height=900, min_size=(900, 620),
-                                   background_color="#191919", js_api=bridge, **window_options)
+    window = webview.create_window(
+        "H-logsen",
+        url,
+        width=1440,
+        height=900,
+        min_size=(900, 620),
+        background_color="#191919",
+        js_api=bridge,
+        **window_options,
+    )
     bridge._attach(window)
     attach = getattr(platform_backend, "attach_window", None)
     if attach:
         attach(window)
     window.events.initialized += lambda renderer: renderer == expected_renderer
-    webview.start(gui=gui, private_mode=False, storage_path=str(store.directory / "desktop-webview"), **start_options)
+    webview.start(
+        gui=gui, private_mode=False, storage_path=str(store.directory / "desktop-webview"), **start_options
+    )
     if webview.renderer != expected_renderer:
         raise RuntimeError(f"Desktop mode requires {expected_renderer}. See the platform installation guide.")

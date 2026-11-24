@@ -91,9 +91,7 @@ def _state(args):
         if safe.get("range") == "custom":
             raise QueryError("Custom ranges require explicit UTC boundaries.")
         first, last = db.session.execute(
-            select(func.min(E.timestamp), func.max(E.timestamp)).where(
-                E.dataset_id == dataset_id
-            )
+            select(func.min(E.timestamp), func.max(E.timestamp)).where(E.dataset_id == dataset_id)
         ).one()
         # A window is anchored at its start, which can precede the first raw
         # record (e.g. 03:10:00 vs 03:10:30). Include completed output anchors
@@ -164,9 +162,7 @@ def _state(args):
         if args.get("runs_pinned") == "1":
             runs = []
     if len({r.detector_id for r in runs}) != len(runs):
-        raise QueryError(
-            "Select one completed run per logical detector to avoid replay duplicates."
-        )
+        raise QueryError("Select one completed run per logical detector to avoid replay duplicates.")
     if args.get("version_id"):
         version_id = integer(args["version_id"], 1, 2**63 - 1, "Version")
         runs = [r for r in runs if r.version_id == version_id]
@@ -196,11 +192,7 @@ def base(state, *, excluded=None, selection=False):
     )
     for key, column in FIELDS.items():
         if key != excluded and state[key]:
-            q = q.where(
-                column.in_(
-                    [int(v) for v in state[key]] if key == "detector" else state[key]
-                )
-            )
+            q = q.where(column.in_([int(v) for v in state[key]] if key == "detector" else state[key]))
     if state["q"]:
         q = q.where(
             or_(
@@ -239,7 +231,7 @@ def row_summary(row, state):
         message=redact(
             event.message[:1024]
             if event
-            else f"Observed host-window: {unit.definition.get('observed_event_count','unavailable')} events"
+            else f"Observed host-window: {unit.definition.get('observed_event_count', 'unavailable')} events"
         )
         if unit.definition or event
         else "Observed detection unit",
@@ -256,10 +248,7 @@ def row_summary(row, state):
 def build(state):
     start, end = instant(state["start_time"]), instant(state["end_time"])
     duration = resolution(state)
-    epoch_us = (
-        lambda t: ((t - EPOCH).days * 86400 + (t - EPOCH).seconds) * 1000000
-        + (t - EPOCH).microseconds
-    )
+    epoch_us = lambda t: ((t - EPOCH).days * 86400 + (t - EPOCH).seconds) * 1000000 + (t - EPOCH).microseconds
     origin = epoch_us(start) // (duration * 1000000) * (duration * 1000000)
     cells = []
     lower = origin
@@ -271,7 +260,7 @@ def build(state):
                 start=iso(a),
                 end=iso(b),
                 label=display_time(iso(a), state["timezone"]),
-                full_label=f"{display_time(iso(a),state['timezone'],True)} – {display_time(iso(b),state['timezone'],True)}",
+                full_label=f"{display_time(iso(a), state['timezone'], True)} – {display_time(iso(b), state['timezone'], True)}",
                 coverage="unknown",
                 partial_bin=(b - a).total_seconds() != duration,
                 count=0,
@@ -281,12 +270,9 @@ def build(state):
         )
         lower += duration * 1000000
     query = base(state)
-    bucket = (
-        func.timestampdiff(
-            text("MICROSECOND"), EPOCH.replace(tzinfo=None), A.anchor_time
-        )
-        - origin
-    ).op("DIV", precedence=100)(duration * 1000000)
+    bucket = (func.timestampdiff(text("MICROSECOND"), EPOCH.replace(tzinfo=None), A.anchor_time) - origin).op(
+        "DIV", precedence=100
+    )(duration * 1000000)
     grouped = db.session.execute(
         query.with_only_columns(
             D.id,
@@ -359,21 +345,15 @@ def build(state):
         proofs = [
             r
             for r in coverage_rows
-            if r.start_time <= a
-            and r.end_time >= b
-            and (r.layer != "analysis" or r.run_id in run_ids)
+            if r.start_time <= a and r.end_time >= b and (r.layer != "analysis" or r.run_id in run_ids)
         ]
         if any(r.state == "failed" for r in proofs):
             return "missing"
         if any(r.state == "not_processed" for r in proofs):
             return "unprocessed"
         complete = {r.layer for r in proofs if r.state == "complete"}
-        analyzed = {
-            r.run_id for r in proofs if r.layer == "analysis" and r.state == "complete"
-        }
-        if {"ingestion", "parsing", "analysis"} <= complete and set(
-            run_ids
-        ) <= analyzed:
+        analyzed = {r.run_id for r in proofs if r.layer == "analysis" and r.state == "complete"}
+        if {"ingestion", "parsing", "analysis"} <= complete and set(run_ids) <= analyzed:
             return "complete"
         return "partial" if any(r.state == "partial" for r in proofs) else "unknown"
 
@@ -381,9 +361,7 @@ def build(state):
         for cell in grid:
             cell["coverage"] = coverage(cell, did)
             cell["volume"] = (
-                min(4, max(1, ceil(4 * log1p(cell["count"]) / log1p(maximum))))
-                if cell["count"]
-                else 0
+                min(4, max(1, ceil(4 * log1p(cell["count"]) / log1p(maximum)))) if cell["count"] else 0
             )
             cell["selected"] = bool(
                 state["selection_start"]
@@ -393,17 +371,9 @@ def build(state):
             )
     facets = {}
     for key, column in FIELDS.items():
-        fq = (
-            base(state, excluded=key)
-            .with_only_columns(column, func.count())
-            .group_by(column)
-        )
+        fq = base(state, excluded=key).with_only_columns(column, func.count()).group_by(column)
         values = db.session.execute(fq.order_by(func.count().desc()).limit(100)).all()
-        labels = (
-            dict(db.session.execute(select(D.id, D.detector_key)).all())
-            if key == "detector"
-            else {}
-        )
+        labels = dict(db.session.execute(select(D.id, D.detector_key)).all()) if key == "detector" else {}
         facets[key] = [
             dict(
                 value=str(v),
@@ -467,13 +437,15 @@ def build(state):
         evaluations.append({"run_id": r.run_id, "metrics": r.metrics})
         if isinstance(r.metrics.get("supplied_labels"), dict):
             # Uploaded datasets: a separate, explicitly unverified row (never the trusted metrics).
-            evaluations.append({"run_id": f"{r.run_id} · supplied labels (unverified)",
-                                "metrics": r.metrics["supplied_labels"]})
+            evaluations.append(
+                {
+                    "run_id": f"{r.run_id} · supplied labels (unverified)",
+                    "metrics": r.metrics["supplied_labels"],
+                }
+            )
     sources = {
         f"db-{d.id}": d.name + " · MySQL"
-        for d in db.session.scalars(
-            select(Dataset).where(Dataset.id.in_(authorized_datasets()))
-        )
+        for d in db.session.scalars(select(Dataset).where(Dataset.id.in_(authorized_datasets())))
     }
     scale = []
     previous = 0
@@ -491,9 +463,7 @@ def build(state):
         dataset_mode=dataset.data_mode,
         scope_count=sum(c["count"] for c in overall),
         result_count=result_count,
-        high_critical_count=sum(
-            c["severity"]["High"] + c["severity"]["Critical"] for c in overall
-        ),
+        high_critical_count=sum(c["severity"]["High"] + c["severity"]["Critical"] for c in overall),
         events=[row_summary(r, state) for r in rows],
         page_count=max(1, ceil(result_count / state["limit"])),
         row_count=row_count,
@@ -507,7 +477,7 @@ def build(state):
             volume_max=maximum,
             volume_scale=scale,
         ),
-        range_label=f"{display_time(iso(start),state['timezone'],True)} – {display_time(iso(end),state['timezone'],True)}",
+        range_label=f"{display_time(iso(start), state['timezone'], True)} – {display_time(iso(end), state['timezone'], True)}",
         coverage=dict(
             status="unknown",
             dataset=dataset.name,

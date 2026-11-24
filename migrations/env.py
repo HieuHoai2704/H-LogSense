@@ -28,12 +28,7 @@ def get_engine():
 def get_engine_url():
     # Online migration uses the engine directly; offline DDL needs only dialect.
     # Never copy a clear-text password into the Alembic configuration object.
-    return (
-        get_engine()
-        .url.set(password=None)
-        .render_as_string(hide_password=True)
-        .replace("%", "%%")
-    )
+    return get_engine().url.set(password=None).render_as_string(hide_password=True).replace("%", "%%")
 
 
 # add your model's MetaData object here
@@ -100,20 +95,14 @@ def run_migrations_online():
 
     with connectable.connect() as connection:
         version = connection.execute(text("SELECT VERSION()")).scalar_one()
-        if "MariaDB" in version or tuple(
-            map(int, version.split("-")[0].split(".")[:3])
-        ) < (8, 0, 16):
+        if "MariaDB" in version or tuple(map(int, version.split("-")[0].split(".")[:3])) < (8, 0, 16):
             raise RuntimeError("MySQL 8.0.16 or newer is required.")
         existing = set(inspect(connection).get_table_names())
         if "alembic_version" not in existing and existing - {"logsense_test_guard"}:
-            raise RuntimeError(
-                "Initial migration requires an empty, explicitly selected database."
-            )
+            raise RuntimeError("Initial migration requires an empty, explicitly selected database.")
         # End the validation autobegin before Alembic manages its transaction.
         connection.commit()
-        context.configure(
-            connection=connection, target_metadata=get_metadata(), **conf_args
-        )
+        context.configure(connection=connection, target_metadata=get_metadata(), **conf_args)
 
         with context.begin_transaction():
             context.run_migrations()

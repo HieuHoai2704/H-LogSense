@@ -32,9 +32,7 @@ def page_events(
                 and_(LogEvent.timestamp == timestamp, LogEvent.id > event_id),
             )
         )
-    return list(
-        session.scalars(query.order_by(LogEvent.timestamp, LogEvent.id).limit(limit))
-    )
+    return list(session.scalars(query.order_by(LogEvent.timestamp, LogEvent.id).limit(limit)))
 
 
 def page_anomalies(session, dataset_id, run_id, *, after_id=0, limit=100):

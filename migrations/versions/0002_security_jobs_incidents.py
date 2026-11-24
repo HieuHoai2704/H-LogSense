@@ -13,9 +13,7 @@ depends_on = None
 def upgrade():
     op.add_column("detection_units", sa.Column("host", sa.String(128), nullable=True))
     op.add_column("detection_units", sa.Column("definition", sa.JSON(), nullable=True))
-    op.add_column(
-        "processing_jobs", sa.Column("configuration", sa.JSON(), nullable=True)
-    )
+    op.add_column("processing_jobs", sa.Column("configuration", sa.JSON(), nullable=True))
     op.add_column("processing_jobs", sa.Column("result", sa.JSON(), nullable=True))
     op.execute("ALTER TABLE processing_jobs DROP CHECK ck_processing_jobs_state")
     op.create_check_constraint(
@@ -26,9 +24,7 @@ def upgrade():
         "anomaly_outputs",
         ["dataset_id", "id", "run_id"],
     )
-    op.create_unique_constraint(
-        "uq_anomaly_outputs_dataset_id_id", "anomaly_outputs", ["dataset_id", "id"]
-    )
+    op.create_unique_constraint("uq_anomaly_outputs_dataset_id_id", "anomaly_outputs", ["dataset_id", "id"])
     # Frozen schema additions, reviewed.
     op.create_table(
         "users",
@@ -38,9 +34,7 @@ def upgrade():
         sa.Column("active", sa.Boolean(), nullable=False),
         sa.Column("auth_version", sa.Integer(), nullable=False),
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
-        sa.CheckConstraint(
-            "role IN ('viewer','analyst','manager','admin')", name=op.f("ck_users_role")
-        ),
+        sa.CheckConstraint("role IN ('viewer','analyst','manager','admin')", name=op.f("ck_users_role")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_users")),
         sa.UniqueConstraint("username", name=op.f("uq_users_username")),
         mysql_charset="utf8mb4",
@@ -78,9 +72,7 @@ def upgrade():
             name=op.f("fk_alert_rules_detector_id_detectors"),
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_alert_rules")),
-        sa.UniqueConstraint(
-            "dataset_id", "id", name=op.f("uq_alert_rules_dataset_id_id")
-        ),
+        sa.UniqueConstraint("dataset_id", "id", name=op.f("uq_alert_rules_dataset_id_id")),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_0900_as_cs",
         mysql_engine="InnoDB",
@@ -95,13 +87,9 @@ def upgrade():
             ["datasets.id"],
             name=op.f("fk_user_datasets_dataset_id_datasets"),
         ),
-        sa.ForeignKeyConstraint(
-            ["user_id"], ["users.id"], name=op.f("fk_user_datasets_user_id_users")
-        ),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], name=op.f("fk_user_datasets_user_id_users")),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_user_datasets")),
-        sa.UniqueConstraint(
-            "user_id", "dataset_id", name=op.f("uq_user_datasets_user_id_dataset_id")
-        ),
+        sa.UniqueConstraint("user_id", "dataset_id", name=op.f("uq_user_datasets_user_id_dataset_id")),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_0900_as_cs",
         mysql_engine="InnoDB",
@@ -125,9 +113,7 @@ def upgrade():
             ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_evaluation_reports")),
-        sa.UniqueConstraint(
-            "dataset_id", "run_id", name=op.f("uq_evaluation_reports_dataset_id_run_id")
-        ),
+        sa.UniqueConstraint("dataset_id", "run_id", name=op.f("uq_evaluation_reports_dataset_id_run_id")),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_0900_as_cs",
         mysql_engine="InnoDB",
@@ -190,9 +176,7 @@ def upgrade():
             ["users.id"],
             name=op.f("fk_alerts_acknowledged_by_users"),
         ),
-        sa.ForeignKeyConstraint(
-            ["assigned_to"], ["users.id"], name=op.f("fk_alerts_assigned_to_users")
-        ),
+        sa.ForeignKeyConstraint(["assigned_to"], ["users.id"], name=op.f("fk_alerts_assigned_to_users")),
         sa.ForeignKeyConstraint(
             ["dataset_id", "anomaly_id", "run_id"],
             [
@@ -235,9 +219,7 @@ def upgrade():
         sa.Column("timestamp", mysql.DATETIME(fsp=6), nullable=False),
         sa.Column("dataset_id", sa.BigInteger(), nullable=False),
         sa.Column("id", sa.BigInteger(), autoincrement=True, nullable=False),
-        sa.ForeignKeyConstraint(
-            ["actor_id"], ["users.id"], name=op.f("fk_alert_audit_actor_id_users")
-        ),
+        sa.ForeignKeyConstraint(["actor_id"], ["users.id"], name=op.f("fk_alert_audit_actor_id_users")),
         sa.ForeignKeyConstraint(
             ["dataset_id", "alert_id"],
             ["alerts.dataset_id", "alerts.id"],
@@ -293,6 +275,4 @@ def upgrade():
 
 
 def downgrade():
-    raise RuntimeError(
-        "Destructive downgrade disabled; use a reviewed forward migration."
-    )
+    raise RuntimeError("Destructive downgrade disabled; use a reviewed forward migration.")

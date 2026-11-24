@@ -14,11 +14,30 @@ from .platforms import current as backend
 
 MAX_BUFFER = 256 * 1024
 ENVIRONMENT = {
-    "PATH", "PATHEXT", "SYSTEMROOT", "SYSTEMDRIVE", "WINDIR", "COMSPEC", "TEMP", "TMP",
-    "USERPROFILE", "USERNAME", "HOME", "APPDATA", "LOCALAPPDATA", "LANG", "LC_ALL",
+    "PATH",
+    "PATHEXT",
+    "SYSTEMROOT",
+    "SYSTEMDRIVE",
+    "WINDIR",
+    "COMSPEC",
+    "TEMP",
+    "TMP",
+    "USERPROFILE",
+    "USERNAME",
+    "HOME",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "LANG",
+    "LC_ALL",
     # Windows NVML uses these system paths even when nvidia-smi is in System32.
-    "PROGRAMFILES", "PROGRAMW6432",
-    "LOGNAME", "USER", "TERM", "SSH_AUTH_SOCK", "XDG_RUNTIME_DIR", "TZ",
+    "PROGRAMFILES",
+    "PROGRAMW6432",
+    "LOGNAME",
+    "USER",
+    "TERM",
+    "SSH_AUTH_SOCK",
+    "XDG_RUNTIME_DIR",
+    "TZ",
 }
 
 
@@ -44,16 +63,40 @@ def profiles():
 
 
 def ssh_command(host, user, port):
-    if (not isinstance(host, str) or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9.:-]{0,252}", host)
-            or not isinstance(user, str) or not re.fullmatch(r"[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,63}", user)
-            or type(port) is not int or not 1 <= port <= 65535):
+    if (
+        not isinstance(host, str)
+        or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9.:-]{0,252}", host)
+        or not isinstance(user, str)
+        or not re.fullmatch(r"[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,63}", user)
+        or type(port) is not int
+        or not 1 <= port <= 65535
+    ):
         raise WorkspaceError("Check the SSH host, user and port.")
     executable = shutil.which("ssh")
     if not executable:
         raise WorkspaceError("OpenSSH client is not installed.", 503)
-    return [executable, "-F", "none", "-o", "StrictHostKeyChecking=yes", "-o", "ClearAllForwardings=yes",
-            "-o", "ForwardAgent=no", "-o", "ForwardX11=no", "-o", "ConnectTimeout=10",
-            "-tt", "-p", str(port), "-l", user, "--", host]
+    return [
+        executable,
+        "-F",
+        "none",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-o",
+        "ClearAllForwardings=yes",
+        "-o",
+        "ForwardAgent=no",
+        "-o",
+        "ForwardX11=no",
+        "-o",
+        "ConnectTimeout=10",
+        "-tt",
+        "-p",
+        str(port),
+        "-l",
+        user,
+        "--",
+        host,
+    ]
 
 
 class Session:
@@ -93,7 +136,9 @@ class Session:
     def snapshot(self, offset, wait_ms=0):
         with self.lock:
             if wait_ms and offset == self.offset:
-                self.lock.wait_for(lambda: self.offset != offset or self.finished or self.closed, wait_ms / 1000)
+                self.lock.wait_for(
+                    lambda: self.offset != offset or self.finished or self.closed, wait_ms / 1000
+                )
             if self.closed:
                 raise WorkspaceError("The terminal session no longer exists.", 404)
             oldest = self.offset - self.length
@@ -103,10 +148,15 @@ class Session:
             chunks = []
             for chunk in self.buffer:
                 if consumed + len(chunk) > start:
-                    chunks.append(chunk[max(0, start - consumed):])
+                    chunks.append(chunk[max(0, start - consumed) :])
                 consumed += len(chunk)
-            return {"text": "".join(chunks), "start_offset": start, "offset": self.offset,
-                    "reset": reset, "finished": self.finished}
+            return {
+                "text": "".join(chunks),
+                "start_offset": start,
+                "offset": self.offset,
+                "reset": reset,
+                "finished": self.finished,
+            }
 
     def write(self, value):
         with self.input_lock:
@@ -143,7 +193,9 @@ class Terminals:
 
     def add(self, command, root, interpreter=None):
         with self.lock:
-            expired = [key for key, session in self.sessions.items() if time.monotonic() - session.touched > 1800]
+            expired = [
+                key for key, session in self.sessions.items() if time.monotonic() - session.touched > 1800
+            ]
             for key in expired:
                 self.sessions.pop(key).close()
             if len(self.sessions) >= 6:

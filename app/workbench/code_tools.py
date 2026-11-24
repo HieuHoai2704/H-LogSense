@@ -36,8 +36,9 @@ def node_tool(root, name):
         if not entry.is_relative_to(root) or not entry.is_file():
             raise FileNotFoundError
     except (OSError, RuntimeError):
-        raise WorkspaceError("Install {0} in the project with npm install -D {1}.", 422,
-                             values=(name, name.lower())) from None
+        raise WorkspaceError(
+            "Install {0} in the project with npm install -D {1}.", 422, values=(name, name.lower())
+        ) from None
     return [node_command(), str(entry)]
 
 
@@ -47,9 +48,15 @@ def run_tool(command, root, interpreter, name, *, text=None, valid_codes=(0,)):
     try:
         with TemporaryFile() as output, TemporaryFile() as errors:
             result = subprocess.run(
-                command, cwd=root, env=terminal_environment(interpreter), creationflags=NO_WINDOW,
-                input=text.encode("utf-8") if text is not None else b"", stdout=output, stderr=errors,
-                timeout=15, check=False,
+                command,
+                cwd=root,
+                env=terminal_environment(interpreter),
+                creationflags=NO_WINDOW,
+                input=text.encode("utf-8") if text is not None else b"",
+                stdout=output,
+                stderr=errors,
+                timeout=15,
+                check=False,
             )
             output.seek(0)
             data = output.read(2 * MAX_TEXT + 1)
@@ -59,9 +66,12 @@ def run_tool(command, root, interpreter, name, *, text=None, valid_codes=(0,)):
             raise WorkspaceError("{0} output exceeds the limit.", 422, values=(name,))
         if result.returncode not in valid_codes:
             if name == "Ruff" and "No module named ruff" in error:
-                raise WorkspaceError("Install Ruff in the selected Python with python -m pip install ruff.", 422)
-            raise WorkspaceError("{0} did not finish. Check the project's syntax and configuration.", 422,
-                                 values=(name,))
+                raise WorkspaceError(
+                    "Install Ruff in the selected Python with python -m pip install ruff.", 422
+                )
+            raise WorkspaceError(
+                "{0} did not finish. Check the project's syntax and configuration.", 422, values=(name,)
+            )
         return data.decode("utf-8")
     except subprocess.TimeoutExpired:
         raise WorkspaceError("{0} exceeded the 15-second limit.", 504, values=(name,)) from None
@@ -90,7 +100,17 @@ def format_text(path, root, interpreter, text):
     suffix = path.suffix.casefold()
     if suffix == ".py":
         tool = "Ruff"
-        command = [str(interpreter), "-I", "-m", "ruff", "format", "--no-cache", "--stdin-filename", str(path), "-"]
+        command = [
+            str(interpreter),
+            "-I",
+            "-m",
+            "ruff",
+            "format",
+            "--no-cache",
+            "--stdin-filename",
+            str(path),
+            "-",
+        ]
     elif suffix in _PRETTIER_SUFFIXES:
         tool = "Prettier"
         command = [*node_tool(root, tool), "--stdin-filepath", str(path)]
@@ -107,10 +127,15 @@ def ruff_issues(data, lines):
         location = item["location"]
         line = location["row"]
         # Ruff counts Unicode code points; textarea selection uses UTF-16 code units.
-        prefix = lines[line - 1][:location["column"] - 1] if 1 <= line <= len(lines) else ""
-        yield {"line": line, "column": len(prefix.encode("utf-16-le")) // 2 + 1, "tool": "Ruff",
-               "rule": item.get("code"), "severity": item.get("severity", "error"),
-               "message": item["message"][:800]}
+        prefix = lines[line - 1][: location["column"] - 1] if 1 <= line <= len(lines) else ""
+        yield {
+            "line": line,
+            "column": len(prefix.encode("utf-16-le")) // 2 + 1,
+            "tool": "Ruff",
+            "rule": item.get("code"),
+            "severity": item.get("severity", "error"),
+            "message": item["message"][:800],
+        }
 
 
 def pyright_issues(data, path):
@@ -118,8 +143,14 @@ def pyright_issues(data, path):
         if Path(item.get("file") or "").resolve() != path or "range" not in item:
             continue
         start = item["range"]["start"]
-        yield {"line": start["line"] + 1, "column": start["character"] + 1, "tool": "Pyright",
-               "rule": item.get("rule"), "severity": item["severity"], "message": item["message"][:800]}
+        yield {
+            "line": start["line"] + 1,
+            "column": start["character"] + 1,
+            "tool": "Pyright",
+            "rule": item.get("rule"),
+            "severity": item["severity"],
+            "message": item["message"][:800],
+        }
 
 
 def diagnostics(path, root, interpreter, text):
@@ -128,9 +159,26 @@ def diagnostics(path, root, interpreter, text):
     for name in tools:
         try:
             if name == "Ruff":
-                command = [str(interpreter), "-I", "-m", "ruff", "check", "--no-cache", "--output-format", "json", "--", str(path)]
+                command = [
+                    str(interpreter),
+                    "-I",
+                    "-m",
+                    "ruff",
+                    "check",
+                    "--no-cache",
+                    "--output-format",
+                    "json",
+                    "--",
+                    str(path),
+                ]
             else:
-                command = [*node_tool(root, name), "--outputjson", "--pythonpath", str(interpreter), str(path)]
+                command = [
+                    *node_tool(root, name),
+                    "--outputjson",
+                    "--pythonpath",
+                    str(interpreter),
+                    str(path),
+                ]
             data = json.loads(run_tool(command, root, interpreter, name, valid_codes=(0, 1)))
             found = ruff_issues(data, text.split("\n")) if name == "Ruff" else pyright_issues(data, path)
             issues.extend(list(found))

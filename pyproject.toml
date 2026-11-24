@@ -42,6 +42,8 @@ Repository = "https://github.com/HieuHoai2704/H-LogSense"
 desktop = ["pywebview==6.2.1; sys_platform == 'linux'"]
 # Browser and accessibility QA in scripts/qa.
 qa = ["playwright==1.64.1"]
+# Lint/format (ruff) and the git hook runner; see [tool.ruff] and .pre-commit-config.yaml.
+dev = ["ruff==0.17.6", "pre-commit>=4,<5"]
 # scripts/ml research baselines (bgl_window_baseline); never needed by the product.
 ml = ["xgboost>=3,<4"]
 # academic/course lab scripts only; never needed by the product.
@@ -63,3 +65,30 @@ namespaces = false
 
 [tool.setuptools.package-data]
 app = ["templates/**/*.html", "locales/*.json", "static/**/*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 110
+extend-exclude = ["sandbox", "app/static/vendor", ".local"]
+
+[tool.ruff.format]
+quote-style = "double"
+line-ending = "lf"
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, import order, bugbear, pyupgrade, comprehensions, simplify (selected).
+select = ["E", "W", "F", "I", "B", "UP", "C4", "SIM"]
+ignore = [
+    "E501",    # long strings/comments the formatter cannot split; the formatter owns line length
+    "SIM105",  # contextlib.suppress is not clearer than a two-line try/except here
+    "SIM108",  # ternaries are not forced on multi-line branches
+    "C408",    # dict(key=value) is the house style for JSON payloads
+    "SIM117",  # a lease or patch scope nested around a transaction reads as two boundaries
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "scripts", "academic", "config"]
+force-sort-within-sections = true
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/versions/*" = ["E", "W"]  # frozen DDL, kept as generated

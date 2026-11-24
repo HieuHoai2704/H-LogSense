@@ -49,16 +49,9 @@ def validate_member(member):
 @contextmanager
 def import_lease(engine, dataset_id):
     """Connection-owned MySQL lease; process exit releases it automatically."""
-    lock = (
-        "lsi:"
-        + hashlib.sha256(f"{engine.url.database}:{dataset_id}".encode()).hexdigest()[
-            :60
-        ]
-    )
+    lock = "lsi:" + hashlib.sha256(f"{engine.url.database}:{dataset_id}".encode()).hexdigest()[:60]
     with engine.connect() as connection:
-        acquired = connection.execute(
-            text("SELECT GET_LOCK(:key, 0)"), {"key": lock}
-        ).scalar_one()
+        acquired = connection.execute(text("SELECT GET_LOCK(:key, 0)"), {"key": lock}).scalar_one()
         connection.commit()
         if acquired != 1:
             raise ImportBusyError("An import already owns this dataset.")
@@ -127,8 +120,9 @@ def _ingest_bgl(
     """
     if not 1 <= batch_size <= 2000 or (limit is not None and limit < 1):
         raise ValueError("Invalid import limits.")
-    if any(not isinstance(value, str) or not 1 <= len(value) <= 64
-           for value in (label_source, label_version)):
+    if any(
+        not isinstance(value, str) or not 1 <= len(value) <= 64 for value in (label_source, label_version)
+    ):
         raise ValueError("Invalid supplied label provenance.")
     if event_metadata is not None and not callable(event_metadata):
         raise ValueError("Event metadata must be a trusted callable.")
@@ -140,9 +134,7 @@ def _ingest_bgl(
         if info.is_dir() or info.file_size > 10 * 1024**3:
             raise ValueError("Invalid archive member size.")
         with Session(engine) as session, session.begin():
-            dataset = session.scalar(
-                select(Dataset).where(Dataset.id == dataset_id).with_for_update()
-            )
+            dataset = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
             if dataset is None or dataset.state == "archived":
                 raise ValueError("Dataset unavailable.")
             artifact = session.scalar(
@@ -178,9 +170,7 @@ def _ingest_bgl(
                 )
                 .values(state="failed", error_code="worker_interrupted")
             )
-            job = ProcessingJob(
-                dataset_id=dataset_id, kind="ingestion", state="running"
-            )
+            job = ProcessingJob(dataset_id=dataset_id, kind="ingestion", state="running")
             session.add(job)
             session.flush()
             job_id = job.id
@@ -191,9 +181,7 @@ def _ingest_bgl(
                 while True:
                     with Session(engine) as session, session.begin():
                         dataset = session.scalar(
-                            select(Dataset)
-                            .where(Dataset.id == dataset_id)
-                            .with_for_update()
+                            select(Dataset).where(Dataset.id == dataset_id).with_for_update()
                         )
                         if dataset.state == "archived":
                             raise ValueError("Dataset archived while importing.")
@@ -203,9 +191,7 @@ def _ingest_bgl(
                             break
                         stream.seek(artifact.checkpoint_byte)
                         remaining = (
-                            batch_size
-                            if limit is None
-                            else min(batch_size, limit - artifact.checkpoint_line)
+                            batch_size if limit is None else min(batch_size, limit - artifact.checkpoint_line)
                         )
                         records = []
                         batch_bytes = 0
@@ -216,10 +202,7 @@ def _ingest_bgl(
                             version=parser_version,
                         )
                         for record in islice(iterator, remaining):
-                            if (
-                                records
-                                and batch_bytes + len(record.raw) > 8 * 1024 * 1024
-                            ):
+                            if records and batch_bytes + len(record.raw) > 8 * 1024 * 1024:
                                 break
                             records.append(record)
                             batch_bytes += len(record.raw)
@@ -267,8 +250,11 @@ def _ingest_bgl(
                                         service=r.attributes["component"],
                                         severity=r.attributes["level"],
                                         message=r.message,
-                                        attributes=(dict(r.attributes, upload=event_metadata(r))
-                                                    if event_metadata else r.attributes),
+                                        attributes=(
+                                            dict(r.attributes, upload=event_metadata(r))
+                                            if event_metadata
+                                            else r.attributes
+                                        ),
                                     )
                                     for r in valid
                                 ],
@@ -277,9 +263,7 @@ def _ingest_bgl(
                                 session.execute(
                                     select(LogEvent.raw_id, LogEvent.id).where(
                                         LogEvent.dataset_id == dataset_id,
-                                        LogEvent.raw_id.in_(
-                                            [raw_ids[r.line_number] for r in valid]
-                                        ),
+                                        LogEvent.raw_id.in_([raw_ids[r.line_number] for r in valid]),
                                     )
                                 ).all()
                             )
@@ -297,16 +281,12 @@ def _ingest_bgl(
                                 ],
                             )
                         artifact.checkpoint_line = records[-1].line_number
-                        artifact.checkpoint_byte = records[-1].byte_offset + len(
-                            records[-1].raw
-                        )
+                        artifact.checkpoint_byte = records[-1].byte_offset + len(records[-1].raw)
                         artifact.parsed_count += len(valid)
                         artifact.malformed_count += len(records) - len(valid)
                         dataset.input_revision += 1
                         dataset.state = (
-                            "imported"
-                            if artifact.checkpoint_byte == info.file_size
-                            else "partial"
+                            "imported" if artifact.checkpoint_byte == info.file_size else "partial"
                         )
                         job = session.get(ProcessingJob, job_id)
                         job.processed_count += len(records)

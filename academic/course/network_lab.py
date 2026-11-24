@@ -34,8 +34,13 @@ def download_images(page_url, destination, *, image_origins=()):
     parser.feed(page)
     document_origin = urlsplit(document_url)
     allowed_origins = {document_origin.netloc, *image_origins}
-    allowed = {"image/png": ".png", "image/jpeg": ".jpg", "image/gif": ".gif", "image/webp": ".webp",
-               "image/svg+xml": ".svg"}
+    allowed = {
+        "image/png": ".png",
+        "image/jpeg": ".jpg",
+        "image/gif": ".gif",
+        "image/webp": ".webp",
+        "image/svg+xml": ".svg",
+    }
     saved = []
     for source in sorted(parser.urls)[:30]:
         target = urljoin(document_url, source)
@@ -70,8 +75,11 @@ def text_to_csv(url, destination):
 
 def youtube_statistics(ids, api_key, destination):
     try:
-        response = requests.get("https://www.googleapis.com/youtube/v3/videos", timeout=(5, 20),
-                                params={"part": "statistics", "id": ",".join(ids), "key": api_key})
+        response = requests.get(
+            "https://www.googleapis.com/youtube/v3/videos",
+            timeout=(5, 20),
+            params={"part": "statistics", "id": ",".join(ids), "key": api_key},
+        )
     except requests.RequestException as error:
         raise ApiError(f"YouTube request failed ({type(error).__name__}).") from None
     with response:
@@ -83,9 +91,9 @@ def youtube_statistics(ids, api_key, destination):
         writer = csv.DictWriter(output, fieldnames=fields)
         writer.writeheader()
         for item in items:
-            writer.writerow({"videoid": item["id"], **{
-                field: item["statistics"].get(field, "") for field in fields[1:]
-            }})
+            writer.writerow(
+                {"videoid": item["id"], **{field: item["statistics"].get(field, "") for field in fields[1:]}}
+            )
     return len(items)
 
 
@@ -93,9 +101,15 @@ def nasa_dates(destination):
     """The official public API key can read real APOD entries by date."""
     fields = ("date", "title", "media_type")
     try:
-        response = requests.get("https://api.nasa.gov/planetary/apod", timeout=(5, 20),
-                                params={"start_date": "2024-01-01", "end_date": "2024-01-03",
-                                        "api_key": os.environ.get("NASA_API_KEY") or "DEMO_KEY"})
+        response = requests.get(
+            "https://api.nasa.gov/planetary/apod",
+            timeout=(5, 20),
+            params={
+                "start_date": "2024-01-01",
+                "end_date": "2024-01-03",
+                "api_key": os.environ.get("NASA_API_KEY") or "DEMO_KEY",
+            },
+        )
     except requests.RequestException as error:
         raise ApiError(f"NASA request failed ({type(error).__name__}).") from None
     with response:
@@ -123,8 +137,10 @@ def run(client, dataset_id, output, *, image_url, text_url, youtube_ids):
         with urlopen(client.base + "/?workspace=logs", timeout=8) as response:
             (output / "01-log-explorer.html").write_bytes(response.read(1_000_000))
         errors = {}
-        for label, url in (("http", client.base + "/api/v1/course-path-missing"),
-                           ("network", "http://127.0.0.1:0/")):
+        for label, url in (
+            ("http", client.base + "/api/v1/course-path-missing"),
+            ("network", "http://127.0.0.1:0/"),
+        ):
             try:
                 with urlopen(url, timeout=3):
                     pass
@@ -141,27 +157,46 @@ def run(client, dataset_id, output, *, image_url, text_url, youtube_ids):
         if not page["items"]:
             raise ApiError("No log records in this interval.")
         severity = page["items"][0]["severity"]
-        filters = {"dataset_id": dataset_id, "start_time": date_range["start_time"],
-                   "end_time": date_range["end_time"], "limit": 10}
+        filters = {
+            "dataset_id": dataset_id,
+            "start_time": date_range["start_time"],
+            "end_time": date_range["end_time"],
+            "limit": 10,
+        }
         if severity:
             filters["severity"] = severity
         opener = build_opener(HTTPCookieProcessor(client.session.cookies))
-        request = Request(client.base + "/api/v1/logs?" + urlencode(filters),
-                          headers={"Accept": "application/json"})
+        request = Request(
+            client.base + "/api/v1/logs?" + urlencode(filters), headers={"Accept": "application/json"}
+        )
         opened = opener.open(request, timeout=8)
         try:
             first = json.load(opened)
-            results["2"] = {"status": opened.status, "content_type": opened.headers.get_content_type(),
-                            "severity": severity, "matches": first["count"]}
+            results["2"] = {
+                "status": opened.status,
+                "content_type": opened.headers.get_content_type(),
+                "severity": severity,
+                "matches": first["count"],
+            }
         finally:
             opened.close()
-        pinned = Request(client.base + "/api/v1/logs?" + urlencode({
-            **filters, "scope_token": first["scope_token"],
-        }), headers={"Accept": "application/json"})
+        pinned = Request(
+            client.base
+            + "/api/v1/logs?"
+            + urlencode(
+                {
+                    **filters,
+                    "scope_token": first["scope_token"],
+                }
+            ),
+            headers={"Accept": "application/json"},
+        )
         with opener.open(pinned, timeout=8) as response:
             second = json.load(response)
-        results["3"] = {"same_ids": [r["id"] for r in first["items"]] == [r["id"] for r in second["items"]],
-                        "both_responses_closed": opened.closed and response.closed}
+        results["3"] = {
+            "same_ids": [r["id"] for r in first["items"]] == [r["id"] for r in second["items"]],
+            "both_responses_closed": opened.closed and response.closed,
+        }
 
         for exercise, operation in (
             ("4", lambda: {"images": download_images(image_url, output)}),
@@ -177,17 +212,24 @@ def run(client, dataset_id, output, *, image_url, text_url, youtube_ids):
         key = os.environ.get("YOUTUBE_API_KEY")
         if key:
             try:
-                results["7"] = {"rows": youtube_statistics(youtube_ids, key, output / "07-video-statistics.csv")}
+                results["7"] = {
+                    "rows": youtube_statistics(youtube_ids, key, output / "07-video-statistics.csv")
+                }
             except ApiError as error:
                 results["7"] = {"status": "failed", "error": str(error)}
         else:
             try:
-                results["7"] = {"provider": "NASA APOD", "rows": nasa_dates(output / "07-nasa-apod.csv"),
-                                "youtube": "not_run: YOUTUBE_API_KEY is required for the original video exercise"}
+                results["7"] = {
+                    "provider": "NASA APOD",
+                    "rows": nasa_dates(output / "07-nasa-apod.csv"),
+                    "youtube": "not_run: YOUTUBE_API_KEY is required for the original video exercise",
+                }
             except (ApiError, ValueError) as error:
                 results["7"] = {"provider": "NASA APOD", "status": "failed", "error": str(error)}
     finally:
-        (output / "results.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        (output / "results.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     return report
 
 
@@ -199,15 +241,28 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--images-url", default="https://www.python.org/")
     parser.add_argument("--text-url", default="https://www.python.org/robots.txt")
-    parser.add_argument("--youtube-ids", nargs="+", default=[
-        "7cmvABXyUC0", "9eH-7x7swEM", "JndzGxbwvG0", "l0P5_E6J_g0",
-    ])
+    parser.add_argument(
+        "--youtube-ids",
+        nargs="+",
+        default=[
+            "7cmvABXyUC0",
+            "9eH-7x7swEM",
+            "JndzGxbwvG0",
+            "l0P5_E6J_g0",
+        ],
+    )
     args = parser.parse_args()
     try:
         with LogSenseClient(args.url) as client:
             client.login(args.username, getpass("LogSense password: "))
-            report = run(client, args.dataset, args.output, image_url=args.images_url,
-                         text_url=args.text_url, youtube_ids=args.youtube_ids)
+            report = run(
+                client,
+                args.dataset,
+                args.output,
+                image_url=args.images_url,
+                text_url=args.text_url,
+                youtube_ids=args.youtube_ids,
+            )
         print(json.dumps(report, ensure_ascii=False, indent=2))
     except (ApiError, URLError, OSError, ValueError) as error:
         parser.exit(1, f"{type(error).__name__}: {error}\n")

@@ -31,9 +31,7 @@ class LogScope:
 
 
 def signer():
-    return URLSafeTimedSerializer(
-        current_app.config["EVIDENCE_CURSOR_SECRET"], salt="logs-snapshot-1"
-    )
+    return URLSafeTimedSerializer(current_app.config["EVIDENCE_CURSOR_SECRET"], salt="logs-snapshot-1")
 
 
 def parse_scope(session, args):
@@ -89,17 +87,10 @@ def parse_scope(session, args):
             maximum, revision = int(pinned["maximum"]), int(pinned["revision"])
         else:
             maximum = (
-                session.scalar(
-                    select(func.max(LogEvent.id)).where(
-                        LogEvent.dataset_id == dataset_id
-                    )
-                )
-                or 0
+                session.scalar(select(func.max(LogEvent.id)).where(LogEvent.dataset_id == dataset_id)) or 0
             )
             revision = dataset.input_revision
-            snapshot = signer().dumps(
-                {"scope": scope_hash, "maximum": maximum, "revision": revision}
-            )
+            snapshot = signer().dumps({"scope": scope_hash, "maximum": maximum, "revision": revision})
         cursor = args.get("cursor")
         if cursor:
             if len(cursor) > 4096:
@@ -112,9 +103,7 @@ def parse_scope(session, args):
                 integer(position["id"], 1, 2**63 - 1, "Cursor ID"),
             )
     except (BadData, KeyError, ValueError, TypeError) as error:
-        raise QueryError(
-            "Snapshot/cursor expired or belongs to another filter scope."
-        ) from error
+        raise QueryError("Snapshot/cursor expired or belongs to another filter scope.") from error
     return LogScope(
         dataset_id,
         start,
@@ -179,25 +168,19 @@ def page(session, scope):
         if len(rows) > scope.limit
         else None
     )
-    count = session.scalar(
-        select(func.count()).select_from(LogEvent).where(*predicates(scope))
-    )
+    count = session.scalar(select(func.count()).select_from(LogEvent).where(*predicates(scope)))
     return rows[: scope.limit], cursor, count
 
 
 def timeline(session, scope, bins=60):
     duration = scope.end - scope.start
-    micros = (
-        duration.days * 86400 + duration.seconds
-    ) * 1000000 + duration.microseconds
+    micros = (duration.days * 86400 + duration.seconds) * 1000000 + duration.microseconds
     step = max(1000000, (micros + bins - 1) // bins)
-    bucket = func.timestampdiff(
-        text("MICROSECOND"), scope.start.replace(tzinfo=None), LogEvent.timestamp
-    ).op("DIV", precedence=100)(step)
+    bucket = func.timestampdiff(text("MICROSECOND"), scope.start.replace(tzinfo=None), LogEvent.timestamp).op(
+        "DIV", precedence=100
+    )(step)
     counts = dict(
-        session.execute(
-            select(bucket, func.count()).where(*predicates(scope)).group_by(bucket)
-        ).all()
+        session.execute(select(bucket, func.count()).where(*predicates(scope)).group_by(bucket)).all()
     )
     result = []
     for index in range((micros + step - 1) // step):

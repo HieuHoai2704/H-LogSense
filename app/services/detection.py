@@ -36,9 +36,9 @@ def features(message, severity):
 
 
 def _events(session, dataset_id, cursor, limit):
-    query = select(
-        LogEvent.id, LogEvent.timestamp, LogEvent.message, LogEvent.severity
-    ).where(LogEvent.dataset_id == dataset_id)
+    query = select(LogEvent.id, LogEvent.timestamp, LogEvent.message, LogEvent.severity).where(
+        LogEvent.dataset_id == dataset_id
+    )
     if cursor:
         timestamp, event_id = cursor
         query = query.where(
@@ -47,9 +47,7 @@ def _events(session, dataset_id, cursor, limit):
                 and_(LogEvent.timestamp == timestamp, LogEvent.id > event_id),
             )
         )
-    return session.execute(
-        query.order_by(LogEvent.timestamp, LogEvent.id).limit(limit)
-    ).all()
+    return session.execute(query.order_by(LogEvent.timestamp, LogEvent.id).limit(limit)).all()
 
 
 def detect(
@@ -81,9 +79,7 @@ def detect(
                 raise ValueError("Insufficient training events.")
             cursor = (training[-1].timestamp, training[-1].id)
             train_cursor = cursor
-            x = np.asarray(
-                [features(r.message, r.severity) for r in training], dtype=np.float64
-            )
+            x = np.asarray([features(r.message, r.severity) for r in training], dtype=np.float64)
             model = IsolationForest(
                 n_estimators=100,
                 max_samples=min(256, train_size),
@@ -99,9 +95,7 @@ def detect(
         "unit": "event",
         "threshold": 1 if model is None else float(model.offset_),
         "comparison": ">=" if model is None else "<",
-        "score_semantics": "high_severity_indicator"
-        if model is None
-        else "sklearn.score_samples",
+        "score_semantics": "high_severity_indicator" if model is None else "sklearn.score_samples",
         "priority_policy": "fixed High for rule; fixed Medium for IF; no common score scale",
         "python": platform.python_version(),
         "sklearn": sklearn.__version__,
@@ -123,21 +117,15 @@ def detect(
             estimators=100,
             max_samples=min(256, train_size),
         )
-    version_key = hashlib.sha256(
-        json.dumps(configuration, sort_keys=True).encode()
-    ).hexdigest()
+    version_key = hashlib.sha256(json.dumps(configuration, sort_keys=True).encode()).hexdigest()
     with Session(engine) as session, session.begin():
         # A single dataset lock serializes detector registration with other runs.
-        dataset = session.scalar(
-            select(Dataset).where(Dataset.id == dataset_id).with_for_update()
-        )
+        dataset = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
         if dataset.input_revision != revision:
             if model is not None:
                 path.unlink(missing_ok=True)  # never leave an orphaned model behind
             raise ValueError("Dataset revision changed during training.")
-        detector = session.scalar(
-            select(Detector).where(Detector.detector_key == "bgl-" + kind)
-        )
+        detector = session.scalar(select(Detector).where(Detector.detector_key == "bgl-" + kind))
         if detector is None:
             detector = Detector(
                 detector_key="bgl-" + kind,
@@ -177,21 +165,15 @@ def detect(
     try:
         while True:
             with Session(engine) as session, session.begin():
-                dataset = session.scalar(
-                    select(Dataset).where(Dataset.id == dataset_id).with_for_update()
-                )
+                dataset = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
                 if dataset.input_revision != revision or dataset.state == "archived":
-                    raise ValueError(
-                        "Dataset changed; analysis stopped without publication."
-                    )
+                    raise ValueError("Dataset changed; analysis stopped without publication.")
                 rows = _events(session, dataset_id, cursor, batch_size)
                 run = session.get(DetectorRun, run_id)
                 if not rows:
                     run.state = "completed"
                     break
-                matrix = np.asarray(
-                    [features(r.message, r.severity) for r in rows], dtype=np.float64
-                )
+                matrix = np.asarray([features(r.message, r.severity) for r in rows], dtype=np.float64)
                 scores = matrix[:, 2] if model is None else model.score_samples(matrix)
                 selected = [
                     (row, float(score), feature.tolist())
@@ -218,11 +200,7 @@ def detect(
                         )
                         session.add(unit)
                         session.flush()
-                        session.add(
-                            UnitEvent(
-                                dataset_id=dataset_id, unit_id=unit.id, event_id=row.id
-                            )
-                        )
+                        session.add(UnitEvent(dataset_id=dataset_id, unit_id=unit.id, event_id=row.id))
                     session.add(
                         AnomalyOutput(
                             dataset_id=dataset_id,

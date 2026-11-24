@@ -65,9 +65,7 @@ def verify(dataset_id, *, reuse=False):
                         state=run.state,
                         input_revision=run.input_revision,
                     )
-                duration = (
-                    None  # Do not fabricate timing for a previously completed run.
-                )
+                duration = None  # Do not fabricate timing for a previously completed run.
             else:
                 started = time.perf_counter()
                 result = detect(db.engine, dataset_id, kind=kind, train_size=10000)
@@ -142,9 +140,7 @@ def verify(dataset_id, *, reuse=False):
                     threshold=run.configuration["threshold"],
                     comparison=run.configuration["comparison"],
                     training_count=run.configuration.get("training_count", 0),
-                    training_distinct_vectors=run.configuration.get(
-                        "training_distinct_vectors"
-                    ),
+                    training_distinct_vectors=run.configuration.get("training_distinct_vectors"),
                     evaluation="Original BGL label != dash; event-level; no point adjustment. Prefix case study only, no tuning or generalization claim.",
                     tp=tp,
                     fp=fp,
@@ -164,9 +160,7 @@ def verify(dataset_id, *, reuse=False):
                     .limit(1)
                 )
             token = secrets.token_hex(32)
-            app.config.update(
-                DATABASE_READ_TOKEN=token, DATABASE_ALLOWED_DATASETS=(dataset_id,)
-            )
+            app.config.update(DATABASE_READ_TOKEN=token, DATABASE_ALLOWED_DATASETS=(dataset_id,))
             if first_id is not None:
                 # This verifier deliberately retains an outer Flask app context.
                 # End its previous read snapshot before making a new HTTP request.
@@ -175,24 +169,16 @@ def verify(dataset_id, *, reuse=False):
                     f"/api/v1/database/anomalies/{first_id}/evidence?dataset_id={dataset_id}",
                     headers={"Authorization": "Bearer " + token},
                 )
-                assert (
-                    response.status_code == 200
-                    and response.json["raw_event"]["source_line"] > 0
-                )
+                assert response.status_code == 200 and response.json["raw_event"]["source_line"] > 0
                 assert (
                     response.json["synthetic"] is False
                     and response.json["availability"]["raw"] == "available"
                 )
-                assert (
-                    response.json["detector"]["version"]
-                    == item["model_or_rule_version"]
-                )
+                assert response.json["detector"]["version"] == item["model_or_rule_version"]
                 item["real_evidence_api"] = "PASS"
             else:
                 item["real_evidence_api"] = "NOT RUN: this run flagged no anomaly"
-            item["existing_drawer_ui"] = (
-                "NOT CONNECTED: existing workspace remains explicitly synthetic"
-            )
+            item["existing_drawer_ui"] = "NOT CONNECTED: existing workspace remains explicitly synthetic"
             report.append(item)
     return report
 
@@ -203,7 +189,7 @@ def main():
     parser.add_argument("--reuse", action="store_true")
     args = parser.parse_args()
     result = verify(args.dataset, reuse=args.reuse)
-    path = (REPO_ROOT / "docs/database/measurements/detectors.json")
+    path = REPO_ROOT / "docs/database/measurements/detectors.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(result, indent=2))
     print(json.dumps(result, indent=2))

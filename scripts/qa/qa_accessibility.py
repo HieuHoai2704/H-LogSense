@@ -11,11 +11,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def main():
-    axe = (REPO_ROOT / ".local/qa-tools/node_modules/axe-core/axe.min.js")
+    axe = REPO_ROOT / ".local/qa-tools/node_modules/axe-core/axe.min.js"
     if not axe.is_file():
-        raise RuntimeError(
-            "Install the pinned QA-only axe-core package under .local/qa-tools."
-        )
+        raise RuntimeError("Install the pinned QA-only axe-core package under .local/qa-tools.")
     app = create_app()
     logging.getLogger("werkzeug").setLevel(logging.ERROR)
     server = make_server("127.0.0.1", 0, app, threaded=True)
@@ -81,9 +79,7 @@ def main():
         "status": "PASS" if not any(r["violations"] for r in reports) else "FAIL",
         "limits": "Automated checks only. Screen reader, manual contrast in every state and native macOS testing NOT RUN.",
     }
-    (REPO_ROOT / "docs/database/measurements/accessibility.json").write_text(
-        json.dumps(report, indent=2)
-    )
+    (REPO_ROOT / "docs/database/measurements/accessibility.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
     return 0 if report["status"] == "PASS" else 1
 

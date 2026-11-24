@@ -27,7 +27,9 @@ def upgrade():
         sa.Column("upload_id", sa.String(32), sa.Computed(UPLOAD_ID, persisted=False), nullable=True),
     )
     op.create_index("ix_processing_jobs_upload_id", "processing_jobs", ["upload_id"], unique=False)
-    op.create_index("ix_processing_jobs_kind_state_id", "processing_jobs", ["kind", "state", "id"], unique=False)
+    op.create_index(
+        "ix_processing_jobs_kind_state_id", "processing_jobs", ["kind", "state", "id"], unique=False
+    )
     op.create_index(
         "ix_notification_outbox_state_next_attempt_id",
         "notification_outbox",
@@ -37,7 +39,9 @@ def upgrade():
     op.create_check_constraint(
         "state", "notification_outbox", "state IN ('pending','retry','sending','sent','failed')"
     )
-    op.create_index("ix_anomalies_dataset_run_id", "anomaly_outputs", ["dataset_id", "run_id", "id"], unique=False)
+    op.create_index(
+        "ix_anomalies_dataset_run_id", "anomaly_outputs", ["dataset_id", "run_id", "id"], unique=False
+    )
     op.create_check_constraint("outcome", "alert_decisions", "outcome IN ('alerted','cooldown')")
 
 

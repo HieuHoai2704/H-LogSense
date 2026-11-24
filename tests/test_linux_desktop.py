@@ -20,16 +20,21 @@ class ReservedNameTest(unittest.TestCase):
 
 class DependencyCheckTest(unittest.TestCase):
     def test_ignores_system_packages_outside_the_dependency_tree(self):
-        report = "\n".join((
-            "python-debian 1.0.1+ubuntu2 requires charset-normalizer, which is not installed.",
-            "Flask-WTF 1.2.2 requires WTForms, which is not installed.",
-            "scikit_learn 1.7.2 has requirement numpy>=1.22, but you have numpy 1.0.",
-        ))
+        report = "\n".join(
+            (
+                "python-debian 1.0.1+ubuntu2 requires charset-normalizer, which is not installed.",
+                "Flask-WTF 1.2.2 requires WTForms, which is not installed.",
+                "scikit_learn 1.7.2 has requirement numpy>=1.22, but you have numpy 1.0.",
+            )
+        )
         closure = {"h-logsen", "flask-wtf", "scikit-learn", "numpy"}
-        self.assertEqual(linux.dependency_problems(report, closure), [
-            "Flask-WTF 1.2.2 requires WTForms, which is not installed.",
-            "scikit_learn 1.7.2 has requirement numpy>=1.22, but you have numpy 1.0.",
-        ])
+        self.assertEqual(
+            linux.dependency_problems(report, closure),
+            [
+                "Flask-WTF 1.2.2 requires WTForms, which is not installed.",
+                "scikit_learn 1.7.2 has requirement numpy>=1.22, but you have numpy 1.0.",
+            ],
+        )
 
     def test_pip_failure_without_a_report_is_a_problem(self):
         class Result:
@@ -39,8 +44,11 @@ class DependencyCheckTest(unittest.TestCase):
             self.assertEqual(linux.check_dependencies(), ["No module named pip"])
 
     def test_closure_follows_installed_requirements(self):
-        requirements = {"h-logsen": ["Flask<3.2,>=3.1", "pywebview==6.2.1; extra == \"desktop\""],
-                        "flask": ["Werkzeug>=3.1"], "werkzeug": None}
+        requirements = {
+            "h-logsen": ["Flask<3.2,>=3.1", 'pywebview==6.2.1; extra == "desktop"'],
+            "flask": ["Werkzeug>=3.1"],
+            "werkzeug": None,
+        }
 
         class Distribution:
             def __init__(self, name):
@@ -100,11 +108,13 @@ class LauncherTest(unittest.TestCase):
         self.assertEqual(fields["Icon"], linux.APP_ID)  # themed name, independent of the install folder
         icon = self.folder / "icons" / "hicolor" / "256x256" / "apps" / "h-logsen.png"
         from PIL import Image
+
         with Image.open(icon) as image:
             self.assertEqual(image.size, (256, 256))
         # A literal $ is \$ for Exec quoting and \\$ after the string escape in the file.
-        self.assertEqual(self.exec_arguments(fields["Exec"]),
-                         [str(self.python), "-I", "-m", "app.workbench", "--desktop"])
+        self.assertEqual(
+            self.exec_arguments(fields["Exec"]), [str(self.python), "-I", "-m", "app.workbench", "--desktop"]
+        )
         self.assertIn(r"\\$", fields["Exec"])
         self.assertEqual(path.stat().st_mode & 0o777, 0o644)
 
@@ -119,7 +129,9 @@ class LauncherTest(unittest.TestCase):
         with patch.dict(linux.os.environ, {"XDG_DATA_HOME": str(self.folder / "data")}):
             self.assertEqual(linux.applications_directory(), self.folder / "data" / "applications")
         with patch.dict(linux.os.environ, {"XDG_DATA_HOME": "relative"}):
-            self.assertEqual(linux.applications_directory(), Path.home() / ".local" / "share" / "applications")
+            self.assertEqual(
+                linux.applications_directory(), Path.home() / ".local" / "share" / "applications"
+            )
 
     def test_percent_is_escaped_for_field_codes(self):
         self.assertEqual(linux._exec_argument("50%"), '"50%%"')
@@ -144,11 +156,13 @@ class TitleBarThemeTest(unittest.TestCase):
         import subprocess
         import sys
 
-        probe = ("import gi; gi.require_version('Gtk', '3.0'); from gi.repository import Gtk")
+        probe = "import gi; gi.require_version('Gtk', '3.0'); from gi.repository import Gtk"
         if subprocess.run([sys.executable, "-c", probe], capture_output=True).returncode:
             self.skipTest("GTK 3 bindings are not available")
-        code = ("from app.workbench.platforms import linux; "
-                "print(linux.set_window_theme(None, True, '#000000', '#ffffff'))")
+        code = (
+            "from app.workbench.platforms import linux; "
+            "print(linux.set_window_theme(None, True, '#000000', '#ffffff'))"
+        )
         result = subprocess.run([sys.executable, "-W", "ignore", "-c", code], capture_output=True, text=True)
         self.assertEqual(result.stdout.strip(), "True", result.stderr)
 
@@ -162,6 +176,7 @@ class TitleBarThemeTest(unittest.TestCase):
             backend.set_window_theme.return_value = True
             self.assertTrue(bridge.set_window_theme("secret", True, "#000000", "#ffffff"))
 
+
 class AppIconTest(unittest.TestCase):
     def test_every_platform_uses_the_shared_h_artwork(self):
         from PIL import Image
@@ -174,6 +189,7 @@ class AppIconTest(unittest.TestCase):
             self.assertGreaterEqual(png.size[0], 512)  # sharp in the macOS Dock and GNOME
         with Image.open(ICON_ICO) as ico:
             self.assertTrue({(16, 16), (32, 32), (256, 256)} <= ico.info["sizes"])  # Windows taskbar sizes
+
 
 if __name__ == "__main__":
     unittest.main()

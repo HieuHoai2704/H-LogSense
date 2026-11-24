@@ -33,29 +33,41 @@ def make_study(root, dataset_id, maximum=1, revision=0, records=()):
             stream.write(json.dumps(record) + "\n")
     model = IsolationForest(n_estimators=4, max_samples=16, random_state=42, n_jobs=1)
     model.fit(np.arange(80, dtype=float).reshape(16, 5))
-    joblib.dump({"model": model, "reference": None, "features": "base"},
-                directory / "selected.joblib")
+    joblib.dump({"model": model, "reference": None, "features": "base"}, directory / "selected.joblib")
     start = second(baseline.NOW)
     manifest = {
-        "dataset_id": dataset_id, "input_revision": revision,
-        "maximum_event_id": maximum, "seconds": 300,
+        "dataset_id": dataset_id,
+        "input_revision": revision,
+        "maximum_event_id": maximum,
+        "seconds": 300,
         "splits": {
-            "train_start": start - 1200, "train_end": start - 600,
-            "validation_end": start, "test_end": start + 600,
+            "train_start": start - 1200,
+            "train_end": start - 600,
+            "validation_end": start,
+            "test_end": start + 600,
         },
-        "cache": {"test": {
-            "key": "test.jsonl", "sha256": digest(directory / "test.jsonl"),
-            "count": len(records) or 1,
-        }},
+        "cache": {
+            "test": {
+                "key": "test.jsonl",
+                "sha256": digest(directory / "test.jsonl"),
+                "count": len(records) or 1,
+            }
+        },
     }
     (directory / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     selection = {
         "manifest_sha256": digest(directory / "manifest.json"),
-        "model_artifact": {"key": "selected.joblib",
-                           "sha256": digest(directory / "selected.joblib")},
-        "threshold": 0.0, "comparison": "<", "score_direction": "lower",
-        "selected": {"id": "synthetic-test", "features": "base",
-                     "n_estimators": 4, "max_samples": 16, "seed": 42},
+        "model_artifact": {"key": "selected.joblib", "sha256": digest(directory / "selected.joblib")},
+        "threshold": 0.0,
+        "comparison": "<",
+        "score_direction": "lower",
+        "selected": {
+            "id": "synthetic-test",
+            "features": "base",
+            "n_estimators": 4,
+            "max_samples": 16,
+            "seed": 42,
+        },
         "feature_names": FEATURE_NAMES,
     }
     (directory / "selection.json").write_text(json.dumps(selection), encoding="utf-8")
@@ -66,8 +78,7 @@ class FrozenStudyGuards(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
-        self.root_patch = patch("app.services.window_deployment.STUDY_ROOT",
-                                Path(self.directory.name))
+        self.root_patch = patch("app.services.window_deployment.STUDY_ROOT", Path(self.directory.name))
         self.root_patch.start()
         self.addCleanup(self.root_patch.stop)
         self.study_id, self.path = make_study(self.directory.name, 7)
@@ -119,18 +130,19 @@ class FrozenStudyGuards(unittest.TestCase):
             inspect_study(self.study_id, 7)
 
     def test_opt_in_template_histogram_preserves_default(self):
-        event = SimpleNamespace(id=1, timestamp=baseline.NOW, host="host", severity="INFO",
-                                message="message 42")
+        event = SimpleNamespace(
+            id=1, timestamp=baseline.NOW, host="host", severity="INFO", message="message 42"
+        )
         legacy = list(aggregate_windows([event]))
         contextual = list(aggregate_windows([event], include_templates=True))
         self.assertNotIn("templates", legacy[0])
         self.assertEqual(sum(contextual[0]["templates"].values()), 1)
-        self.assertEqual({k: v for k, v in contextual[0].items() if k != "templates"},
-                         legacy[0])
+        self.assertEqual({k: v for k, v in contextual[0].items() if k != "templates"}, legacy[0])
 
 
-@unittest.skipUnless(os.environ.get("LOGSENSE_RUN_MYSQL_TESTS") == "1",
-                     "MySQL frozen-study integration NOT RUN")
+@unittest.skipUnless(
+    os.environ.get("LOGSENSE_RUN_MYSQL_TESTS") == "1", "MySQL frozen-study integration NOT RUN"
+)
 class FrozenStudyMySQL(unittest.TestCase):
     setUpClass = classmethod(baseline.MySQLIntegrationTests.setUpClass.__func__)
     tearDown = baseline.MySQLIntegrationTests.tearDown
@@ -142,8 +154,7 @@ class FrozenStudyMySQL(unittest.TestCase):
         baseline.MySQLIntegrationTests.setUp(self)
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
-        root_patch = patch("app.services.window_deployment.STUDY_ROOT",
-                           Path(self.directory.name))
+        root_patch = patch("app.services.window_deployment.STUDY_ROOT", Path(self.directory.name))
         root_patch.start()
         self.addCleanup(root_patch.stop)
         with self.session.begin():
@@ -154,10 +165,15 @@ class FrozenStudyMySQL(unittest.TestCase):
                 event = self.event(self.session, timestamp=baseline.NOW + timedelta(minutes=index))
                 event.host = "host-" + str(index)
                 event.severity = "INFO"
-                self.session.add(GroundTruthLabel(
-                    dataset_id=self.dataset_id, event_id=event.id,
-                    source="loghub-bgl", version="original", label="-" if index == 0 else "TEST",
-                ))
+                self.session.add(
+                    GroundTruthLabel(
+                        dataset_id=self.dataset_id,
+                        event_id=event.id,
+                        source="loghub-bgl",
+                        version="original",
+                        label="-" if index == 0 else "TEST",
+                    )
+                )
                 events.append(event)
             records = list(aggregate_windows(events, include_templates=True))
             maximum = max(event.id for event in events)
@@ -171,15 +187,15 @@ class FrozenStudyMySQL(unittest.TestCase):
     def test_persisted_native_scores_evidence_and_idempotency(self):
         result = run_windows(self.engine, self.dataset_id, "frozen-study", self.configuration)
         with Session(self.engine) as session:
-            predictions = session.scalars(select(DetectionPrediction).where(
-                DetectionPrediction.run_id == result["run_id"]
-            )).all()
-            outputs = session.scalars(select(AnomalyOutput).where(
-                AnomalyOutput.run_id == result["run_id"]
-            )).all()
-            report = session.scalar(select(EvaluationReport).where(
-                EvaluationReport.run_id == result["run_id"]
-            ))
+            predictions = session.scalars(
+                select(DetectionPrediction).where(DetectionPrediction.run_id == result["run_id"])
+            ).all()
+            outputs = session.scalars(
+                select(AnomalyOutput).where(AnomalyOutput.run_id == result["run_id"])
+            ).all()
+            report = session.scalar(
+                select(EvaluationReport).where(EvaluationReport.run_id == result["run_id"])
+            )
             self.assertEqual(len(predictions), 2)
             self.assertEqual(len(outputs), 2)
             self.assertTrue(all(p.score < 0 and p.predicted for p in predictions))
@@ -205,15 +221,23 @@ class FrozenStudyMySQL(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 run_windows(self.engine, self.dataset_id, "resume-study", self.configuration)
         with Session(self.engine) as session:
-            run = session.scalar(select(DetectorRun).where(
-                DetectorRun.dataset_id == self.dataset_id, DetectorRun.run_key == "resume-study"
-            ))
+            run = session.scalar(
+                select(DetectorRun).where(
+                    DetectorRun.dataset_id == self.dataset_id, DetectorRun.run_key == "resume-study"
+                )
+            )
             self.assertEqual(run.state, "failed")
             self.assertEqual(run.evaluated_units, 2)
         result = run_windows(self.engine, self.dataset_id, "resume-study", self.configuration)
         with Session(self.engine) as session:
-            self.assertEqual(session.scalar(select(func.count()).select_from(
-                DetectionPrediction).where(DetectionPrediction.run_id == result["run_id"])), 2)
+            self.assertEqual(
+                session.scalar(
+                    select(func.count())
+                    .select_from(DetectionPrediction)
+                    .where(DetectionPrediction.run_id == result["run_id"])
+                ),
+                2,
+            )
             self.assertEqual(session.get(DetectorRun, result["run_id"]).evaluated_units, 2)
 
     def test_dataset_snapshot_revision_and_cross_dataset_rejected(self):
@@ -226,12 +250,19 @@ class FrozenStudyMySQL(unittest.TestCase):
 
     def test_job_api_rejects_scope_override_and_accepts_frozen_job(self):
         self.login("analyst")
-        body = {"dataset_id": self.dataset_id, "idempotency_key": "frozen-api",
-                "configuration": self.configuration}
+        body = {
+            "dataset_id": self.dataset_id,
+            "idempotency_key": "frozen-api",
+            "configuration": self.configuration,
+        }
         result = self.client.post("/api/v1/detection/jobs", json=body, headers=self.headers())
         self.assertEqual(result.status_code, 202, result.json)
-        for override in ({"seed": 3}, {"window_seconds": 60}, {"study_id": "../invalid"},
-                         {"detector": "rule"}):
+        for override in (
+            {"seed": 3},
+            {"window_seconds": 60},
+            {"study_id": "../invalid"},
+            {"detector": "rule"},
+        ):
             body["configuration"] = dict(self.configuration, **override)
             result = self.client.post("/api/v1/detection/jobs", json=body, headers=self.headers())
             self.assertEqual(result.status_code, 400, result.json)

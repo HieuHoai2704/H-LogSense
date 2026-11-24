@@ -106,7 +106,9 @@ class ParserVersionTests(unittest.TestCase):
 
     def test_epoch_must_match_the_printed_date(self):
         self.assertEqual(parse_line(LINE.replace(b"1117838570", b"0"), 1, 0).error, "invalid_timestamp")
-        self.assertEqual(parse_line(LINE.replace(b"1117838570", b"253402300000"), 1, 0).error, "invalid_timestamp")
+        self.assertEqual(
+            parse_line(LINE.replace(b"1117838570", b"253402300000"), 1, 0).error, "invalid_timestamp"
+        )
         self.assertIsNone(parse_line(LINE.replace(b"1117838570", b"0"), 1, 0, LEGACY_VERSION).error)
         self.assertIsNone(parse_line(LINE.replace(b"1117838570", b"1117810000"), 1, 0).error)  # 8 h earlier
 

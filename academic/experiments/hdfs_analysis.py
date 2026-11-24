@@ -109,7 +109,10 @@ def ingest_blocks(db, stream, progress=print):
         if line_number % 1_000_000 == 0:
             progress(f"HDFS parsed {line_number:,} physical lines")
     flush()
-    return {key: counts[key] for key in ("raw_lines", "parsed_lines", "malformed", "block_references", "lines_without_block")}
+    return {
+        key: counts[key]
+        for key in ("raw_lines", "parsed_lines", "malformed", "block_references", "lines_without_block")
+    }
 
 
 def label_rows(stream):
@@ -133,7 +136,11 @@ def cohort_ranges(db):
     validation_end = first + span * 80 // 100
     if not first < train_end < validation_end < end:
         raise ValueError("HDFS clock range is too short for three cohorts.")
-    return {"train": (first, train_end), "validation": (train_end, validation_end), "test": (validation_end, end)}
+    return {
+        "train": (first, train_end),
+        "validation": (train_end, validation_end),
+        "test": (validation_end, end),
+    }
 
 
 def count_cohorts(db, splits):
@@ -145,22 +152,29 @@ def count_cohorts(db, splits):
             WHERE b.first_wall>=? AND b.last_wall<?""",
             (start, end),
         ).fetchone()
-        result[name] = {"start_inclusive_wall_clock": wall_iso(start), "end_exclusive_wall_clock": wall_iso(end),
-                        "blocks": total, "labeled": labeled, "positive": positive}
+        result[name] = {
+            "start_inclusive_wall_clock": wall_iso(start),
+            "end_exclusive_wall_clock": wall_iso(end),
+            "blocks": total,
+            "labeled": labeled,
+            "positive": positive,
+        }
     return result
 
 
 def train_features(db, limits):
     return db.execute(
-        f"SELECT {','.join(FEATURES)} FROM blocks WHERE first_wall>=? AND last_wall<? ORDER BY block_id", limits
+        f"SELECT {','.join(FEATURES)} FROM blocks WHERE first_wall>=? AND last_wall<? ORDER BY block_id",
+        limits,
     )
 
 
 def labeled_rows(db, limits):
     return db.execute(
-        f"""SELECT b.block_id,l.label,b.first_line,b.last_line,{','.join(FEATURES)}
+        f"""SELECT b.block_id,l.label,b.first_line,b.last_line,{",".join(FEATURES)}
         FROM blocks b JOIN labels l ON b.block_id=l.block_id
-        WHERE b.first_wall>=? AND b.last_wall<? ORDER BY b.block_id""", limits
+        WHERE b.first_wall>=? AND b.last_wall<? ORDER BY b.block_id""",
+        limits,
     )
 
 
@@ -174,10 +188,22 @@ def detect(model, rows):
 def predictions(path, rows, scores, threshold):
     with path.open("x", newline="", encoding="utf-8") as stream:
         writer = csv.writer(stream)
-        writer.writerow(("unit_id", "label", "prediction", "score", "first_source_line", "last_source_line", "event_count"))
+        writer.writerow(
+            (
+                "unit_id",
+                "label",
+                "prediction",
+                "score",
+                "first_source_line",
+                "last_source_line",
+                "event_count",
+            )
+        )
         for row, score in zip(rows, scores):
             block, label, first, last, event_count, *_ = row
-            writer.writerow((block, label, int(score > threshold), format(score, ".17g"), first, last, event_count))
+            writer.writerow(
+                (block, label, int(score > threshold), format(score, ".17g"), first, last, event_count)
+            )
 
 
 def analyze(db, output, budget):
@@ -190,8 +216,10 @@ def analyze(db, output, budget):
     model.fit(np.log1p(np.asarray(train, dtype=float)))
     validation = list(labeled_rows(db, splits["validation"]))
     labels = [row[1] for row in validation]
-    thresholds = {name: choose_threshold(labels, scores, max_fpr=budget, direction="higher")
-                  for name, scores in detect(model, validation).items()}
+    thresholds = {
+        name: choose_threshold(labels, scores, max_fpr=budget, direction="higher")
+        for name, scores in detect(model, validation).items()
+    }
     del validation, labels
     test = list(labeled_rows(db, splits["test"]))
     labels = [row[1] for row in test]
@@ -201,20 +229,29 @@ def analyze(db, output, budget):
         prediction_path = output / f"{name}-test.csv"
         predictions(prediction_path, test, scores, decision["threshold"])
         methods[name] = {
-            "score_direction": "higher", "comparison": ">", "threshold": decision["threshold"],
+            "score_direction": "higher",
+            "comparison": ">",
+            "threshold": decision["threshold"],
             "validation": decision["metrics"],
             "test": binary_metrics(labels, scores, decision["threshold"], direction="higher"),
-            "test_predictions": prediction_path.name, "test_predictions_sha256": digest(prediction_path),
+            "test_predictions": prediction_path.name,
+            "test_predictions_sha256": digest(prediction_path),
         }
     blocks = db.execute("SELECT COUNT(*) FROM blocks").fetchone()[0]
     labels_total = db.execute("SELECT COUNT(*) FROM labels").fetchone()[0]
     matched = db.execute("SELECT COUNT(*) FROM blocks JOIN labels USING (block_id)").fetchone()[0]
     return {
-        "block_count": blocks, "label_count": labels_total, "matched": matched,
-        "unlabeled_blocks": blocks - matched, "labels_without_block": labels_total - matched,
+        "block_count": blocks,
+        "label_count": labels_total,
+        "matched": matched,
+        "unlabeled_blocks": blocks - matched,
+        "labels_without_block": labels_total - matched,
         "boundary_purge_blocks": blocks - sum(item["blocks"] for item in cohorts.values()),
-        "cohorts": cohorts, "train_sample_blocks": len(train), "seed": SEED,
-        "feature_schema": list(FEATURES), "validation_fpr_budget": budget,
+        "cohorts": cohorts,
+        "train_sample_blocks": len(train),
+        "seed": SEED,
+        "feature_schema": list(FEATURES),
+        "validation_fpr_budget": budget,
         "methods": methods,
     }
 
@@ -234,18 +271,29 @@ def run(archive_path, output, *, budget=0.01, progress=print):
             db.executescript(SCHEMA)
             with archive.open(log_member) as logs:
                 counts = ingest_blocks(db, logs, progress)
-            with archive.open(label_member) as raw, TextIOWrapper(raw, encoding="utf-8-sig", newline="") as labels, db:
+            with (
+                archive.open(label_member) as raw,
+                TextIOWrapper(raw, encoding="utf-8-sig", newline="") as labels,
+                db,
+            ):
                 db.executemany("INSERT INTO labels VALUES (?, ?)", label_rows(labels))
             references = db.execute("SELECT COALESCE(SUM(event_count),0) FROM blocks").fetchone()[0]
             if counts["block_references"] != references:
                 raise RuntimeError("Block membership counts do not reconcile.")
             ingest_seconds = time.perf_counter() - started
             report = analyze(db, output, budget)
-        report.update(version=VERSION, dataset="Loghub HDFS_v1", unit="hdfs_block",
-                      clock="Source wall clock, timezone not supplied",
-                      archive_sha256=archive_sha, log_member=LOG_MEMBER, label_member=LABEL_MEMBER,
-                      ingest_seconds=round(ingest_seconds, 3), total_seconds=round(time.perf_counter() - started, 3),
-                      **counts)
+        report.update(
+            version=VERSION,
+            dataset="Loghub HDFS_v1",
+            unit="hdfs_block",
+            clock="Source wall clock, timezone not supplied",
+            archive_sha256=archive_sha,
+            log_member=LOG_MEMBER,
+            label_member=LABEL_MEMBER,
+            ingest_seconds=round(ingest_seconds, 3),
+            total_seconds=round(time.perf_counter() - started, 3),
+            **counts,
+        )
         with (output / "report.json").open("x", encoding="utf-8") as file:
             json.dump(report, file, indent=2, allow_nan=False)
         return report

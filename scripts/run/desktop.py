@@ -72,15 +72,20 @@ class Desktop:
         file_menu.add_command(label="Exit", command=self.close)
         menu.add_cascade(label="File", menu=file_menu)
         help_menu = tk.Menu(menu, tearoff=False)
-        help_menu.add_command(label="About", command=lambda: messagebox.showinfo(
-            APP_NAME, "Select a granted dataset to read its real log records.", parent=self.root))
+        help_menu.add_command(
+            label="About",
+            command=lambda: messagebox.showinfo(
+                APP_NAME, "Select a granted dataset to read its real log records.", parent=self.root
+            ),
+        )
         menu.add_cascade(label="Help", menu=help_menu)
         self.root.configure(menu=menu)
 
         login = ttk.LabelFrame(self.root, text="Connection", padding=8)
         login.grid(row=0, column=0, padx=10, pady=(10, 4), sticky="ew")
-        for col, (label, var) in enumerate((("Server", self.origin), ("Username", self.username),
-                                            ("Password", self.password))):
+        for col, (label, var) in enumerate(
+            (("Server", self.origin), ("Username", self.username), ("Password", self.password))
+        ):
             ttk.Label(login, text=label).grid(row=0, column=col, sticky="w")
             entry = ttk.Entry(login, textvariable=var, show="*" if col == 2 else "")
             entry.grid(row=1, column=col, padx=(0, 8), sticky="ew")
@@ -99,11 +104,14 @@ class Desktop:
         refresh = ttk.Button(datasets, text="Refresh", command=self.refresh_datasets)
         refresh.grid(row=0, column=1)
         self.connected_widgets.append(refresh)
-        for col, (label, roles, callback) in enumerate((
-            ("New", {"manager", "admin"}, self.new_dataset),
-            ("Rename", {"manager", "admin"}, self.rename_dataset),
-            ("Delete empty", {"admin"}, self.remove_dataset),
-        ), start=2):
+        for col, (label, roles, callback) in enumerate(
+            (
+                ("New", {"manager", "admin"}, self.new_dataset),
+                ("Rename", {"manager", "admin"}, self.rename_dataset),
+                ("Delete empty", {"admin"}, self.remove_dataset),
+            ),
+            start=2,
+        ):
             button = ttk.Button(datasets, text=label, command=callback)
             button.grid(row=0, column=col, padx=(4, 0))
             self.mutations.append((button, roles))
@@ -135,14 +143,20 @@ class Desktop:
         jobs.columnconfigure(0, weight=1)
         self.upload_button = ttk.Button(jobs, text="Upload BGL file", command=self.upload)
         self.upload_button.grid(row=0, column=0, sticky="w")
-        ttk.Checkbutton(jobs, text="Refresh automatically", variable=self.auto).grid(row=1, column=0, sticky="w")
+        ttk.Checkbutton(jobs, text="Refresh automatically", variable=self.auto).grid(
+            row=1, column=0, sticky="w"
+        )
         check = ttk.Button(jobs, text="Check import", command=self.check_import)
         check.grid(row=1, column=1, padx=4)
         self.connected_widgets.append(check)
-        ttk.Progressbar(jobs, variable=self.progress, maximum=100).grid(row=2, column=0, columnspan=2, sticky="ew", pady=8)
+        ttk.Progressbar(jobs, variable=self.progress, maximum=100).grid(
+            row=2, column=0, columnspan=2, sticky="ew", pady=8
+        )
         self.canvas = tk.Canvas(jobs, height=48, background="#ffffff", highlightthickness=1)
         self.canvas.grid(row=3, column=0, columnspan=2, sticky="ew")
-        ttk.Label(self.root, textvariable=self.status, wraplength=720).grid(row=3, column=0, padx=10, pady=6, sticky="w")
+        ttk.Label(self.root, textvariable=self.status, wraplength=720).grid(
+            row=3, column=0, padx=10, pady=6, sticky="w"
+        )
 
     def update_controls(self):
         busy = self.future is not None
@@ -153,7 +167,9 @@ class Desktop:
             widget.configure(state="normal" if connected else "disabled")
         for button, roles in self.mutations:
             button.configure(state="normal" if connected and self.role in roles else "disabled")
-        self.upload_button.configure(state="normal" if connected and self.role in {"analyst", "manager", "admin"} else "disabled")
+        self.upload_button.configure(
+            state="normal" if connected and self.role in {"analyst", "manager", "admin"} else "disabled"
+        )
 
     def run(self, work, on_success):
         if self.future is not None:
@@ -210,10 +226,12 @@ class Desktop:
         current = preferred if preferred is not None else self.dataset_id()
 
         def display(rows):
-            self.records = {f'{row["id"]} · {row["name"]}': row["id"] for row in rows}
+            self.records = {f"{row['id']} · {row['name']}": row["id"] for row in rows}
             values = list(self.records)
             self.dataset_picker.configure(values=values)
-            self.selection.set(next((k for k, v in self.records.items() if v == current), values[0] if values else ""))
+            self.selection.set(
+                next((k for k, v in self.records.items() if v == current), values[0] if values else "")
+            )
             self.select_dataset()
             self.status.set(f"{len(values)} dataset(s) available on this page.")
 
@@ -232,10 +250,13 @@ class Desktop:
         name = simpledialog.askstring("Register dataset", "Dataset name:", parent=self.root)
         if not name:
             return
-        key = simpledialog.askstring("Register dataset", "Unique key (letters, digits, dot, dash, underscore):", parent=self.root)
+        key = simpledialog.askstring(
+            "Register dataset", "Unique key (letters, digits, dot, dash, underscore):", parent=self.root
+        )
         if key:
-            self.run(lambda: self.client.create_dataset(name, key),
-                     lambda row: self.refresh_datasets(row["id"]))
+            self.run(
+                lambda: self.client.create_dataset(name, key), lambda row: self.refresh_datasets(row["id"])
+            )
 
     def rename_dataset(self):
         dataset_id = self.dataset_id()
@@ -243,13 +264,16 @@ class Desktop:
             return
         name = simpledialog.askstring("Rename dataset", "New name:", parent=self.root)
         if name:
-            self.run(lambda: self.client.rename_dataset(dataset_id, name),
-                     lambda row: self.refresh_datasets(row["id"]))
+            self.run(
+                lambda: self.client.rename_dataset(dataset_id, name),
+                lambda row: self.refresh_datasets(row["id"]),
+            )
 
     def remove_dataset(self):
         dataset_id = self.dataset_id()
         if dataset_id is not None and messagebox.askyesno(
-                "Delete empty dataset", f"Delete {self.selection.get()} if it is empty?", parent=self.root):
+            "Delete empty dataset", f"Delete {self.selection.get()} if it is empty?", parent=self.root
+        ):
             self.run(lambda: self.client.delete_dataset(dataset_id), lambda _: self.refresh_datasets())
 
     def read_logs(self):
@@ -270,12 +294,13 @@ class Desktop:
             interval = self.client.log_range(dataset_id)
             if not interval or not interval["start_time"]:
                 return {"items": [], "count": 0}
-            return self.client.logs(dataset_id, interval["start_time"], interval["end_time"],
-                                    limit=limit, sort=sort, q=query)
+            return self.client.logs(
+                dataset_id, interval["start_time"], interval["end_time"], limit=limit, sort=sort, q=query
+            )
 
         def display(page):
             self.show_logs(page["items"])
-            self.status.set(f'{len(page["items"])} displayed · {page["count"]:,} matches in MySQL')
+            self.status.set(f"{len(page['items'])} displayed · {page['count']:,} matches in MySQL")
 
         self.run(fetch, display)
 
@@ -284,25 +309,32 @@ class Desktop:
         self.logs.configure(state="normal")
         self.logs.delete("1.0", "end")
         for row in rows:
-            self.logs.insert("end", f'{row["timestamp"]}  {row["severity"]}  {row["host"]}\n{row["message"]}\n\n')
+            self.logs.insert(
+                "end", f"{row['timestamp']}  {row['severity']}  {row['host']}\n{row['message']}\n\n"
+            )
         self.logs.configure(state="disabled")
 
     def export_logs(self):
         if not self.log_rows:
             self.status.set("Read log rows before saving.")
             return
-        destination = filedialog.asksaveasfilename(parent=self.root, defaultextension=".csv",
-                                                  filetypes=[("CSV", "*.csv")])
+        destination = filedialog.asksaveasfilename(
+            parent=self.root, defaultextension=".csv", filetypes=[("CSV", "*.csv")]
+        )
         if destination:
-            self.run(lambda: write_log_csv(destination, self.log_rows),
-                     lambda _: self.status.set(f"Saved {len(self.log_rows)} log rows."))
+            self.run(
+                lambda: write_log_csv(destination, self.log_rows),
+                lambda _: self.status.set(f"Saved {len(self.log_rows)} log rows."),
+            )
 
     def upload(self):
         dataset_id = self.dataset_id()
         if dataset_id is None:
             self.status.set("Select a dataset.")
             return
-        path = filedialog.askopenfilename(parent=self.root, filetypes=[("BGL text or CSV", "*.txt *.log *.csv")])
+        path = filedialog.askopenfilename(
+            parent=self.root, filetypes=[("BGL text or CSV", "*.txt *.log *.csv")]
+        )
         if path:
             self.run(lambda: self.client.upload(dataset_id, path), self.show_job)
 
@@ -314,8 +346,10 @@ class Desktop:
         color = {"completed": "#087f5b", "failed": "#b02a37"}.get(state, "#1769a0")
         self.canvas.delete("all")
         self.canvas.create_oval(9, 14, 24, 29, fill=color, outline="")
-        self.canvas.create_text(34, 22, anchor="w", text=f'Import {job["job_id"]}: {state} · {completed:,}/{total:,} lines')
-        self.status.set(f'{state} · {job["parsed_events"]:,} parsed · {job["malformed_rows"]:,} malformed')
+        self.canvas.create_text(
+            34, 22, anchor="w", text=f"Import {job['job_id']}: {state} · {completed:,}/{total:,} lines"
+        )
+        self.status.set(f"{state} · {job['parsed_events']:,} parsed · {job['malformed_rows']:,} malformed")
 
     def check_import(self):
         job = self.jobs.get(self.dataset_id())
@@ -330,7 +364,9 @@ class Desktop:
 
     def close(self):
         if self.future is not None:
-            messagebox.showwarning("Request in progress", "Wait for the current request to complete.", parent=self.root)
+            messagebox.showwarning(
+                "Request in progress", "Wait for the current request to complete.", parent=self.root
+            )
             return
         self.executor.shutdown(wait=False, cancel_futures=True)
         if self.client:

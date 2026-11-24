@@ -20,8 +20,14 @@ NUMERIC = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", re.ASCII)
 
 
 def column_names(names):
-    if len(names) > MAX_COLUMNS or any(not name.strip() or len(name) > 200 for name in names) or len(set(names)) != len(names):
-        raise WorkspaceError("Up to 64 unique, non-empty column names of at most 200 characters are required.", 422)
+    if (
+        len(names) > MAX_COLUMNS
+        or any(not name.strip() or len(name) > 200 for name in names)
+        or len(set(names)) != len(names)
+    ):
+        raise WorkspaceError(
+            "Up to 64 unique, non-empty column names of at most 200 characters are required.", 422
+        )
     return list(names)
 
 
@@ -30,7 +36,11 @@ def csv_rows(text):
     fields = column_names(next(reader, []))
     for row in reader:
         if row:
-            yield dict(zip(fields, (value if value != "" else None for value in row))) if len(row) == len(fields) else None
+            yield (
+                dict(zip(fields, (value if value != "" else None for value in row)))
+                if len(row) == len(fields)
+                else None
+            )
 
 
 def invalid_number(value):
@@ -86,8 +96,13 @@ def distribution(values, kind):
                 counts[max(0, min(index, len(counts) - 1))] += 1
             return {"kind": "histogram", "min": low, "max": high, "counts": counts}
     if kind in {"text", "boolean", "mixed"}:
-        values = Counter((encoded(value), short(value)) for value in values if isinstance(value, (str, bool, int, float)))
-        return {"kind": "top", "values": [{"label": label, "count": count} for (_, label), count in values.most_common(8)]}
+        values = Counter(
+            (encoded(value), short(value)) for value in values if isinstance(value, (str, bool, int, float))
+        )
+        return {
+            "kind": "top",
+            "values": [{"label": label, "count": count} for (_, label), count in values.most_common(8)],
+        }
     return None
 
 
@@ -121,13 +136,29 @@ def summarize(source, format_name, fields=None, total=None, bounded=False):
         values = [row[name] for row in records if row.get(name) is not None]
         types = sorted({observed_type(value, format_name == "csv") for value in values})
         kind = types[0] if len(types) == 1 else "mixed" if types else "unknown"
-        summaries.append({"name": name, "type": fields.get(name) or kind, "observed_types": types,
-                          "missing": len(records) - len(values), "distribution": distribution(values, kind)})
-    return {"format": format_name, "scanned_rows": scanned, "valid_rows": len(records), "malformed_rows": malformed,
-            "duplicate_rows": duplicates, "total_rows": total if total is not None else None if bounded else scanned,
-            "sampled": bounded or (total is not None and total > scanned), "columns": summaries,
-            "preview": [[None if row.get(name) is None else short(row[name]) for name in columns]
-                        for row in records[:PREVIEW_ROWS]]}
+        summaries.append(
+            {
+                "name": name,
+                "type": fields.get(name) or kind,
+                "observed_types": types,
+                "missing": len(records) - len(values),
+                "distribution": distribution(values, kind),
+            }
+        )
+    return {
+        "format": format_name,
+        "scanned_rows": scanned,
+        "valid_rows": len(records),
+        "malformed_rows": malformed,
+        "duplicate_rows": duplicates,
+        "total_rows": total if total is not None else None if bounded else scanned,
+        "sampled": bounded or (total is not None and total > scanned),
+        "columns": summaries,
+        "preview": [
+            [None if row.get(name) is None else short(row[name]) for name in columns]
+            for row in records[:PREVIEW_ROWS]
+        ],
+    }
 
 
 def text_profile(text, format_name):
@@ -153,9 +184,12 @@ def parquet_profile(path):
             raise WorkspaceError("Parquet exceeds the 256 MiB preview limit.", 413)
         stream.seek(0)
         try:
-            with parquet.ParquetFile(stream, thrift_string_size_limit=8 * 1024 * 1024,
-                                     thrift_container_size_limit=200_000,
-                                     arrow_extensions_enabled=False) as file:
+            with parquet.ParquetFile(
+                stream,
+                thrift_string_size_limit=8 * 1024 * 1024,
+                thrift_container_size_limit=200_000,
+                arrow_extensions_enabled=False,
+            ) as file:
                 schema = file.schema_arrow
                 fields = {name: str(schema.field(name).type) for name in column_names(schema.names)}
                 groups, rows, decoded = [], 0, 0
@@ -166,8 +200,13 @@ def parquet_profile(path):
                         break
                     groups.append(index)
                     rows += group.num_rows
-                records = (row for batch in file.iter_batches(batch_size=128, row_groups=groups, use_threads=False)
-                           for row in batch.to_pylist())
+                records = (
+                    row
+                    for batch in file.iter_batches(batch_size=128, row_groups=groups, use_threads=False)
+                    for row in batch.to_pylist()
+                )
                 return summarize(records, "parquet", fields, total=file.metadata.num_rows)
         except (pyarrow.ArrowException, ValueError, OverflowError, RecursionError):
-            raise WorkspaceError("Could not read the Parquet file, or its schema exceeds the preview limit.", 422) from None
+            raise WorkspaceError(
+                "Could not read the Parquet file, or its schema exceeds the preview limit.", 422
+            ) from None

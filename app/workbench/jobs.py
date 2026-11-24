@@ -57,8 +57,16 @@ def package_list(executable, root):
         "'packages':sorted([[d.metadata.get('Name') or '',d.version] for d in m.distributions()])[:1000]}))"
     )
     try:
-        output = subprocess.run([str(executable), "-I", "-c", snippet], cwd=root, env=child_environment(),
-                                capture_output=True, text=True, timeout=8, check=True, creationflags=NO_WINDOW)
+        output = subprocess.run(
+            [str(executable), "-I", "-c", snippet],
+            cwd=root,
+            env=child_environment(),
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=True,
+            creationflags=NO_WINDOW,
+        )
         return json.loads(output.stdout)
     except (OSError, subprocess.SubprocessError, ValueError):
         raise WorkspaceError("Could not read the selected Python environment.", 422) from None
@@ -66,21 +74,43 @@ def package_list(executable, root):
 
 def sample_machine(include_gpu):
     ram = psutil.virtual_memory()
-    sample = {"timestamp": now(), "cpu_percent": psutil.cpu_percent(interval=0.1), "ram_percent": ram.percent,
-              "ram_used_bytes": ram.total - ram.available, "ram_total_bytes": ram.total, "gpu": []}
+    sample = {
+        "timestamp": now(),
+        "cpu_percent": psutil.cpu_percent(interval=0.1),
+        "ram_percent": ram.percent,
+        "ram_used_bytes": ram.total - ram.available,
+        "ram_total_bytes": ram.total,
+        "gpu": [],
+    }
     executable = shutil.which("nvidia-smi") if include_gpu else None
     if executable:
         try:
             output = subprocess.run(
-                [executable, "--query-gpu=index,name,uuid,utilization.gpu,memory.used,memory.total", "--format=csv,noheader,nounits"],
-                capture_output=True, text=True, timeout=2, check=True, creationflags=NO_WINDOW,
+                [
+                    executable,
+                    "--query-gpu=index,name,uuid,utilization.gpu,memory.used,memory.total",
+                    "--format=csv,noheader,nounits",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=2,
+                check=True,
+                creationflags=NO_WINDOW,
             )
             for row in csv.reader(output.stdout.splitlines(), skipinitialspace=True):
                 if len(row) != 6 or not row[0].strip().isdecimal():
                     continue
                 index, name, uuid, gpu, used, total = row
-                sample["gpu"].append({"index": int(index), "name": name.strip(), "uuid": uuid.strip(),
-                                      "percent": number(gpu), "vram_used_mib": number(used), "vram_total_mib": number(total)})
+                sample["gpu"].append(
+                    {
+                        "index": int(index),
+                        "name": name.strip(),
+                        "uuid": uuid.strip(),
+                        "percent": number(gpu),
+                        "vram_used_mib": number(used),
+                        "vram_total_mib": number(total),
+                    }
+                )
         except (OSError, subprocess.SubprocessError, ValueError):
             pass
     return sample
@@ -102,7 +132,9 @@ def utc_timestamp(value):
     try:
         timestamp = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
         if timestamp.utcoffset() is not None:
-            return timestamp.astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+            return (
+                timestamp.astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+            )
     except (ValueError, OverflowError):
         pass
     return None
@@ -110,7 +142,11 @@ def utc_timestamp(value):
 
 def training_metrics(text):
     reader = csv.DictReader(StringIO(text))
-    if not reader.fieldnames or "epoch" not in reader.fieldnames or not {"train_loss", "val_loss"} & set(reader.fieldnames):
+    if (
+        not reader.fieldnames
+        or "epoch" not in reader.fieldnames
+        or not {"train_loss", "val_loss"} & set(reader.fieldnames)
+    ):
         raise WorkspaceError("metrics.csv needs an epoch column and train_loss or val_loss.", 422)
     rows = deque(maxlen=120)
     for row in reader:
@@ -136,9 +172,18 @@ def machine_metrics(text):
         stamp = utc_timestamp(row.get("timestamp"))
         if stamp is None:
             continue
-        result = {key: number(row.get(key)) for key in ("cpu_percent", "gpu_percent", "ram_percent",
-                                                        "ram_used_bytes", "ram_total_bytes",
-                                                        "vram_used_mib", "vram_total_mib")}
+        result = {
+            key: number(row.get(key))
+            for key in (
+                "cpu_percent",
+                "gpu_percent",
+                "ram_percent",
+                "ram_used_bytes",
+                "ram_total_bytes",
+                "vram_used_mib",
+                "vram_total_mib",
+            )
+        }
         devices = row.get("gpu")
         result["gpu"] = []
         if isinstance(devices, list):
@@ -148,11 +193,21 @@ def machine_metrics(text):
                 index = device.get("index", position)
                 if type(index) is not int or not 0 <= index <= 255:
                     continue
-                identifiers = {key: device[key].strip()[:160] for key in ("name", "uuid") if isinstance(device.get(key), str)}
-                readings = {key: number(device.get(key)) for key in ("percent", "vram_used_mib", "vram_total_mib")}
+                identifiers = {
+                    key: device[key].strip()[:160]
+                    for key in ("name", "uuid")
+                    if isinstance(device.get(key), str)
+                }
+                readings = {
+                    key: number(device.get(key)) for key in ("percent", "vram_used_mib", "vram_total_mib")
+                }
                 result["gpu"].append({"index": index, **identifiers, **readings})
         if result["gpu"]:
-            for field, key in (("gpu_percent", "percent"), ("vram_used_mib", "vram_used_mib"), ("vram_total_mib", "vram_total_mib")):
+            for field, key in (
+                ("gpu_percent", "percent"),
+                ("vram_used_mib", "vram_used_mib"),
+                ("vram_total_mib", "vram_total_mib"),
+            ):
                 result[field] = result["gpu"][0][key]
         rows.append({"timestamp": stamp, **result})
     return list(rows)
@@ -191,6 +246,7 @@ class Runs:
 
     def recent(self, root):
         rows = []
+
         def modified(item):
             try:
                 return item.stat().st_mtime_ns
@@ -213,37 +269,72 @@ class Runs:
         file = self.store.resolve(script, root=root)
         if file.suffix.casefold() != ".py" or not file.is_file():
             raise WorkspaceError("Choose a Python file in the project.")
-        if (not isinstance(args, list) or len(args) > 40
-                or any(not isinstance(item, str) or len(item) > 1024 or "\0" in item for item in args)):
+        if (
+            not isinstance(args, list)
+            or len(args) > 40
+            or any(not isinstance(item, str) or len(item) > 1024 or "\0" in item for item in args)
+        ):
             raise WorkspaceError("Invalid run arguments.")
         if not isinstance(config_files, list) or len(config_files) > 8:
             raise WorkspaceError("Choose up to eight configuration files in the project.")
         for name in config_files:
             path = self.store.resolve(name, root=root)
             if path.suffix.casefold() not in run_profile.CONFIG_SUFFIXES or not path.is_file():
-                raise WorkspaceError("Choose a JSON, TOML, YAML, INI, CFG, TXT or lockfile configuration file.")
+                raise WorkspaceError(
+                    "Choose a JSON, TOML, YAML, INI, CFG, TXT or lockfile configuration file."
+                )
         with self.store.profile_lock():
-            if sum(row.get("source") != "attached" and row["status"] in {"starting", "running"}
-                   for row in self.recent(root)) >= RUN_LIMIT:
+            if (
+                sum(
+                    row.get("source") != "attached" and row["status"] in {"starting", "running"}
+                    for row in self.recent(root)
+                )
+                >= RUN_LIMIT
+            ):
                 raise WorkspaceError("At most two concurrent runs per project.", 409)
             folder = self.directory / run_id
             folder.mkdir(mode=0o700)
             (folder / "artifacts").mkdir(mode=0o700)
-            record = {"id": run_id, "root": str(root), "script": script, "status": "starting", "started_at": now(),
-                      "gpu": self.store.state["features"]["gpu"]}
+            record = {
+                "id": run_id,
+                "root": str(root),
+                "script": script,
+                "status": "starting",
+                "started_at": now(),
+                "gpu": self.store.state["features"]["gpu"],
+            }
             save_record(folder, record)
-            command = [sys.executable, "-B", "-m", "app.workbench.runner", str(folder), str(interpreter),
-                       identifier, json.dumps(config_files), *args]
-            options = ({"creationflags": subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP}
-                       if os.name == "nt" else {"start_new_session": True})
+            command = [
+                sys.executable,
+                "-B",
+                "-m",
+                "app.workbench.runner",
+                str(folder),
+                str(interpreter),
+                identifier,
+                json.dumps(config_files),
+                *args,
+            ]
+            options = (
+                {"creationflags": subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP}
+                if os.name == "nt"
+                else {"start_new_session": True}
+            )
             try:
-                process = subprocess.Popen(command, cwd=Path(__file__).resolve().parents[2], env=child_environment(),
-                                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                           **options)
+                process = subprocess.Popen(
+                    command,
+                    cwd=Path(__file__).resolve().parents[2],
+                    env=child_environment(),
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    **options,
+                )
             except (OSError, ValueError):  # ValueError: arguments that cannot be encoded for the OS
                 save_record(folder, {**record, "status": "failed", "ended_at": now()})
                 raise WorkspaceError("Could not start the run supervisor.", 503) from None
             from threading import Thread
+
             Thread(target=process.wait, daemon=True).start()
             return record
 
@@ -273,9 +364,18 @@ class Runs:
                 if previous.get("source") != "attached":
                     raise WorkspaceError("run_id is already in use.", 409)
                 reference = reference or previous.get("external_id")
-            record = {"id": identifier, "root": str(root), "source": "attached", "pid": process.pid,
-                      "process_created": created, "status": "running", "started_at": attached.timestamp(created),
-                      "external_id": reference, "script": reference or f"PID {process.pid}", **paths}
+            record = {
+                "id": identifier,
+                "root": str(root),
+                "source": "attached",
+                "pid": process.pid,
+                "process_created": created,
+                "status": "running",
+                "started_at": attached.timestamp(created),
+                "external_id": reference,
+                "script": reference or f"PID {process.pid}",
+                **paths,
+            }
             save_record(folder, record)
         return record
 
@@ -297,12 +397,21 @@ class Runs:
             if record["status"] == "running":
                 attached.sample(folder, record, root, self.store.profile_lock)
             log_path = self.external_file(root, record["log"])
-            log = tail(log_path, offset, stamp) if log_path else {
-                "changed": offset != 0 or stamp != "", "text": "", "offset": 0, "stamp": ""}
-            samples, training = self.measurements(folder, self.external_file(root, record["metrics"]), external=True)
+            log = (
+                tail(log_path, offset, stamp)
+                if log_path
+                else {"changed": offset != 0 or stamp != "", "text": "", "offset": 0, "stamp": ""}
+            )
+            samples, training = self.measurements(
+                folder, self.external_file(root, record["metrics"]), external=True
+            )
             return {"run": record, "log": log, "machine": samples, "training": training}
         path = folder / "train.log"
-        log = tail(path, offset, stamp) if path.is_file() else {"changed": True, "text": "", "offset": 0, "stamp": ""}
+        log = (
+            tail(path, offset, stamp)
+            if path.is_file()
+            else {"changed": True, "text": "", "offset": 0, "stamp": ""}
+        )
         samples, training = self.measurements(folder)
         return {"run": record, "log": log, "machine": samples, "training": training}
 
@@ -319,13 +428,34 @@ class Runs:
             snapshot = run_profile.load_snapshot(folder, record["id"])
             machine = {}
             for field in ("cpu_percent", "gpu_percent", "ram_percent", "vram_used_mib"):
-                values = [row[field] for row in samples if row[field] is not None and row[field] >= 0
-                          and (field == "vram_used_mib" or row[field] <= 100)]
+                values = [
+                    row[field]
+                    for row in samples
+                    if row[field] is not None
+                    and row[field] >= 0
+                    and (field == "vram_used_mib" or row[field] <= 100)
+                ]
                 machine[field] = {"samples": len(values), "peak": max(values, default=None)}
-            compared.append({
-                "run": {key: record.get(key) for key in ("id", "script", "status", "started_at", "ended_at", "exit_code", "source", "pid")},
-                "profile": snapshot, "training": training, "machine": machine
-            })
+            compared.append(
+                {
+                    "run": {
+                        key: record.get(key)
+                        for key in (
+                            "id",
+                            "script",
+                            "status",
+                            "started_at",
+                            "ended_at",
+                            "exit_code",
+                            "source",
+                            "pid",
+                        )
+                    },
+                    "profile": snapshot,
+                    "training": training,
+                    "machine": machine,
+                }
+            )
         return {"runs": compared}
 
     def external_file(self, root, name):
@@ -359,9 +489,11 @@ class Runs:
 def running(record):
     pid = record.get("runner_pid")
     if not pid:
-        return record["status"] == "starting" and (
-            datetime.now(timezone.utc) - datetime.fromisoformat(record["started_at"])
-        ).total_seconds() < 15
+        return (
+            record["status"] == "starting"
+            and (datetime.now(timezone.utc) - datetime.fromisoformat(record["started_at"])).total_seconds()
+            < 15
+        )
     try:
         return psutil.Process(pid).create_time() == record["runner_created"]
     except psutil.Error:
@@ -405,10 +537,17 @@ def execute_run(folder, interpreter, identifier, config_files, args):
     save_record(folder, record)
     process = None
     try:
-        env = {**child_environment(), "H_LOGSEN_RUN_ID": record["id"],
-               "H_LOGSEN_METRICS_CSV": str(folder / "metrics.csv"),
-               "H_LOGSEN_ARTIFACTS_DIR": str(folder / "artifacts"), "PYTHONIOENCODING": "utf-8"}
-        with (folder / "train.log").open("xb") as log, (folder / "machine.jsonl").open("x", encoding="utf-8") as metrics:
+        env = {
+            **child_environment(),
+            "H_LOGSEN_RUN_ID": record["id"],
+            "H_LOGSEN_METRICS_CSV": str(folder / "metrics.csv"),
+            "H_LOGSEN_ARTIFACTS_DIR": str(folder / "artifacts"),
+            "PYTHONIOENCODING": "utf-8",
+        }
+        with (
+            (folder / "train.log").open("xb") as log,
+            (folder / "machine.jsonl").open("x", encoding="utf-8") as metrics,
+        ):
             if script.resolve(strict=True) != script or not script.is_file():
                 raise OSError("Script path changed")
             try:
@@ -420,8 +559,13 @@ def execute_run(folder, interpreter, identifier, config_files, args):
                 record.update(status="stopped")
                 return
             process = subprocess.Popen(
-                [interpreter, "-u", str(script), *args], cwd=root, env=env,
-                stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, creationflags=NO_WINDOW,
+                [interpreter, "-u", str(script), *args],
+                cwd=root,
+                env=env,
+                stdin=subprocess.DEVNULL,
+                stdout=log,
+                stderr=subprocess.STDOUT,
+                creationflags=NO_WINDOW,
             )
             record.update(status="running", pid=process.pid)
             save_record(folder, record)

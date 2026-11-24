@@ -58,9 +58,7 @@ def upgrade():
             ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_datasets")),
-        sa.UniqueConstraint(
-            "source_id", "dataset_key", name=op.f("uq_datasets_source_id_dataset_key")
-        ),
+        sa.UniqueConstraint("source_id", "dataset_key", name=op.f("uq_datasets_source_id_dataset_key")),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_0900_as_cs",
         mysql_engine="InnoDB",
@@ -80,9 +78,7 @@ def upgrade():
             ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_detector_versions")),
-        sa.UniqueConstraint(
-            "detector_id", "id", name=op.f("uq_detector_versions_detector_id_id")
-        ),
+        sa.UniqueConstraint("detector_id", "id", name=op.f("uq_detector_versions_detector_id_id")),
         sa.UniqueConstraint(
             "detector_id",
             "version",
@@ -119,12 +115,8 @@ def upgrade():
             name="fk_run_version",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_detector_runs")),
-        sa.UniqueConstraint(
-            "dataset_id", "id", name=op.f("uq_detector_runs_dataset_id_id")
-        ),
-        sa.UniqueConstraint(
-            "dataset_id", "run_key", name=op.f("uq_detector_runs_dataset_id_run_key")
-        ),
+        sa.UniqueConstraint("dataset_id", "id", name=op.f("uq_detector_runs_dataset_id_id")),
+        sa.UniqueConstraint("dataset_id", "run_key", name=op.f("uq_detector_runs_dataset_id_run_key")),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_0900_as_cs",
         mysql_engine="InnoDB",
@@ -152,9 +144,7 @@ def upgrade():
             ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_processing_jobs")),
-        sa.UniqueConstraint(
-            "dataset_id", "id", name=op.f("uq_processing_jobs_dataset_id_id")
-        ),
+        sa.UniqueConstraint("dataset_id", "id", name=op.f("uq_processing_jobs_dataset_id_id")),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_0900_as_cs",
         mysql_engine="InnoDB",
@@ -187,9 +177,7 @@ def upgrade():
             "artifact_key",
             name=op.f("uq_source_artifacts_dataset_id_artifact_key"),
         ),
-        sa.UniqueConstraint(
-            "dataset_id", "id", name=op.f("uq_source_artifacts_dataset_id_id")
-        ),
+        sa.UniqueConstraint("dataset_id", "id", name=op.f("uq_source_artifacts_dataset_id_id")),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_0900_as_cs",
         mysql_engine="InnoDB",
@@ -220,9 +208,7 @@ def upgrade():
             "state IN ('complete','partial','unknown','failed','not_processed')",
             name=op.f("ck_coverage_intervals_state"),
         ),
-        sa.CheckConstraint(
-            "end_time > start_time", name=op.f("ck_coverage_intervals_bounds")
-        ),
+        sa.CheckConstraint("end_time > start_time", name=op.f("ck_coverage_intervals_bounds")),
         sa.ForeignKeyConstraint(
             ["dataset_id", "run_id"],
             ["detector_runs.dataset_id", "detector_runs.id"],
@@ -272,9 +258,7 @@ def upgrade():
             "line_number",
             name=op.f("uq_raw_log_records_dataset_id_artifact_id_line_number"),
         ),
-        sa.UniqueConstraint(
-            "dataset_id", "id", name=op.f("uq_raw_log_records_dataset_id_id")
-        ),
+        sa.UniqueConstraint("dataset_id", "id", name=op.f("uq_raw_log_records_dataset_id_id")),
         mysql_charset="utf8mb4",
         mysql_collate="utf8mb4_0900_as_cs",
         mysql_engine="InnoDB",
@@ -306,9 +290,7 @@ def upgrade():
             ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_log_events")),
-        sa.UniqueConstraint(
-            "dataset_id", "id", name=op.f("uq_log_events_dataset_id_id")
-        ),
+        sa.UniqueConstraint("dataset_id", "id", name=op.f("uq_log_events_dataset_id_id")),
         sa.UniqueConstraint(
             "dataset_id",
             "raw_id",
@@ -358,9 +340,7 @@ def upgrade():
             ondelete="RESTRICT",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_detection_units")),
-        sa.UniqueConstraint(
-            "dataset_id", "id", name=op.f("uq_detection_units_dataset_id_id")
-        ),
+        sa.UniqueConstraint("dataset_id", "id", name=op.f("uq_detection_units_dataset_id_id")),
         sa.UniqueConstraint(
             "dataset_id",
             "unit_key",

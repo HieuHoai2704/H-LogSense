@@ -35,9 +35,7 @@ def main():
 
             def exit_uncommitted(line):
                 if line >= 50000:
-                    os._exit(
-                        77
-                    )  # Intentional worker process crash, no cleanup handlers.
+                    os._exit(77)  # Intentional worker process crash, no cleanup handlers.
 
             ingest_bgl(
                 db.engine,
@@ -48,9 +46,7 @@ def main():
             )
             raise AssertionError("Crash hook did not execute")
         with Session(db.engine) as session, session.begin():
-            source = DataSource(
-                source_key=uuid4().hex, name="Owned process-crash test, real BGL"
-            )
+            source = DataSource(source_key=uuid4().hex, name="Owned process-crash test, real BGL")
             session.add(source)
             session.flush()
             dataset = Dataset(
@@ -79,9 +75,7 @@ def main():
         assert child.returncode == 77
         with Session(db.engine) as session:
             checkpoint = session.scalar(
-                select(SourceArtifact.checkpoint_line).where(
-                    SourceArtifact.dataset_id == dataset_id
-                )
+                select(SourceArtifact.checkpoint_line).where(SourceArtifact.dataset_id == dataset_id)
             )
         assert checkpoint == 49500
         result = ingest_bgl(db.engine, dataset_id, args.archive, limit=100000)
@@ -103,13 +97,12 @@ def main():
                 worker_exit_code=child.returncode,
                 committed_checkpoint_after_crash=checkpoint,
                 stale_job_recovered=stale,
-                wall_seconds_with_child_startup_and_verification=time.perf_counter()
-                - started,
+                wall_seconds_with_child_startup_and_verification=time.perf_counter() - started,
             )
             | result
             | proof
         )
-        output = (REPO_ROOT / "docs/database/measurements/bgl-process-crash.json")
+        output = REPO_ROOT / "docs/database/measurements/bgl-process-crash.json"
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2))
         print(json.dumps(report, indent=2))

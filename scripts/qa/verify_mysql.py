@@ -38,9 +38,7 @@ def main():
             # Identifiers are generated locally, validated here, and never user SQL.
             assert re.fullmatch(r"logsense_test_[0-9a-f]{12}", schema)
             connection.execute(
-                text(
-                    f"CREATE DATABASE `{schema}` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs"
-                )
+                text(f"CREATE DATABASE `{schema}` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs")
             )
             connection.execute(
                 text(
@@ -61,12 +59,8 @@ def main():
     os.environ.update(
         LOGSENSE_RUN_MYSQL_TESTS="1",
         LOGSENSE_TEST_TOKEN=token,
-        TEST_DATABASE_URL=app_url.set(database=schema_names[0]).render_as_string(
-            hide_password=False
-        ),
-        SECOND_TEST_DATABASE_URL=app_url.set(database=schema_names[1]).render_as_string(
-            hide_password=False
-        ),
+        TEST_DATABASE_URL=app_url.set(database=schema_names[0]).render_as_string(hide_password=False),
+        SECOND_TEST_DATABASE_URL=app_url.set(database=schema_names[1]).render_as_string(hide_password=False),
     )
     suite = unittest.defaultTestLoader.discover("tests", pattern="test_*mysql*.py")
     result = unittest.TextTestRunner(verbosity=2).run(suite)
@@ -76,12 +70,10 @@ def main():
         "failures": len(result.failures),
         "errors": len(result.errors),
         "skipped": len(result.skipped),
-        "mysql_integration": "PASS"
-        if result.wasSuccessful() and not result.skipped
-        else "INCOMPLETE",
+        "mysql_integration": "PASS" if result.wasSuccessful() and not result.skipped else "INCOMPLETE",
         "cleanup": "No database/table/volume dropped. Generated fixtures retained.",
     }
-    destination = (REPO_ROOT / ".local/database-verification")
+    destination = REPO_ROOT / ".local/database-verification"
     destination.mkdir(parents=True, exist_ok=True)
     (destination / "integration-results.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))

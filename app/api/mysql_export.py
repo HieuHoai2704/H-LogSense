@@ -42,9 +42,7 @@ def export_actual():
         writer.writerow(fields)
         yield buffer.getvalue()
         for row in db.session.execute(
-            query.order_by(A.anchor_time.desc(), A.id.desc()).execution_options(
-                yield_per=100
-            )
+            query.order_by(A.anchor_time.desc(), A.id.desc()).execution_options(yield_per=100)
         ):
             item = row_summary(row, scope)
             buffer.seek(0)

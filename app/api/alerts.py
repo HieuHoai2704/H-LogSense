@@ -49,9 +49,7 @@ def create_rule():
         min_priority=priority,
         host=host,
         detector_id=detector,
-        cooldown_seconds=integer(
-            data.get("cooldown_seconds", 300), 0, 86400, "Cooldown"
-        ),
+        cooldown_seconds=integer(data.get("cooldown_seconds", 300), 0, 86400, "Cooldown"),
     )
     db.session.add(rule)
     db.session.commit()
@@ -92,9 +90,7 @@ def list_alerts():
 @alerts_api.route("/api/v1/alerts/<int:alert_id>", methods=["GET", "PATCH"])
 @roles("viewer", "analyst", "manager", "admin")
 def alert_detail(alert_id):
-    alert = db.session.scalar(
-        select(Alert).where(Alert.id == alert_id).with_for_update()
-    )
+    alert = db.session.scalar(select(Alert).where(Alert.id == alert_id).with_for_update())
     if alert is None:
         return jsonify(error={"code": "not_found"}), 404
     require_dataset(alert.dataset_id)
@@ -119,10 +115,7 @@ def alert_detail(alert_id):
             }
             if target != alert.status and (
                 target not in allowed[alert.status]
-                or (
-                    alert.status == "resolved"
-                    and g.user.role not in {"manager", "admin"}
-                )
+                or (alert.status == "resolved" and g.user.role not in {"manager", "admin"})
             ):
                 return jsonify(error={"code": "invalid_transition"}), 409
             changes["status"] = {"old": alert.status, "new": target}
@@ -141,9 +134,7 @@ def alert_detail(alert_id):
                 )
             )
             if not user or not user.active or user.role == "viewer" or not granted:
-                raise QueryError(
-                    "Assignee must have dataset permission and an investigation role."
-                )
+                raise QueryError("Assignee must have dataset permission and an investigation role.")
             changes["assigned_to"] = {"old": alert.assigned_to, "new": user_id}
             alert.assigned_to = user_id
         if "note" in data:

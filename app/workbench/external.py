@@ -28,8 +28,14 @@ def parse_line(line, format_name):
         return structured(row)
     if format_name == "hdfs":
         item = parse_hdfs(line)
-        return {"timestamp_raw": item.timestamp_raw, "thread": item.thread, "level": item.level,
-                "component": item.component, "message": item.message, "units": list(item.block_ids)}
+        return {
+            "timestamp_raw": item.timestamp_raw,
+            "thread": item.thread,
+            "level": item.level,
+            "component": item.component,
+            "message": item.message,
+            "units": list(item.block_ids),
+        }
     if len(line) > MAX_RECORD_CHARS:
         raise ValueError
     source, match = None, OPENSTACK.fullmatch(line)
@@ -41,17 +47,25 @@ def parse_line(line, format_name):
         raise ValueError
     stamp, process, level, component, message = match.groups()
     datetime.fromisoformat(stamp)
-    return {"source": source, "timestamp_raw": stamp, "process": process, "level": level,
-            "component": component, "message": message, "request_ids": REQUEST.findall(message),
-            "units": list(dict.fromkeys(INSTANCE.findall(message)))}
+    return {
+        "source": source,
+        "timestamp_raw": stamp,
+        "process": process,
+        "level": level,
+        "component": component,
+        "message": message,
+        "request_ids": REQUEST.findall(message),
+        "units": list(dict.fromkeys(INSTANCE.findall(message))),
+    }
 
 
 def structured(row):
     message = row.get("message")
     if not isinstance(message, str):
         raise ValueError
-    return {key: row[key] for key in ("timestamp", "level", "host", "message")
-            if isinstance(row.get(key), str)}
+    return {
+        key: row[key] for key in ("timestamp", "level", "host", "message") if isinstance(row.get(key), str)
+    }
 
 
 def evaluate(text, unit):
@@ -71,6 +85,7 @@ def evaluate(text, unit):
             raise WorkspaceError("HDFS IDs must be block IDs.", 422)
         if unit == "openstack_instance":
             from uuid import UUID
+
             try:
                 if str(UUID(key)) != key:
                     raise ValueError
@@ -85,9 +100,18 @@ def evaluate(text, unit):
     def ratio(a, b):
         return a / b if b else None
 
-    return {"unit": unit, "units": len(seen), "tp": tp, "fp": fp, "fn": fn, "tn": tn,
-            "precision": ratio(tp, tp + fp), "recall": ratio(tp, tp + fn),
-            "f1": ratio(2 * tp, 2 * tp + fp + fn), "fpr": ratio(fp, fp + tn)}
+    return {
+        "unit": unit,
+        "units": len(seen),
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "tn": tn,
+        "precision": ratio(tp, tp + fp),
+        "recall": ratio(tp, tp + fn),
+        "f1": ratio(2 * tp, 2 * tp + fp + fn),
+        "fpr": ratio(fp, fp + tn),
+    }
 
 
 def analyze(text, format_name, unit=None):
@@ -96,8 +120,11 @@ def analyze(text, format_name, unit=None):
     if format_name not in ("hdfs", "openstack", "jsonl", "csv"):
         raise WorkspaceError("Choose HDFS, OpenStack, JSONL, CSV or evaluation CSV.")
     # Physical lines only: str.splitlines() also breaks on \x85, \u2028 and form feeds inside a record.
-    source = (csv.DictReader(StringIO(text), strict=True) if format_name == "csv"
-              else [line.removesuffix("\r") for line in text.split("\n")[:-1 if text.endswith("\n") else None]])
+    source = (
+        csv.DictReader(StringIO(text), strict=True)
+        if format_name == "csv"
+        else [line.removesuffix("\r") for line in text.split("\n")[: -1 if text.endswith("\n") else None]]
+    )
     counts = Counter()
     sample = []
     units = set()
@@ -112,13 +139,22 @@ def analyze(text, format_name, unit=None):
                 malformed += 1
                 continue
             level = parsed.get("level", "").upper()
-            counts[level if level in {"TRACE", "DEBUG", "INFO", "WARN", "WARNING", "ERROR", "FATAL", "CRITICAL"} else "unknown"] += 1
+            counts[
+                level
+                if level in {"TRACE", "DEBUG", "INFO", "WARN", "WARNING", "ERROR", "FATAL", "CRITICAL"}
+                else "unknown"
+            ] += 1
             units.update(parsed.get("units", ()))
             if len(sample) < 30:
                 sample.append({"record": index, **parsed})
     except csv.Error:
         raise WorkspaceError("CSV syntax is invalid.", 422) from None
-    return {"format": format_name, "events": sum(counts.values()), "malformed": malformed,
-            "severity": dict(counts), "distinct_unit_ids": len(units) if format_name in ("hdfs", "openstack") else None,
-            "unit": {"hdfs": "hdfs_block", "openstack": "openstack_instance"}.get(format_name, "event"),
-            "preview": sample}
+    return {
+        "format": format_name,
+        "events": sum(counts.values()),
+        "malformed": malformed,
+        "severity": dict(counts),
+        "distinct_unit_ids": len(units) if format_name in ("hdfs", "openstack") else None,
+        "unit": {"hdfs": "hdfs_block", "openstack": "openstack_instance"}.get(format_name, "event"),
+        "preview": sample,
+    }

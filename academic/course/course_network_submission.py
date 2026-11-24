@@ -22,8 +22,12 @@ def response_details(response):
     body = response.read(MAX_HTML_BYTES + 1)
     if len(body) > MAX_HTML_BYTES:
         raise ValueError("HTML response exceeds exercise limit")
-    return {"http": response.getcode(), "final_url": response.geturl(),
-            "type": response.headers.get_content_type(), "bytes": len(body)}, body
+    return {
+        "http": response.getcode(),
+        "final_url": response.geturl(),
+        "type": response.headers.get_content_type(),
+        "bytes": len(body),
+    }, body
 
 
 def capture(operation):
@@ -68,8 +72,12 @@ def read_python_twice(url):
         manual.close()
     with urlopen(url, timeout=12) as managed:
         second, body_two = response_details(managed)
-    return {"manual": first, "context_manager": second, "both_closed": manual.closed and managed.closed,
-            "identical_bytes": hashlib.sha256(body_one).digest() == hashlib.sha256(body_two).digest()}
+    return {
+        "manual": first,
+        "context_manager": second,
+        "both_closed": manual.closed and managed.closed,
+        "identical_bytes": hashlib.sha256(body_one).digest() == hashlib.sha256(body_two).digest(),
+    }
 
 
 def first_duration(payload):
@@ -87,7 +95,8 @@ def iss_live():
 def mdn_images(output):
     images = download_images(
         "https://developer.mozilla.org/en-US/docs/Web/HTTP/Messages/",
-        output, image_origins=("mdn.github.io",),
+        output,
+        image_origins=("mdn.github.io",),
     )
     if not images:
         raise ValueError("The current MDN page returned no matching image files")
@@ -101,19 +110,26 @@ def run(output):
         "1": {
             "html": capture(lambda: save_google(output)),
             "http_error_probe": error_probe(
-                "https://www.python.org/logsense-course-missing-404", "HTTPError", 404),
+                "https://www.python.org/logsense-course-missing-404", "HTTPError", 404
+            ),
             "url_error_probe": error_probe("http://127.0.0.1:0/", "URLError"),
         },
         "2": capture(lambda: response_probe("https://www.google.com/search?q=test")),
         "3": capture(lambda: read_python_twice(PYTHON_URL)),
         "4": capture(lambda: mdn_images(output)),
-        "5": capture(lambda: {"rows": text_to_csv(
-            "http://sixty-north.com/c/t.txt", output / "05-story.csv")}),
-        "6": {"live": capture(iss_live),
-              "course_sample": {"source": "PYTHONNANGCAO_NET_DOCTHEM.pdf p.17",
-                                **first_duration({"response": [{"duration": 630}]})}},
+        "5": capture(
+            lambda: {"rows": text_to_csv("http://sixty-north.com/c/t.txt", output / "05-story.csv")}
+        ),
+        "6": {
+            "live": capture(iss_live),
+            "course_sample": {
+                "source": "PYTHONNANGCAO_NET_DOCTHEM.pdf p.17",
+                **first_duration({"response": [{"duration": 630}]}),
+            },
+        },
         "7": capture(lambda: {"rows": youtube_statistics(VIDEO_IDS, key, output / "07-youtube.csv")})
-             if key else {"status": "SKIP", "reason": "YOUTUBE_API_KEY is not configured"},
+        if key
+        else {"status": "SKIP", "reason": "YOUTUBE_API_KEY is not configured"},
     }
     (output / "results.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))
@@ -127,4 +143,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

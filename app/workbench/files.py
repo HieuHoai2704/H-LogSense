@@ -20,8 +20,19 @@ SEARCH_RESULTS = 80
 SKIPPED = {"node_modules", "__pycache__", "venv", "dist", "build"}
 FORBIDDEN_EXTENSIONS = {".pem", ".key", ".pfx", ".p12"}
 # Never opened even inside a selected project (SSH keys, agent trust files, credential stores).
-PRIVATE_FILES = {"id_rsa", "id_dsa", "id_ecdsa", "id_ecdsa_sk", "id_ed25519", "id_ed25519_sk", "authorized_keys",
-                 "known_hosts", "credentials", "credentials.json", "secrets.json"}
+PRIVATE_FILES = {
+    "id_rsa",
+    "id_dsa",
+    "id_ecdsa",
+    "id_ecdsa_sk",
+    "id_ed25519",
+    "id_ed25519_sk",
+    "authorized_keys",
+    "known_hosts",
+    "credentials",
+    "credentials.json",
+    "secrets.json",
+}
 FEATURES = {"gpu", "ssh", "external_parsers"}
 WORKSPACES = {"project", "analysis", "code"}
 ACTIVE_ROOT = ContextVar("workbench_project_root", default=None)
@@ -33,9 +44,15 @@ class WorkspaceError(Exception):
     def __init__(self, message, status=400, values=()):
         self.message = message
         self.values = tuple(values)
-        super().__init__(re.sub(r"\{(\d+)\}", lambda match: (
-            str(self.values[int(match[1])]) if int(match[1]) < len(self.values) else match[0]
-        ), message))
+        super().__init__(
+            re.sub(
+                r"\{(\d+)\}",
+                lambda match: (
+                    str(self.values[int(match[1])]) if int(match[1]) < len(self.values) else match[0]
+                ),
+                message,
+            )
+        )
         self.status = status
 
     def translated(self):
@@ -80,10 +97,12 @@ def linked(path):
 
 def component(name):
     return (
-        name and name not in {".", ".."} and not name.startswith(".")
+        name
+        and name not in {".", ".."}
+        and not name.startswith(".")
         and name.casefold() not in SKIPPED | PRIVATE_FILES
         and Path(name).suffix.casefold() not in FORBIDDEN_EXTENSIONS
-        and not any(char in name for char in ':\\/<>"|?*' )
+        and not any(char in name for char in ':\\/<>"|?*')
         and not any(ord(char) < 32 for char in name)
         and not name.endswith((" ", "."))
         and not windows_reserved(name)
@@ -93,8 +112,15 @@ def component(name):
 
 
 # Device names Windows reserves in every folder, with or without an extension.
-WINDOWS_RESERVED = {"CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$",
-                    *(f"{device}{number}" for device in ("COM", "LPT") for number in "123456789¹²³")}
+WINDOWS_RESERVED = {
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    "CONIN$",
+    "CONOUT$",
+    *(f"{device}{number}" for device in ("COM", "LPT") for number in "123456789¹²³"),
+}
 
 
 def windows_reserved(name):
@@ -141,19 +167,62 @@ def protected_roots(state_directory):
     trees = {_real(state_directory)}
     exact = {home}
     if os.name == "nt":
-        trees.update(_real(os.environ[name]) for name in
-                     ("WINDIR", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMDATA", "APPDATA", "LOCALAPPDATA")
-                     if os.environ.get(name))
+        trees.update(
+            _real(os.environ[name])
+            for name in (
+                "WINDIR",
+                "PROGRAMFILES",
+                "PROGRAMFILES(X86)",
+                "PROGRAMDATA",
+                "APPDATA",
+                "LOCALAPPDATA",
+            )
+            if os.environ.get(name)
+        )
         exact.update({home.parent})
     else:
         # realpath maps macOS /etc to /private/etc, so the rule holds on every platform.
-        trees.update(_real(name) for name in ("/etc", "/proc", "/sys", "/dev", "/usr", "/bin", "/sbin", "/lib",
-                                               "/lib32", "/lib64", "/boot", "/root", "/var/lib", "/var/log",
-                                               "/System", "/Library"))
+        trees.update(
+            _real(name)
+            for name in (
+                "/etc",
+                "/proc",
+                "/sys",
+                "/dev",
+                "/usr",
+                "/bin",
+                "/sbin",
+                "/lib",
+                "/lib32",
+                "/lib64",
+                "/boot",
+                "/root",
+                "/var/lib",
+                "/var/log",
+                "/System",
+                "/Library",
+            )
+        )
         trees.add(home / "Library")
-        exact.update(_real(name) for name in ("/home", "/Users", "/Volumes", "/var", "/run", "/run/media", "/opt",
-                                               "/srv", "/mnt", "/media", "/tmp", "/private", "/private/var",
-                                               "/snap"))
+        exact.update(
+            _real(name)
+            for name in (
+                "/home",
+                "/Users",
+                "/Volumes",
+                "/var",
+                "/run",
+                "/run/media",
+                "/opt",
+                "/srv",
+                "/mnt",
+                "/media",
+                "/tmp",
+                "/private",
+                "/private/var",
+                "/snap",
+            )
+        )
     return trees, exact
 
 
@@ -192,8 +261,15 @@ class ProjectStore:
         return self._read_state()
 
     def _read_state(self):
-        state = {"root": None, "roots": {}, "recent": [], "workspace_recents": {}, "views": {},
-                 "interpreters": {}, "features": dict.fromkeys(FEATURES, True)}
+        state = {
+            "root": None,
+            "roots": {},
+            "recent": [],
+            "workspace_recents": {},
+            "views": {},
+            "interpreters": {},
+            "features": dict.fromkeys(FEATURES, True),
+        }
         try:
             saved = json.loads(self.path.read_text(encoding="utf-8"))
             if not isinstance(saved, dict):
@@ -216,6 +292,7 @@ class ProjectStore:
             stream.seek(0)
             if os.name == "nt":
                 import msvcrt
+
                 msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
                 try:
                     yield
@@ -223,6 +300,7 @@ class ProjectStore:
                     msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
             else:
                 import fcntl
+
                 fcntl.flock(stream, fcntl.LOCK_EX)
                 try:
                     yield
@@ -243,7 +321,13 @@ class ProjectStore:
     def select(self, value, workspace="project"):
         if workspace not in WORKSPACES:
             raise WorkspaceError("Invalid workspace.")
-        if not isinstance(value, str) or not value or "\0" in value or len(value) > 2048 or not encodable(value):
+        if (
+            not isinstance(value, str)
+            or not value
+            or "\0" in value
+            or len(value) > 2048
+            or not encodable(value)
+        ):
             raise WorkspaceError("Enter the absolute path of the project folder.")
         candidate = Path(value).expanduser()
         if not candidate.is_absolute() or candidate.anchor.startswith("\\\\"):
@@ -279,7 +363,11 @@ class ProjectStore:
 
     def save_workspace_view(self, workspace, project, changes):
         def relative(path):
-            if not isinstance(path, str) or len(path) > 1024 or (path and not all(map(component, path.split("/")))):
+            if (
+                not isinstance(path, str)
+                or len(path) > 1024
+                or (path and not all(map(component, path.split("/"))))
+            ):
                 raise WorkspaceError("Invalid view path.")
             return path
 
@@ -290,15 +378,29 @@ class ProjectStore:
                 cleaned[key] = list(dict.fromkeys(filter(None, map(relative, value))))
             elif key == "selected" or key == file_key:
                 cleaned[key] = relative(value)
-            elif key == "analysis_format" and workspace == "analysis" and value in (
-                    "csv", "jsonl", "parquet", "hdfs", "openstack", "jsonl-log", "csv-log", "evaluation"):
+            elif (
+                key == "analysis_format"
+                and workspace == "analysis"
+                and value
+                in ("csv", "jsonl", "parquet", "hdfs", "openstack", "jsonl-log", "csv-log", "evaluation")
+            ):
                 cleaned[key] = value
             elif key == "editor" and workspace == "code" and isinstance(value, dict):
                 split, active, ratio = value.get("split"), value.get("active"), value.get("ratio")
-                if type(split) is not bool or active not in ("left", "right") or type(ratio) is not int or not 25 <= ratio <= 75:
+                if (
+                    type(split) is not bool
+                    or active not in ("left", "right")
+                    or type(ratio) is not int
+                    or not 25 <= ratio <= 75
+                ):
                     raise WorkspaceError("Invalid Code layout.")
-                cleaned[key] = {"left": relative(value.get("left")), "right": relative(value.get("right")) if split else "",
-                                "split": split, "active": active if split else "left", "ratio": ratio}
+                cleaned[key] = {
+                    "left": relative(value.get("left")),
+                    "right": relative(value.get("right")) if split else "",
+                    "split": split,
+                    "active": active if split else "left",
+                    "ratio": ratio,
+                }
             else:
                 raise WorkspaceError("Invalid view state.")
 
@@ -325,8 +427,13 @@ class ProjectStore:
         # Re-apply the selection rules: projects.json is a plain file and may have been edited.
         if isinstance(value, str) and value:
             root = Path(value)
-            if (root.is_absolute() and root.is_dir() and not linked(root) and root.resolve() == root
-                    and root_allowed(root, self.directory)):
+            if (
+                root.is_absolute()
+                and root.is_dir()
+                and not linked(root)
+                and root.resolve() == root
+                and root_allowed(root, self.directory)
+            ):
                 return root
         raise WorkspaceError("Choose a project folder first.", 409)
 
@@ -346,9 +453,14 @@ class ProjectStore:
                 if is_dir or entry.is_file(follow_symlinks=False):
                     rows.append({"name": entry.name, "directory": is_dir})
                 if len(rows) > 10_000:
-                    raise WorkspaceError("The folder exceeds the 10,000-entry limit. Choose a subfolder.", 422)
+                    raise WorkspaceError(
+                        "The folder exceeds the 10,000-entry limit. Choose a subfolder.", 422
+                    )
         rows.sort(key=lambda item: (not item["directory"], item["name"].casefold(), item["name"]))
-        return {"entries": rows[start:start + 300], "next": start + 300 if len(rows) > start + 300 else None}
+        return {
+            "entries": rows[start : start + 300],
+            "next": start + 300 if len(rows) > start + 300 else None,
+        }
 
     def search(self, query):
         needle = query.strip().replace("\\", "/").casefold()
@@ -471,5 +583,9 @@ def tail(path, offset=None, stamp=None):
             data = stream.read(info.st_size - start)
             if start and b"\n" in data:
                 data = data.split(b"\n", 1)[1]
-    return {"changed": True, "text": data.decode("utf-8", "replace"),
-            "offset": info.st_size, "stamp": f"{identity}:{info.st_mtime_ns}"}
+    return {
+        "changed": True,
+        "text": data.decode("utf-8", "replace"),
+        "offset": info.st_size,
+        "stamp": f"{identity}:{info.st_mtime_ns}",
+    }

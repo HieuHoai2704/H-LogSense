@@ -77,34 +77,19 @@ def verify_provenance(engine, dataset_id, archive):
                 break
             for row in rows:
                 raw = stream.readline(262145)
-                if (
-                    row.line_number != count + 1
-                    or row.byte_offset != offset
-                    or row.raw_bytes != raw
-                ):
+                if row.line_number != count + 1 or row.byte_offset != offset or row.raw_bytes != raw:
                     raise AssertionError("Raw provenance mismatch")
                 if row.parse_error is None:
-                    fields = (
-                        raw.decode("utf-8", errors="strict")
-                        .rstrip("\r\n")
-                        .split(maxsplit=9)
-                    )
+                    fields = raw.decode("utf-8", errors="strict").rstrip("\r\n").split(maxsplit=9)
                     assert row.parsed_id is not None and row.label == fields[0]
-                    assert row.timestamp == datetime(
-                        1970, 1, 1, tzinfo=timezone.utc
-                    ) + timedelta(seconds=int(fields[1]))
+                    assert row.timestamp == datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(
+                        seconds=int(fields[1])
+                    )
                     assert row.raw_timestamp == fields[4] and row.host == (
                         None if fields[3] == "-" else fields[3]
                     )
-                    assert (
-                        row.service == fields[7]
-                        and row.severity == fields[8]
-                        and row.message == fields[9]
-                    )
-                    assert (
-                        row.attributes["epoch"] == fields[1]
-                        and row.attributes["node_repeat"] == fields[5]
-                    )
+                    assert row.service == fields[7] and row.severity == fields[8] and row.message == fields[9]
+                    assert row.attributes["epoch"] == fields[1] and row.attributes["node_repeat"] == fields[5]
                 else:
                     assert row.parsed_id is None and row.label is None
                 expected_hash.update(raw)
@@ -113,14 +98,10 @@ def verify_provenance(engine, dataset_id, archive):
                 offset += len(raw)
             after_id = rows[-1].id
     with Session(engine) as session:
-        artifact = session.scalar(
-            select(SourceArtifact).where(SourceArtifact.dataset_id == dataset_id)
-        )
+        artifact = session.scalar(select(SourceArtifact).where(SourceArtifact.dataset_id == dataset_id))
         counts = {
             table.__tablename__: session.scalar(
-                select(func.count())
-                .select_from(table)
-                .where(table.dataset_id == dataset_id)
+                select(func.count()).select_from(table).where(table.dataset_id == dataset_id)
             )
             for table in (RawLogRecord, LogEvent, GroundTruthLabel)
         }
@@ -131,11 +112,7 @@ def verify_provenance(engine, dataset_id, archive):
         )
         assert count == counts["raw_log_records"] == artifact.checkpoint_line
         assert count == artifact.parsed_count + artifact.malformed_count
-        assert (
-            counts["log_events"]
-            == counts["ground_truth_labels"]
-            == artifact.parsed_count
-        )
+        assert counts["log_events"] == counts["ground_truth_labels"] == artifact.parsed_count
         assert offset == artifact.checkpoint_byte
         assert artifact.sha256 == fingerprint(archive)
         return dict(
@@ -157,13 +134,9 @@ def run_benchmark(archive, lines, *, resume=False):
         engine = db.engine
         schema = engine.url.database
         if not schema.startswith("logsense_bench_"):
-            raise ValueError(
-                "Benchmark requires a NEW logsense_bench_* schema, provisioned separately."
-            )
+            raise ValueError("Benchmark requires a NEW logsense_bench_* schema, provisioned separately.")
         with Session(engine) as session, session.begin():
-            source = DataSource(
-                source_key=uuid4().hex, name="Real Loghub BGL benchmark"
-            )
+            source = DataSource(source_key=uuid4().hex, name="Real Loghub BGL benchmark")
             session.add(source)
             session.flush()
             dataset = Dataset(
@@ -207,9 +180,7 @@ def run_benchmark(archive, lines, *, resume=False):
                     raise
                 with Session(engine) as session:
                     interrupted_checkpoint = session.scalar(
-                        select(SourceArtifact.checkpoint_line).where(
-                            SourceArtifact.dataset_id == dataset_id
-                        )
+                        select(SourceArtifact.checkpoint_line).where(SourceArtifact.dataset_id == dataset_id)
                     )
                 assert interrupted_checkpoint == 49500
                 result = ingest_bgl(engine, dataset_id, archive, limit=lines)
@@ -277,9 +248,7 @@ def run_benchmark(archive, lines, *, resume=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--archive", required=True)
-    parser.add_argument(
-        "--lines", type=int, choices=[1000, 10000, 100000, 1000000], required=True
-    )
+    parser.add_argument("--lines", type=int, choices=[1000, 10000, 100000, 1000000], required=True)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
@@ -287,11 +256,7 @@ def main():
     path = Path(args.output)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(result, indent=2))
-    print(
-        json.dumps(
-            {k: v for k, v in result.items() if not k.startswith("explain")}, indent=2
-        )
-    )
+    print(json.dumps({k: v for k, v in result.items() if not k.startswith("explain")}, indent=2))
 
 
 if __name__ == "__main__":

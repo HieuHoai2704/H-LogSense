@@ -35,9 +35,7 @@ class DatabaseUnitTests(unittest.TestCase):
         kind = UTCDateTime()
         local = datetime(2026, 11, 4, 7, tzinfo=timezone(timedelta(hours=7)))
         self.assertEqual(kind.process_bind_param(local, None), datetime(2026, 11, 4))
-        self.assertEqual(
-            kind.process_result_value(datetime(2026, 11, 4), None).tzinfo, timezone.utc
-        )
+        self.assertEqual(kind.process_result_value(datetime(2026, 11, 4), None).tzinfo, timezone.utc)
         with self.assertRaises(ValueError):
             kind.process_bind_param(datetime(2026, 11, 4), None)
 
@@ -50,9 +48,7 @@ class DatabaseUnitTests(unittest.TestCase):
     def test_private_api_disabled_without_token(self):
         app = create_app({"TESTING": True})
         self.assertEqual(
-            app.test_client()
-            .get("/api/v1/database/anomalies?dataset_id=1&run_id=1")
-            .status_code,
+            app.test_client().get("/api/v1/database/anomalies?dataset_id=1&run_id=1").status_code,
             403,
         )
 
@@ -74,14 +70,10 @@ class DatabaseUnitTests(unittest.TestCase):
             )
             headers = {"Authorization": "Bearer synthetic-operator-token"}
             self.assertEqual(
-                app.test_client()
-                .get("/api/v1/logs/datasets", headers=headers)
-                .status_code,
+                app.test_client().get("/api/v1/logs/datasets", headers=headers).status_code,
                 503,
             )
-            self.assertEqual(
-                app.test_client().get("/?source=db-1", headers=headers).status_code, 503
-            )
+            self.assertEqual(app.test_client().get("/?source=db-1", headers=headers).status_code, 503)
 
     def test_csv_formulas_and_native_negative_score(self):
         from app.services.csv_safety import safe_cell

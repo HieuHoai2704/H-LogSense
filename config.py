@@ -10,7 +10,7 @@ class Config:
     # Only these explicitly synthetic sources may be read without a real identity
     # provider. Private MySQL sources use the authenticated dataset policy.
     DEMO_READ_ENABLED = True
-    PUBLIC_DEMO_SOURCES = ('demo', 'empty', 'partial', 'unprocessed')
+    PUBLIC_DEMO_SOURCES = ("demo", "empty", "partial", "unprocessed")
     BOOTSTRAP_SERVE_LOCAL = True
     MAIL_SUPPRESS_SEND = False
 

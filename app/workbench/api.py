@@ -19,14 +19,21 @@ def mount(app, token, directory, *, port=None, desktop=False):
     app.config.setdefault("DEFAULT_INTERFACE_LANGUAGE", "vi")
     store = ProjectStore(directory)
     terminals = terminal.Terminals()
-    app.extensions["workbench"] = {"store": store, "terminals": terminals, "token": token, "port": port, "desktop": desktop,
-                                  "runs": jobs.Runs(store)}
+    app.extensions["workbench"] = {
+        "store": store,
+        "terminals": terminals,
+        "token": token,
+        "port": port,
+        "desktop": desktop,
+        "runs": jobs.Runs(store),
+    }
     app.register_blueprint(workbench)
     return app.extensions["workbench"]
 
 
 def state():
     from flask import current_app
+
     return current_app.extensions["workbench"]
 
 
@@ -34,16 +41,28 @@ def state():
 def authorize():
     config = state()
     expected = f"127.0.0.1:{config['port']}" if config["port"] not in (None, 80) else "127.0.0.1"
-    if (request.remote_addr != "127.0.0.1" or request.host != expected
-            or request.headers.get("Origin", f"http://{expected}") != f"http://{expected}"
-            or request.headers.get("Sec-Fetch-Site") not in (None, "same-origin")
-            or not secrets.compare_digest(request.headers.get("Authorization", "").encode(), b"Bearer " + config["token"].encode())):
+    if (
+        request.remote_addr != "127.0.0.1"
+        or request.host != expected
+        or request.headers.get("Origin", f"http://{expected}") != f"http://{expected}"
+        or request.headers.get("Sec-Fetch-Site") not in (None, "same-origin")
+        or not secrets.compare_digest(
+            request.headers.get("Authorization", "").encode(), b"Bearer " + config["token"].encode()
+        )
+    ):
         raise WorkspaceError("The local session is not authorized.", 403)
     g.workspace = request.headers.get("X-Workspace", "project")
     if g.workspace not in WORKSPACES:
         raise WorkspaceError("Invalid workspace.")
-    unscoped = {"session_info", "select_project", "set_feature", "start_terminal", "terminal_output", "terminal_input",
-                "close_terminal"}
+    unscoped = {
+        "session_info",
+        "select_project",
+        "set_feature",
+        "start_terminal",
+        "terminal_output",
+        "terminal_input",
+        "close_terminal",
+    }
     if request.endpoint.rsplit(".", 1)[-1] not in unscoped:
         g.workbench_root = ACTIVE_ROOT.set(str(authorized_project()))
 
@@ -118,14 +137,22 @@ def session_info():
         root = project.workspace_root(g.workspace)
     except WorkspaceError:
         root = None
-    return jsonify(root=str(root) if root else None, project=project_id(str(root)) if root else None, recent=project.workspace_recent(g.workspace), shells=list(terminal.profiles()),
-                   features=project.state["features"], os=sys.platform)
+    return jsonify(
+        root=str(root) if root else None,
+        project=project_id(str(root)) if root else None,
+        recent=project.workspace_recent(g.workspace),
+        shells=list(terminal.profiles()),
+        features=project.state["features"],
+        os=sys.platform,
+    )
 
 
 @workbench.post("/project")
 def select_project():
     root = store().select(body().get("path"), g.workspace)
-    return jsonify(root=str(root), project=project_id(str(root)), recent=store().workspace_recent(g.workspace))
+    return jsonify(
+        root=str(root), project=project_id(str(root)), recent=store().workspace_recent(g.workspace)
+    )
 
 
 @workbench.get("/tree")
@@ -200,7 +227,9 @@ def format_code():
     values = body()
     path, _ = code_file(values)
     root = store().root()
-    return jsonify(code_tools.format_text(path, root, code_tools.project_python(store(), root), values.get("text")))
+    return jsonify(
+        code_tools.format_text(path, root, code_tools.project_python(store(), root), values.get("text"))
+    )
 
 
 @workbench.get("/log")
@@ -217,8 +246,9 @@ def read_pdf():
     page = integer(request.args.get("page", type=int), 1, 100_000)
     zoom = integer(request.args.get("zoom", type=int), 75, 200)
     image, count = pdf_preview.render_page(path, page - 1, zoom)
-    return Response(image, mimetype="image/png", headers={"X-PDF-Pages": str(count),
-                                                          "X-Content-Type-Options": "nosniff"})
+    return Response(
+        image, mimetype="image/png", headers={"X-PDF-Pages": str(count), "X-Content-Type-Options": "nosniff"}
+    )
 
 
 @workbench.get("/metrics")
@@ -231,8 +261,10 @@ def metrics():
             output["default_log"] = "train.log"
     except WorkspaceError:
         pass
-    for name, loader, key in (("metrics.csv", jobs.training_metrics, "training"),
-                              ("machine.jsonl", jobs.machine_metrics, "machine")):
+    for name, loader, key in (
+        ("metrics.csv", jobs.training_metrics, "training"),
+        ("machine.jsonl", jobs.machine_metrics, "machine"),
+    ):
         if not (root / name).is_file():
             continue
         try:
@@ -317,8 +349,11 @@ def start_terminal():
         available = jobs.interpreters(root)
         interpreter = available[jobs.runtime_id(store(), root, available) if scoped else "app"]
     session = state()["terminals"].add(command, root, interpreter)
-    return jsonify(id=session, cwd=str(root) if shell != "SSH" else None,
-                   interpreter=str(interpreter) if interpreter is not None else None), 201
+    return jsonify(
+        id=session,
+        cwd=str(root) if shell != "SSH" else None,
+        interpreter=str(interpreter) if interpreter is not None else None,
+    ), 201
 
 
 @workbench.get("/ports")
@@ -328,14 +363,23 @@ def listening_ports():
     try:
         sockets = psutil.net_connections(kind="tcp")
     except (psutil.AccessDenied, NotImplementedError) as error:
-        raise WorkspaceError("The operating system has not granted permission to read TCP ports.", 403) from error
-    rows = sorted({(conn.status != psutil.CONN_LISTEN, conn.laddr.port, conn.laddr.ip, conn.pid or 0)
-                   for conn in sockets if conn.laddr and not conn.raddr
-                   and conn.status in (psutil.CONN_LISTEN, psutil.CONN_NONE)})
-    return jsonify(ports=[{"address": ip, "port": port, "pid": pid or None,
-                           "status": "unknown" if unknown else "listening"}
-                          for unknown, port, ip, pid in rows[:200]],
-                   truncated=len(rows) > 200)
+        raise WorkspaceError(
+            "The operating system has not granted permission to read TCP ports.", 403
+        ) from error
+    rows = sorted(
+        {
+            (conn.status != psutil.CONN_LISTEN, conn.laddr.port, conn.laddr.ip, conn.pid or 0)
+            for conn in sockets
+            if conn.laddr and not conn.raddr and conn.status in (psutil.CONN_LISTEN, psutil.CONN_NONE)
+        }
+    )
+    return jsonify(
+        ports=[
+            {"address": ip, "port": port, "pid": pid or None, "status": "unknown" if unknown else "listening"}
+            for unknown, port, ip, pid in rows[:200]
+        ],
+        truncated=len(rows) > 200,
+    )
 
 
 @workbench.get("/terminals/<session_id>")
@@ -375,8 +419,15 @@ def runs():
     if request.method == "GET":
         return jsonify(runs=runner.recent(root))
     values = body()
-    return jsonify(runner.start(secrets.token_hex(16), root, values.get("script"), values.get("args", []),
-                                values.get("config_files", []))), 201
+    return jsonify(
+        runner.start(
+            secrets.token_hex(16),
+            root,
+            values.get("script"),
+            values.get("args", []),
+            values.get("config_files", []),
+        )
+    ), 201
 
 
 @workbench.get("/runs/<run_id>")
@@ -391,7 +442,9 @@ def attach_run():
 
 @workbench.get("/runs/compare")
 def compare_runs():
-    return jsonify(state()["runs"].compare(request.args.get("left"), request.args.get("right"), store().root()))
+    return jsonify(
+        state()["runs"].compare(request.args.get("left"), request.args.get("right"), store().root())
+    )
 
 
 @workbench.get("/runs/<run_id>/profile")
@@ -424,6 +477,8 @@ def external_preview():
         return jsonify(tabular.text_profile(content, format_name))
     legacy_formats = {"csv-log": "csv", "jsonl-log": "jsonl"}
     try:
-        return jsonify(external.analyze(content, legacy_formats.get(format_name, format_name), values.get("unit")))
+        return jsonify(
+            external.analyze(content, legacy_formats.get(format_name, format_name), values.get("unit"))
+        )
     except csv.Error:
         raise WorkspaceError("CSV syntax is invalid.", 422) from None

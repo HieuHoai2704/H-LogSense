@@ -36,8 +36,9 @@ class InterfaceLanguages(unittest.TestCase):
         for language in LANGUAGES:
             with self.subTest(language=language):
                 target = "/?workspace=logs&dataset_id=12"
-                result = self.client.post("/preferences/language",
-                                          data={"language": language, "next": target})
+                result = self.client.post(
+                    "/preferences/language", data={"language": language, "next": target}
+                )
                 self.assertEqual(result.status_code, 303)
                 self.assertEqual(result.location, target)
                 response = self.client.get(result.location)
@@ -58,7 +59,9 @@ class InterfaceLanguages(unittest.TestCase):
                 self.assertEqual(options.codes, list(LANGUAGES))
                 self.assertEqual(self.client.get("/").status_code, 200)
                 for source, value in messages.items():
-                    self.assertEqual(sorted(placeholders.findall(source)), sorted(placeholders.findall(value)))
+                    self.assertEqual(
+                        sorted(placeholders.findall(source)), sorted(placeholders.findall(value))
+                    )
 
     def test_partial_render_keeps_data_and_translates_labels(self):
         path = "/api/v1/investigation?source=demo"
@@ -74,10 +77,12 @@ class InterfaceLanguages(unittest.TestCase):
         self.assertEqual(data["revision"], english["revision"])
 
     def test_configured_database_links_log_explorer_from_workspace(self):
-        client = create_app({
-            "TESTING": True,
-            "SQLALCHEMY_DATABASE_URI": "mysql+pymysql://test@127.0.0.1:1/test",
-        }).test_client()
+        client = create_app(
+            {
+                "TESTING": True,
+                "SQLALCHEMY_DATABASE_URI": "mysql+pymysql://test@127.0.0.1:1/test",
+            }
+        ).test_client()
         home = client.get("/")
         self.assertEqual(home.status_code, 200)
         self.assertIn(b'id="open-project-file"', home.data)
@@ -92,7 +97,6 @@ class InterfaceLanguages(unittest.TestCase):
         self.assertEqual(result.status_code, 400)
         self.assertNotIn("Set-Cookie", result.headers)
         for target in ("https://example.invalid", "//example.invalid", "/\\example.invalid"):
-            result = self.client.post("/preferences/language",
-                                      data={"language": "de", "next": target})
+            result = self.client.post("/preferences/language", data={"language": "de", "next": target})
             self.assertEqual(result.location, "/?workspace=logs")
         self.assertEqual(self.client.get("/?workspace=logs").headers["Content-Language"], "de")

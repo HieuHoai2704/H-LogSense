@@ -33,11 +33,21 @@ def run(runtime_root, source_csv, output):
             source_host VARCHAR(200) NOT NULL,
             reviewed BOOLEAN NOT NULL DEFAULT FALSE
         ) ENGINE=InnoDB""")
-        cursor.execute(f"GRANT SELECT, INSERT, UPDATE, DELETE ON `{schema}`.log_references TO 'logsense_app'@'localhost'")
+        cursor.execute(
+            f"GRANT SELECT, INSERT, UPDATE, DELETE ON `{schema}`.log_references TO 'logsense_app'@'localhost'"
+        )
 
-    with mysql.connector.connect(host="127.0.0.1", port=info["port"], database=schema,
-                                 user="logsense_app", password=info["app_password"],
-                                 connection_timeout=5) as connection, connection.cursor() as cursor:
+    with (
+        mysql.connector.connect(
+            host="127.0.0.1",
+            port=info["port"],
+            database=schema,
+            user="logsense_app",
+            password=info["app_password"],
+            connection_timeout=5,
+        ) as connection,
+        connection.cursor() as cursor,
+    ):
         cursor.execute("INSERT INTO log_references (event_id, source_host) VALUES (%s, %s)", (event_id, host))
         reference = cursor.lastrowid
         cursor.execute("SELECT event_id, source_host, reviewed FROM log_references WHERE id=%s", (reference,))
@@ -55,7 +65,8 @@ def run(runtime_root, source_csv, output):
         connection.commit()
 
     host_hex = host.encode("utf-8").hex()
-    (output / "workbench.sql").write_text(f"""-- Open in MySQL Workbench on 127.0.0.1:{info["port"]} as logsense_app.
+    (output / "workbench.sql").write_text(
+        f"""-- Open in MySQL Workbench on 127.0.0.1:{info["port"]} as logsense_app.
 -- This worksheet uses the dedicated course schema and rolls back its own changes.
 USE `{schema}`;
 SHOW TABLES;
@@ -70,10 +81,18 @@ SELECT * FROM log_references WHERE id = @course_reference;
 DELETE FROM log_references WHERE id = @course_reference;
 SELECT COUNT(*) AS remaining FROM log_references WHERE id = @course_reference;
 ROLLBACK;
-""", encoding="utf-8")
-    result = {"schema": schema, "port": info["port"], "source_event_id": event_id,
-              "connector": mysql.connector.__version__, "insert_read_update_delete": "PASS",
-              "worksheet": "workbench.sql", "workbench_gui": "not_run"}
+""",
+        encoding="utf-8",
+    )
+    result = {
+        "schema": schema,
+        "port": info["port"],
+        "source_event_id": event_id,
+        "connector": mysql.connector.__version__,
+        "insert_read_update_delete": "PASS",
+        "worksheet": "workbench.sql",
+        "workbench_gui": "not_run",
+    }
     (output / "results.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     return result
 

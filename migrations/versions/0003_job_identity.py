@@ -10,9 +10,7 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column(
-        "processing_jobs", sa.Column("job_key", sa.String(100), nullable=True)
-    )
+    op.add_column("processing_jobs", sa.Column("job_key", sa.String(100), nullable=True))
     op.create_unique_constraint(
         "uq_processing_jobs_dataset_id_job_key",
         "processing_jobs",

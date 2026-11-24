@@ -7,8 +7,14 @@ from app.services.window_detection import SUPPLIED_LABELS, TRUSTED_LABELS, windo
 
 class WindowMetricsTest(unittest.TestCase):
     def test_counts_rates_and_label_provenance(self):
-        metrics = window_metrics([1, 0, 1, 0], [1, 1, 0, 0], [0.9, 0.8, 0.2, 0.1], 3,
-                                 "uploaded-bgl supplied (user-provided, not verified)", "policy")
+        metrics = window_metrics(
+            [1, 0, 1, 0],
+            [1, 1, 0, 0],
+            [0.9, 0.8, 0.2, 0.1],
+            3,
+            "uploaded-bgl supplied (user-provided, not verified)",
+            "policy",
+        )
         self.assertEqual((metrics["tp"], metrics["fp"], metrics["fn"], metrics["tn"]), (1, 1, 1, 1))
         self.assertEqual(metrics["precision"], 0.5)
         self.assertEqual(metrics["recall"], 0.5)

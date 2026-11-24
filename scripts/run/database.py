@@ -18,13 +18,12 @@ def main():
     register.add_argument("--key", required=True)
     user_command = commands.add_parser("create-user")
     user_command.add_argument("--username", required=True)
-    user_command.add_argument(
-        "--role", choices=["viewer", "analyst", "manager", "admin"], required=True
-    )
+    user_command.add_argument("--role", choices=["viewer", "analyst", "manager", "admin"], required=True)
     access = user_command.add_mutually_exclusive_group(required=True)
     access.add_argument("--dataset", type=int, action="append", default=[])
-    access.add_argument("--no-dataset", action="store_true",
-                        help="Create an account with no initial dataset grants.")
+    access.add_argument(
+        "--no-dataset", action="store_true", help="Create an account with no initial dataset grants."
+    )
     notify = commands.add_parser("notify")
     notify.add_argument("--alert-id", type=int, help="Restrict processing to this alert.")
     ingest = commands.add_parser("ingest-bgl")
@@ -49,11 +48,7 @@ def main():
             password = os.environ.get("LOGSENSE_BOOTSTRAP_PASSWORD") or getpass.getpass(
                 "New account password (12+ characters): "
             )
-            if (
-                len(password) < 12
-                or len(password) > 1024
-                or not 1 <= len(args.username) <= 100
-            ):
+            if len(password) < 12 or len(password) > 1024 or not 1 <= len(args.username) <= 100:
                 raise ValueError("Invalid account settings.")
             with Session(db.engine) as session, session.begin():
                 for dataset_id in args.dataset:
@@ -66,12 +61,7 @@ def main():
                 )
                 session.add(user)
                 session.flush()
-                session.add_all(
-                    [
-                        UserDataset(user_id=user.id, dataset_id=d)
-                        for d in set(args.dataset)
-                    ]
-                )
+                session.add_all([UserDataset(user_id=user.id, dataset_id=d) for d in set(args.dataset)])
                 result = {
                     "user_id": user.id,
                     "role": user.role,
@@ -87,9 +77,7 @@ def main():
             from sqlalchemy import select
 
             with Session(db.engine) as session, session.begin():
-                source = session.scalar(
-                    select(DataSource).where(DataSource.source_key == "loghub-bgl")
-                )
+                source = session.scalar(select(DataSource).where(DataSource.source_key == "loghub-bgl"))
                 if source is None:
                     source = DataSource(source_key="loghub-bgl", name="Loghub BGL")
                     session.add(source)
@@ -115,9 +103,7 @@ def main():
         else:
             from app.services.detection import detect
 
-            result = detect(
-                db.engine, args.dataset, kind=args.kind, train_size=args.train_size
-            )
+            result = detect(db.engine, args.dataset, kind=args.kind, train_size=args.train_size)
         print(json.dumps(result))
 
 
@@ -127,7 +113,5 @@ if __name__ == "__main__":
         main()
     except Exception as error:
         raise SystemExit(
-            "Operation failed ("
-            + type(error).__name__
-            + "); inspect private diagnostics with authorization."
+            "Operation failed (" + type(error).__name__ + "); inspect private diagnostics with authorization."
         ) from None

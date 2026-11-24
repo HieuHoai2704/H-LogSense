@@ -40,4 +40,6 @@ def render_page(path, index, zoom):
                         bitmap.to_pil().save(output, format="PNG")
                     return output.getvalue(), pages
         except pdf.PdfiumError as error:
-            raise WorkspaceError("Could not read the PDF. The file may be corrupted or password-protected.", 422) from error
+            raise WorkspaceError(
+                "Could not read the PDF. The file may be corrupted or password-protected.", 422
+            ) from error

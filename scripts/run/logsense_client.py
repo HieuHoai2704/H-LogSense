@@ -20,8 +20,15 @@ class ApiError(Exception):
 class LogSenseClient:
     def __init__(self, base_url):
         url = urlsplit(base_url.strip())
-        if (url.scheme not in {"http", "https"} or not url.hostname or url.username
-                or url.password or url.path not in {"", "/"} or url.query or url.fragment):
+        if (
+            url.scheme not in {"http", "https"}
+            or not url.hostname
+            or url.username
+            or url.password
+            or url.path not in {"", "/"}
+            or url.query
+            or url.fragment
+        ):
             raise ApiError("Enter the server origin, for example http://127.0.0.1:5000.")
         if url.scheme == "http" and url.hostname not in {"localhost", "127.0.0.1", "::1"}:
             raise ApiError("Remote log servers require HTTPS.")
@@ -40,9 +47,14 @@ class LogSenseClient:
         if self.csrf and method != "GET":
             headers["X-CSRF-Token"] = self.csrf
         try:
-            response = self.session.request(method, self.base + "/api/v1/" + path,
-                                            headers=headers, timeout=(4, 45),
-                                            allow_redirects=False, **options)
+            response = self.session.request(
+                method,
+                self.base + "/api/v1/" + path,
+                headers=headers,
+                timeout=(4, 45),
+                allow_redirects=False,
+                **options,
+            )
         except requests.RequestException as error:
             raise ApiError(f"Network request failed ({type(error).__name__}).") from error
         with response:
@@ -51,8 +63,9 @@ class LogSenseClient:
             try:
                 data = response.json()
             except ValueError:
-                raise ApiError(f"Expected a JSON response (HTTP {response.status_code}).",
-                               response.status_code) from None
+                raise ApiError(
+                    f"Expected a JSON response (HTTP {response.status_code}).", response.status_code
+                ) from None
             if not 200 <= response.status_code < 300:
                 detail = data.get("error", {}) if isinstance(data, dict) else {}
                 if not isinstance(detail, dict):
@@ -75,9 +88,15 @@ class LogSenseClient:
         return self.request("GET", f"datasets/{dataset_id}")["dataset"]
 
     def create_dataset(self, name, key, mode="unverified"):
-        return self.request("POST", "datasets", json={
-            "name": name, "dataset_key": key, "data_mode": mode,
-        })["dataset"]
+        return self.request(
+            "POST",
+            "datasets",
+            json={
+                "name": name,
+                "dataset_key": key,
+                "data_mode": mode,
+            },
+        )["dataset"]
 
     def rename_dataset(self, dataset_id, name):
         return self.request("PATCH", f"datasets/{dataset_id}", json={"name": name})["dataset"]
@@ -90,10 +109,18 @@ class LogSenseClient:
         return next((row for row in entries if row["id"] == dataset_id), None)
 
     def logs(self, dataset_id, start, end, *, limit=25, sort="desc", q=""):
-        return self.request("GET", "logs", params={
-            "dataset_id": dataset_id, "start_time": start, "end_time": end,
-            "limit": limit, "sort": sort, "q": q,
-        })
+        return self.request(
+            "GET",
+            "logs",
+            params={
+                "dataset_id": dataset_id,
+                "start_time": start,
+                "end_time": end,
+                "limit": limit,
+                "sort": sort,
+                "q": q,
+            },
+        )
 
     def upload(self, dataset_id, filename, reference=None):
         path = Path(filename)
@@ -101,10 +128,16 @@ class LogSenseClient:
             raise ApiError("Select a file of at most 16 MiB.")
         token = self.request("GET", "forms/csrf")["csrf_token"]
         with path.open("rb") as handle:
-            return self.request("POST", "uploads", data={
-                "dataset_id": dataset_id, "csrf_token": token,
-                "idempotency_key": reference or uuid4().hex,
-            }, files={"file": (path.name, handle)})
+            return self.request(
+                "POST",
+                "uploads",
+                data={
+                    "dataset_id": dataset_id,
+                    "csrf_token": token,
+                    "idempotency_key": reference or uuid4().hex,
+                },
+                files={"file": (path.name, handle)},
+            )
 
     def upload_status(self, upload_id):
         return self.request("GET", f"uploads/{upload_id}")
@@ -146,8 +179,16 @@ def main():
             page = client.logs(args.dataset, date_range["start_time"], date_range["end_time"], limit=100)
             if args.csv:
                 write_log_csv(args.csv, page["items"])
-            print(json.dumps({"dataset": args.dataset, "total_in_scope": page["count"],
-                              "rows_fetched": len(page["items"]), "csv": str(args.csv) if args.csv else None}))
+            print(
+                json.dumps(
+                    {
+                        "dataset": args.dataset,
+                        "total_in_scope": page["count"],
+                        "rows_fetched": len(page["items"]),
+                        "csv": str(args.csv) if args.csv else None,
+                    }
+                )
+            )
     except (ApiError, OSError) as error:
         parser.exit(1, f"{error}\n")
 

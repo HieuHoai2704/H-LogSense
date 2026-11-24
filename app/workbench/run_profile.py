@@ -17,8 +17,15 @@ from .terminal import child_environment
 PROFILE_VERSION = 1
 ARTIFACT_LIMIT = 100
 SCAN_LIMIT = 1000
-CONFIG_NAMES = ("pyproject.toml", "requirements.txt", "requirements.lock", "uv.lock",
-                "poetry.lock", "Pipfile.lock", "environment.yml")
+CONFIG_NAMES = (
+    "pyproject.toml",
+    "requirements.txt",
+    "requirements.lock",
+    "uv.lock",
+    "poetry.lock",
+    "Pipfile.lock",
+    "environment.yml",
+)
 CONFIG_SUFFIXES = {".json", ".toml", ".yaml", ".yml", ".ini", ".cfg", ".txt", ".lock"}
 RUN_PARAMETERS = {"--epochs", "--batch-size", "--seed", "--learning-rate", "--lr", "--workers", "--steps"}
 STREAMS = {"train.log": "log", "machine.jsonl": "machine", "metrics.csv": "training"}
@@ -33,8 +40,14 @@ def git_snapshot(root):
 
     def run(args, output=subprocess.PIPE):
         try:
-            return subprocess.run([*command, *args], env=child_environment(), stdout=output,
-                                  stderr=subprocess.DEVNULL, timeout=3, creationflags=NO_WINDOW)
+            return subprocess.run(
+                [*command, *args],
+                env=child_environment(),
+                stdout=output,
+                stderr=subprocess.DEVNULL,
+                timeout=3,
+                creationflags=NO_WINDOW,
+            )
         except (OSError, subprocess.SubprocessError):
             return None
 
@@ -47,19 +60,38 @@ def git_snapshot(root):
         status = run(["status", "--porcelain=v1", "--untracked-files=normal", "--", "."], changes)
         changes.seek(0)
         dirty = bool(changes.read(1)) if status is not None and status.returncode == 0 else None
-    return {"status": "available",
-            "commit": head.stdout.decode("ascii").strip() if head is not None and head.returncode == 0 else None,
-            "branch": branch.stdout.decode("utf-8", "replace").strip() if branch is not None and branch.returncode == 0 else None,
-            "dirty": dirty}
+    return {
+        "status": "available",
+        "commit": head.stdout.decode("ascii").strip() if head is not None and head.returncode == 0 else None,
+        "branch": branch.stdout.decode("utf-8", "replace").strip()
+        if branch is not None and branch.returncode == 0
+        else None,
+        "dirty": dirty,
+    }
 
 
 def interpreter_snapshot(executable, identifier, root):
-    data = {"id": identifier, "executable": str(executable), "version": None, "platform": None, "architecture": None}
-    code = ("import json, platform, sys;"
-            "print(json.dumps([platform.python_version(), sys.platform, platform.machine()]))")
+    data = {
+        "id": identifier,
+        "executable": str(executable),
+        "version": None,
+        "platform": None,
+        "architecture": None,
+    }
+    code = (
+        "import json, platform, sys;"
+        "print(json.dumps([platform.python_version(), sys.platform, platform.machine()]))"
+    )
     try:
-        result = subprocess.run([str(executable), "-I", "-S", "-c", code], cwd=root, env=child_environment(),
-                                capture_output=True, timeout=4, check=True, creationflags=NO_WINDOW)
+        result = subprocess.run(
+            [str(executable), "-I", "-S", "-c", code],
+            cwd=root,
+            env=child_environment(),
+            capture_output=True,
+            timeout=4,
+            check=True,
+            creationflags=NO_WINDOW,
+        )
         values = json.loads(result.stdout)
         if isinstance(values, list) and len(values) == 3 and all(isinstance(value, str) for value in values):
             data.update(zip(("version", "platform", "architecture"), values))
@@ -81,8 +113,10 @@ def fingerprint(root, name):
             after = os.fstat(stream.fileno())
         current = path.stat()
         if len(data) != before.st_size or any(
-                (item.st_size, item.st_mtime_ns, item.st_ino, item.st_dev)
-                != (before.st_size, before.st_mtime_ns, before.st_ino, before.st_dev) for item in (after, current)):
+            (item.st_size, item.st_mtime_ns, item.st_ino, item.st_dev)
+            != (before.st_size, before.st_mtime_ns, before.st_ino, before.st_dev)
+            for item in (after, current)
+        ):
             return {"path": name, "status": "changed"}
         return {"path": name, "status": "available", "bytes": len(data), "sha256": sha256(data).hexdigest()}
     except (OSError, RuntimeError):
@@ -99,7 +133,9 @@ def numeric_parameters(args):
             continue
         if not separator:
             value = args[index + 1] if index + 1 < len(args) else ""
-        if re.fullmatch(r"[+-]?(?:[0-9]{1,12}(?:\.[0-9]{1,12})?|\.[0-9]{1,12})(?:[eE][+-]?[0-9]{1,3})?", value):
+        if re.fullmatch(
+            r"[+-]?(?:[0-9]{1,12}(?:\.[0-9]{1,12})?|\.[0-9]{1,12})(?:[eE][+-]?[0-9]{1,3})?", value
+        ):
             parameters.append({"name": flag, "value": value})
     return parameters
 
@@ -107,10 +143,18 @@ def numeric_parameters(args):
 def capture(folder, record, interpreter, identifier, config_files, args):
     root = Path(record["root"])
     files = list(dict.fromkeys([*config_files, *(name for name in CONFIG_NAMES if (root / name).is_file())]))
-    data = {"version": PROFILE_VERSION, "run_id": record["id"], "captured_at": datetime.now(timezone.utc).isoformat(),
-            "git": git_snapshot(root), "interpreter": interpreter_snapshot(interpreter, identifier, root),
-            "script": fingerprint(root, record["script"]), "config_files": [fingerprint(root, name) for name in files],
-            "parameters": numeric_parameters(args), "argument_count": len(args), "gpu_sampling": record["gpu"]}
+    data = {
+        "version": PROFILE_VERSION,
+        "run_id": record["id"],
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "git": git_snapshot(root),
+        "interpreter": interpreter_snapshot(interpreter, identifier, root),
+        "script": fingerprint(root, record["script"]),
+        "config_files": [fingerprint(root, name) for name in files],
+        "parameters": numeric_parameters(args),
+        "argument_count": len(args),
+        "gpu_sampling": record["gpu"],
+    }
     atomic_write(folder / "profile.json", json.dumps(data, ensure_ascii=False).encode("utf-8"))
 
 
@@ -120,8 +164,12 @@ def metadata(path, relative, kind):
             return None
         info = path.stat()
         if stat.S_ISREG(info.st_mode):
-            return {"path": relative, "kind": kind, "bytes": info.st_size,
-                    "modified_at": datetime.fromtimestamp(info.st_mtime, timezone.utc).isoformat()}
+            return {
+                "path": relative,
+                "kind": kind,
+                "bytes": info.st_size,
+                "modified_at": datetime.fromtimestamp(info.st_mtime, timezone.utc).isoformat(),
+            }
     except (OSError, OverflowError, ValueError):
         pass
     return None
@@ -178,7 +226,11 @@ def load_snapshot(folder, run_id):
         try:
             with path.open("rb") as stream:
                 data = json.loads(stream.read(64 * 1024))
-            if isinstance(data, dict) and data.get("version") == PROFILE_VERSION and data.get("run_id") == run_id:
+            if (
+                isinstance(data, dict)
+                and data.get("version") == PROFILE_VERSION
+                and data.get("run_id") == run_id
+            ):
                 return data
         except (OSError, ValueError, RecursionError):
             pass
@@ -190,6 +242,15 @@ def read(folder, record):
     location = artifact_root(folder)
     artifacts, limited = artifact_inventory(location)
     streams = [item for name, kind in STREAMS.items() if (item := metadata(folder / name, name, kind))]
-    run = {key: record.get(key) for key in ("id", "root", "script", "status", "started_at", "ended_at", "exit_code")}
-    return {"run": run, "profile": profile, "streams": streams, "artifacts": artifacts,
-            "artifact_directory": str(location) if location is not None else None, "artifacts_limited": limited}
+    run = {
+        key: record.get(key)
+        for key in ("id", "root", "script", "status", "started_at", "ended_at", "exit_code")
+    }
+    return {
+        "run": run,
+        "profile": profile,
+        "streams": streams,
+        "artifacts": artifacts,
+        "artifact_directory": str(location) if location is not None else None,
+        "artifacts_limited": limited,
+    }
