@@ -1314,7 +1314,6 @@
   "Local copy": "Локальная копия",
   "Log anomaly investigation": "Расследование аномалий в журналах",
   "Loghub dataset catalog": "Каталог наборов данных Loghub",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Менеджеры и администраторы входят здесь, чтобы управлять учётными записями, наборами данных и доступом.",
   "New password": "Новый пароль",
   "New password (optional)": "Новый пароль (необязательно)",
   "No accounts match.": "Нет подходящих учётных записей.",
@@ -1367,5 +1366,22 @@
   "You cannot remove your own administrator access.": "Нельзя отозвать собственные права администратора.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN имеет неверный формат.",
   "Zenodo could not be reached. Check the network connection.": "Не удалось подключиться к Zenodo. Проверьте сетевое подключение.",
-  "Accounts are created by an administrator.": "Учётные записи создаёт администратор."
+  "Accounts are created by an administrator.": "Учётные записи создаёт администратор.",
+  "Show password": "Показать пароль",
+  "Hide password": "Скрыть пароль",
+  "Save changes before quitting?": "Сохранить изменения перед выходом?",
+  "{0} open files have unsaved changes.": {
+    "one": "В {0} открытом файле есть несохранённые изменения.",
+    "few": "В {0} открытых файлах есть несохранённые изменения.",
+    "many": "В {0} открытых файлах есть несохранённые изменения.",
+    "other": "В {0} открытых файлах есть несохранённые изменения."
+  },
+  "Save and quit": "Сохранить и выйти",
+  "Saving…": "Сохранение…",
+  "Quit without saving": "Выйти без сохранения",
+  "Quit H-logsen?": "Выйти из H-logsen?",
+  "Quit": "Выйти",
+  "You will be signed out. Sign in again the next time you open the app.": "Сеанс будет завершён. При следующем запуске приложения войдите снова.",
+  "Some files could not be saved. Check the status bar, then try again.": "Не удалось сохранить некоторые файлы. Проверьте строку состояния и повторите попытку.",
+  "Administrators sign in here to manage accounts and access.": "Администраторы входят здесь, чтобы управлять учётными записями и доступом."
 }

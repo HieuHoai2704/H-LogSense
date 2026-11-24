@@ -1,5 +1,5 @@
 {% extends "account/layout.html" %}
-{% from "account/_icons.html" import field %}
+{% from "account/_icons.html" import field with context %}
 {% block title %}{{ tr("Choose a new password") }} · {{ app_name }}{% endblock %}
 {% block content %}
 <section class="auth-panel">

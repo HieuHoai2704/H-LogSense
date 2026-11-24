@@ -194,6 +194,30 @@ html.auth-root, .auth-body {
 .auth-field input:focus ~ label, .auth-field input:not(:placeholder-shown) ~ label { top: -0.1rem; font-size: 0.75rem; color: var(--text); transform: none; }
 .auth-field .auth-icon { position: absolute; right: 0; top: 1.25rem; transform: translateY(-50%); color: var(--field-muted); }
 .auth-field input:focus ~ .auth-icon { color: var(--text); }
+/* Show / hide password: an eye button in place of the lock icon. */
+.auth-reveal {
+  position: absolute;
+  right: -6px;
+  top: 1.25rem;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--field-muted);
+  background: transparent;
+  cursor: pointer;
+}
+.auth-reveal:hover, .auth-reveal[aria-pressed="true"] { color: var(--text); }
+.auth-reveal:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+.auth-reveal .auth-icon { position: static; transform: none; color: inherit; }
+.auth-reveal .reveal-show { display: contents; }
+.auth-reveal .reveal-hide, .auth-reveal[aria-pressed="true"] .reveal-show { display: none; }
+.auth-reveal[aria-pressed="true"] .reveal-hide { display: contents; }
+.auth-field input[type="password"], .auth-field input[data-revealed] { padding-right: 2.2rem; }
 .auth-field.has-error input { border-bottom-color: var(--field-danger); }
 .auth-error { display: block; margin-top: 0.3rem; color: var(--field-danger); font-size: 0.78rem; }
 .auth-field:has(.auth-error) .auth-icon { top: 1.25rem; }

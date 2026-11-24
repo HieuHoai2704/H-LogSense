@@ -1324,7 +1324,6 @@
   "Local copy": "Copie locale",
   "Log anomaly investigation": "Investigation des anomalies de journaux",
   "Loghub dataset catalog": "Catalogue des jeux de données Loghub",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Les gestionnaires et administrateurs se connectent ici pour gérer les comptes, les jeux de données et les accès.",
   "New password": "Nouveau mot de passe",
   "New password (optional)": "Nouveau mot de passe (facultatif)",
   "No accounts match.": "Aucun compte ne correspond.",
@@ -1377,5 +1376,20 @@
   "You cannot remove your own administrator access.": "Vous ne pouvez pas retirer votre propre accès administrateur.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN a un format non valide.",
   "Zenodo could not be reached. Check the network connection.": "Impossible de joindre Zenodo. Vérifiez la connexion réseau.",
-  "Accounts are created by an administrator.": "Les comptes sont créés par un administrateur."
+  "Accounts are created by an administrator.": "Les comptes sont créés par un administrateur.",
+  "Show password": "Afficher le mot de passe",
+  "Hide password": "Masquer le mot de passe",
+  "Save changes before quitting?": "Enregistrer les modifications avant de quitter ?",
+  "{0} open files have unsaved changes.": {
+    "one": "{0} fichier ouvert a des modifications non enregistrées.",
+    "other": "{0} fichiers ouverts ont des modifications non enregistrées."
+  },
+  "Save and quit": "Enregistrer et quitter",
+  "Saving…": "Enregistrement…",
+  "Quit without saving": "Quitter sans enregistrer",
+  "Quit H-logsen?": "Quitter H-logsen ?",
+  "Quit": "Quitter",
+  "You will be signed out. Sign in again the next time you open the app.": "Vous serez déconnecté. Reconnectez-vous à la prochaine ouverture de l'application.",
+  "Some files could not be saved. Check the status bar, then try again.": "Certains fichiers n'ont pas pu être enregistrés. Vérifiez la barre d'état, puis réessayez.",
+  "Administrators sign in here to manage accounts and access.": "Les administrateurs se connectent ici pour gérer les comptes et les accès."
 }

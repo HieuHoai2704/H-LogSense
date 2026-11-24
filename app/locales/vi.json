@@ -1303,7 +1303,6 @@
   "Local copy": "Bản trên máy",
   "Log anomaly investigation": "Điều tra bất thường trong log",
   "Loghub dataset catalog": "Danh mục bộ dữ liệu Loghub",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Quản lý và quản trị viên đăng nhập tại đây để quản lý tài khoản, bộ dữ liệu và quyền truy cập.",
   "New password": "Mật khẩu mới",
   "New password (optional)": "Mật khẩu mới (không bắt buộc)",
   "No accounts match.": "Không có tài khoản phù hợp.",
@@ -1356,5 +1355,17 @@
   "You cannot remove your own administrator access.": "Bạn không thể tự gỡ quyền quản trị của mình.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN không đúng định dạng.",
   "Zenodo could not be reached. Check the network connection.": "Không kết nối được Zenodo. Hãy kiểm tra mạng.",
-  "Accounts are created by an administrator.": "Tài khoản do quản trị viên cấp."
+  "Accounts are created by an administrator.": "Tài khoản do quản trị viên cấp.",
+  "Show password": "Hiện mật khẩu",
+  "Hide password": "Ẩn mật khẩu",
+  "Save changes before quitting?": "Lưu thay đổi trước khi thoát?",
+  "{0} open files have unsaved changes.": "{0} tệp đang mở có thay đổi chưa lưu.",
+  "Save and quit": "Lưu và thoát",
+  "Saving…": "Đang lưu…",
+  "Quit without saving": "Thoát không lưu",
+  "Quit H-logsen?": "Thoát H-logsen?",
+  "Quit": "Thoát",
+  "You will be signed out. Sign in again the next time you open the app.": "Bạn sẽ bị đăng xuất. Lần mở app sau hãy đăng nhập lại.",
+  "Some files could not be saved. Check the status bar, then try again.": "Một số tệp chưa lưu được. Xem thanh trạng thái rồi thử lại.",
+  "Administrators sign in here to manage accounts and access.": "Quản trị viên đăng nhập tại đây để quản lý tài khoản và quyền truy cập."
 }

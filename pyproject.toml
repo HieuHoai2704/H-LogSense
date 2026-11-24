@@ -110,7 +110,7 @@ no_implicit_optional = true
 module = [
     "flask_bootstrap", "flask_mail", "flask_moment", "flask_migrate", "flask_wtf.*", "wtforms.*",
     "sklearn.*", "joblib", "numpy.*", "pyarrow.*", "pypdfium2", "webview.*", "gi.*", "winpty",
-    "win32com.*", "pywintypes", "pythoncom", "psutil", "PIL.*", "xgboost",
+    "win32com.*", "pywintypes", "pythoncom", "psutil", "PIL.*", "xgboost", "pymysql",
     # Platform bridges: PyObjC (macOS) and pythonnet (.NET on Windows).
     "AppKit", "Foundation", "objc", "System", "System.*",
 ]

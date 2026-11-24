@@ -103,6 +103,9 @@ class SignInGateTests(unittest.TestCase):
             self.assertIn('name="admin-username"', page)
             self.assertIn('name="admin-portal" type="hidden" value="admin"', page)
         self.assertIn('class="auth-card intro"', staff)
+        # Every password field has a show/hide button tied to it.
+        self.assertIn('data-reveal aria-controls="password" aria-pressed="false"', staff)
+        self.assertIn('data-reveal aria-controls="admin-password" aria-pressed="false"', staff)
         self.assertIn('class="auth-card intro admin"', admin)
 
     def test_there_is_no_self_registration(self):
@@ -115,6 +118,7 @@ class SignInGateTests(unittest.TestCase):
     def test_sign_in_without_database_is_503_not_a_crash(self):
         page = self.client.get("/account/login").get_data(as_text=True)
         self.assertIn("Accounts need the MySQL database", page)
+        self.assertIn("python -m scripts.run.demo", page)
         self.app.config["WTF_CSRF_ENABLED"] = False
         response = self.client.post(
             "/account/login", data={"username": "a", "password": "b", "portal": "staff"}

@@ -1,5 +1,5 @@
 {% extends "account/layout.html" %}
-{% from "account/_icons.html" import field, icon %}
+{% from "account/_icons.html" import field, icon with context %}
 {% block title %}{{ tr("Administrator sign-in") if portal == "admin" else tr("Staff sign-in") }} · {{ app_name }}{% endblock %}
 {% macro sign_in_form(form, endpoint, first) -%}
 <form method="post" action="{{ url_for(endpoint) }}" novalidate>
@@ -13,7 +13,8 @@
 {%- endmacro %}
 {% block content %}
 {% if not accounts_ready %}
-<p class="auth-flash auth-flash-danger" role="status">{{ tr("Accounts need the MySQL database. Start the demo environment first.") }}</p>
+<p class="auth-flash auth-flash-danger" role="status">{{ tr("Accounts need the MySQL database. Start the demo environment first.") }}
+  <br><code>python -m scripts.run.demo</code></p>
 {% endif %}
 {# One card, two portals: staff signs in on the left, administrators on the right. Switching sweeps the
    diagonal panel across and inverts the palette. #}
@@ -48,7 +49,7 @@
   <div class="info-content admin"{% if portal != "admin" %} aria-hidden="true"{% endif %}>
     <p class="info-badge animation" style="--d:0">{{ icon("shield") }} {{ tr("Administrator console") }}</p>
     <h2 class="animation" style="--d:1">{{ tr("RESTRICTED AREA") }}</h2>
-    <p class="animation" style="--d:2">{{ tr("Managers and administrators sign in here to manage accounts, datasets and access.") }}</p>
+    <p class="animation" style="--d:2">{{ tr("Administrators sign in here to manage accounts and access.") }}</p>
   </div>
 </section>
 {% endblock %}

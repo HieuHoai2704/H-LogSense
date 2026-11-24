@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import secrets
 import sys
-from threading import Lock
+from threading import Lock, Thread
 
 from .files import WORKSPACES, WorkspaceError
 from .platforms import current as platform_backend
@@ -28,12 +28,39 @@ class DesktopBridge:
         self._folder_dialog = folder_dialog
         self._lock = Lock()
         self._window = None
+        self._quitting = False
 
     def _attach(self, window):
         self._window = window
 
     def _authorized(self, token):
         return isinstance(token, str) and secrets.compare_digest(token.encode(), self._token.encode())
+
+    def quit(self, token):
+        """Close the window after the page's quit prompt (its token proves the request is ours)."""
+        if not self._authorized(token):
+            return False
+        self._quitting = True
+        Thread(target=self._window.destroy, name="h-logsen-quit", daemon=True).start()
+        return True
+
+    def closing(self):
+        """Window close button: let the page ask first (unsaved edits, sign-out). False keeps it open."""
+        if self._quitting:
+            return True
+        Thread(target=self._ask_page, name="h-logsen-quit-prompt", daemon=True).start()
+        return False
+
+    def _ask_page(self):
+        try:
+            asked = self._window.evaluate_js(
+                "typeof window.hlogsenRequestQuit === 'function' && window.hlogsenRequestQuit() === true"
+            )
+        except Exception:
+            asked = False
+        if asked is not True:  # a page without the prompt (an error page, still loading): close as asked
+            self._quitting = True
+            self._window.destroy()
 
     def set_window_glass(self, token, enabled):
         if type(enabled) is not bool or not self._authorized(token):
@@ -91,6 +118,7 @@ def desktop_window(url, token, store):
         **window_options,
     )
     bridge._attach(window)
+    window.events.closing += bridge.closing
     attach = getattr(platform_backend, "attach_window", None)
     if attach:
         attach(window)

@@ -1279,7 +1279,6 @@
   "Local copy": "Yerel kopya",
   "Log anomaly investigation": "Günlük anomalisi incelemesi",
   "Loghub dataset catalog": "Loghub veri kümesi kataloğu",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Müdürler ve yöneticiler hesapları, veri kümelerini ve erişimi yönetmek için buradan oturum açar.",
   "New password": "Yeni şifre",
   "New password (optional)": "Yeni şifre (isteğe bağlı)",
   "No accounts match.": "Eşleşen hesap yok.",
@@ -1332,5 +1331,17 @@
   "You cannot remove your own administrator access.": "Kendi yönetici erişiminizi kaldıramazsınız.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN geçersiz bir biçimde.",
   "Zenodo could not be reached. Check the network connection.": "Zenodo'ya ulaşılamadı. Ağ bağlantısını kontrol edin.",
-  "Accounts are created by an administrator.": "Hesaplar bir yönetici tarafından oluşturulur."
+  "Accounts are created by an administrator.": "Hesaplar bir yönetici tarafından oluşturulur.",
+  "Show password": "Parolayı göster",
+  "Hide password": "Parolayı gizle",
+  "Save changes before quitting?": "Çıkmadan önce değişiklikler kaydedilsin mi?",
+  "{0} open files have unsaved changes.": "Açık {0} dosyada kaydedilmemiş değişiklik var.",
+  "Save and quit": "Kaydet ve çık",
+  "Saving…": "Kaydediliyor…",
+  "Quit without saving": "Kaydetmeden çık",
+  "Quit H-logsen?": "H-logsen'den çıkılsın mı?",
+  "Quit": "Çık",
+  "You will be signed out. Sign in again the next time you open the app.": "Oturumunuz kapatılacak. Uygulamayı bir sonraki açışınızda yeniden oturum açın.",
+  "Some files could not be saved. Check the status bar, then try again.": "Bazı dosyalar kaydedilemedi. Durum çubuğunu kontrol edip yeniden deneyin.",
+  "Administrators sign in here to manage accounts and access.": "Yöneticiler hesapları ve erişimi yönetmek için burada oturum açar."
 }

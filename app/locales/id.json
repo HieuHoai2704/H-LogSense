@@ -1279,7 +1279,6 @@
   "Local copy": "Salinan lokal",
   "Log anomaly investigation": "Investigasi anomali log",
   "Loghub dataset catalog": "Katalog kumpulan data Loghub",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Manajer dan administrator masuk di sini untuk mengelola akun, kumpulan data, dan akses.",
   "New password": "Kata sandi baru",
   "New password (optional)": "Kata sandi baru (opsional)",
   "No accounts match.": "Tidak ada akun yang cocok.",
@@ -1332,5 +1331,17 @@
   "You cannot remove your own administrator access.": "Anda tidak dapat menghapus akses administrator Anda sendiri.",
   "ZENODO_TOKEN has an invalid format.": "Format ZENODO_TOKEN tidak valid.",
   "Zenodo could not be reached. Check the network connection.": "Zenodo tidak dapat dijangkau. Periksa koneksi jaringan.",
-  "Accounts are created by an administrator.": "Akun dibuat oleh administrator."
+  "Accounts are created by an administrator.": "Akun dibuat oleh administrator.",
+  "Show password": "Tampilkan kata sandi",
+  "Hide password": "Sembunyikan kata sandi",
+  "Save changes before quitting?": "Simpan perubahan sebelum keluar?",
+  "{0} open files have unsaved changes.": "{0} file yang terbuka memiliki perubahan yang belum disimpan.",
+  "Save and quit": "Simpan dan keluar",
+  "Saving…": "Menyimpan…",
+  "Quit without saving": "Keluar tanpa menyimpan",
+  "Quit H-logsen?": "Keluar dari H-logsen?",
+  "Quit": "Keluar",
+  "You will be signed out. Sign in again the next time you open the app.": "Anda akan dikeluarkan. Masuk lagi saat membuka aplikasi berikutnya.",
+  "Some files could not be saved. Check the status bar, then try again.": "Beberapa file tidak dapat disimpan. Periksa bilah status, lalu coba lagi.",
+  "Administrators sign in here to manage accounts and access.": "Administrator masuk di sini untuk mengelola akun dan akses."
 }

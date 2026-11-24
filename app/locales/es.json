@@ -1324,7 +1324,6 @@
   "Local copy": "Copia local",
   "Log anomaly investigation": "Investigación de anomalías en registros",
   "Loghub dataset catalog": "Catálogo de conjuntos de datos de Loghub",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Los gestores y administradores inician sesión aquí para gestionar cuentas, conjuntos de datos y accesos.",
   "New password": "Nueva contraseña",
   "New password (optional)": "Nueva contraseña (opcional)",
   "No accounts match.": "No hay cuentas que coincidan.",
@@ -1377,5 +1376,20 @@
   "You cannot remove your own administrator access.": "No puede quitar su propio acceso de administrador.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN tiene un formato no válido.",
   "Zenodo could not be reached. Check the network connection.": "No se pudo conectar con Zenodo. Compruebe la conexión de red.",
-  "Accounts are created by an administrator.": "Las cuentas las crea un administrador."
+  "Accounts are created by an administrator.": "Las cuentas las crea un administrador.",
+  "Show password": "Mostrar contraseña",
+  "Hide password": "Ocultar contraseña",
+  "Save changes before quitting?": "¿Guardar los cambios antes de salir?",
+  "{0} open files have unsaved changes.": {
+    "one": "{0} archivo abierto tiene cambios sin guardar.",
+    "other": "{0} archivos abiertos tienen cambios sin guardar."
+  },
+  "Save and quit": "Guardar y salir",
+  "Saving…": "Guardando…",
+  "Quit without saving": "Salir sin guardar",
+  "Quit H-logsen?": "¿Salir de H-logsen?",
+  "Quit": "Salir",
+  "You will be signed out. Sign in again the next time you open the app.": "Se cerrará su sesión. Vuelva a iniciar sesión la próxima vez que abra la aplicación.",
+  "Some files could not be saved. Check the status bar, then try again.": "No se pudieron guardar algunos archivos. Revise la barra de estado e inténtelo de nuevo.",
+  "Administrators sign in here to manage accounts and access.": "Los administradores inician sesión aquí para gestionar cuentas y accesos."
 }

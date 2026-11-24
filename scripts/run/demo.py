@@ -22,13 +22,12 @@ import subprocess
 import sys
 import time
 
+from app.workbench.local_database import CONTAINER, PORT, SCHEMA, demo_url
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 STATE = REPO_ROOT / ".local" / "demo"
-CONTAINER = "hlogsen-demo-mysql"
 VOLUME = "hlogsen-demo-data"
 IMAGE = "mysql:8.4"
-PORT = 3308
-SCHEMA = "logsense_demo"
 ACCOUNTS = (
     # username, role, email: one account of each type for the demonstration.
     ("admin", "admin", "admin@demo.h-logsen.local"),
@@ -66,14 +65,7 @@ def save_state(state):
 
 
 def url(state, role="app"):
-    from sqlalchemy.engine import URL
-
-    user, password = (
-        ("root", state["root_password"]) if role == "admin" else ("logsense_app", state["app_password"])
-    )
-    return URL.create(
-        "mysql+pymysql", username=user, password=password, host="127.0.0.1", port=PORT, database=SCHEMA
-    ).render_as_string(hide_password=False)
+    return demo_url(state, role)
 
 
 def container_state():

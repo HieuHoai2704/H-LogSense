@@ -1279,7 +1279,6 @@
   "Local copy": "로컬 사본",
   "Log anomaly investigation": "로그 이상 조사",
   "Loghub dataset catalog": "Loghub 데이터세트 카탈로그",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "매니저와 관리자는 여기에서 로그인하여 계정, 데이터세트 및 접근 권한을 관리합니다.",
   "New password": "새 비밀번호",
   "New password (optional)": "새 비밀번호(선택 사항)",
   "No accounts match.": "일치하는 계정이 없습니다.",
@@ -1332,5 +1331,17 @@
   "You cannot remove your own administrator access.": "자신의 관리자 권한은 제거할 수 없습니다.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN의 형식이 올바르지 않습니다.",
   "Zenodo could not be reached. Check the network connection.": "Zenodo에 연결할 수 없습니다. 네트워크 연결을 확인하세요.",
-  "Accounts are created by an administrator.": "계정은 관리자가 생성합니다."
+  "Accounts are created by an administrator.": "계정은 관리자가 생성합니다.",
+  "Show password": "비밀번호 표시",
+  "Hide password": "비밀번호 숨기기",
+  "Save changes before quitting?": "종료하기 전에 변경 사항을 저장할까요?",
+  "{0} open files have unsaved changes.": "열린 파일 {0}개에 저장하지 않은 변경 사항이 있습니다.",
+  "Save and quit": "저장 후 종료",
+  "Saving…": "저장 중…",
+  "Quit without saving": "저장하지 않고 종료",
+  "Quit H-logsen?": "H-logsen을 종료할까요?",
+  "Quit": "종료",
+  "You will be signed out. Sign in again the next time you open the app.": "로그아웃됩니다. 다음에 앱을 열 때 다시 로그인하세요.",
+  "Some files could not be saved. Check the status bar, then try again.": "일부 파일을 저장하지 못했습니다. 상태 표시줄을 확인한 후 다시 시도하세요.",
+  "Administrators sign in here to manage accounts and access.": "관리자는 여기에서 로그인하여 계정과 접근 권한을 관리합니다."
 }

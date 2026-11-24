@@ -168,8 +168,7 @@ def sign_in(portal):
         return redirect(url_for("dashboard"))
     form = portal_form(portal)
     if request.method == "POST":
-        if not auth_available():
-            flash("Accounts need the MySQL database. Start the demo environment first.", "danger")
+        if not auth_available():  # the page itself explains how to start the database
             return auth_page(portal, form, status=503)
         if not form.validate_on_submit():
             return auth_page(portal, form, status=400)

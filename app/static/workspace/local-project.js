@@ -32,6 +32,7 @@
   const setStatus = (message) => { status.textContent = message; };
   const codeEditor = window.createWorkbenchEditor({ api: codeApi, onStatus: setStatus,
     onLayout(editor) { if (codeScope.root) codeScope.view.patch({ editor }); } });
+  window.hlogsenEditor = codeEditor; // read by the quit prompt (quit.js)
   const codeFile = (path) => /\.pdf$/i.test(path) || projectExtensions.has(path.split(".").at(-1).toLowerCase());
 
   function updateSelection(path, directory) {

@@ -1324,7 +1324,6 @@
   "Local copy": "Lokale kopie",
   "Log anomaly investigation": "Onderzoek naar loganomalieën",
   "Loghub dataset catalog": "Loghub-gegevenssetcatalogus",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Managers en beheerders melden zich hier aan om accounts, gegevenssets en toegang te beheren.",
   "New password": "Nieuw wachtwoord",
   "New password (optional)": "Nieuw wachtwoord (optioneel)",
   "No accounts match.": "Geen overeenkomende accounts.",
@@ -1377,5 +1376,20 @@
   "You cannot remove your own administrator access.": "Je kunt je eigen beheerderstoegang niet intrekken.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN heeft een ongeldige indeling.",
   "Zenodo could not be reached. Check the network connection.": "Zenodo is niet bereikbaar. Controleer de netwerkverbinding.",
-  "Accounts are created by an administrator.": "Accounts worden aangemaakt door een beheerder."
+  "Accounts are created by an administrator.": "Accounts worden aangemaakt door een beheerder.",
+  "Show password": "Wachtwoord tonen",
+  "Hide password": "Wachtwoord verbergen",
+  "Save changes before quitting?": "Wijzigingen opslaan voor het afsluiten?",
+  "{0} open files have unsaved changes.": {
+    "one": "{0} geopend bestand heeft niet-opgeslagen wijzigingen.",
+    "other": "{0} geopende bestanden hebben niet-opgeslagen wijzigingen."
+  },
+  "Save and quit": "Opslaan en afsluiten",
+  "Saving…": "Opslaan…",
+  "Quit without saving": "Afsluiten zonder opslaan",
+  "Quit H-logsen?": "H-logsen afsluiten?",
+  "Quit": "Afsluiten",
+  "You will be signed out. Sign in again the next time you open the app.": "Je wordt afgemeld. Meld je opnieuw aan wanneer je de app weer opent.",
+  "Some files could not be saved. Check the status bar, then try again.": "Sommige bestanden konden niet worden opgeslagen. Bekijk de statusbalk en probeer het opnieuw.",
+  "Administrators sign in here to manage accounts and access.": "Beheerders melden zich hier aan om accounts en toegang te beheren."
 }

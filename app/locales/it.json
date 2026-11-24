@@ -1318,7 +1318,6 @@
   "Local copy": "Copia locale",
   "Log anomaly investigation": "Indagine sulle anomalie dei log",
   "Loghub dataset catalog": "Catalogo dei set di dati Loghub",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Responsabili e amministratori accedono qui per gestire account, set di dati e accessi.",
   "New password": "Nuova password",
   "New password (optional)": "Nuova password (facoltativa)",
   "No accounts match.": "Nessun account corrispondente.",
@@ -1371,5 +1370,20 @@
   "You cannot remove your own administrator access.": "Non puoi rimuovere il tuo accesso da amministratore.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN ha un formato non valido.",
   "Zenodo could not be reached. Check the network connection.": "Impossibile raggiungere Zenodo. Controlla la connessione di rete.",
-  "Accounts are created by an administrator.": "Gli account vengono creati da un amministratore."
+  "Accounts are created by an administrator.": "Gli account vengono creati da un amministratore.",
+  "Show password": "Mostra password",
+  "Hide password": "Nascondi password",
+  "Save changes before quitting?": "Salvare le modifiche prima di uscire?",
+  "{0} open files have unsaved changes.": {
+    "one": "{0} file aperto ha modifiche non salvate.",
+    "other": "{0} file aperti hanno modifiche non salvate."
+  },
+  "Save and quit": "Salva ed esci",
+  "Saving…": "Salvataggio…",
+  "Quit without saving": "Esci senza salvare",
+  "Quit H-logsen?": "Uscire da H-logsen?",
+  "Quit": "Esci",
+  "You will be signed out. Sign in again the next time you open the app.": "Verrai disconnesso. Accedi di nuovo la prossima volta che apri l'app.",
+  "Some files could not be saved. Check the status bar, then try again.": "Alcuni file non sono stati salvati. Controlla la barra di stato e riprova.",
+  "Administrators sign in here to manage accounts and access.": "Gli amministratori accedono qui per gestire account e accessi."
 }

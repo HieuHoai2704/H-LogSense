@@ -1321,7 +1321,6 @@
   "Local copy": "Lokale Kopie",
   "Log anomaly investigation": "Untersuchung von Protokollanomalien",
   "Loghub dataset catalog": "Loghub-Datensatzkatalog",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "Manager und Administratoren melden sich hier an, um Konten, Datensätze und Zugriffe zu verwalten.",
   "New password": "Neues Passwort",
   "New password (optional)": "Neues Passwort (optional)",
   "No accounts match.": "Keine passenden Konten.",
@@ -1374,5 +1373,20 @@
   "You cannot remove your own administrator access.": "Sie können Ihren eigenen Administratorzugriff nicht entfernen.",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN hat ein ungültiges Format.",
   "Zenodo could not be reached. Check the network connection.": "Zenodo ist nicht erreichbar. Prüfen Sie die Netzwerkverbindung.",
-  "Accounts are created by an administrator.": "Konten werden von einem Administrator angelegt."
+  "Accounts are created by an administrator.": "Konten werden von einem Administrator angelegt.",
+  "Show password": "Passwort anzeigen",
+  "Hide password": "Passwort verbergen",
+  "Save changes before quitting?": "Änderungen vor dem Beenden speichern?",
+  "{0} open files have unsaved changes.": {
+    "one": "{0} geöffnete Datei hat ungespeicherte Änderungen.",
+    "other": "{0} geöffnete Dateien haben ungespeicherte Änderungen."
+  },
+  "Save and quit": "Speichern und beenden",
+  "Saving…": "Wird gespeichert…",
+  "Quit without saving": "Ohne Speichern beenden",
+  "Quit H-logsen?": "H-logsen beenden?",
+  "Quit": "Beenden",
+  "You will be signed out. Sign in again the next time you open the app.": "Sie werden abgemeldet. Melden Sie sich beim nächsten Öffnen der App erneut an.",
+  "Some files could not be saved. Check the status bar, then try again.": "Einige Dateien konnten nicht gespeichert werden. Prüfen Sie die Statusleiste und versuchen Sie es erneut.",
+  "Administrators sign in here to manage accounts and access.": "Administratoren melden sich hier an, um Konten und Zugriffe zu verwalten."
 }

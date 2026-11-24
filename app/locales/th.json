@@ -1279,7 +1279,6 @@
   "Local copy": "สำเนาในเครื่อง",
   "Log anomaly investigation": "การตรวจสอบความผิดปกติของบันทึก",
   "Loghub dataset catalog": "แค็ตตาล็อกชุดข้อมูล Loghub",
-  "Managers and administrators sign in here to manage accounts, datasets and access.": "ผู้จัดการและผู้ดูแลระบบเข้าสู่ระบบที่นี่เพื่อจัดการบัญชี ชุดข้อมูล และสิทธิ์การเข้าถึง",
   "New password": "รหัสผ่านใหม่",
   "New password (optional)": "รหัสผ่านใหม่ (ไม่บังคับ)",
   "No accounts match.": "ไม่มีบัญชีที่ตรงกัน",
@@ -1332,5 +1331,17 @@
   "You cannot remove your own administrator access.": "คุณไม่สามารถนำสิทธิ์ผู้ดูแลระบบของตัวเองออกได้",
   "ZENODO_TOKEN has an invalid format.": "ZENODO_TOKEN มีรูปแบบไม่ถูกต้อง",
   "Zenodo could not be reached. Check the network connection.": "ไม่สามารถเชื่อมต่อ Zenodo ได้ โปรดตรวจสอบการเชื่อมต่อเครือข่าย",
-  "Accounts are created by an administrator.": "บัญชีสร้างโดยผู้ดูแลระบบ"
+  "Accounts are created by an administrator.": "บัญชีสร้างโดยผู้ดูแลระบบ",
+  "Show password": "แสดงรหัสผ่าน",
+  "Hide password": "ซ่อนรหัสผ่าน",
+  "Save changes before quitting?": "บันทึกการเปลี่ยนแปลงก่อนออกหรือไม่",
+  "{0} open files have unsaved changes.": "มีไฟล์ที่เปิดอยู่ {0} ไฟล์ที่ยังไม่ได้บันทึกการเปลี่ยนแปลง",
+  "Save and quit": "บันทึกและออก",
+  "Saving…": "กำลังบันทึก…",
+  "Quit without saving": "ออกโดยไม่บันทึก",
+  "Quit H-logsen?": "ออกจาก H-logsen หรือไม่",
+  "Quit": "ออก",
+  "You will be signed out. Sign in again the next time you open the app.": "คุณจะถูกออกจากระบบ โปรดเข้าสู่ระบบอีกครั้งเมื่อเปิดแอปครั้งถัดไป",
+  "Some files could not be saved. Check the status bar, then try again.": "บันทึกบางไฟล์ไม่สำเร็จ ตรวจสอบแถบสถานะแล้วลองอีกครั้ง",
+  "Administrators sign in here to manage accounts and access.": "ผู้ดูแลระบบเข้าสู่ระบบที่นี่เพื่อจัดการบัญชีและสิทธิ์การเข้าถึง"
 }

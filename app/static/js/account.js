@@ -54,3 +54,23 @@
   });
   window.addEventListener("popstate", () => show(location.pathname === url.admin ? "admin" : "staff", false));
 })();
+
+// Show / hide password. The field returns to hidden when its form is submitted.
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-reveal]");
+  if (!button) return;
+  const input = document.getElementById(button.getAttribute("aria-controls"));
+  if (!input) return;
+  const show = input.type === "password";
+  input.type = show ? "text" : "password";
+  input.toggleAttribute("data-revealed", show);
+  button.setAttribute("aria-pressed", String(show));
+  button.setAttribute("aria-label", button.dataset[show ? "hideLabel" : "showLabel"]);
+  input.focus({ preventScroll: true });
+});
+document.addEventListener("submit", (event) => {
+  for (const input of event.target.querySelectorAll("input[data-revealed]")) {
+    input.type = "password";
+    input.removeAttribute("data-revealed");
+  }
+});

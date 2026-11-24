@@ -395,5 +395,11 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
   restoring = false;
   return { open, focus, canDiscard, restore,
     hasOpen: (path) => panes.some(({ file }) => file && (file.path === path || file.path.startsWith(path + "/"))),
-    file: () => active.file, dirty: () => dirty(active) };
+    file: () => active.file, dirty: () => dirty(active),
+    // For the quit prompt: how many open files have unsaved edits, and save them all.
+    unsaved: () => panes.filter(dirty).length,
+    async saveAll() {
+      for (const pane of panes) if (dirty(pane)) await saveFile(pane);
+      return !panes.some(dirty);
+    } };
 };
