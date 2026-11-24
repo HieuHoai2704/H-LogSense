@@ -25,7 +25,7 @@ def main():
     output = REPO_ROOT / ".local/database-verification/platform-browser"
     output.mkdir(parents=True, exist_ok=True)
     logging.getLogger("werkzeug").setLevel(logging.ERROR)
-    app = create_app()
+    app = create_app({"LOGIN_REQUIRED": False})
     server = make_server("127.0.0.1", 0, app, threaded=True)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()

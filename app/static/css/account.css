@@ -1,0 +1,188 @@
+/* Sign-in and password pages: a black and white card with a diagonal panel. The administrator portal
+   inverts the palette so the two sign-in modes are never confused. */
+:root {
+  --ink: #0b0b0c;
+  --ink-2: #151517;
+  --paper: #f4f4f2;
+  --line: rgba(244, 244, 242, 0.55);
+  --muted: #a6a6a6;
+  --danger: #ff8a80;
+  --glow: rgba(244, 244, 242, 0.28);
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+* { box-sizing: border-box; }
+
+html.auth-root, .auth-body {
+  margin: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at 20% 0%, #222 0, var(--ink) 55%) fixed, var(--ink);
+  color: var(--paper);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+}
+
+.auth-body { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ---- top navigation ---- */
+.auth-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid rgba(244, 244, 242, 0.12);
+  background: rgba(11, 11, 12, 0.85);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.auth-brand { display: flex; align-items: center; gap: 0.55rem; color: var(--paper); font-weight: 700; font-size: 1.1rem; text-decoration: none; }
+.auth-brand img { border-radius: 6px; background: var(--paper); }
+.auth-tabs { display: flex; gap: 0.25rem; margin: 0 auto; padding: 0.25rem; border: 1px solid rgba(244, 244, 242, 0.18); border-radius: 999px; }
+.auth-tabs a { color: var(--muted); text-decoration: none; padding: 0.4rem 1rem; border-radius: 999px; font-weight: 600; font-size: 0.9rem; transition: background 0.2s, color 0.2s; white-space: nowrap; }
+.auth-tabs a:hover { color: var(--paper); }
+.auth-tabs a[aria-current="page"] { background: var(--paper); color: var(--ink); }
+.auth-tabs a:focus-visible, .auth-switch a:focus-visible, .auth-button:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
+.auth-nav .language-picker { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.auth-nav .language-picker select { background: var(--ink-2); color: var(--paper); border: 1px solid rgba(244, 244, 242, 0.25); border-radius: 8px; }
+
+.auth-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 2rem 1rem; }
+.auth-footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 1rem; }
+
+.auth-flash { margin: 0; width: min(780px, 100%); padding: 0.6rem 1rem; border: 1px solid var(--line); border-radius: 10px; background: var(--ink-2); }
+.auth-flash-danger { border-color: var(--danger); color: var(--danger); }
+.auth-flash-success { border-color: var(--paper); }
+
+/* ---- the card ---- */
+.auth-card {
+  position: relative;
+  width: min(780px, 100%);
+  height: 480px;
+  overflow: hidden;
+  border: 2px solid var(--paper);
+  border-radius: 14px;
+  background: var(--ink);
+  box-shadow: 0 0 28px var(--glow), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --card: var(--ink);
+  --panel: var(--paper);
+  --text: var(--paper);
+  --panel-text: var(--ink);
+  --panel-soft: #7d7d7d;
+}
+.auth-card.admin {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--ink);
+  box-shadow: 0 0 28px var(--glow), 0 0 0 1px var(--paper);
+  --card: var(--paper);
+  --panel: var(--ink);
+  --text: var(--ink);
+  --panel-text: var(--paper);
+  --panel-soft: #4a4a4a;
+  --line: rgba(11, 11, 12, 0.5);
+  --muted: #555;
+  --danger: #b3261e;
+}
+
+/* Diagonal panel behind the welcome text. */
+.auth-panel-shape {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--panel-soft) 0%, var(--panel) 58%);
+  clip-path: polygon(40% 0, 100% 0, 100% 100%, 76% 100%);
+}
+.auth-card::after {
+  /* a thin rim that follows the panel edge */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.35);
+}
+
+.form-box, .info-content { position: absolute; top: 0; height: 100%; width: 50%; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
+/* The welcome text has no controls; it must never cover a form while it is hidden. */
+.info-content { pointer-events: none; }
+.form-box.login { left: 0; padding: 0 40px; }
+.info-content.login { right: 0; padding: 0 40px 40px 130px; text-align: right; color: var(--panel-text); }
+
+.form-box h1 { margin: 0 0 0.75rem; font-size: 2rem; text-align: center; letter-spacing: 0.02em; }
+.info-content h2 { margin: 0.25rem 0 0.5rem; font-size: 2.1rem; line-height: 1.1; letter-spacing: 0.04em; }
+.info-content p { margin: 0; font-size: 0.95rem; }
+.info-badge { display: inline-flex; align-items: center; gap: 0.35rem; align-self: flex-start; padding: 0.15rem 0.65rem; border: 1.5px solid currentColor; border-radius: 999px; font-size: 0.75rem !important; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.info-content.login .info-badge { align-self: flex-end; }
+
+/* Staggered slide-in with blur on load: each element waits --d steps. */
+@keyframes auth-in { from { transform: translateX(-40px); opacity: 0; filter: blur(8px); } }
+.form-box .animation, .info-content .animation { animation: auth-in 0.7s ease both; animation-delay: calc(0.08s * var(--d, 0)); }
+.info-content .animation { animation-name: auth-in-right; }
+@keyframes auth-in-right { from { transform: translateX(40px); opacity: 0; filter: blur(8px); } }
+
+/* ---- fields: underline inputs with a floating label and an icon ---- */
+.auth-field { position: relative; margin: 0.9rem 0 1.1rem; }
+.auth-field input {
+  width: 100%;
+  height: 2.6rem;
+  padding: 0.9rem 1.8rem 0.2rem 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--line);
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.auth-field label { position: absolute; left: 0; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.95rem; pointer-events: none; transition: 0.25s ease; }
+.auth-field input:focus, .auth-field input:not(:placeholder-shown) { border-bottom-color: var(--text); }
+.auth-field input:focus ~ label, .auth-field input:not(:placeholder-shown) ~ label { top: -0.1rem; font-size: 0.75rem; color: var(--text); transform: none; }
+.auth-field .auth-icon { position: absolute; right: 0; top: 1.25rem; transform: translateY(-50%); color: var(--muted); }
+.auth-field input:focus ~ .auth-icon { color: var(--text); }
+.auth-field.has-error input { border-bottom-color: var(--danger); }
+.auth-error { display: block; margin-top: 0.3rem; color: var(--danger); font-size: 0.78rem; }
+.auth-field:has(.auth-error) .auth-icon { top: 1.25rem; }
+
+.auth-button {
+  width: 100%;
+  height: 2.75rem;
+  margin-top: 0.5rem;
+  border: 2px solid var(--text);
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--card);
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+  transition: color 0.35s;
+}
+.auth-button::before { content: ""; position: absolute; inset: 0; background: var(--card); transform: translateY(100%); transition: transform 0.35s ease; z-index: -1; }
+.auth-button:hover { color: var(--text); }
+.auth-button:hover::before { transform: translateY(0); }
+
+.auth-switch { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; margin: 1rem 0 0; font-size: 0.85rem; color: var(--muted); text-align: center; }
+.auth-switch a { color: var(--text); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- single-panel pages (forgot / reset) ---- */
+.auth-panel { width: min(440px, 100%); padding: 2rem 2.25rem; border: 2px solid var(--paper); border-radius: 14px; background: var(--ink); box-shadow: 0 0 28px var(--glow); --text: var(--paper); --card: var(--ink); }
+.auth-panel h1 { margin: 0 0 0.4rem; font-size: 1.6rem; }
+.auth-lead { margin: 0 0 1rem; color: var(--muted); }
+
+/* ---- narrow screens: one column, no diagonal ---- */
+@media (max-width: 720px) {
+  .auth-nav { flex-wrap: wrap; gap: 0.5rem; padding: 0.6rem 1rem; }
+  .auth-tabs { order: 3; width: 100%; overflow-x: auto; margin: 0; }
+  .auth-nav .language-picker { margin-left: auto; }
+  .auth-card { height: auto; min-height: 520px; }
+  .auth-panel-shape, .info-content { display: none; }
+  .form-box { position: relative; width: 100%; padding: 2rem 1.5rem !important; }
+  .auth-card .animation { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-card .animation { animation: none; }
+}

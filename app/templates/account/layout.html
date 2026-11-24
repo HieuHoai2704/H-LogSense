@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="{{ interface_language }}" class="auth-root">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="same-origin">
+  <title>{% block title %}{{ tr("Sign in") }} · {{ app_name }}{% endblock %}</title>
+{% include "partials/language_assets.html" %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+  <script src="{{ url_for('static', filename='js/account.js') }}" defer></script>
+</head>
+<body class="auth-body">
+{% set portal = portal|default("staff") %}
+<header class="auth-nav">
+  <a class="auth-brand" href="{{ url_for('accounts.login') }}">
+    <img src="{{ url_for('static', filename='h-logsen.png') }}" width="26" height="26" alt="">
+    <span>{{ app_name }}</span>
+  </a>
+  <nav class="auth-tabs" aria-label="{{ tr('Sign-in options') }}">
+    <a href="{{ url_for('accounts.login') }}"{% if portal == "staff" %} aria-current="page"{% endif %}>{{ tr("Staff sign-in") }}</a>
+    <a href="{{ url_for('accounts.admin_login') }}"{% if portal == "admin" %} aria-current="page"{% endif %}>{{ tr("Administrator sign-in") }}</a>
+  </nav>
+  {% include "partials/language_picker.html" %}
+</header>
+<main class="auth-main">
+  {% for category, message in get_flashed_messages(with_categories=true) %}
+  <p class="auth-flash auth-flash-{{ category }}" role="status">{{ tr(message) }}</p>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="auth-footer">
+  <span>{{ app_name }} · {{ tr("Log anomaly investigation") }}</span>
+</footer>
+</body>
+</html>

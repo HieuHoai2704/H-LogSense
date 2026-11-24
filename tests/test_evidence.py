@@ -11,7 +11,7 @@ from app.services.redaction import redact
 
 class EvidenceTests(unittest.TestCase):
     def setUp(self):
-        self.app = create_app()
+        self.app = create_app({"LOGIN_REQUIRED": False})
         self.app.config["TESTING"] = True
         self.client = self.app.test_client()
 

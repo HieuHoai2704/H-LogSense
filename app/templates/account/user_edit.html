@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "bootstrap5/form.html" import render_field %}
+{% block title %}{{ tr("Edit account") }} · {{ app_name }}{% endblock %}
+{% block content %}
+<h1>{{ tr("Edit account") }}: {{ user.username }}</h1>
+<form method="post" class="card card-body mb-4">
+  {{ form.hidden_tag() }}
+  {% for error in (form.csrf_token.errors if form.csrf_token is defined else []) %}<p class="alert alert-danger">{{ tr("The form expired. Try again.") }}</p>{% endfor %}
+  {{ render_field(form.email) }}
+  {{ render_field(form.role) }}
+  {{ render_field(form.active) }}
+  {{ render_field(form.password, autocomplete="new-password") }}
+  {{ render_field(form.datasets, size=6) }}
+  <p class="text-secondary small">{{ tr("Changing the role, state or password signs the account out everywhere.") }}</p>
+  <div class="d-flex gap-2"><button class="btn btn-primary">{{ tr("Save changes") }}</button><a class="btn btn-outline-secondary" href="{{ url_for('accounts.users') }}">{{ tr("Cancel") }}</a></div>
+</form>
+<form method="post" action="{{ url_for('accounts.delete_user', user_id=user.id) }}" class="card card-body border-danger">
+  <h2 class="h5">{{ tr("Delete account") }}</h2>
+  {{ delete_form.hidden_tag() }}
+  {{ render_field(delete_form.confirmation) }}
+  <button class="btn btn-danger">{{ tr("Delete account") }}</button>
+</form>
+{% endblock %}

@@ -38,7 +38,8 @@ def main(argv=None):
         parser.error("Port must be between 0 and 65535.")
     if args.mode == "desktop" and sys.platform not in RENDERERS:
         parser.error("Desktop mode is available on Windows, macOS and Linux.")
-    app = create_app({"TRUSTED_HOSTS": ["127.0.0.1"]})
+    # A new session secret per launch: closing the app signs everyone out, like a system program.
+    app = create_app({"TRUSTED_HOSTS": ["127.0.0.1"], "SECRET_KEY": secrets.token_hex(32)})
     token = secrets.token_urlsafe(32)
     local = mount(app, token, args.state_dir, desktop=args.mode == "desktop")
     with make_server("127.0.0.1", args.port, app, threaded=True) as server:

@@ -6,9 +6,19 @@ independent session/header CSRF contract rather than disabling form protection.
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed, FileField, FileRequired
-from wtforms import BooleanField, IntegerField, SelectField, StringField
+from wtforms import (
+    BooleanField,
+    HiddenField,
+    IntegerField,
+    PasswordField,
+    SelectField,
+    SelectMultipleField,
+    StringField,
+)
 from wtforms.validators import (
+    AnyOf,
     DataRequired,
+    EqualTo,
     InputRequired,
     Length,
     NumberRange,
@@ -84,4 +94,82 @@ class UploadForm(FlaskForm):
     file = FileField(
         "BGL source file",
         validators=[FileRequired(), FileAllowed(["txt", "log", "csv"], "Upload a TXT, LOG or CSV file.")],
+    )
+
+
+# Accounts. Usernames and emails are checked with plain patterns: no extra validation package.
+USERNAME = Regexp(
+    r"[A-Za-z0-9][A-Za-z0-9._-]{2,99}\Z", message="Use 3-100 letters, numbers, dot, underscore or hyphen."
+)
+EMAIL = Regexp(r"[^@\s]{1,64}@[^@\s]+\.[^@\s]+\Z", message="Enter a valid email address.")
+ROLES = [("viewer", "Viewer"), ("analyst", "Analyst"), ("manager", "Manager"), ("admin", "Administrator")]
+
+
+def lower(value):
+    return value.strip().lower() if isinstance(value, str) else value
+
+
+class LoginForm(FlaskForm):
+    username = StringField(
+        "Username", filters=[clean_label], validators=[InputRequired(), Length(max=100), valid_text]
+    )
+    password = PasswordField("Password", validators=[InputRequired(), Length(max=1024)])
+    portal = HiddenField(default="staff", validators=[AnyOf(["staff", "admin"])])
+    next = HiddenField(validators=[Optional(), Length(max=2000)])
+
+
+class RegisterForm(FlaskForm):
+    username = StringField(
+        "Username", filters=[clean_label], validators=[InputRequired(), Length(max=100), valid_text, USERNAME]
+    )
+    email = StringField("Email", filters=[lower], validators=[InputRequired(), Length(max=254), EMAIL])
+    password = PasswordField(
+        "Password",
+        validators=[InputRequired(), Length(min=8, max=1024, message="Use at least 8 characters.")],
+    )
+    confirm = PasswordField(
+        "Confirm password",
+        validators=[InputRequired(), EqualTo("password", message="The passwords do not match.")],
+    )
+
+
+class ForgotPasswordForm(FlaskForm):
+    email = StringField("Email", filters=[lower], validators=[InputRequired(), Length(max=254), EMAIL])
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField(
+        "New password",
+        validators=[InputRequired(), Length(min=8, max=1024, message="Use at least 8 characters.")],
+    )
+    confirm = PasswordField(
+        "Confirm password",
+        validators=[InputRequired(), EqualTo("password", message="The passwords do not match.")],
+    )
+
+
+class LogoutForm(FlaskForm):
+    """Only the CSRF token: signing out is a POST."""
+
+
+class UserCreateForm(RegisterForm):
+    role = SelectField("Role", choices=ROLES, default="viewer", validators=[InputRequired()])
+
+
+class UserEditForm(FlaskForm):
+    email = StringField("Email", filters=[lower], validators=[Optional(), Length(max=254), EMAIL])
+    role = SelectField("Role", choices=ROLES, validators=[InputRequired()])
+    active = BooleanField("Active")
+    password = PasswordField(
+        "New password (optional)",
+        validators=[Optional(), Length(min=8, max=1024, message="Use at least 8 characters.")],
+    )
+    datasets = SelectMultipleField("Dataset access", coerce=int, choices=[])
+
+
+class UserDeleteForm(FlaskForm):
+    confirmation = BooleanField(
+        "Confirm account deletion",
+        false_values=(False, "false", "", "0"),
+        validators=[DataRequired(message="Confirm account deletion.")],
     )

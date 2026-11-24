@@ -34,6 +34,9 @@ def create_app(config_overrides=None):
 
     initialize_security(app)
     initialize_i18n(app)
+    from app.web_accounts import initialize_accounts
+
+    initialize_accounts(app)
     app.register_blueprint(api)
     from app.extensions import bootstrap, db, mail, moment
     from app.web_datasets import dataset_pages, register_page_errors

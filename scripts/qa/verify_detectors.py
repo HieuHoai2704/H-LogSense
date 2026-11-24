@@ -29,7 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def verify(dataset_id, *, reuse=False):
-    app = create_app()
+    app = create_app({"LOGIN_REQUIRED": False})
     report = []
     with app.app_context():
         if not db.engine.url.database.startswith("logsense_bench_"):

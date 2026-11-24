@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ tr("Loghub dataset catalog") }} · {{ app_name }}{% endblock %}
+{% macro size(value) -%}
+{%- if value >= 1073741824 %}{{ "%.2f"|format(value / 1073741824) }} GB{% elif value >= 1048576 %}{{ "%.1f"|format(value / 1048576) }} MB{% else %}{{ "%.0f"|format(value / 1024) }} KB{% endif -%}
+{%- endmacro %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-baseline gap-3 mb-2">
+  <h1 class="me-auto mb-0">{{ tr("Loghub dataset catalog") }}</h1>
+  <a href="{{ url_for('dataset_pages.index') }}">{{ tr("Dataset management") }}</a>
+</div>
+<p class="text-secondary">{{ tr("Read live from the Zenodo REST API (JSON over HTTPS) and compared with the archives in data/raw.") }}</p>
+{% if error %}
+<p class="alert alert-warning" role="status">{{ tr(error) }}</p>
+<a class="btn btn-outline-secondary" href="{{ url_for('dataset_pages.catalog', refresh=1) }}">{{ tr("Try again") }}</a>
+{% else %}
+<section class="card card-body mb-3">
+  <h2 class="h5 mb-1">{{ record.title }}</h2>
+  <dl class="row mb-0 small">
+    {% if record.doi %}<dt class="col-sm-3">DOI</dt><dd class="col-sm-9"><a href="https://doi.org/{{ record.doi }}" rel="noopener noreferrer" target="_blank">{{ record.doi }}</a></dd>{% endif %}
+    {% if record.published %}<dt class="col-sm-3">{{ tr("Published") }}</dt><dd class="col-sm-9">{{ record.published }}</dd>{% endif %}
+    <dt class="col-sm-3">{{ tr("Files") }}</dt><dd class="col-sm-9">{{ record.files|length }} · {{ size(record.total_size) }}</dd>
+    <dt class="col-sm-3">{{ tr("Downloads") }} / {{ tr("Views") }}</dt><dd class="col-sm-9">{{ "{:,}".format(record.downloads) }} / {{ "{:,}".format(record.views) }}</dd>
+    <dt class="col-sm-3">{{ tr("Fetched at") }}</dt><dd class="col-sm-9"><time datetime="{{ record.fetched_at.isoformat() }}">{{ record.fetched_at.strftime('%Y-%m-%d %H:%M UTC') }}</time>
+      · <a href="{{ url_for('dataset_pages.catalog', refresh=1, q=q or None) }}">{{ tr("Refresh") }}</a></dd>
+  </dl>
+</section>
+<form class="row g-2 mb-3" method="get" role="search">
+  <div class="col-md-6"><input class="form-control" type="search" name="q" value="{{ q }}" maxlength="100" placeholder="{{ tr('Filter by file name') }}" aria-label="{{ tr('Filter by file name') }}"></div>
+  <div class="col-md-3"><button class="btn btn-primary">{{ tr("Search") }}</button></div>
+</form>
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>{{ tr("File") }}</th><th class="text-end">{{ tr("Size") }}</th><th>MD5</th><th>{{ tr("Local copy") }}</th><th>{{ tr("Source") }}</th></tr></thead>
+    <tbody>
+    {% for item in files %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td class="text-end">{{ size(item.size) }}</td>
+        <td><code class="small">{{ item.checksum[4:] if item.checksum else "—" }}</code></td>
+        <td>{% if item.local_state == "present" %}<span class="badge text-bg-success">{{ tr("In data/raw") }}</span>{% elif item.local_state == "missing" %}<span class="badge text-bg-secondary">{{ tr("Not downloaded") }}</span>{% else %}<span class="badge text-bg-warning">{{ tr("Size differs") }}</span>{% endif %}</td>
+        <td><a href="{{ item.url }}" rel="noopener noreferrer" target="_blank">Zenodo</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5">{{ tr("No files match.") }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

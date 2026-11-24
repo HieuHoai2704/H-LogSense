@@ -11,7 +11,7 @@ from app.models import UTCDateTime
 class DatabaseUnitTests(unittest.TestCase):
     def test_demo_database_optional(self):
         with patch.dict(os.environ, {}, clear=True):
-            app = create_app()
+            app = create_app({"LOGIN_REQUIRED": False})
             self.assertEqual(app.test_client().get("/").status_code, 200)
             self.assertEqual(
                 app.test_client().get("/api/v1/health/database").json,

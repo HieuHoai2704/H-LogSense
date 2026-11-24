@@ -27,7 +27,7 @@ def main():
     parser.add_argument("--archive", required=True)
     parser.add_argument("--worker", type=int)
     args = parser.parse_args()
-    app = create_app()
+    app = create_app({"LOGIN_REQUIRED": False})
     with app.app_context():
         if not db.engine.url.database.startswith("logsense_bench_"):
             raise ValueError("Requires the isolated benchmark schema.")

@@ -1,0 +1,7 @@
+Welcome to {{ app_name }}, {{ username }}.
+
+An administrator created your account ({{ role }}). Your administrator gives you the initial password; change it with "Forgot password?" on the sign-in page if you prefer.
+
+Sign in: {{ sign_in_url }}
+
+If you did not expect this account, tell your administrator.

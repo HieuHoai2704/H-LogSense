@@ -135,3 +135,17 @@ def register_page_errors(app):
 
     for code in (400, 403, 404, 405, 500):
         app.register_error_handler(code, error_page)
+
+
+@dataset_pages.get("/catalog")
+def catalog():
+    """Public Loghub datasets from the Zenodo REST API, next to the archives already in data/raw."""
+    from app.services.dataset_catalog import CatalogUnavailable, loghub_catalog
+
+    query_text = (request.args.get("q") or "").strip()[:100]
+    try:
+        record = loghub_catalog(refresh=request.args.get("refresh") == "1")
+    except CatalogUnavailable as error:
+        return render_template("dataset_pages/catalog.html", record=None, error=str(error), q=query_text), 503
+    files = [item for item in record.files if query_text.lower() in item.name.lower()]
+    return render_template("dataset_pages/catalog.html", record=record, files=files, error=None, q=query_text)

@@ -2,7 +2,7 @@
 {% from "bootstrap5/form.html" import render_field %}
 {% block title %}{{ tr("Dataset management") }} · {{ app_name }}{% endblock %}
 {% block content %}
-<h1>{{ tr("Dataset management") }}</h1>
+<div class="d-flex flex-wrap align-items-baseline gap-3"><h1 class="me-auto">{{ tr("Dataset management") }}</h1><a href="{{ url_for('dataset_pages.catalog') }}">{{ tr("Loghub dataset catalog") }}</a>{% if current_account and current_account.role == "admin" %}<a href="{{ url_for('accounts.users') }}">{{ tr("User management") }}</a>{% endif %}</div>
 <p class="text-secondary">{{ tr("Rendered at") }} {{ moment(viewed_at).format('LLLL') }}
   <time datetime="{{ viewed_at.isoformat() }}">{{ viewed_at.strftime('%Y-%m-%d %H:%M UTC') }}</time>
 </p>

@@ -8,7 +8,7 @@ from scripts.run.mysql_runtime import grant_dataset_crud
 
 
 class DatasetPrivilegeTests(unittest.TestCase):
-    def invoke(self, tables=(("datasets",), ("user_datasets",)), *, port=13307):
+    def invoke(self, tables=(("datasets",), ("user_datasets",), ("users",)), *, port=13307):
         cursor = MagicMock()
         cursor.fetchall.return_value = tables
         connection = MagicMock()
@@ -23,7 +23,7 @@ class DatasetPrivilegeTests(unittest.TestCase):
             result = grant_dataset_crud(".local/owned", "logsense_test_0123456789ab")
         return result, cursor, owned, status, load, connect
 
-    def test_only_two_table_delete_grants_after_existence_check(self):
+    def test_only_named_table_delete_grants_after_existence_check(self):
         result, cursor, owned, status, load, connect = self.invoke()
         statements = [args.args[0] for args in cursor.execute.call_args_list]
         self.assertEqual(
@@ -31,14 +31,15 @@ class DatasetPrivilegeTests(unittest.TestCase):
             [
                 "GRANT DELETE ON `logsense_test_0123456789ab`.`datasets` TO 'logsense_app'@'localhost'",
                 "GRANT DELETE ON `logsense_test_0123456789ab`.`user_datasets` TO 'logsense_app'@'localhost'",
+                "GRANT DELETE ON `logsense_test_0123456789ab`.`users` TO 'logsense_app'@'localhost'",
             ],
         )
         self.assertEqual(
             cursor.execute.call_args_list[0].args[1],
-            ("logsense_test_0123456789ab", "datasets", "user_datasets"),
+            ("logsense_test_0123456789ab", "datasets", "user_datasets", "users"),
         )
         self.assertFalse(any(".*" in statement or "GRANT OPTION" in statement for statement in statements))
-        self.assertEqual(result["tables_granted"], ["datasets", "user_datasets"])
+        self.assertEqual(result["tables_granted"], ["datasets", "user_datasets", "users"])
         self.assertFalse(result["data_deleted"])
         owned.assert_called_once_with(".local/owned")
         status.assert_called_once_with(Path("owned"))

@@ -1,0 +1,16 @@
+{% extends "account/layout.html" %}
+{% from "account/_icons.html" import field %}
+{% block title %}{{ tr("Forgot password?") }} · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="auth-panel">
+  <h1>{{ tr("Reset your password") }}</h1>
+  <p class="auth-lead">{{ tr("Enter the email of your account. We will send a link that is valid for one hour.") }}</p>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {% for error in (form.csrf_token.errors if form.csrf_token is defined else []) %}<p class="auth-error">{{ tr("The form expired. Try again.") }}</p>{% endfor %}
+    {{ field(form.email, "mail", 0, "email") }}
+    <button class="auth-button">{{ tr("Send reset link") }}</button>
+  </form>
+  <p class="auth-switch"><a href="{{ url_for('accounts.login') }}">{{ tr("Back to sign-in") }}</a></p>
+</section>
+{% endblock %}

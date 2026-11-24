@@ -75,6 +75,8 @@ A few constraints shape every module:
 | **Evidence drawer** | Raw log page with redaction before pagination, parsed fields, detector evidence (features, threshold, score direction), related anomalies by host, service, time or window, with signed cursors |
 | **Ingestion** | Streaming, versioned BGL parser; atomic batches that commit rows, counters and checkpoint together; safe resume after a crash; immutable staging for HTTP uploads |
 | **Detection** | Event rules and Isolation Forest per event; host-window rule and Isolation Forest models with chronological train / validation / test splits; frozen, checksum-verified model bundles for inference |
+| **Accounts** | The whole application sits behind a sign-in page with two portals, staff and administrator; signing out ends every workspace at once. Administrators create, search, page through, edit and delete accounts and grant dataset access; Flask-Mail sends welcome and one-time password-reset emails |
+| **Network** | A live Loghub dataset catalog read from the Zenodo REST API with `urllib` (JSON, timeout, validation, cache, optional API token), compared with the archives already downloaded |
 | **Alerting** | Rules per dataset, idempotent alert decisions with cooldown, incident acknowledgement, assignment and an append-only audit trail; an SMTP outbox with claim, send and record phases |
 | **Desktop workbench** | File explorer, live log tailing with level timelines, loss-by-epoch charts, run history and comparison, machine load, split code editor with Ruff and Pyright, PTY terminals, SSH, PDF and Parquet preview |
 | **Platform** | Native window via WebView2, WKWebView or WebKitGTK; OS-specific code isolated behind one interface; installers for all three systems |
@@ -240,6 +242,25 @@ Then open **Project → Open folder**, choose a project and select its log. A lo
 project contains `metrics.csv` with `epoch,train_loss,val_loss` columns. The complete reference is the
 [workbench guide](docs/WORKBENCH_GUIDE.md).
 
+### One-command demonstration
+
+With Docker running, one command prepares everything and opens the desktop application:
+
+```bash
+python -m scripts.run.demo              # --browser for the default browser; `accounts` prints the logins
+```
+
+The first run starts MySQL 8.4 in a container bound to `127.0.0.1:3308`, applies the migrations, creates one
+account per role (`admin`, `manager`, `analyst`, `staff`) with generated passwords kept owner-only in
+`.local/demo/accounts.txt`, imports the first 60,000 lines of `data/raw/BGL.zip` and runs the rule and
+Isolation Forest window detectors through the normal job API and worker. Later runs only start the
+container and the app; `python -m scripts.run.demo stop` stops MySQL and keeps the data.
+
+The app opens on the sign-in page. **Staff sign-in** admits viewers and analysts, **Administrator sign-in**
+admits managers and administrators; there is no self-registration, accounts are created under
+**User management**. Account emails are written to `~/.h-logsen/outbox` as `.eml` files unless
+`SMTP_ENABLED=1` and the `SMTP_*` settings point at a mail server.
+
 ### Run the investigation platform with MySQL
 
 On Windows and macOS the repository manages a private MySQL ZIP runtime bound to `127.0.0.1`; on Linux,
@@ -287,12 +308,12 @@ Details: [July holdout and model contract](docs/ml/IF_JULY_HOLDOUT.md) ·
 | --- | --- |
 | Local API exposure | Loopback only; a random bearer token per launch; Host and Origin checks on every request |
 | Script injection | Content Security Policy with per-response nonces; autoescaped templates; secrets, tokens and e-mail addresses redacted from displayed logs |
-| Authentication | Password hashing, session reset at sign-in, rate-limited login, CSRF protection on every state change |
+| Authentication | Every page behind sign-in (default deny), password hashing, session reset at sign-in, rate-limited login, CSRF protection on every state change, one-time signed reset links that expire after an hour, a new session secret per desktop launch |
 | Authorization | Default deny; roles (viewer, analyst, manager, admin) plus explicit per-dataset grants, enforced in queries and by composite keys |
 | File system | Project root sandbox (system, home, temporary and hidden roots refused); credential files never served; Windows 8.3 aliases and reserved device names refused |
 | Data at rest | Owner-only files and folders, verified after creation; a strict mode for filesystems that ignore POSIX modes |
 | Uploads | Size, encoding and control-character checks; immutable staging; no download route for originals |
-| Database | Least-privilege accounts; `DELETE` granted only on the two tables that need it |
+| Database | Least-privilege accounts; `DELETE` granted only on the three tables whose pages offer it |
 
 Please report vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 

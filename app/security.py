@@ -29,15 +29,20 @@ def identity():
     return user
 
 
+def service_token_valid():
+    """True when the request carries the configured read-only service token."""
+    token = current_app.config.get("DATABASE_READ_TOKEN") or os.environ.get("DATABASE_READ_TOKEN")
+    supplied = request.headers.get("Authorization", "")
+    return bool(token) and secrets.compare_digest(supplied.encode(), ("Bearer " + token).encode())
+
+
 def authorized_datasets():
     from app.domain import UserDataset
 
     user = identity()
     if user:
         return set(db.session.scalars(select(UserDataset.dataset_id).where(UserDataset.user_id == user.id)))
-    token = current_app.config.get("DATABASE_READ_TOKEN") or os.environ.get("DATABASE_READ_TOKEN")
-    supplied = request.headers.get("Authorization", "")
-    if token and secrets.compare_digest(supplied.encode(), ("Bearer " + token).encode()):
+    if service_token_valid():
         return set(current_app.config.get("DATABASE_ALLOWED_DATASETS", ()))
     return set()
 
@@ -70,12 +75,51 @@ def roles(*allowed):
     return decorate
 
 
-@security_api.post("/api/v1/auth/login")
-def login():
-    if not current_app.secret_key or "sqlalchemy" not in current_app.extensions:
-        return jsonify(error={"code": "auth_unavailable"}), 503
+LOGIN_WINDOW = 60.0  # seconds
+LOGIN_ATTEMPTS = 5  # per client address and window
+
+
+def login_rate_limited():
+    """Count a sign-in attempt for this client; True when it exceeds the window's budget."""
+    key = hashlib.sha256((request.remote_addr or "").encode()).hexdigest()
+    now = time.monotonic()
+    if len(attempts) > 10000:
+        attempts.clear()
+    queue = attempts[key]
+    while queue and now - queue[0] > LOGIN_WINDOW:
+        queue.popleft()
+    if len(queue) >= LOGIN_ATTEMPTS:
+        return True
+    queue.append(now)
+    return False
+
+
+def authenticate(username, password):
+    """The active user with these credentials, or None. Unknown names cost the same hash work."""
     from app.domain import User
 
+    user = db.session.scalar(select(User).where(User.username == username))
+    valid = check_password_hash(
+        user.password_hash if user else current_app.config["DUMMY_PASSWORD_HASH"],
+        password,
+    )
+    return user if user is not None and user.active and valid else None
+
+
+def start_session(user):
+    """A fresh session for ``user``: the old session is discarded and a new CSRF secret issued."""
+    session.clear()
+    session.update(user_id=user.id, auth_version=user.auth_version, csrf=secrets.token_hex(32))
+
+
+def auth_available():
+    return bool(current_app.secret_key) and "sqlalchemy" in current_app.extensions
+
+
+@security_api.post("/api/v1/auth/login")
+def login():
+    if not auth_available():
+        return jsonify(error={"code": "auth_unavailable"}), 503
     data = request.get_json(silent=True) or {}
     if not isinstance(data, dict):
         return jsonify(error={"code": "invalid_credentials"}), 401
@@ -87,26 +131,12 @@ def login():
         or len(password) > 1024
     ):
         return jsonify(error={"code": "invalid_credentials"}), 401
-    key = hashlib.sha256((request.remote_addr or "").encode()).hexdigest()
-    now = time.monotonic()
-    if len(attempts) > 10000:
-        attempts.clear()
-    queue = attempts[key]
-    while queue and now - queue[0] > 60:
-        queue.popleft()
-    if len(queue) >= 5:
+    if login_rate_limited():
         return jsonify(error={"code": "rate_limited"}), 429
-    queue.append(now)
-    user = db.session.scalar(select(User).where(User.username == username))
-    # Fixed dummy hash work prevents a trivial missing-user fast path.
-    valid = check_password_hash(
-        user.password_hash if user else current_app.config["DUMMY_PASSWORD_HASH"],
-        password,
-    )
-    if user is None or not user.active or not valid:
+    user = authenticate(username, password)
+    if user is None:
         return jsonify(error={"code": "invalid_credentials"}), 401
-    session.clear()
-    session.update(user_id=user.id, auth_version=user.auth_version, csrf=secrets.token_hex(32))
+    start_session(user)
     return jsonify(
         user={"id": user.id, "username": user.username, "role": user.role},
         csrf_token=session["csrf"],

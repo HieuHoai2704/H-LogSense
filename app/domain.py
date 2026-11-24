@@ -29,10 +29,12 @@ class User(Identity, Model):
     __tablename__ = "users"
     __table_args__ = (
         UniqueConstraint("username"),
+        UniqueConstraint("email"),
         CheckConstraint("role IN ('viewer','analyst','manager','admin')", name="role"),
         options(),
     )
     username: Mapped[str] = mapped_column(String(100), nullable=False)
+    email: Mapped[str | None] = mapped_column(String(254))  # optional; required for self-registration
     password_hash: Mapped[str] = mapped_column(String(512), nullable=False)
     role: Mapped[str] = mapped_column(String(16), nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

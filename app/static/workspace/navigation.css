@@ -86,3 +86,25 @@
   .workspace-nav nav a { width: 34px; height: 32px; }
   .workspace-nav nav a[aria-current="page"]::before { bottom: -5px; }
 }
+
+/* Signed-in account and sign-out, at the right end of the header on every page. */
+.workspace-account { display: flex; align-items: center; gap: 10px; margin: 0 0 0 auto; }
+.workspace-account-name { display: grid; line-height: 1.15; text-align: right; font-size: 13px; font-weight: 600; color: var(--text); }
+.workspace-account-name small { font-size: 11px; font-weight: 500; color: var(--muted); }
+.workspace-account button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.workspace-account button:hover { background: color-mix(in srgb, var(--text) 9%, transparent); }
+.workspace-account button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.workspace-account .workspace-nav-icon { width: 16px; height: 16px; }

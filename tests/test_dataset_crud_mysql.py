@@ -56,7 +56,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         admin = create_engine(admin_url, hide_parameters=True)
         try:
             with admin.begin() as connection:
-                for table in ("datasets", "user_datasets"):
+                for table in ("datasets", "user_datasets", "users"):
                     connection.execute(
                         text(f"GRANT DELETE ON `{url.database}`.`{table}` TO '{url.username}'@'{GRANT_HOST}'")
                     )

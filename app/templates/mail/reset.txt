@@ -1,0 +1,6 @@
+A password reset was requested for {{ username }} on {{ app_name }}.
+
+Choose a new password (works once, expires in {{ minutes }} minutes):
+{{ reset_url }}
+
+If you did not ask for this, ignore this email; your password stays the same.

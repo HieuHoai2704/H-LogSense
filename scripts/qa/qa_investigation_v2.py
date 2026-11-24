@@ -26,7 +26,7 @@ def main():
     root = Path(__file__).resolve().parents[2]
     output = Path(os.environ.get("LOGSENSE_QA_OUTPUT", root / "docs/ui/implementation-v2"))
     output.mkdir(parents=True, exist_ok=True)
-    app = create_app()
+    app = create_app({"LOGIN_REQUIRED": False})
 
     @app.before_request
     def slow_old_query():

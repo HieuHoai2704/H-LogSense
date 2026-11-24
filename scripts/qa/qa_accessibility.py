@@ -19,7 +19,7 @@ def main():
     axe = REPO_ROOT / ".local/qa-tools/node_modules/axe-core/axe.min.js"
     if not axe.is_file():
         raise RuntimeError("Install the pinned QA-only axe-core package under .local/qa-tools.")
-    app = create_app()
+    app = create_app({"LOGIN_REQUIRED": False})
     logging.getLogger("werkzeug").setLevel(logging.ERROR)
     server = make_server("127.0.0.1", 0, app, threaded=True)
     thread = threading.Thread(target=server.serve_forever, daemon=True)

@@ -14,7 +14,7 @@ from app.services.investigation import build, query
 
 class InvestigationTests(unittest.TestCase):
     def setUp(self):
-        self.app = create_app()
+        self.app = create_app({"LOGIN_REQUIRED": False})
         self.app.config["TESTING"] = True
         self.client = self.app.test_client()
 
