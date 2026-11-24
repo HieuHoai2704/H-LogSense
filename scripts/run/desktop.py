@@ -106,8 +106,8 @@ class Desktop:
         self.connected_widgets.append(refresh)
         for col, (label, roles, callback) in enumerate(
             (
-                ("New", {"manager", "admin"}, self.new_dataset),
-                ("Rename", {"manager", "admin"}, self.rename_dataset),
+                ("New", {"staff", "admin"}, self.new_dataset),
+                ("Rename", {"staff", "admin"}, self.rename_dataset),
                 ("Delete empty", {"admin"}, self.remove_dataset),
             ),
             start=2,
@@ -168,7 +168,7 @@ class Desktop:
         for button, roles in self.mutations:
             button.configure(state="normal" if connected and self.role in roles else "disabled")
         self.upload_button.configure(
-            state="normal" if connected and self.role in {"analyst", "manager", "admin"} else "disabled"
+            state="normal" if connected and self.role in {"staff", "admin"} else "disabled"
         )
 
     def run(self, work, on_success):

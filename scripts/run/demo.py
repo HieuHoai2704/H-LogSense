@@ -7,7 +7,7 @@
 
 The first run creates a Docker container ``hlogsen-demo-mysql`` (MySQL 8.4, 127.0.0.1:3308 only) with a
 named volume, generates every password, and keeps them owner-only in ``.local/demo/``. It then applies the
-Alembic migrations, creates one account per role, imports the first lines of ``data/raw/BGL.zip`` (when
+Alembic migrations, creates an administrator and a staff account, imports the first lines of ``data/raw/BGL.zip`` (when
 present) and runs the rule and Isolation Forest window detectors through the same API and worker as
 production. Later runs reuse everything and only start the container and the app.
 """
@@ -30,11 +30,9 @@ IMAGE = "mysql:8.4"
 PORT = 3308
 SCHEMA = "logsense_demo"
 ACCOUNTS = (
-    # username, role, email: one account per role for the demonstration.
+    # username, role, email: one account of each type for the demonstration.
     ("admin", "admin", "admin@demo.h-logsen.local"),
-    ("manager", "manager", "manager@demo.h-logsen.local"),
-    ("analyst", "analyst", "analyst@demo.h-logsen.local"),
-    ("staff", "viewer", "staff@demo.h-logsen.local"),
+    ("staff", "staff", "staff@demo.h-logsen.local"),
 )
 DEMO_LINES = 60000
 
@@ -269,7 +267,10 @@ def write_accounts(state):
     lines = ["H-logsen demo accounts (local demonstration only)", ""]
     for username, role, email in ACCOUNTS:
         lines.append(f"{role:<8} {username:<8} {state['accounts'][username]:<20} {email}")
-    lines += ["", "Staff sign-in: viewer/analyst. Administrator sign-in: manager/admin."]
+    lines += [
+        "",
+        "staff: Staff sign-in (the whole application). admin: Administrator sign-in (also user management).",
+    ]
     write_private(STATE / "accounts.txt", "\n".join(lines) + "\n")
 
 
@@ -277,7 +278,7 @@ def show_accounts(state):
     print()
     print("  Role      Username  Password              Portal")
     for username, role, _ in ACCOUNTS:
-        portal = "Administrator" if role in ("admin", "manager") else "Staff"
+        portal = "Administrator" if role == "admin" else "Staff"
         print(f"  {role:<9} {username:<9} {state['accounts'][username]:<21} {portal}")
     print(f"\n  Saved owner-only in {STATE / 'accounts.txt'}")
     print("  Emails (welcome, password reset) are written to ~/.h-logsen/outbox unless SMTP_ENABLED=1.\n")

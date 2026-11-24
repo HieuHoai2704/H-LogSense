@@ -50,7 +50,7 @@ class SignedFormsMySQLTests(unittest.TestCase):
         data.update(changes)
         return self.client.post("/forms/datasets", data=data, headers=self.headers())
 
-    def other_client(self, role="manager"):
+    def other_client(self, role="staff"):
         with Session(self.engine) as session, session.begin():
             user = User(
                 username=uuid4().hex,
@@ -70,7 +70,7 @@ class SignedFormsMySQLTests(unittest.TestCase):
 
     def test_01_signed_token_endpoint_requires_active_session(self):
         self.assertEqual(self.client.get("/api/v1/forms/csrf").status_code, 403)
-        self.login("viewer")
+        self.login("staff")
         self.assertTrue(self.app.config.get("WTF_CSRF_ENABLED", True))
         self.assertTrue(self.app.config.get("WTF_CSRF_CHECK_DEFAULT", True))
         self.assertTrue(self.token())
@@ -160,7 +160,7 @@ class SignedFormsMySQLTests(unittest.TestCase):
         self.assertIn("csrf_token", response.json["error"]["fields"])
 
     def test_05_expired_form_token_rejected_and_fresh_token_works(self):
-        self.login("manager")
+        self.login("staff")
         signed = self.token()
         with patch.dict(self.app.config, {"WTF_CSRF_TIME_LIMIT": -1}):
             response = self.client.post(
@@ -178,24 +178,25 @@ class SignedFormsMySQLTests(unittest.TestCase):
         self.assertEqual(valid.status_code, 200, valid.json)
 
     def test_06_role_matrix_applies_to_form_adapters(self):
-        for role in ("viewer", "analyst", "manager", "admin"):
+        # Two account types; both use every dataset form.
+        for role in ("staff", "admin"):
             with self.subTest(role=role):
                 self.login(role)
                 token = self.token()
                 created = self.create_form()
-                self.assertEqual(created.status_code, 201 if role in {"manager", "admin"} else 403)
+                self.assertEqual(created.status_code, 201)
                 renamed = self.client.post(
                     f"/forms/datasets/{self.dataset_id}/rename",
                     data={"name": "Role " + role, "csrf_token": token},
                     headers=self.headers(),
                 )
-                self.assertEqual(renamed.status_code, 200 if role in {"manager", "admin"} else 403)
+                self.assertEqual(renamed.status_code, 200)
                 removed = self.client.post(
-                    f"/forms/datasets/{self.dataset_id}/delete",
+                    f"/forms/datasets/{created.json['dataset']['id']}/delete",
                     data={"confirmation": "y", "csrf_token": token},
                     headers=self.headers(),
                 )
-                self.assertEqual(removed.status_code, 204 if role == "admin" else 403)
+                self.assertEqual(removed.status_code, 204, removed.json)
 
     def test_07_admin_has_no_ungranted_form_access(self):
         self.login("admin")
@@ -219,7 +220,7 @@ class SignedFormsMySQLTests(unittest.TestCase):
             )
 
     def test_08_duplicate_form_key_conflicts_without_new_dataset(self):
-        self.login("manager")
+        self.login("staff")
         key = uuid4().hex
         first = self.create_form(dataset_key=key)
         self.assertEqual(first.status_code, 201, first.json)
@@ -231,7 +232,7 @@ class SignedFormsMySQLTests(unittest.TestCase):
         self.assertEqual(self.count(Dataset, Dataset.source_id == source_id), count_before)
 
     def test_09_malformed_types_unknown_and_duplicate_fields_are400(self):
-        self.login("manager")
+        self.login("staff")
         response = self.client.post("/forms/datasets", json=["not", "form"], headers=self.headers())
         self.assertEqual(response.status_code, 400, response.json)
         response = self.create_form(state="imported")
@@ -343,7 +344,7 @@ class SignedFormsMySQLTests(unittest.TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_13_existing_rest_json_contract_does_not_need_form_token(self):
-        self.login("manager")
+        self.login("staff")
         with self.client.session_transaction() as state:
             self.assertNotIn("csrf_token", state)
         response = self.client.post(
@@ -354,7 +355,7 @@ class SignedFormsMySQLTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201, response.json)
 
     def test_14_form_source_id_cannot_attach_to_ungranted_source(self):
-        self.login("manager")
+        self.login("staff")
         with Session(self.engine) as session, session.begin():
             source = DataSource(source_key=uuid4().hex, name="Private isolated source fixture")
             session.add(source)

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="d-flex flex-wrap align-items-baseline gap-3 mb-3">
   <h1 class="me-auto mb-0">{{ tr("User management") }}</h1>
-  {% for value, label in [("admin", "Administrator"), ("manager", "Manager"), ("analyst", "Analyst"), ("viewer", "Viewer")] %}
+  {% for value, label in [("admin", "Administrator"), ("staff", "Staff")] %}
   <span class="badge text-bg-secondary">{{ tr(label) }}: {{ counts.get(value, 0) }}</span>
   {% endfor %}
 </div>
@@ -14,7 +14,7 @@
   <div class="col-md-3">
     <select class="form-select" name="role" aria-label="{{ tr('Role') }}">
       <option value="">{{ tr("All roles") }}</option>
-      {% for value, label in [("viewer", "Viewer"), ("analyst", "Analyst"), ("manager", "Manager"), ("admin", "Administrator")] %}
+      {% for value, label in [("staff", "Staff"), ("admin", "Administrator")] %}
       <option value="{{ value }}"{% if role == value %} selected{% endif %}>{{ tr(label) }}</option>
       {% endfor %}
     </select>
@@ -31,7 +31,7 @@
         <td>{{ user.id }}</td>
         <td>{{ user.username }}</td>
         <td>{{ user.email or "—" }}</td>
-        <td>{{ tr({"viewer": "Viewer", "analyst": "Analyst", "manager": "Manager", "admin": "Administrator"}[user.role]) }}</td>
+        <td>{{ tr({"staff": "Staff", "admin": "Administrator"}[user.role]) }}</td>
         <td>{{ tr("Active") if user.active else tr("Disabled") }}</td>
         <td><a href="{{ url_for('accounts.edit_user', user_id=user.id) }}">{{ tr("Edit") }}</a></td>
       </tr>

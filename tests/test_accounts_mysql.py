@@ -41,7 +41,7 @@ class AccountMySQLTests(unittest.TestCase):
         self.addCleanup(self.app.config.update, LOGIN_REQUIRED=False)
         self.app.extensions["account_outbox"] = []
 
-    def user(self, role="viewer", *, email=None, active=True):
+    def user(self, role="staff", *, email=None, active=True):
         with Session(self.engine) as session, session.begin():
             user = User(
                 username="u" + uuid4().hex[:20],
@@ -78,7 +78,7 @@ class AccountMySQLTests(unittest.TestCase):
         return response.get_data(as_text=True)
 
     def create_account(self, form_page, **fields):
-        data = {"csrf_token": csrf(form_page), "role": "viewer", "password": PASSWORD, "confirm": PASSWORD}
+        data = {"csrf_token": csrf(form_page), "role": "staff", "password": PASSWORD, "confirm": PASSWORD}
         data.update(fields)
         return self.client.post("/account/admin/users", data=data)
 
@@ -89,12 +89,17 @@ class AccountMySQLTests(unittest.TestCase):
         username = "staff" + uuid4().hex[:12]
         email = f"{username}@example.invalid"
         response = self.create_account(
-            self.page("/account/admin/users"), username=username, email=email.upper(), role="analyst"
+            self.page("/account/admin/users"), username=username, email=email.upper(), role="staff"
         )
         self.assertEqual(response.status_code, 303)
         with Session(self.engine) as session:
             user = session.scalar(select(User).where(User.username == username))
-            self.assertEqual((user.email, user.role, user.active), (email, "analyst", True))
+            self.assertEqual((user.email, user.role, user.active), (email, "staff", True))
+            # A new account opens every existing dataset; the administrator can narrow this.
+            grants = session.scalars(
+                select(UserDataset.dataset_id).where(UserDataset.user_id == user.id)
+            ).all()
+            self.assertIn(self.dataset_id, grants)
             self.assertNotIn(PASSWORD, user.password_hash)
         (mail,) = self.app.extensions["account_outbox"]
         self.assertEqual(mail.recipients, [email])
@@ -130,30 +135,30 @@ class AccountMySQLTests(unittest.TestCase):
         ):
             self.assertIn(message, body)
         self.assertEqual(self.app.extensions["account_outbox"], [])
-        _, manager = self.user("manager")
+        # Staff use the whole application but never the account pages.
+        _, staff = self.user("staff")
         other = self.app.test_client()
-        self.sign_in(manager, "admin", client=other)
+        self.sign_in(staff, client=other)
+        self.assertEqual(other.get("/account/admin/users").status_code, 403)
         self.assertEqual(other.post("/account/admin/users", data={}).status_code, 403)
 
-    def test_03_portals_admit_only_their_roles(self):
-        _, viewer = self.user("viewer")
+    def test_03_portals_admit_only_their_account_type(self):
+        _, staff = self.user("staff")
         _, admin = self.user("admin")
-        _, manager = self.user("manager")
-        self.assertEqual(self.sign_in(viewer, "admin").status_code, 403)
+        self.assertEqual(self.sign_in(staff, "admin").status_code, 403)
         self.assertEqual(self.client.get("/").status_code, 302)
         self.assertEqual(self.sign_in(admin, "staff").status_code, 403)
         self.assertEqual(self.sign_in(admin, "admin", password="wrong-password").status_code, 401)
         signed = self.sign_in(admin, "admin")
         self.assertEqual((signed.status_code, signed.headers["Location"]), (303, "/account/admin/users"))
-        other = self.app.test_client()
-        managed = self.sign_in(manager, "admin", client=other)
-        self.assertEqual(managed.headers["Location"], "/manage/datasets")
-        self.assertEqual(other.get("/account/admin/users").status_code, 403)
-        staff = self.app.test_client()
-        self.assertEqual(self.sign_in(viewer, "staff", client=staff).headers["Location"], "/")
+        member = self.app.test_client()
+        self.assertEqual(self.sign_in(staff, "staff", client=member).headers["Location"], "/")
+        # Staff reach every workspace and the dataset pages.
+        for path in ("/", "/?view=editor", "/?workspace=logs", "/manage/datasets"):
+            self.assertEqual(member.get(path).status_code, 200, path)
 
     def test_04_next_path_and_sign_out_end_every_workspace(self):
-        _, viewer = self.user("analyst")
+        _, viewer = self.user("staff")
         redirect = self.client.get("/?workspace=logs")
         self.assertEqual(redirect.headers["Location"], "/account/login?next=/?workspace%3Dlogs")
         signed = self.sign_in(viewer, next_path="/?workspace=logs")
@@ -172,7 +177,7 @@ class AccountMySQLTests(unittest.TestCase):
     def test_05_sign_in_is_rate_limited(self):
         from app.security import attempts
 
-        _, viewer = self.user("viewer")
+        _, viewer = self.user("staff")
         attempts.clear()
         page = self.page("/account/login")
         token = csrf(page)
@@ -186,7 +191,7 @@ class AccountMySQLTests(unittest.TestCase):
 
     def test_06_password_reset_link_works_once_and_ends_old_sessions(self):
         email = f"reset{uuid4().hex[:10]}@example.invalid"
-        user_id, username = self.user("viewer", email=email)
+        user_id, username = self.user("staff", email=email)
         old_session = self.app.test_client()
         self.sign_in(username, client=old_session)
         self.assertEqual(old_session.get("/").status_code, 200)
@@ -226,7 +231,7 @@ class AccountMySQLTests(unittest.TestCase):
         self.sign_in(admin, "admin")
         marker = uuid4().hex[:8]
         for index in range(23):
-            self.user("viewer", email=f"page{index:02d}-{marker}@example.invalid")
+            self.user("staff", email=f"page{index:02d}-{marker}@example.invalid")
 
         listing = self.page("/account/admin/users")
         username = "made" + marker
@@ -236,7 +241,7 @@ class AccountMySQLTests(unittest.TestCase):
                 "csrf_token": csrf(listing),
                 "username": username,
                 "email": f"{username}@example.invalid",
-                "role": "analyst",
+                "role": "staff",
                 "password": PASSWORD,
                 "confirm": PASSWORD,
             },
@@ -244,7 +249,7 @@ class AccountMySQLTests(unittest.TestCase):
         self.assertEqual(created.status_code, 303)
         with Session(self.engine) as session:
             made = session.scalar(select(User).where(User.username == username))
-            self.assertEqual(made.role, "analyst")
+            self.assertEqual(made.role, "staff")
 
         found = self.page(f"/account/admin/users?q={marker}")
         self.assertEqual(found.count(f"-{marker}@example.invalid"), 20)  # one page of 20
@@ -252,9 +257,9 @@ class AccountMySQLTests(unittest.TestCase):
         second = self.page(f"/account/admin/users?q={marker}&page=2")
         self.assertEqual(second.count(f"-{marker}@example.invalid"), 3)
         self.assertIn(username, second)
-        analysts = self.page(f"/account/admin/users?q={marker}&role=analyst")
-        self.assertIn(username, analysts)
-        self.assertNotIn(f"page00-{marker}", analysts)
+        staff_only = self.page(f"/account/admin/users?q={marker}&role=staff")
+        self.assertIn("Total accounts: 24", staff_only)  # 23 listed accounts and the one just added
+        self.assertIn("No accounts match.", self.page(f"/account/admin/users?q={marker}&role=admin"))
         self.assertIn("No accounts match.", self.page("/account/admin/users?q=%25_nothing_"))
 
         edit = self.page(f"/account/admin/users/{made.id}")
@@ -263,14 +268,14 @@ class AccountMySQLTests(unittest.TestCase):
             data={
                 "csrf_token": csrf(edit),
                 "email": f"{username}@example.invalid",
-                "role": "manager",
+                "role": "admin",
                 "datasets": [str(self.dataset_id)],
             },
         )
         self.assertEqual(updated.status_code, 303)
         with Session(self.engine) as session:
             made = session.get(User, made.id)
-            self.assertEqual((made.role, made.active, made.auth_version), ("manager", False, 2))
+            self.assertEqual((made.role, made.active, made.auth_version), ("admin", False, 2))
             grants = session.scalars(
                 select(UserDataset.dataset_id).where(UserDataset.user_id == made.id)
             ).all()
@@ -279,7 +284,7 @@ class AccountMySQLTests(unittest.TestCase):
         own = self.page(f"/account/admin/users/{admin_id}")
         refused = self.client.post(
             f"/account/admin/users/{admin_id}",
-            data={"csrf_token": csrf(own), "role": "viewer", "active": "y"},
+            data={"csrf_token": csrf(own), "role": "staff", "active": "y"},
         )
         self.assertEqual(refused.status_code, 400)
         self.assertIn("You cannot remove your own administrator access.", refused.get_data(as_text=True))

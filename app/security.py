@@ -144,7 +144,7 @@ def login():
 
 
 @security_api.get("/api/v1/auth/me")
-@roles("viewer", "analyst", "manager", "admin")
+@roles("staff", "admin")
 def me():
     return jsonify(
         user={"id": g.user.id, "username": g.user.username, "role": g.user.role},
@@ -154,7 +154,7 @@ def me():
 
 
 @security_api.post("/api/v1/auth/logout")
-@roles("viewer", "analyst", "manager", "admin")
+@roles("staff", "admin")
 def logout():
     session.clear()
     return jsonify(status="logged_out")

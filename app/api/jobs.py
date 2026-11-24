@@ -13,7 +13,7 @@ jobs_api = Blueprint("jobs", __name__)
 
 
 @jobs_api.post("/api/v1/detection/jobs")
-@roles("analyst", "manager", "admin")
+@roles("staff", "admin")
 def submit():
     data = request.get_json(silent=True) or {}
     if not isinstance(data, dict):
@@ -132,7 +132,7 @@ def submit():
 
 
 @jobs_api.get("/api/v1/detection/jobs/<int:job_id>")
-@roles("viewer", "analyst", "manager", "admin")
+@roles("staff", "admin")
 def status(job_id):
     job = db.session.get(ProcessingJob, job_id)
     if job is None:
@@ -148,7 +148,7 @@ def status(job_id):
 
 
 @jobs_api.post("/api/v1/detection/jobs/<int:job_id>/retry")
-@roles("analyst", "manager", "admin")
+@roles("staff", "admin")
 def retry(job_id):
     from sqlalchemy.orm import Session
 
@@ -175,7 +175,7 @@ def retry(job_id):
 
 
 @jobs_api.get("/api/v1/detection/models")
-@roles("viewer", "analyst", "manager", "admin")
+@roles("staff", "admin")
 def models():
     from app.services.validated_if import model_card
 

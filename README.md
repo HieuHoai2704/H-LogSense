@@ -250,16 +250,17 @@ With Docker running, one command prepares everything and opens the desktop appli
 python -m scripts.run.demo              # --browser for the default browser; `accounts` prints the logins
 ```
 
-The first run starts MySQL 8.4 in a container bound to `127.0.0.1:3308`, applies the migrations, creates one
-account per role (`admin`, `manager`, `analyst`, `staff`) with generated passwords kept owner-only in
+The first run starts MySQL 8.4 in a container bound to `127.0.0.1:3308`, applies the migrations, creates an
+administrator (`admin`) and a staff account (`staff`) with generated passwords kept owner-only in
 `.local/demo/accounts.txt`, imports the first 60,000 lines of `data/raw/BGL.zip` and runs the rule and
 Isolation Forest window detectors through the normal job API and worker. Later runs only start the
 container and the app; `python -m scripts.run.demo stop` stops MySQL and keeps the data.
 
-The app opens on the sign-in page. **Staff sign-in** admits viewers and analysts, **Administrator sign-in**
-admits managers and administrators; there is no self-registration, accounts are created under
-**User management**. Account emails are written to `~/.h-logsen/outbox` as `.eml` files unless
-`SMTP_ENABLED=1` and the `SMTP_*` settings point at a mail server.
+The app opens on the sign-in page. There are two account types: **staff** sign in under **Staff sign-in**
+and use the whole application; **administrators** sign in under **Administrator sign-in** and also manage
+accounts under **User management**. There is no self-registration. Account emails are written to
+`~/.h-logsen/outbox` as `.eml` files unless `SMTP_ENABLED=1` and the `SMTP_*` settings point at a mail
+server.
 
 ### Run the investigation platform with MySQL
 
@@ -271,7 +272,7 @@ python -m scripts.run.mysql_runtime start
 python -m scripts.run.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
 python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database register-bgl --key bgl-research-v1
 python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database ingest-bgl --dataset ID --archive data/raw/BGL.zip --limit 100000
-python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database create-user --username analyst --role admin --dataset ID
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database create-user --username admin --role admin --dataset ID
 python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.worker
 python -m scripts.run.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
 ```
@@ -309,7 +310,7 @@ Details: [July holdout and model contract](docs/ml/IF_JULY_HOLDOUT.md) ·
 | Local API exposure | Loopback only; a random bearer token per launch; Host and Origin checks on every request |
 | Script injection | Content Security Policy with per-response nonces; autoescaped templates; secrets, tokens and e-mail addresses redacted from displayed logs |
 | Authentication | Every page behind sign-in (default deny), password hashing, session reset at sign-in, rate-limited login, CSRF protection on every state change, one-time signed reset links that expire after an hour, a new session secret per desktop launch |
-| Authorization | Default deny; roles (viewer, analyst, manager, admin) plus explicit per-dataset grants, enforced in queries and by composite keys |
+| Authorization | Default deny; two account types (staff, admin) plus explicit per-dataset grants, enforced in queries and by composite keys; only administrators manage accounts |
 | File system | Project root sandbox (system, home, temporary and hidden roots refused); credential files never served; Windows 8.3 aliases and reserved device names refused |
 | Data at rest | Owner-only files and folders, verified after creation; a strict mode for filesystems that ignore POSIX modes |
 | Uploads | Size, encoding and control-character checks; immutable staging; no download route for originals |

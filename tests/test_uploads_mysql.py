@@ -92,7 +92,7 @@ class UploadMySQLTests(unittest.TestCase):
         return self.client.get(response.json["status_url"])
 
     def test_01_queue_then_worker_preserves_actual_bytes_labels_and_provenance(self):
-        self.login("analyst")
+        self.login("staff")
         original = LINE.replace(b"\n", b"\r\n") + LINE.rstrip(b"\n")
         response = self.upload(original)
         self.assertEqual(response.status_code, 202, response.json)
@@ -136,7 +136,7 @@ class UploadMySQLTests(unittest.TestCase):
             )
 
     def test_02_csv_records_link_to_original_container_rows_not_fake_offsets(self):
-        self.login("analyst")
+        self.login("staff")
         stream = io.StringIO(newline="")
         writer = csv.writer(stream)
         writer.writerow(["raw_line"])
@@ -168,9 +168,7 @@ class UploadMySQLTests(unittest.TestCase):
 
     def test_03_rbac_grants_and_both_csrf_layers(self):
         self.assertEqual(self.client.post("/api/v1/uploads").status_code, 403)
-        self.login("viewer")
-        self.assertEqual(self.upload().status_code, 403)
-        self.login("analyst")
+        self.login("staff")
         self.assertEqual(self.upload(header=False).status_code, 403)
         missing = self.upload(signed=False)
         self.assertEqual(missing.status_code, 400, missing.json)
@@ -185,7 +183,7 @@ class UploadMySQLTests(unittest.TestCase):
         self.assertEqual(self.upload().status_code, 403)
 
     def test_04_idempotent_replay_and_conflict_do_not_duplicate_files_or_rows(self):
-        self.login("analyst")
+        self.login("staff")
         key = "same-key-" + uuid4().hex
         first = self.upload(key=key)
         self.assertEqual(first.status_code, 202, first.json)
@@ -204,7 +202,7 @@ class UploadMySQLTests(unittest.TestCase):
         self.assertFalse(run_once(self.engine))
 
     def test_05_malformed_rows_are_retained_without_invented_events(self):
-        self.login("analyst")
+        self.login("staff")
         response = self.upload(LINE + b"not a BGL row\n")
         self.assertEqual(response.status_code, 202, response.json)
         self.assertTrue(run_once(self.engine))
@@ -222,7 +220,7 @@ class UploadMySQLTests(unittest.TestCase):
         self.assertEqual(self.count(GroundTruthLabel, GroundTruthLabel.dataset_id == self.dataset_id), 1)
 
     def test_06_invalid_files_and_parameter_pollution_create_no_job(self):
-        self.login("analyst")
+        self.login("staff")
         for body, name in (
             (b"\x00" + LINE, "binary.log"),
             (b"\xff" + LINE, "bad.txt"),
@@ -257,7 +255,7 @@ class UploadMySQLTests(unittest.TestCase):
         self.assertEqual(list(self.storage.iterdir()), [])
 
     def test_07_request_and_file_caps_do_not_change_other_endpoint_limit(self):
-        self.login("analyst")
+        self.login("staff")
         valid_large = LINE * ((1024 * 1024 // len(LINE)) + 20)
         accepted = self.upload(valid_large, "over-one-mib.log")
         self.assertEqual(accepted.status_code, 202, accepted.json)
@@ -275,7 +273,7 @@ class UploadMySQLTests(unittest.TestCase):
         self.assertEqual(login_large.status_code, 413)
 
     def test_08_original_file_bytes_are_not_exposed_by_an_http_download(self):
-        self.login("analyst")
+        self.login("staff")
         response = self.upload(LINE.replace(b"example", b"password=synthetic-secret"))
         self.assertEqual(response.status_code, 202, response.json)
         self.assertEqual(self.client.get(response.json["status_url"] + "/original").status_code, 404)
@@ -284,7 +282,7 @@ class UploadMySQLTests(unittest.TestCase):
             self.assertEqual(self.client.get("/api/v1/uploads/" + identity).status_code, 404)
 
     def test_09_retry_blocks_active_lease_and_enforces_attempt_limit(self):
-        self.login("analyst")
+        self.login("staff")
         response = self.upload()
         job_id, url = response.json["job_id"], response.json["status_url"]
         with Session(self.engine) as session, session.begin():
@@ -301,7 +299,7 @@ class UploadMySQLTests(unittest.TestCase):
         self.assertEqual(self.client.post(url + "/retry", headers=self.headers()).status_code, 409)
 
     def test_10_rollback_committed_progress_and_resume_have_no_duplicate_lines(self):
-        self.login("analyst")
+        self.login("staff")
         original = LINE * 1200
         response = self.upload(original)
         self.assertEqual(response.status_code, 202, response.json)
@@ -360,7 +358,7 @@ class UploadMySQLTests(unittest.TestCase):
         self.assertEqual(self.count(GroundTruthLabel, GroundTruthLabel.dataset_id == self.dataset_id), 1200)
 
     def test_11_mutated_artifacts_fail_before_import_and_cannot_retry(self):
-        self.login("analyst")
+        self.login("staff")
         for filename in ("original.log", "normalized.zip"):
             with self.subTest(filename=filename):
                 response = self.upload(key="mutation-" + filename)

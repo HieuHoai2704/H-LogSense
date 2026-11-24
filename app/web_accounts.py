@@ -50,8 +50,8 @@ from app.services.account_mail import send_account_mail
 
 accounts = Blueprint("accounts", __name__, url_prefix="/account")
 
-STAFF_ROLES = ("viewer", "analyst")
-ADMIN_ROLES = ("manager", "admin")
+STAFF_ROLES = ("staff",)
+ADMIN_ROLES = ("admin",)
 RESET_SALT = "h-logsen-password-reset"
 RESET_SECONDS = 3600
 PAGE_SIZE = 20
@@ -316,7 +316,7 @@ def users():
     if query_text:
         pattern = "%" + query_text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
         statement = statement.where(or_(User.username.like(pattern), User.email.like(pattern)))
-    if role in {"viewer", "analyst", "manager", "admin"}:
+    if role in {"staff", "admin"}:
         statement = statement.where(User.role == role)
     pages = db.paginate(statement, page=page, per_page=PAGE_SIZE, error_out=False)
     counts = dict(db.session.execute(select(User.role, func.count()).group_by(User.role)).tuples().all())
@@ -333,7 +333,7 @@ def users():
 
 @accounts.post("/admin/users")
 def create_user():
-    from app.domain import User
+    from app.domain import User, UserDataset
 
     require_admin()
     form = UserCreateForm()
@@ -353,6 +353,10 @@ def create_user():
                 auth_version=1,
             )
             db.session.add(user)
+            db.session.flush()
+            # Staff use the whole application: a new account can open every existing dataset. The
+            # administrator can narrow this on the account's edit page.
+            db.session.add_all(UserDataset(user_id=user.id, dataset_id=row[0]) for row in dataset_choices())
             db.session.commit()
             portal = "accounts.admin_login" if user.role in ADMIN_ROLES else "accounts.login"
             send_account_mail(

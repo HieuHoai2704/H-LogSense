@@ -212,7 +212,25 @@
   --bs-border-color: var(--border);
   --bs-link-color: var(--accent);
   --bs-link-hover-color: var(--text);
+  /* Bootstrap tables, form hints and placeholders take these: keep them readable on every palette. */
+  --bs-emphasis-color: var(--text);
+  --bs-heading-color: var(--text);
+  --bs-secondary-color: var(--muted);
+  --bs-secondary-bg: var(--panel);
+  --bs-tertiary-bg: var(--panel);
 }
+:root[data-workspace-theme] .table {
+  --bs-table-color: var(--text);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-color: var(--text);
+  --bs-table-hover-color: var(--text);
+}
+:root[data-workspace-theme] .table > thead th { color: var(--muted); font-weight: 600; }
+:root[data-workspace-theme] :is(.form-control, .form-select) { color: var(--text); background-color: var(--panel); border-color: var(--border); }
+:root[data-workspace-theme] .form-control::placeholder { color: var(--muted); opacity: 1; }
+:root[data-workspace-theme] .card { color: var(--text); background-color: var(--panel); border-color: var(--border); }
+:root[data-workspace-theme] .text-secondary { color: var(--muted) !important; }
 
 #glass-controls, #glass-unavailable { display: none; }
 :root[data-theme|="glass"][data-native-glass] #glass-reset { background-color: var(--glass-surface); }

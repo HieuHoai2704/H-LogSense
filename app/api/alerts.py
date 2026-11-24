@@ -7,7 +7,7 @@ from app.domain import Alert, AlertAudit, AlertRule, User, UserDataset
 from app.extensions import db
 from app.i18n import translate
 from app.models import Detector
-from app.security import Forbidden, require_dataset, roles
+from app.security import require_dataset, roles
 from app.services.investigation import QueryError, integer
 from app.services.redaction import redact
 
@@ -20,7 +20,7 @@ def invalid(error):
 
 
 @alerts_api.post("/api/v1/alert-rules")
-@roles("manager", "admin")
+@roles("staff", "admin")
 def create_rule():
     data = request.get_json(silent=True) or {}
     if not isinstance(data, dict):
@@ -58,7 +58,7 @@ def create_rule():
 
 
 @alerts_api.get("/api/v1/alerts")
-@roles("viewer", "analyst", "manager", "admin")
+@roles("staff", "admin")
 def list_alerts():
     dataset = integer(request.args.get("dataset_id"), 1, 2**63 - 1, "Dataset")
     require_dataset(dataset)
@@ -89,15 +89,13 @@ def list_alerts():
 
 
 @alerts_api.route("/api/v1/alerts/<int:alert_id>", methods=["GET", "PATCH"])
-@roles("viewer", "analyst", "manager", "admin")
+@roles("staff", "admin")
 def alert_detail(alert_id):
     alert = db.session.scalar(select(Alert).where(Alert.id == alert_id).with_for_update())
     if alert is None:
         return jsonify(error={"code": "not_found"}), 404
     require_dataset(alert.dataset_id)
     if request.method == "PATCH":
-        if g.user.role == "viewer":
-            raise Forbidden()
         data = request.get_json(silent=True) or {}
         if not isinstance(data, dict):
             raise QueryError("JSON object required.")
@@ -114,10 +112,7 @@ def alert_detail(alert_id):
                 "investigating": {"acknowledged", "resolved"},
                 "resolved": {"open"},
             }
-            if target != alert.status and (
-                target not in allowed[alert.status]
-                or (alert.status == "resolved" and g.user.role not in {"manager", "admin"})
-            ):
+            if target != alert.status and (target not in allowed[alert.status]):
                 return jsonify(error={"code": "invalid_transition"}), 409
             changes["status"] = {"old": alert.status, "new": target}
             alert.status = target
@@ -125,8 +120,6 @@ def alert_detail(alert_id):
                 alert.acknowledged_by = g.user.id
         if "assigned_to" in data:
             user_id = integer(data["assigned_to"], 1, 2**63 - 1, "Assignee")
-            if g.user.role == "analyst" and user_id != g.user.id:
-                raise Forbidden()
             user = db.session.get(User, user_id)
             granted = db.session.scalar(
                 select(UserDataset.id).where(
@@ -134,7 +127,7 @@ def alert_detail(alert_id):
                     UserDataset.dataset_id == alert.dataset_id,
                 )
             )
-            if not user or not user.active or user.role == "viewer" or not granted:
+            if not user or not user.active or not granted:
                 raise QueryError("Assignee must have dataset permission and an investigation role.")
             changes["assigned_to"] = {"old": alert.assigned_to, "new": user_id}
             alert.assigned_to = user_id

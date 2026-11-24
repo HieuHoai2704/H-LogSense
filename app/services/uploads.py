@@ -416,7 +416,7 @@ def queue_upload(session, actor, dataset_id, key, bundle):
     if (
         actor is None
         or not actor.active
-        or actor.role not in {"analyst", "manager", "admin"}
+        or actor.role not in {"staff", "admin"}
         or session.scalar(
             select(UserDataset.id).where(
                 UserDataset.user_id == actor.id, UserDataset.dataset_id == dataset_id

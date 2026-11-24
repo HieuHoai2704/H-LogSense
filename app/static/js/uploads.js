@@ -12,7 +12,7 @@
   const LIMIT = 16 * 1024 * 1024, MAX_POLLS = 20;
   let user = null, csrf = null, authGeneration = 0, listSequence = 0,
     jobSequence = 0, current = null, notifiedUpload = null, timer = null, polls = 0, busy = false;
-  const allowed = () => ["analyst", "manager", "admin"].includes(user?.role);
+  const allowed = () => ["staff", "admin"].includes(user?.role);
   function say(text, focus = false) {
     status.textContent = text;
     if (focus) status.focus({ preventScroll: true });

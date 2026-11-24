@@ -102,7 +102,7 @@ USERNAME = Regexp(
     r"[A-Za-z0-9][A-Za-z0-9._-]{2,99}\Z", message="Use 3-100 letters, numbers, dot, underscore or hyphen."
 )
 EMAIL = Regexp(r"[^@\s]{1,64}@[^@\s]+\.[^@\s]+\Z", message="Enter a valid email address.")
-ROLES = [("viewer", "Viewer"), ("analyst", "Analyst"), ("manager", "Manager"), ("admin", "Administrator")]
+ROLES = [("staff", "Staff"), ("admin", "Administrator")]
 
 
 def lower(value):
@@ -153,7 +153,7 @@ class LogoutForm(FlaskForm):
 
 
 class UserCreateForm(RegisterForm):
-    role = SelectField("Role", choices=ROLES, default="viewer", validators=[InputRequired()])
+    role = SelectField("Role", choices=ROLES, default="staff", validators=[InputRequired()])
 
 
 class UserEditForm(FlaskForm):

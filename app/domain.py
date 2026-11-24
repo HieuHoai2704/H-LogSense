@@ -30,7 +30,7 @@ class User(Identity, Model):
     __table_args__ = (
         UniqueConstraint("username"),
         UniqueConstraint("email"),
-        CheckConstraint("role IN ('viewer','analyst','manager','admin')", name="role"),
+        CheckConstraint("role IN ('staff','admin')", name="role"),
         options(),
     )
     username: Mapped[str] = mapped_column(String(100), nullable=False)

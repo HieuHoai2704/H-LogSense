@@ -73,18 +73,18 @@
         rows.append(tr);
       }
       for (const id of ["run-window-rule", "run-window-if"])
-        document.getElementById(id).disabled = role === "viewer";
+        document.getElementById(id).disabled = !["staff", "admin"].includes(role);
       const models = await request("/api/v1/detection/models");
       validatedModel = models.items[0] || null;
       const validatedButton = document.getElementById("run-validated-if");
       const observedEnd = form.elements.dataset_id.selectedOptions[0]?.dataset.end;
       const compatible = validatedModel && observedEnd && Date.parse(observedEnd) > Date.parse(validatedModel.inference_start_utc);
-      validatedButton.disabled = role === "viewer" || !compatible;
+      validatedButton.disabled = !["staff", "admin"].includes(role) || !compatible;
       document.getElementById("validated-if-note").textContent = validatedModel ? (compatible
         ? t("{0} · scores closed windows after {1} · frozen validation threshold; no retraining on this dataset.", validatedModel.name, validatedModel.inference_start_utc)
         : t("{0} · scores closed windows after {1} · selected data is earlier/empty; this profile is unavailable.", validatedModel.name, validatedModel.inference_start_utc)) : t("Validated model artifact unavailable. Existing baseline jobs remain available.");
       for (const element of document.getElementById("alert-rule-form").elements)
-        element.disabled = !["manager", "admin"].includes(role);
+        element.disabled = !["staff", "admin"].includes(role);
       status.textContent =
         t("Alert page ready · explicit dataset permission · cooldown decisions are retained.");
     } catch (error) {
@@ -100,7 +100,7 @@
       edit.elements.status.value = data.status;
       edit.elements.assigned_to.value = data.assigned_to || "";
       edit.elements.note.value = "";
-      for (const element of edit.elements) element.disabled = role === "viewer";
+      for (const element of edit.elements) element.disabled = !["staff", "admin"].includes(role);
       document.getElementById("incident-history").textContent = JSON.stringify(
         data.history,
         null,

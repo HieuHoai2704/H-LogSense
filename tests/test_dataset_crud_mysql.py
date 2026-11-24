@@ -172,26 +172,33 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 303)
         self.assertEqual(self.count(Dataset, Dataset.id == row["id"]), 0)
-        self.login("viewer")
-        self.assertNotIn(b"Register dataset", self.client.get(path).data)
-        self.assertEqual(self.client.post(path, data=fields).status_code, 403)
+        self.login("staff")
+        self.assertIn(b"Register dataset", self.client.get(path).data)
 
     def test_02_role_matrix_and_explicit_grants(self):
-        for role in ("viewer", "analyst", "manager", "admin"):
+        # Two account types; both create, rename and delete within their grants.
+        for role in ("staff", "admin"):
             with self.subTest(role=role):
                 self.login(role)
                 self.assertEqual(self.client.get("/api/v1/datasets").status_code, 200)
                 self.assertEqual(self.client.get(f"/api/v1/datasets/{self.dataset_id}").status_code, 200)
                 result = self.create()
-                self.assertEqual(result.status_code, 201 if role in {"manager", "admin"} else 403)
+                self.assertEqual(result.status_code, 201)
                 changed = self.client.patch(
                     f"/api/v1/datasets/{self.dataset_id}",
                     json={"name": "Name after " + role},
                     headers=self.headers(),
                 )
-                self.assertEqual(changed.status_code, 200 if role in {"manager", "admin"} else 403)
-                deleted = self.client.delete(f"/api/v1/datasets/{self.dataset_id}", headers=self.headers())
-                self.assertEqual(deleted.status_code, 204 if role == "admin" else 403)
+                self.assertEqual(changed.status_code, 200)
+                created_id = self.resource(result)["id"]
+                deleted = self.client.delete(f"/api/v1/datasets/{created_id}", headers=self.headers())
+                self.assertEqual(deleted.status_code, 204)
+                self.assertEqual(
+                    self.client.delete(
+                        f"/api/v1/datasets/{self.other_id}", headers=self.headers()
+                    ).status_code,
+                    403,
+                )
 
     def test_03_admin_has_no_implicit_cross_dataset_access(self):
         self.login("admin")
@@ -217,7 +224,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.assertEqual(self.client.post("/api/v1/datasets", json={}).status_code, 403)
         self.assertEqual(self.client.patch(f"/api/v1/datasets/{self.dataset_id}", json={}).status_code, 403)
         self.assertEqual(self.client.delete(f"/api/v1/datasets/{self.dataset_id}").status_code, 403)
-        self.login("viewer", grant=False)
+        self.login("staff", grant=False)
         response = self.client.get("/api/v1/datasets")
         self.assertEqual(response.status_code, 200, response.json)
         self.assertEqual(response.json["items"], [])
@@ -225,10 +232,9 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json, {"datasets": []})
         self.assertEqual(self.client.get("/api/v1/logs").status_code, 403)
-        self.assertEqual(self.create().status_code, 403)
 
-    def test_first_dataset_appears_after_manager_creates_it(self):
-        self.login("manager", grant=False)
+    def test_first_dataset_appears_after_staff_creates_it(self):
+        self.login("staff", grant=False)
         self.assertEqual(self.client.get("/api/v1/logs/datasets").json, {"datasets": []})
         dataset = self.resource(self.create())
         listed = self.client.get("/api/v1/logs/datasets").json["datasets"]
@@ -274,7 +280,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.assertEqual(self.count(Dataset, Dataset.id == self.dataset_id), 1)
 
     def test_07_duplicate_create_rolls_back_dataset_and_creator_grant(self):
-        self.login("manager")
+        self.login("staff")
         key = uuid4().hex
         first = self.create(dataset_key=key)
         self.assertEqual(first.status_code, 201, first.json)
@@ -288,20 +294,20 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.assertNotIn("INSERT", str(duplicate.json))
 
     def test_08_personal_source_reused_and_other_users_cannot_attach(self):
-        owner = self.login("manager")
+        owner = self.login("staff")
         first = self.resource(self.create())
         second = self.resource(self.create())
         self.assertEqual(first["source_id"], second["source_id"])
         with Session(self.engine) as session:
             self.assertEqual(session.get(DataSource, first["source_id"]).source_key, "api-user-" + str(owner))
-        self.login("manager", grant=False)
+        self.login("staff", grant=False)
         denied = self.create(source_id=first["source_id"])
         self.assertEqual(denied.status_code, 403, denied.json)
         unknown = self.create(source_id=2**63 - 1)
         self.assertEqual(unknown.status_code, 403, unknown.json)
 
     def test_09_existing_granted_source_allowed_without_granting_other_datasets(self):
-        self.login("manager")
+        self.login("staff")
         with Session(self.engine) as session:
             source_id = session.get(Dataset, self.dataset_id).source_id
         created = self.create(source_id=source_id)
@@ -367,7 +373,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.assertEqual(current, original)
 
     def test_12_bounded_stable_pagination_and_literal_search(self):
-        self.login("manager")
+        self.login("staff")
         prefix = "page-" + uuid4().hex
         expected = []
         for index in range(3):
@@ -485,7 +491,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         item = self.resource(self.create())
         dataset_id = item["id"]
         with Session(self.engine) as session, session.begin():
-            viewer = User(username=uuid4().hex, password_hash="synthetic-unused", role="viewer")
+            viewer = User(username=uuid4().hex, password_hash="synthetic-unused", role="staff")
             session.add(viewer)
             session.flush()
             session.add(UserDataset(user_id=viewer.id, dataset_id=dataset_id))
@@ -521,7 +527,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
             connection.execute(text("DELETE FROM log_events WHERE id=-1"))
 
     def test_20_existing_log_explorer_metadata_stays_compatible(self):
-        self.login("manager")
+        self.login("staff")
         item = self.resource(self.create(name="New visible dataset"))
         response = self.client.get("/api/v1/logs/datasets")
         self.assertEqual(response.status_code, 200, response.json)
@@ -581,7 +587,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         )
 
     def test_23_concurrent_first_registrations_share_one_personal_source(self):
-        actor_id = self.login("manager")
+        actor_id = self.login("staff")
         cookie_name = self.app.config.get("SESSION_COOKIE_NAME", "session")
         cookie = self.client.get_cookie(cookie_name)
         self.assertIsNotNone(cookie)

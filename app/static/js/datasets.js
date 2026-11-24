@@ -25,7 +25,7 @@
     pendingDelete = null,
     mutationPending = false;
 
-  const canManage = () => ["manager", "admin"].includes(user?.role);
+  const canManage = () => ["staff", "admin"].includes(user?.role);
   const canDelete = () => user?.role === "admin";
   function say(message, focus = false) {
     status.textContent = message;

@@ -37,7 +37,7 @@
   <form class="workspace-account" method="post" action="{{ url_for('accounts.logout') }}">
     {{ logout_form.hidden_tag() }}
     <span class="workspace-account-name" title="{{ current_account.email or '' }}">{{ current_account.username }}
-      <small>{{ tr({"viewer": "Viewer", "analyst": "Analyst", "manager": "Manager", "admin": "Administrator"}[current_account.role]) }}</small></span>
+      <small>{{ tr({"staff": "Staff", "admin": "Administrator"}[current_account.role]) }}</small></span>
     <button type="submit" aria-label="{{ tr('Sign out') }}" data-tooltip="{{ tr('Sign out') }}">{{ nav_icon("logout") }}<span>{{ tr("Sign out") }}</span></button>
   </form>
   {% endif %}

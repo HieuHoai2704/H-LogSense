@@ -18,7 +18,7 @@ def main():
     register.add_argument("--key", required=True)
     user_command = commands.add_parser("create-user")
     user_command.add_argument("--username", required=True)
-    user_command.add_argument("--role", choices=["viewer", "analyst", "manager", "admin"], required=True)
+    user_command.add_argument("--role", choices=["staff", "admin"], required=True)
     access = user_command.add_mutually_exclusive_group(required=True)
     access.add_argument("--dataset", type=int, action="append", default=[])
     access.add_argument(

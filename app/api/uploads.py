@@ -30,7 +30,7 @@ def invalid(error):
 
 
 @uploads_api.post("/api/v1/uploads")
-@roles("analyst", "manager", "admin")
+@roles("staff", "admin")
 def upload():
     # Override the request only. Login and unrelated endpoints keep their global
     # 1MiB cap. Set limits before accessing form/files in the multipart parser.
@@ -80,7 +80,7 @@ def upload():
 
 
 @uploads_api.get("/api/v1/uploads/<upload_id>")
-@roles("viewer", "analyst", "manager", "admin")
+@roles("staff", "admin")
 def status(upload_id):
     job = job_for_upload(db.session, upload_id)
     require_dataset(job.dataset_id)
@@ -88,7 +88,7 @@ def status(upload_id):
 
 
 @uploads_api.post("/api/v1/uploads/<upload_id>/retry")
-@roles("analyst", "manager", "admin")
+@roles("staff", "admin")
 def retry(upload_id):
     job = job_for_upload(db.session, upload_id)
     require_dataset(job.dataset_id)

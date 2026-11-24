@@ -25,11 +25,12 @@ Replace DATASET_ID with the actual registration result. Account creation prompts
 for a password; do not put passwords in command arguments. The import limit is an
 absolute physical-line target: increase to 10000/100000 to resume the same source.
 The CLI archive must be the immutable locally downloaded Loghub BGL ZIP.
-The extra grant is DELETE on only `datasets` and `user_datasets`, not log tables;
+The extra grant is DELETE on only `datasets`, `user_datasets` and `users`, not log tables;
 use the actual schema name if different. See [dataset CRUD](database/DATASET_CRUD.md).
 
-Open `/?workspace=logs` and sign in. A manager with no initial grants can register
-a first dataset. Use `create-user --username investigator --role manager --no-dataset`
+Open the app and sign in. There are two account types: staff use the whole application,
+admin also manages accounts. A staff account with no grants can register a first dataset.
+Use `create-user --username investigator --role staff --no-dataset`
 with the operator command above when starting from an empty database. To investigate
 completed detections, open `/?source=db-DATASET_ID`. The Investigation link uses
 the selected MySQL dataset. Open `/?source=demo` for synthetic fixtures. Run the
@@ -39,10 +40,9 @@ analysis worker separately:
 python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.worker
 ```
 
-For HTTP import, use the inline dataset/upload panels in Log Explorer. A
-manager/admin can first create an empty dataset; an analyst/manager/admin with
-its grant can stage a compatible TXT/LOG or `raw_line` CSV. A viewer cannot
-submit imports. Run the separate ingestion worker to consume queued uploads:
+For HTTP import, use the inline dataset/upload panels in Log Explorer. A signed-in
+account can first create an empty dataset, then, with its grant, stage a compatible
+TXT/LOG or `raw_line` CSV. Run the separate ingestion worker to consume queued uploads:
 
 ```text
 python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.ingestion_worker
@@ -56,7 +56,7 @@ not independently authenticated Loghub ground truth. See
 
 Jobs are submitted from the inline analysis controls or authenticated REST API.
 A queued job is not a completed detection. Use the inline Alerts panel to create
-rules (manager permission), acknowledge/assign incidents and inspect actual
+rules, acknowledge/assign incidents and inspect actual
 anomaly evidence. SMTP is disabled by default; configure it privately and invoke
 `python -m scripts.run.database notify` outside HTTP requests. Tests use mocks;
 external SMTP delivery was not exercised.

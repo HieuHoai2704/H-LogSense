@@ -249,7 +249,7 @@ class FrozenStudyMySQL(unittest.TestCase):
             run_windows(self.engine, self.dataset_id, "changed-input", self.configuration)
 
     def test_job_api_rejects_scope_override_and_accepts_frozen_job(self):
-        self.login("analyst")
+        self.login("staff")
         body = {
             "dataset_id": self.dataset_id,
             "idempotency_key": "frozen-api",

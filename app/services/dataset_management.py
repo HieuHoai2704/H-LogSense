@@ -20,9 +20,10 @@ from app.services.investigation import QueryError
 
 MAX_ID = 2**63 - 1
 MODES = {"real", "synthetic", "unverified"}
-READ_ROLES = ("viewer", "analyst", "manager", "admin")
-WRITE_ROLES = ("manager", "admin")
-DELETE_ROLES = ("admin",)
+# Two account types: staff use the whole application; admin also manages accounts.
+READ_ROLES = ("staff", "admin")
+WRITE_ROLES = ("staff", "admin")
+DELETE_ROLES = ("staff", "admin")
 
 
 class DatasetConflict(Exception):

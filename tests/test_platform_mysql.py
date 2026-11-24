@@ -89,11 +89,12 @@ class PlatformMySQLTests(unittest.TestCase):
 
     def test_01_login_logout_rbac(self):
         self.assertEqual(self.client.get("/api/v1/logs/datasets").status_code, 403)
-        self.login("viewer")
+        self.login("staff")
         self.assertEqual(self.client.get("/api/v1/auth/me").status_code, 200)
+        # Staff may submit jobs: an empty body is refused by validation, not by authorization.
         self.assertEqual(
             self.client.post("/api/v1/detection/jobs", json={}, headers=self.headers()).status_code,
-            403,
+            400,
         )
         self.assertEqual(self.client.post("/api/v1/auth/logout").status_code, 403)
         self.assertEqual(
@@ -302,7 +303,7 @@ class PlatformMySQLTests(unittest.TestCase):
                 )
             )
         generate_alerts(self.engine, self.dataset_id, run_id)
-        self.login("analyst")
+        self.login("staff")
         listing = self.client.get(f"/api/v1/alerts?dataset_id={self.dataset_id}")
         self.assertEqual(listing.status_code, 200)
         alert_id = listing.json["items"][0]["id"]
@@ -323,7 +324,7 @@ class PlatformMySQLTests(unittest.TestCase):
         self.assertEqual(
             self.client.post(
                 "/api/v1/alert-rules",
-                json={"dataset_id": self.dataset_id},
+                json={"dataset_id": self.other_id, "name": "Ungranted"},
                 headers=self.headers(),
             ).status_code,
             403,
@@ -408,7 +409,7 @@ class PlatformMySQLTests(unittest.TestCase):
 
     def test_14_job_submission_idempotency_and_worker(self):
         ingest_bgl(self.engine, self.dataset_id, self.window_source())
-        self.login("analyst")
+        self.login("staff")
         body = {
             "dataset_id": self.dataset_id,
             "idempotency_key": "window-job",
@@ -442,8 +443,8 @@ class PlatformMySQLTests(unittest.TestCase):
             413,
         )
 
-    def test_16_manager_rule_creation_and_invalid_assignment(self):
-        self.login("manager")
+    def test_16_staff_rule_creation_and_invalid_assignment(self):
+        self.login("staff")
         response = self.client.post(
             "/api/v1/alert-rules",
             json={
@@ -469,7 +470,7 @@ class PlatformMySQLTests(unittest.TestCase):
         )
 
     def test_17_invalid_window_request_rejected_before_queue(self):
-        self.login("analyst")
+        self.login("staff")
         body = {
             "dataset_id": self.dataset_id,
             "idempotency_key": "invalid-time",
@@ -510,7 +511,7 @@ class PlatformMySQLTests(unittest.TestCase):
             self.assertEqual(values[0], values[1])
 
     def test_19_failed_job_requeue_and_active_worker_guard(self):
-        self.login("analyst")
+        self.login("staff")
         with self.session.begin():
             job = ProcessingJob(
                 dataset_id=self.dataset_id,

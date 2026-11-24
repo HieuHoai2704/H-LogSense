@@ -162,7 +162,7 @@ def setup(root, archive, lines):
             user = User(
                 username=context["username"],
                 password_hash=generate_password_hash(context["password"]),
-                role="manager",
+                role="staff",
             )
             session.add(user)
             session.flush()
