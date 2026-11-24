@@ -1,6 +1,7 @@
-"""Accounts: staff and administrator sign-in, password reset and user management.
+"""Accounts: staff and administrator sign-in, sign-up with approval, password reset and user management.
 
-Accounts are created only by an administrator (user management); there is no self-registration.
+Anyone may sign up; the account stays pending (it cannot sign in) until an administrator approves it.
+Administrators can also create accounts directly.
 
 Every page of the application sits behind the sign-in page (``require_login``): opening the app shows
 the sign-in page first, and signing out ends access to every workspace at once.
@@ -25,13 +26,15 @@ from flask import (
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.exc import IntegrityError, OperationalError
-from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db
 from app.forms import (
+    ActionForm,
     ForgotPasswordForm,
     LoginForm,
     LogoutForm,
+    RegisterForm,
     ResetPasswordForm,
     UserCreateForm,
     UserDeleteForm,
@@ -59,6 +62,7 @@ PAGE_SIZE = 20
 PUBLIC_ENDPOINTS = {
     "accounts.login",
     "accounts.admin_login",
+    "accounts.register",
     "accounts.forgot",
     "accounts.reset",
     "static",
@@ -177,6 +181,9 @@ def sign_in(portal):
             return auth_page(portal, form, status=429)
         user = authenticate(form.username.data, form.password.data)
         if user is None:
+            if awaiting_approval(form.username.data, form.password.data):
+                form.username.errors.append("Your account is waiting for administrator approval.")
+                return auth_page(portal, form, status=403)
             form.password.errors.append("Incorrect username or password.")
             return auth_page(portal, form, status=401)
         expected = ADMIN_ROLES if portal == "admin" else STAFF_ROLES
@@ -191,6 +198,83 @@ def sign_in(portal):
         flash("Signed in.", "success")
         return redirect(safe_next(form.next.data) or landing(user, portal), code=303)
     return auth_page(portal, form)
+
+
+def awaiting_approval(username, password):
+    """True only for the right password of a signed-up account that is not approved yet."""
+    from app.domain import User
+
+    user = db.session.scalar(select(User).where(User.username == username))
+    return bool(user and user.pending and check_password_hash(user.password_hash, password))
+
+
+def all_dataset_grants(user_id):
+    from app.domain import UserDataset
+
+    return [UserDataset(user_id=user_id, dataset_id=row[0]) for row in dataset_choices()]
+
+
+def notify_administrators(user):
+    """Tell every active administrator with an email that an account waits for approval."""
+    from app.domain import User
+
+    for admin in db.session.scalars(
+        select(User).where(User.role == "admin", User.active.is_(True), User.email.is_not(None))
+    ):
+        send_account_mail(
+            "New account waiting for approval",
+            admin.email,
+            "mail/approval_request",
+            username=user.username,
+            email=user.email,
+            review_url=url_for("accounts.users", state="pending", _external=True),
+        )
+
+
+@accounts.route("/register", methods=["GET", "POST"])
+def register():
+    from app.domain import User
+
+    if identity() is not None and request.method == "GET":
+        return redirect(url_for("dashboard"))
+    form = RegisterForm()
+    status = 200
+    if request.method == "POST":
+        status = 400
+        if not auth_available():
+            flash("Accounts need the MySQL database. Start the demo environment first.", "danger")
+            status = 503
+        elif form.validate_on_submit():
+            if login_rate_limited():
+                form.username.errors.append("Too many requests. Wait a minute and try again.")
+                status = 429
+            elif db.session.scalar(
+                select(User.id).where(or_(User.username == form.username.data, User.email == form.email.data))
+            ):
+                form.username.errors.append("That username or email is already registered.")
+                status = 409
+            else:
+                user = User(
+                    username=form.username.data,
+                    email=form.email.data,
+                    password_hash=generate_password_hash(form.password.data),
+                    role="staff",
+                    active=False,
+                    pending=True,
+                    auth_version=1,
+                )
+                db.session.add(user)
+                db.session.commit()
+                send_account_mail(
+                    "Registration received",
+                    user.email,
+                    "mail/registered",
+                    username=user.username,
+                )
+                notify_administrators(user)
+                flash("Registration received. You can sign in once an administrator approves it.", "success")
+                return redirect(url_for("accounts.login"), code=303)
+    return render_template("account/register.html", form=localized(form), portal="staff"), status
 
 
 @accounts.route("/login", methods=["GET", "POST"])
@@ -317,12 +401,24 @@ def users():
         statement = statement.where(or_(User.username.like(pattern), User.email.like(pattern)))
     if role in {"staff", "admin"}:
         statement = statement.where(User.role == role)
+    state = request.args.get("state", "")
+    if state == "pending":
+        statement = statement.where(User.pending.is_(True))
+    elif state == "active":
+        statement = statement.where(User.active.is_(True))
+    elif state == "disabled":
+        statement = statement.where(User.active.is_(False), User.pending.is_(False))
+    else:
+        state = ""
     pages = db.paginate(statement, page=page, per_page=PAGE_SIZE, error_out=False)
     counts = dict(db.session.execute(select(User.role, func.count()).group_by(User.role)).tuples().all())
     return render_template(
         "account/users.html",
         workspace_view="users",
         pages=pages,
+        state=state,
+        pending=db.session.scalar(select(func.count()).select_from(User).where(User.pending.is_(True))),
+        action_form=ActionForm(),
         q=query_text,
         role=role,
         counts=counts,
@@ -400,6 +496,8 @@ def edit_user(user_id):
                     return render_user(user, form, delete_form, 409)
             user.email = form.email.data or None
             user.role, user.active = form.role.data, bool(form.active.data)
+            if user.active and user.pending:
+                user.pending = False  # activating a signed-up account approves it
             if form.password.data:
                 user.password_hash = generate_password_hash(form.password.data)
                 changed_access = True
@@ -430,6 +528,47 @@ def render_user(user, form, delete_form, status):
         form=localized(form),
         delete_form=localized(delete_form),
     ), status
+
+
+@accounts.post("/admin/users/<int:user_id>/<any(approve,reject):decision>")
+def decide(user_id, decision):
+    """Approve a signed-up account (it opens every dataset) or reject it (the request is deleted)."""
+    from app.domain import User
+
+    require_admin()
+    if not ActionForm().validate_on_submit():
+        abort(400)
+    user = db.session.get(User, user_id) or abort(404)
+    if not user.pending:
+        flash("This account is not waiting for approval.", "danger")
+        return redirect(url_for("accounts.users"), code=303)
+    email, username = user.email, user.username
+    if decision == "approve":
+        user.pending, user.active = False, True
+        db.session.add_all(all_dataset_grants(user.id))
+        db.session.commit()
+        if email:
+            send_account_mail(
+                "Account approved",
+                email,
+                "mail/approved",
+                username=username,
+                sign_in_url=url_for("accounts.login", _external=True),
+            )
+        flash("Account approved. An email has been sent.", "success")
+    else:
+        db.session.delete(user)
+        db.session.commit()
+        if email:
+            send_account_mail("Registration declined", email, "mail/declined", username=username)
+        flash("Registration rejected.", "success")
+    return redirect(
+        request.form.get("back") if safe_back(request.form.get("back")) else url_for("accounts.users"), 303
+    )
+
+
+def safe_back(value):
+    return isinstance(value, str) and value.startswith("/account/admin/users") and "//" not in value
 
 
 @accounts.post("/admin/users/<int:user_id>/delete")

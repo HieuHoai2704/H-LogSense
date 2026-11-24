@@ -38,6 +38,8 @@ class User(Identity, Model):
     password_hash: Mapped[str] = mapped_column(String(512), nullable=False)
     role: Mapped[str] = mapped_column(String(16), nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    # A self-registered account waits for an administrator (and stays inactive) until approved.
+    pending: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     auth_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     saved_log_views: Mapped[list | None] = mapped_column(JSON)  # named Log Explorer filters
 

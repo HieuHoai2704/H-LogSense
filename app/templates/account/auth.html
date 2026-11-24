@@ -27,7 +27,7 @@
     {% call sign_in_form(staff_form, "accounts.login", 0) %}
     <p class="auth-switch animation" style="--d:4">
       <a href="{{ url_for('accounts.forgot') }}">{{ tr("Forgot password?") }}</a>
-      <span>{{ tr("Accounts are created by an administrator.") }}</span>
+      <span>{{ tr("No account yet?") }} <a href="{{ url_for('accounts.register') }}">{{ tr("Sign up") }}</a> · {{ tr("an administrator approves new accounts") }}</span>
     </p>
     {% endcall %}
   </div>

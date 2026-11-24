@@ -1,0 +1,19 @@
+{% extends "account/layout.html" %}
+{% from "account/_icons.html" import field with context %}
+{% block title %}{{ tr("Sign up") }} · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="auth-panel">
+  <h1>{{ tr("Sign up") }}</h1>
+  <p class="auth-lead">{{ tr("New accounts are staff accounts. You can sign in once an administrator approves yours; we email you when that happens.") }}</p>
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {% for error in (form.csrf_token.errors if form.csrf_token is defined else []) %}<p class="auth-error">{{ tr("The form expired. Try again.") }}</p>{% endfor %}
+    {{ field(form.username, "user", 0, "username") }}
+    {{ field(form.email, "mail", 1, "email") }}
+    {{ field(form.password, "lock", 2, "new-password") }}
+    {{ field(form.confirm, "lock", 3, "new-password") }}
+    <button class="auth-button">{{ tr("Send sign-up request") }}</button>
+  </form>
+  <p class="auth-switch"><span>{{ tr("Already have an account?") }} <a href="{{ url_for('accounts.login') }}">{{ tr("Sign in") }}</a></span></p>
+</section>
+{% endblock %}

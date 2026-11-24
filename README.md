@@ -76,7 +76,7 @@ A few constraints shape every module:
 | **Evidence drawer** | Raw log page with redaction before pagination, parsed fields, detector evidence (features, threshold, score direction), related anomalies by host, service, time or window, with signed cursors |
 | **Ingestion** | Streaming, versioned BGL parser; atomic batches that commit rows, counters and checkpoint together; safe resume after a crash; immutable staging for HTTP uploads |
 | **Detection** | Event rules and Isolation Forest per event; host-window rule and Isolation Forest models with chronological train / validation / test splits; frozen, checksum-verified model bundles for inference |
-| **Accounts** | The whole application sits behind a sign-in page with two portals, staff and administrator; signing out ends every workspace at once. Administrators create, search, page through, edit and delete accounts and grant dataset access; Flask-Mail sends welcome and one-time password-reset emails |
+| **Accounts** | The whole application sits behind a sign-in page with two portals, staff and administrator; signing out ends every workspace at once. Sign-up waits for administrator approval; administrators approve, create, search, page through, edit and delete accounts and grant dataset access; Flask-Mail sends sign-up, approval, welcome and one-time password-reset emails |
 | **Network** | A live Loghub dataset catalog read from the Zenodo REST API with `urllib` (JSON, timeout, validation, cache, optional API token), compared with the archives already downloaded |
 | **Alerting** | Rules per dataset, idempotent alert decisions with cooldown, incident acknowledgement, assignment and an append-only audit trail; an SMTP outbox with claim, send and record phases |
 | **Desktop workbench** | File explorer, live log tailing with level timelines, loss-by-epoch charts, run history and comparison, machine load, split code editor with Ruff and Pyright, PTY terminals, SSH, PDF and Parquet preview |
@@ -259,7 +259,7 @@ container and the app; `python -m scripts.run.demo stop` stops MySQL and keeps t
 
 The app opens on the sign-in page. There are two account types: **staff** sign in under **Staff sign-in**
 and use the whole application; **administrators** sign in under **Administrator sign-in** and also manage
-accounts under **User management**. There is no self-registration. Account emails are written to
+accounts under **User management**. Anyone can sign up; the account waits until an administrator approves or rejects it under **User management**, and each step sends an email. Account emails are written to
 `~/.h-logsen/outbox` as `.eml` files unless `SMTP_ENABLED=1` and the `SMTP_*` settings point at a mail
 server.
 

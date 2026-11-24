@@ -303,6 +303,109 @@ class AccountMySQLTests(unittest.TestCase):
             self.assertIsNone(session.get(User, made.id))
             self.assertIsNotNone(session.get(User, admin_id))
 
+    def sign_up(self, username, email, password=PASSWORD, confirm=None, client=None):
+        from app.security import attempts
+
+        attempts.clear()
+        client = client or self.client
+        page = client.get("/account/register").get_data(as_text=True)
+        return client.post(
+            "/account/register",
+            data={
+                "csrf_token": csrf(page),
+                "username": username,
+                "email": email,
+                "password": password,
+                "confirm": confirm or password,
+            },
+        )
+
+    def test_08_sign_up_waits_for_approval_then_signs_in(self):
+        admin_id, admin = self.user("admin", email=f"adm{uuid4().hex[:8]}@example.invalid")
+        username = "su" + uuid4().hex[:10]
+        email = f"{username}@example.invalid"
+        response = self.sign_up(username, email.upper())
+        self.assertEqual((response.status_code, response.headers["Location"]), (303, "/account/login"))
+        with Session(self.engine) as session:
+            user = session.scalar(select(User).where(User.username == username))
+            self.assertEqual(
+                (user.email, user.role, user.active, user.pending), (email, "staff", False, True)
+            )
+            self.assertEqual(
+                session.scalars(select(UserDataset).where(UserDataset.user_id == user.id)).all(), []
+            )
+            user_id = user.id
+        sent = {tuple(m.recipients): m for m in self.app.extensions["account_outbox"]}
+        self.assertIn((email,), sent)  # "registration received" to the new user
+        admin_mail = [m for m in self.app.extensions["account_outbox"] if m.recipients != [email]]
+        self.assertTrue(any(username in m.body and "state=pending" in m.body for m in admin_mail))
+        # The right password is told to wait; a wrong one stays a generic failure.
+        waiting = self.sign_in(username)
+        self.assertEqual(waiting.status_code, 403)
+        self.assertIn("waiting for administrator approval", waiting.get_data(as_text=True))
+        self.assertEqual(self.sign_in(username, password="wrong-password").status_code, 401)
+        # Duplicates and a mismatched confirmation are refused.
+        self.assertEqual(self.sign_up(username, "other@example.invalid").status_code, 409)
+        self.assertEqual(self.sign_up("x" + username, "y" + email, confirm="different-pass").status_code, 400)
+
+        reviewer = self.app.test_client()
+        self.sign_in(admin, "admin", client=reviewer)
+        listing = self.page("/account/admin/users?state=pending", client=reviewer)
+        self.assertIn(username, listing)
+        self.assertIn("Sign-up requests waiting for approval: ", listing)
+        self.app.extensions["account_outbox"] = []
+        approved = reviewer.post(
+            f"/account/admin/users/{user_id}/approve", data={"csrf_token": csrf(listing)}
+        )
+        self.assertEqual(approved.status_code, 303)
+        with Session(self.engine) as session:
+            user = session.get(User, user_id)
+            self.assertEqual((user.active, user.pending), (True, False))
+            grants = session.scalars(
+                select(UserDataset.dataset_id).where(UserDataset.user_id == user_id)
+            ).all()
+            self.assertIn(self.dataset_id, grants)
+        (mail,) = self.app.extensions["account_outbox"]
+        self.assertEqual(mail.recipients, [email])
+        self.assertIn("/account/login", mail.body)
+        self.assertEqual(self.sign_in(username).status_code, 303)
+        # A decided account cannot be decided again; CSRF is required.
+        self.assertEqual(reviewer.post(f"/account/admin/users/{user_id}/reject", data={}).status_code, 400)
+        again = reviewer.post(f"/account/admin/users/{user_id}/reject", data={"csrf_token": csrf(listing)})
+        self.assertEqual(again.status_code, 303)
+        with Session(self.engine) as session:
+            self.assertIsNotNone(session.get(User, user_id))
+        self.assertNotEqual(admin_id, user_id)
+
+    def test_09_rejected_sign_up_is_deleted_and_staff_cannot_decide(self):
+        _, admin = self.user("admin")
+        username = "rj" + uuid4().hex[:10]
+        email = f"{username}@example.invalid"
+        self.assertEqual(self.sign_up(username, email).status_code, 303)
+        with Session(self.engine) as session:
+            user_id = session.scalar(select(User.id).where(User.username == username))
+        _, staff = self.user("staff")
+        member = self.app.test_client()
+        self.sign_in(staff, client=member)
+        page = self.page("/", client=member)
+        self.assertEqual(
+            member.post(
+                f"/account/admin/users/{user_id}/approve", data={"csrf_token": csrf(page)}
+            ).status_code,
+            403,
+        )
+        reviewer = self.app.test_client()
+        self.sign_in(admin, "admin", client=reviewer)
+        listing = self.page("/account/admin/users?state=pending", client=reviewer)
+        self.app.extensions["account_outbox"] = []
+        rejected = reviewer.post(f"/account/admin/users/{user_id}/reject", data={"csrf_token": csrf(listing)})
+        self.assertEqual(rejected.status_code, 303)
+        with Session(self.engine) as session:
+            self.assertIsNone(session.get(User, user_id))
+        (mail,) = self.app.extensions["account_outbox"]
+        self.assertEqual(mail.recipients, [email])
+        self.assertIn("did not approve", mail.body)
+
 
 if __name__ == "__main__":
     unittest.main()

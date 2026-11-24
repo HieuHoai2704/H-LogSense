@@ -9,13 +9,27 @@
   {% endfor %}
 </div>
 
+{% if pending %}
+<div class="alert alert-warning d-flex flex-wrap align-items-center gap-2" role="status">
+  <strong>{{ tr("Sign-up requests waiting for approval: {0}", pending) }}</strong>
+  {% if state != "pending" %}<a class="ms-auto" href="{{ url_for('accounts.users', state='pending') }}">{{ tr("Review requests") }}</a>{% endif %}
+</div>
+{% endif %}
 <form class="row g-2 mb-3" method="get" role="search">
-  <div class="col-md-6"><input class="form-control" type="search" name="q" value="{{ q }}" maxlength="100" placeholder="{{ tr('Search username or email') }}" aria-label="{{ tr('Search username or email') }}"></div>
+  <div class="col-md-4"><input class="form-control" type="search" name="q" value="{{ q }}" maxlength="100" placeholder="{{ tr('Search username or email') }}" aria-label="{{ tr('Search username or email') }}"></div>
   <div class="col-md-3">
     <select class="form-select" name="role" aria-label="{{ tr('Role') }}">
       <option value="">{{ tr("All roles") }}</option>
       {% for value, label in [("staff", "Staff"), ("admin", "Administrator")] %}
       <option value="{{ value }}"{% if role == value %} selected{% endif %}>{{ tr(label) }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <select class="form-select" name="state" aria-label="{{ tr('State') }}">
+      <option value="">{{ tr("All states") }}</option>
+      {% for value, label in [("active", "Active"), ("pending", "Waiting for approval"), ("disabled", "Disabled")] %}
+      <option value="{{ value }}"{% if state == value %} selected{% endif %}>{{ tr(label) }}</option>
       {% endfor %}
     </select>
   </div>
@@ -32,8 +46,19 @@
         <td>{{ user.username }}</td>
         <td>{{ user.email or "—" }}</td>
         <td>{{ tr({"staff": "Staff", "admin": "Administrator"}[user.role]) }}</td>
-        <td>{{ tr("Active") if user.active else tr("Disabled") }}</td>
-        <td><a href="{{ url_for('accounts.edit_user', user_id=user.id) }}">{{ tr("Edit") }}</a></td>
+        <td>{% if user.pending %}<span class="badge text-bg-warning">{{ tr("Waiting for approval") }}</span>{% elif user.active %}{{ tr("Active") }}{% else %}{{ tr("Disabled") }}{% endif %}</td>
+        <td class="d-flex flex-wrap gap-2 align-items-center">
+          {% if user.pending %}
+          {% for decision, label, kind in [("approve", "Approve", "btn-success"), ("reject", "Reject", "btn-outline-danger")] %}
+          <form method="post" action="{{ url_for('accounts.decide', user_id=user.id, decision=decision) }}" class="m-0">
+            <input type="hidden" name="csrf_token" value="{{ action_form.csrf_token.current_token }}">
+            <input type="hidden" name="back" value="{{ request.full_path }}">
+            <button class="btn btn-sm {{ kind }}">{{ tr(label) }}</button>
+          </form>
+          {% endfor %}
+          {% endif %}
+          <a href="{{ url_for('accounts.edit_user', user_id=user.id) }}">{{ tr("Edit") }}</a>
+        </td>
       </tr>
     {% else %}
       <tr><td colspan="6">{{ tr("No accounts match.") }}</td></tr>
@@ -44,13 +69,13 @@
 {% if pages.pages > 1 %}
 <nav aria-label="{{ tr('Pages') }}">
   <ul class="pagination">
-    <li class="page-item{% if not pages.has_prev %} disabled{% endif %}"><a class="page-link" href="{{ url_for('accounts.users', q=q or None, role=role or None, page=pages.prev_num) if pages.has_prev else '#' }}">{{ tr("Previous") }}</a></li>
+    <li class="page-item{% if not pages.has_prev %} disabled{% endif %}"><a class="page-link" href="{{ url_for('accounts.users', q=q or None, role=role or None, state=state or None, page=pages.prev_num) if pages.has_prev else '#' }}">{{ tr("Previous") }}</a></li>
     {% for number in pages.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
       {% if number %}
-      <li class="page-item{% if number == pages.page %} active{% endif %}"><a class="page-link" href="{{ url_for('accounts.users', q=q or None, role=role or None, page=number) }}">{{ number }}</a></li>
+      <li class="page-item{% if number == pages.page %} active{% endif %}"><a class="page-link" href="{{ url_for('accounts.users', q=q or None, role=role or None, state=state or None, page=number) }}">{{ number }}</a></li>
       {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
     {% endfor %}
-    <li class="page-item{% if not pages.has_next %} disabled{% endif %}"><a class="page-link" href="{{ url_for('accounts.users', q=q or None, role=role or None, page=pages.next_num) if pages.has_next else '#' }}">{{ tr("Next") }}</a></li>
+    <li class="page-item{% if not pages.has_next %} disabled{% endif %}"><a class="page-link" href="{{ url_for('accounts.users', q=q or None, role=role or None, state=state or None, page=pages.next_num) if pages.has_next else '#' }}">{{ tr("Next") }}</a></li>
   </ul>
 </nav>
 {% endif %}

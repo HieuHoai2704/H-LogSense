@@ -1,0 +1,3 @@
+{{ username }} ({{ email }}) signed up for {{ app_name }} and waits for your approval.
+
+Review sign-up requests: {{ review_url }}

@@ -108,12 +108,15 @@ class SignInGateTests(unittest.TestCase):
         self.assertIn('data-reveal aria-controls="admin-password" aria-pressed="false"', staff)
         self.assertIn('class="auth-card intro admin"', admin)
 
-    def test_there_is_no_self_registration(self):
-        # Only an administrator creates accounts (user management).
+    def test_sign_up_is_public_and_linked_from_staff_sign_in(self):
         staff = self.client.get("/account/login").get_data(as_text=True)
-        self.assertNotIn("/account/register", staff)
-        self.assertEqual(self.client.get("/account/register").status_code, 404)
-        self.assertEqual(self.client.post("/account/register").status_code, 404)
+        self.assertIn('href="/account/register"', staff)
+        page = self.client.get("/account/register")
+        self.assertEqual(page.status_code, 200)
+        body = page.get_data(as_text=True)
+        for name in ("username", "email", "password", "confirm", "csrf_token"):
+            self.assertIn(f'name="{name}"', body)
+        self.assertIn('data-reveal aria-controls="password"', body)
 
     def test_sign_in_without_database_is_503_not_a_crash(self):
         page = self.client.get("/account/login").get_data(as_text=True)

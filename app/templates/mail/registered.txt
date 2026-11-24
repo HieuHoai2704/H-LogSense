@@ -1,0 +1,5 @@
+Hello {{ username }},
+
+Your {{ app_name }} account is waiting for an administrator to approve it. We will email you when you can sign in.
+
+If you did not sign up, ignore this email; the request will not be approved.

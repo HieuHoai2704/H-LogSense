@@ -148,8 +148,12 @@ class ResetPasswordForm(FlaskForm):
     )
 
 
-class LogoutForm(FlaskForm):
-    """Only the CSRF token: signing out is a POST."""
+class ActionForm(FlaskForm):
+    """Only the CSRF token, for buttons that change state (sign out, approve, reject)."""
+
+
+class LogoutForm(ActionForm):
+    """Signing out is a POST."""
 
 
 class UserCreateForm(RegisterForm):

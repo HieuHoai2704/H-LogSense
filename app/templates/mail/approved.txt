@@ -1,0 +1,4 @@
+Hello {{ username }},
+
+An administrator approved your {{ app_name }} account. You can now sign in with the password you chose:
+{{ sign_in_url }}

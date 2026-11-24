@@ -1,0 +1,3 @@
+Hello {{ username }},
+
+An administrator did not approve your {{ app_name }} sign-up request, and it has been deleted. Contact your administrator if you think this is a mistake.
