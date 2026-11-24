@@ -3,7 +3,7 @@
 from collections.abc import Mapping
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
-from math import ceil, expm1, floor, log1p
+from math import ceil
 from typing import Any, cast
 
 from sqlalchemy import Row, Select, func, or_, select, text
@@ -29,13 +29,17 @@ from app.models import (
 from app.security import authorized_datasets, require_dataset
 from app.services.investigation import (
     PRIORITIES,
+    RANGE_SECONDS,
     QueryError,
+    cell_selected,
     display_time,
     instant,
     integer,
     iso,
     query,
     resolution,
+    volume_band,
+    volume_scale,
 )
 from app.services.redaction import redact
 
@@ -108,16 +112,7 @@ def _state(args: MultiDict[str, str]) -> InvestigationState:
         first = min((value for value in (first, anomaly_first) if value is not None), default=EPOCH)
         last = max((value for value in (last, anomaly_last) if value is not None), default=first)
         end = last + timedelta(seconds=1)
-        spans = {
-            "15m": 900,
-            "1h": 3600,
-            "6h": 21600,
-            "24h": 86400,
-            "7d": 604800,
-            "30d": 2592000,
-            "recent": 2100,
-            "early": 1500,
-        }
+        spans = RANGE_SECONDS
         preset = safe.get("range", "full")
         if preset not in {"full", *spans}:
             raise QueryError("Unsupported dataset time range.")
@@ -369,15 +364,8 @@ def build(state: InvestigationState) -> dict[str, Any]:
     for did, grid in [("", overall)] + [(k, v["cells"]) for k, v in lanes.items()]:
         for cell in grid:
             cell["coverage"] = coverage(cell, did)
-            cell["volume"] = (
-                min(4, max(1, ceil(4 * log1p(cell["count"]) / log1p(maximum)))) if cell["count"] else 0
-            )
-            cell["selected"] = bool(
-                state["selection_start"]
-                and did == state["selection_detector"]
-                and instant(cell["start"]) < instant(state["selection_end"])
-                and instant(cell["end"]) > instant(state["selection_start"])
-            )
+            cell["volume"] = volume_band(cell["count"], maximum)
+            cell["selected"] = cell_selected(cell, did, state)
     facets: dict[str, list[dict[str, Any]]] = {}
     chosen = cast(Mapping[str, list[str]], state)
     for key, column in FIELDS.items():
@@ -461,13 +449,6 @@ def build(state: InvestigationState) -> dict[str, Any]:
         dataset_source(d.id): d.name + " · MySQL"
         for d in db.session.scalars(select(Dataset).where(Dataset.id.in_(authorized_datasets())))
     }
-    scale: list[dict[str, int]] = []
-    previous = 0
-    for band in range(1, 5):
-        upper = maximum if band == 4 else floor(expm1(log1p(maximum) * band / 4))
-        if upper > previous:
-            scale.append(dict(band=band, lower=previous + 1, upper=upper))
-        previous = upper
     return dict(
         state=dict(state, page=page, row_page=row_page),
         revision="mysql-runs-" + ",".join(state["run_id"]),
@@ -489,7 +470,7 @@ def build(state: InvestigationState) -> dict[str, Any]:
             overall=overall,
             lanes=ordered[(row_page - 1) * 12 : row_page * 12],
             volume_max=maximum,
-            volume_scale=scale,
+            volume_scale=volume_scale(maximum),
         ),
         range_label=f"{display_time(iso(start), state['timezone'], True)} – {display_time(iso(end), state['timezone'], True)}",
         coverage=dict(

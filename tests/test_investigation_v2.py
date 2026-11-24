@@ -246,3 +246,24 @@ class InvestigationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class VolumeScaleTest(unittest.TestCase):
+    """Both backends share these; pinned to the formulas each backend used to inline."""
+
+    def test_matches_the_original_formulas(self):
+        from math import ceil, expm1, floor, log1p
+
+        from app.services.investigation import volume_band, volume_scale
+
+        for maximum in range(0, 3001):
+            scale, previous = [], 0
+            for band in range(1, 5):
+                upper = maximum if band == 4 else floor(expm1(log1p(maximum) * band / 4))
+                if upper > previous:
+                    scale.append(dict(band=band, lower=previous + 1, upper=upper))
+                previous = upper
+            self.assertEqual(volume_scale(maximum), scale)
+            for count in {c for c in (0, 1, maximum // 3, maximum // 2, maximum) if c <= maximum}:
+                expected = min(4, max(1, ceil(4 * log1p(count) / log1p(maximum)))) if count else 0
+                self.assertEqual(volume_band(count, maximum), expected)

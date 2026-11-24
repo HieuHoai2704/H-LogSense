@@ -228,68 +228,92 @@ def _csv_lines(original):
         ) from None
 
 
+COPY_BLOCK = 65536
+
+
+def copy_original(storage, path):
+    """Copy the uploaded stream exactly, enforcing the size limit; returns (sha256 hex, bytes)."""
+    digest, size = hashlib.sha256(), 0
+    with path.open("xb") as output:
+        for block in iter(lambda: storage.stream.read(COPY_BLOCK), b""):
+            size += len(block)
+            if size > MAX_FILE_BYTES:
+                raise UploadError("file_too_large", "Uploaded file exceeds 16 MiB.", 413)
+            digest.update(block)
+            output.write(block)
+    if not size:
+        raise UploadError("empty_file", "Choose a nonempty UTF-8 BGL file.")
+    return digest.hexdigest(), size
+
+
+def check_encoding(raw):
+    if raw.startswith(b"\xef\xbb\xbf"):
+        raise UploadError("unsupported_encoding", "BGL records must not contain a byte-order mark.")
+    if any(c < 32 and c not in (9, 10, 13) for c in raw):
+        raise UploadError("unsupported_encoding", "Binary/control content is not supported.")
+    try:
+        raw.decode("utf-8", errors="strict")
+    except UnicodeDecodeError:
+        raise UploadError("unsupported_encoding", "Files must use valid UTF-8.") from None
+
+
+def normalize_lines(lines, normalized, mapping):
+    """Write the BGL lines and a line-to-source mapping; returns (valid, malformed, bytes, sha256 hex)."""
+    valid = malformed = total_bytes = 0
+    digest = hashlib.sha256()
+    with normalized.open("xb") as output, mapping.open("x", encoding="utf-8", newline="\n") as rows:
+        for number, (raw, reference) in enumerate(lines, 1):
+            check_encoding(raw)
+            if parse_line(raw, number, total_bytes).error is None:
+                valid += 1
+            else:
+                malformed += 1
+            reference.update(bgl_line=number, bgl_byte_offset=total_bytes)
+            rows.write(json.dumps(reference, separators=(",", ":")) + "\n")
+            output.write(raw)
+            digest.update(raw)
+            total_bytes += len(raw)
+            if total_bytes > MAX_FILE_BYTES:
+                raise UploadError("upload_limit", "Decoded BGL content exceeds 16 MiB.")
+    if valid == 0:
+        raise UploadError(
+            "unsupported_log_schema", "No valid BGL records found; arbitrary log schemas are not guessed."
+        )
+    return valid, malformed, total_bytes, digest.hexdigest()
+
+
+def write_archive(normalized, archive, member):
+    """A stored (uncompressed) single-member ZIP with fixed metadata, so equal input gives equal bytes."""
+    info = ZipInfo(member, date_time=(1980, 1, 1, 0, 0, 0))
+    info.compress_type = ZIP_STORED
+    info.external_attr = 0o600 << 16
+    with ZipFile(archive, "x") as zipped, normalized.open("rb") as content, zipped.open(info, "w") as output:
+        for block in iter(lambda: content.read(COPY_BLOCK), b""):
+            output.write(block)
+
+
 def stage_file(storage):
+    """Stage one upload: original, normalized BGL ZIP, line mapping and manifest, owner-only.
+
+    Nothing is imported here; a worker ingests the staged bundle later. Any failure removes the bundle.
+    """
     original_name, extension = filename(storage.filename)
     upload_id = uuid4().hex
     folder = directory(upload_id)
     folder.mkdir(mode=0o700)
     bundle = {"upload_id": upload_id}
-    source = None
+    lines = None
     try:
         protect_directory(folder)
         original = local_file(folder, "original" + extension)
-        digest, size = hashlib.sha256(), 0
-        with original.open("xb") as output:
-            for block in iter(lambda: storage.stream.read(65536), b""):
-                size += len(block)
-                if size > MAX_FILE_BYTES:
-                    raise UploadError("file_too_large", "Uploaded file exceeds 16 MiB.", 413)
-                digest.update(block)
-                output.write(block)
-        if not size:
-            raise UploadError("empty_file", "Choose a nonempty UTF-8 BGL file.")
+        original_sha256, size = copy_original(storage, original)
         normalized = local_file(folder, "normalized.log")
         mapping = local_file(folder, "mapping.jsonl")
-        valid = malformed = total_bytes = 0
-        source = _csv_lines(original) if extension == ".csv" else _raw_lines(original)
-        normalized_digest = hashlib.sha256()
-        with normalized.open("xb") as output, mapping.open("x", encoding="utf-8", newline="\n") as rows:
-            for number, (raw, reference) in enumerate(source, 1):
-                if raw.startswith(b"\xef\xbb\xbf"):
-                    raise UploadError(
-                        "unsupported_encoding", "BGL records must not contain a byte-order mark."
-                    )
-                if any(c < 32 and c not in (9, 10, 13) for c in raw):
-                    raise UploadError("unsupported_encoding", "Binary/control content is not supported.")
-                try:
-                    raw.decode("utf-8", errors="strict")
-                except UnicodeDecodeError:
-                    raise UploadError("unsupported_encoding", "Files must use valid UTF-8.") from None
-                record = parse_line(raw, number, total_bytes)
-                if record.error is None:
-                    valid += 1
-                else:
-                    malformed += 1
-                reference.update(bgl_line=number, bgl_byte_offset=total_bytes)
-                rows.write(json.dumps(reference, separators=(",", ":")) + "\n")
-                output.write(raw)
-                normalized_digest.update(raw)
-                total_bytes += len(raw)
-                if total_bytes > MAX_FILE_BYTES:
-                    raise UploadError("upload_limit", "Decoded BGL content exceeds 16 MiB.")
-        if valid == 0:
-            raise UploadError(
-                "unsupported_log_schema", "No valid BGL records found; arbitrary log schemas are not guessed."
-            )
+        lines = _csv_lines(original) if extension == ".csv" else _raw_lines(original)
+        valid, malformed, total_bytes, normalized_sha256 = normalize_lines(lines, normalized, mapping)
         member = upload_id + "/BGL.log"
         archive = local_file(folder, "normalized.zip")
-        info = ZipInfo(member, date_time=(1980, 1, 1, 0, 0, 0))
-        info.compress_type = ZIP_STORED
-        info.external_attr = 0o600 << 16
-        with ZipFile(archive, "x") as zipped, normalized.open("rb") as source:
-            with zipped.open(info, "w") as output:
-                for block in iter(lambda: source.read(65536), b""):
-                    output.write(block)
+        write_archive(normalized, archive, member)
         normalized.unlink()  # Derived staging copy only; original and ZIP persist.
         manifest = {
             "version": TYPE,
@@ -297,9 +321,9 @@ def stage_file(storage):
             "original_filename": original_name,
             "original_key": original.name,
             "original_bytes": size,
-            "original_sha256": digest.hexdigest(),
+            "original_sha256": original_sha256,
             "format": extension[1:],
-            "normalized_sha256": normalized_digest.hexdigest(),
+            "normalized_sha256": normalized_sha256,
             "normalized_bytes": total_bytes,
             "archive_sha256": fingerprint(archive),
             "mapping_sha256": fingerprint(mapping),
@@ -326,8 +350,8 @@ def stage_file(storage):
     except Exception:
         # A generator paused at yield still owns its input file. Close it before
         # cleanup, otherwise Windows correctly refuses to unlink the open file.
-        if source is not None:
-            source.close()
+        if lines is not None:
+            lines.close()
         discard(bundle)
         raise
 

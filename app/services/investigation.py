@@ -5,7 +5,7 @@ repository must implement source authorization, revision snapshots and run cover
 """
 
 from collections import Counter
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from datetime import datetime, timedelta, timezone
 from math import ceil, expm1, floor, log1p
 from typing import Any, cast
@@ -86,73 +86,83 @@ def records(source: str) -> list[Record]:
     return list(iter_records(source))
 
 
-def query(args: Mapping[str, Any]) -> InvestigationState:
-    """Validate repeated query keys; AND dimensions, OR values within a dimension."""
-    source = args.get("source", "demo")
-    if source not in SOURCES:
-        raise QueryError("Unknown source. Only labelled synthetic sources are connected.")
-    zone = args.get("timezone", "local")
-    if zone not in ZONES:
-        raise QueryError("Unsupported display timezone.")
-    try:
-        ZoneInfo(ZONES[zone])
-    except ZoneInfoNotFoundError as exc:
-        raise QueryError("Timezone database unavailable. Install requirements.txt.") from exc
-    preset = args.get("range", "full")
-    spans = {
-        "full": 3600,
-        "recent": 2100,
-        "early": 1500,
-        "15m": 900,
-        "1h": 3600,
-        "6h": 21600,
-        "24h": 86400,
-        "7d": 604800,
-        "30d": 2592000,
-    }
-    if preset not in {*spans, "custom"}:
+# Preset ranges in seconds, ending at the latest data (persisted datasets) or the fixture end. "full" is
+# the whole fixture hour here and the whole dataset for persisted data, so it is not listed.
+RANGE_SECONDS = {
+    "recent": 2100,
+    "early": 1500,
+    "15m": 900,
+    "1h": 3600,
+    "6h": 21600,
+    "24h": 86400,
+    "7d": 604800,
+    "30d": 2592000,
+}
+MAX_RANGE = timedelta(days=366)
+
+
+def choice(args: Mapping[str, Any], key: str, default: str, allowed: Iterable[str], message: str) -> str:
+    value = args.get(key, default)
+    if value not in allowed:
+        raise QueryError(message)
+    return cast(str, value)
+
+
+def query_range(args: Mapping[str, Any], preset: str) -> tuple[datetime, datetime]:
+    """The half-open UTC range: explicit start_time/end_time, or the preset over the fixture hour."""
+    if preset not in {"full", *RANGE_SECONDS, "custom"}:
         raise QueryError("Unknown time range.")
     if bool(args.get("start_time")) != bool(args.get("end_time")):
         raise QueryError("Both start_time and end_time are required.")
     if preset == "custom" and not args.get("start_time"):
         raise QueryError("Custom ranges require explicit start_time and end_time.")
-    start = (
-        instant(args["start_time"])
-        if args.get("start_time")
-        else (START if preset == "early" else END - timedelta(seconds=spans.get(preset, 3600)))
-    )
-    end = (
-        instant(args["end_time"])
-        if args.get("end_time")
-        else (START + timedelta(minutes=25) if preset == "early" else END)
-    )
-    if start >= end or end - start > timedelta(days=366):
+    if args.get("start_time"):
+        start, end = instant(args["start_time"]), instant(args["end_time"])
+    elif preset == "early":
+        start, end = START, START + timedelta(minutes=25)
+    else:
+        start, end = END - timedelta(seconds=RANGE_SECONDS.get(preset, 3600)), END
+    if start >= end or end - start > MAX_RANGE:
         raise QueryError("Time range must be positive and no longer than 366 days.")
-    search = args.get("q", "").strip()
-    if len(search) > 200:
-        raise QueryError("Search is limited to 200 characters.")
+    return start, end
+
+
+def reset_range(args: Mapping[str, Any], start: datetime, end: datetime) -> tuple[datetime, datetime]:
+    """The range "reset zoom" returns to; defaults to the current range."""
+    base_start = instant(args.get("base_start_time") or iso(start))
+    base_end = instant(args.get("base_end_time") or iso(end))
+    if base_start >= base_end or base_end - base_start > MAX_RANGE:
+        raise QueryError("Invalid reset-zoom range.")
+    return base_start, base_end
+
+
+def facet_filters(args: Mapping[str, Any]) -> dict[str, list[str]]:
+    """Repeated facet keys, de-duplicated and sorted; detectors may be given by display name."""
     vocabulary: dict[str, list[str]] = {
         "host": sorted({e["host"] for e in ANOMALIES}),
         "service": sorted({e["service"] for e in ANOMALIES}),
         "severity": list(PRIORITIES),
         "detector": list(DETECTORS),
     }
-    base_start = instant(args.get("base_start_time") or iso(start))
-    base_end = instant(args.get("base_end_time") or iso(end))
-    if base_start >= base_end or base_end - base_start > timedelta(days=366):
-        raise QueryError("Invalid reset-zoom range.")
+    aliases = {name: did for did, (name, _) in DETECTORS.items()}
     facets: dict[str, list[str]] = {}
     for key, choices in vocabulary.items():
         values = args.getlist(key) if hasattr(args, "getlist") else args.get(key, [])
         if isinstance(values, str):
             values = [values]
         if key == "detector":
-            aliases = {name: did for did, (name, _) in DETECTORS.items()}
             values = [aliases.get(v, v) for v in values]
         values = sorted({v for v in values if v and v != "all"})
         if len(values) > 100 or any(v not in choices for v in values):
             raise QueryError(f"Unknown {key} value.")
         facets[key] = values
+    return facets
+
+
+def timeline_selection(
+    args: Mapping[str, Any], start: datetime, end: datetime, detectors: list[str]
+) -> tuple[str, str, str]:
+    """A brushed timeline interval (and optionally one detector lane) inside the query range."""
     s0, s1 = args.get("selection_start"), args.get("selection_end")
     if bool(s0) != bool(s1):
         raise QueryError("Both timeline selection boundaries are required.")
@@ -160,22 +170,40 @@ def query(args: Mapping[str, Any]) -> InvestigationState:
         a, b = instant(s0), instant(s1)
         if not start <= a < b <= end:
             raise QueryError("Timeline selection must be inside the query range.")
-        selection = (iso(a), iso(b))
+        interval = (iso(a), iso(b))
     else:
-        selection = ("", "")
-    selected_detector = args.get("selection_detector", "")
-    if selected_detector and (
-        selected_detector not in DETECTORS
-        or not s0
-        or (facets["detector"] and selected_detector not in facets["detector"])
-    ):
+        interval = ("", "")
+    lane = args.get("selection_detector", "")
+    if lane and (lane not in DETECTORS or not s0 or (detectors and lane not in detectors)):
         raise QueryError("Invalid selected detector.")
-    sort = args.get("sort", "priority")
-    if sort not in {"priority", "count", "recent"}:
-        raise QueryError("Invalid detector sort.")
-    mode = args.get("mode", "severity")
-    if mode not in {"severity", "volume"}:
-        raise QueryError("Invalid visualization mode.")
+    return interval[0], interval[1], lane
+
+
+def query(args: Mapping[str, Any]) -> InvestigationState:
+    """Validate repeated query keys; AND dimensions, OR values within a dimension.
+
+    Checks run in a fixed order, so a request with several problems always reports the same one.
+    """
+    source = choice(
+        args, "source", "demo", SOURCES, "Unknown source. Only labelled synthetic sources are connected."
+    )
+    zone = choice(args, "timezone", "local", ZONES, "Unsupported display timezone.")
+    try:
+        ZoneInfo(ZONES[zone])
+    except ZoneInfoNotFoundError as exc:
+        raise QueryError("Timezone database unavailable. Install requirements.txt.") from exc
+    preset = args.get("range", "full")
+    start, end = query_range(args, preset)
+    search = args.get("q", "").strip()
+    if len(search) > 200:
+        raise QueryError("Search is limited to 200 characters.")
+    base_start, base_end = reset_range(args, start, end)
+    facets = facet_filters(args)
+    selection_start, selection_end, selection_detector = timeline_selection(
+        args, start, end, facets["detector"]
+    )
+    sort = choice(args, "sort", "priority", {"priority", "count", "recent"}, "Invalid detector sort.")
+    mode = choice(args, "mode", "severity", {"severity", "volume"}, "Invalid visualization mode.")
     requested = args.get("resolution", "auto")
     return InvestigationState(
         source=source,
@@ -190,9 +218,9 @@ def query(args: Mapping[str, Any]) -> InvestigationState:
         service=facets["service"],
         severity=facets["severity"],
         detector=facets["detector"],
-        selection_start=selection[0],
-        selection_end=selection[1],
-        selection_detector=selected_detector,
+        selection_start=selection_start,
+        selection_end=selection_end,
+        selection_detector=selection_detector,
         width=integer(args.get("width", 1000), 240, 4000, "Chart width"),
         page=integer(args.get("page", 1), 1, 100000, "Page"),
         limit=integer(args.get("limit", 50), 1, 100, "Page size"),
@@ -276,13 +304,41 @@ def summary(event: Record, state: InvestigationState) -> Record:
     } | {"display_time": display_time(event["timestamp"], state["timezone"], True), "synthetic": True}
 
 
-def build(state: InvestigationState) -> dict[str, Any]:
-    source_rows = records(state["source"])
-    scope = [e for e in source_rows if matches(e, state)]
-    results = sorted(
-        (e for e in scope if selected(e, state)), key=lambda e: (e["timestamp"], e["id"]), reverse=True
+VOLUME_BANDS = 4
+LANES_PER_PAGE = 12
+
+
+def volume_scale(maximum: int) -> list[dict[str, int]]:
+    """Log-spaced count bands for the volume view; bands that would be empty are left out."""
+    scale = []
+    previous = 0
+    for band in range(1, VOLUME_BANDS + 1):
+        upper = maximum if band == VOLUME_BANDS else floor(expm1(log1p(maximum) * band / VOLUME_BANDS))
+        if upper > previous:
+            scale.append(dict(band=band, lower=previous + 1, upper=upper))
+        previous = upper
+    return scale
+
+
+def volume_band(count: int, maximum: int) -> int:
+    """The volume_scale band (1-4) a cell's count falls in; 0 for an empty cell."""
+    if not count:
+        return 0
+    return min(VOLUME_BANDS, max(1, ceil(VOLUME_BANDS * log1p(count) / log1p(maximum))))
+
+
+def cell_selected(cell: Record, lane_id: str, state: InvestigationState) -> bool:
+    """Whether a timeline cell lies in the current selection on its lane ("" is the overall lane)."""
+    return bool(
+        state["selection_start"]
+        and lane_id == state["selection_detector"]
+        and instant(cell["start"]) < instant(state["selection_end"])
+        and instant(cell["end"]) > instant(state["selection_start"])
     )
-    duration = resolution(state)
+
+
+def time_bins(state: InvestigationState, duration: int) -> list[Record]:
+    """Half-open bins of ``duration`` seconds aligned to the epoch, clipped to the query range."""
     start, end = instant(state["start_time"]), instant(state["end_time"])
     zone = state["timezone"]
     bins: list[Record] = []
@@ -301,39 +357,32 @@ def build(state: InvestigationState) -> dict[str, Any]:
             )
         )
         lower += duration
-    by_detector: dict[str, list[Record]] = {
-        did: [dict(meta, count=0, severity=dict.fromkeys(PRIORITIES, 0), priority=0) for meta in bins]
-        for did in DETECTORS
-    }
-    overall: list[Record] = [
-        dict(meta, count=0, severity=dict.fromkeys(PRIORITIES, 0), priority=0) for meta in bins
-    ]
-    origin = floor(start.timestamp() / duration) * duration
+    return bins
+
+
+def count_cells(
+    scope: list[Record], bins: list[Record], origin: int, duration: int
+) -> tuple[list[Record], dict[str, list[Record]]]:
+    """Per-bin counts, severity mix and highest priority: the overall lane and one lane per detector."""
+
+    def empty() -> list[Record]:
+        return [dict(meta, count=0, severity=dict.fromkeys(PRIORITIES, 0), priority=0) for meta in bins]
+
+    by_detector = {did: empty() for did in DETECTORS}
+    overall = empty()
     for event in scope:
         index = floor((instant(event["timestamp"]).timestamp() - origin) / duration)
         for cell in [by_detector[event["detector_id"]][index], overall[index]]:
             cell["count"] += 1
             cell["severity"][event["severity"]] += 1
             cell["priority"] = max(cell["priority"], PRIORITIES[event["severity"]])
-    maximum = max((c["count"] for c in overall), default=0)
-    volume_scale: list[Record] = []
-    previous = 0
-    for band in range(1, 5):
-        upper = maximum if band == 4 else floor(expm1(log1p(maximum) * band / 4))
-        if upper > previous:
-            volume_scale.append(dict(band=band, lower=previous + 1, upper=upper))
-        previous = upper
-    for did, cells in [("", overall), *by_detector.items()]:
-        for cell in cells:
-            cell["volume"] = (
-                min(4, max(1, ceil(4 * log1p(cell["count"]) / log1p(maximum)))) if cell["count"] else 0
-            )
-            cell["selected"] = bool(
-                state["selection_start"]
-                and did == state["selection_detector"]
-                and instant(cell["start"]) < instant(state["selection_end"])
-                and instant(cell["end"]) > instant(state["selection_start"])
-            )
+    return overall, by_detector
+
+
+def detector_lanes(
+    state: InvestigationState, scope: list[Record], by_detector: dict[str, list[Record]]
+) -> tuple[list[Record], int, int]:
+    """The requested page of detector lanes in the chosen order, the lane count and the clamped page."""
     lanes: list[Record] = [
         dict(
             id=did,
@@ -352,20 +401,23 @@ def build(state: InvestigationState) -> dict[str, Any]:
     if order == "recent":
         lanes.sort(key=lambda r: (r["recent"], r["name"]), reverse=True)
     row_count = len(lanes)
-    row_page = min(state["row_page"], max(1, ceil(row_count / 12)))
-    lanes = lanes[(row_page - 1) * 12 : row_page * 12]
+    row_page = min(state["row_page"], max(1, ceil(row_count / LANES_PER_PAGE)))
+    return lanes[(row_page - 1) * LANES_PER_PAGE : row_page * LANES_PER_PAGE], row_count, row_page
+
+
+def facet_counts(state: InvestigationState, source_rows: list[Record]) -> dict[str, list[Record]]:
+    """Each facet's values with counts under every other active filter (a facet never filters itself)."""
     facets: dict[str, list[Record]] = {}
     chosen = cast(Mapping[str, list[str]], state)  # the four facet keys
     fields = {"host": "host", "service": "service", "severity": "severity", "detector": "detector_id"}
     for key, field in fields.items():
         counts = Counter(e[field] for e in source_rows if matches(e, state, excluded=key))
-        values = (
-            list(DETECTORS)
-            if key == "detector"
-            else list(PRIORITIES)
-            if key == "severity"
-            else sorted({e[field] for e in ANOMALIES})
-        )
+        if key == "detector":
+            values = list(DETECTORS)
+        elif key == "severity":
+            values = list(PRIORITIES)
+        else:
+            values = sorted({e[field] for e in ANOMALIES})
         facets[key] = [
             dict(
                 value=v,
@@ -375,19 +427,60 @@ def build(state: InvestigationState) -> dict[str, Any]:
             )
             for v in values
         ]
+    return facets
+
+
+def empty_reason(source: str, query_coverage: str) -> str:
+    """Why an empty result is empty; missing coverage is never presented as "no anomalies"."""
+    if source == "unprocessed":
+        return "No detection results — this synthetic source has not been analysed."
+    if source == "empty":
+        return "No data available — this synthetic source contains no records."
+    if query_coverage == "missing":
+        return "No data coverage for this interval. Absence of anomalies is not evidence of health."
+    return "No anomalies match the selected scope."
+
+
+def coverage_summary(source: str, query_coverage: str, source_rows: list[Record]) -> Record:
+    covered_end = END - timedelta(minutes=15) if source == "partial" else END
+    return dict(
+        status=query_coverage,
+        dataset=SOURCES[source],
+        interval=f"{iso(START)} – {iso(covered_end)}" if source in {"demo", "partial"} else "Unavailable",
+        last_processed=None,
+        last_event=max((e["timestamp"] for e in source_rows), default=None),
+        ingestion="Not connected — synthetic fixture",
+        analysis="Not run — presentation records only",
+        freshness="Historical fixture; no live freshness measurement",
+        raw_log_count=None,
+        parsed_event_count=None,
+    )
+
+
+def build(state: InvestigationState) -> dict[str, Any]:
+    """The full investigation view over the fixtures: timeline lanes, facets, one result page, coverage."""
+    source_rows = records(state["source"])
+    scope = [e for e in source_rows if matches(e, state)]
+    results = sorted(
+        (e for e in scope if selected(e, state)), key=lambda e: (e["timestamp"], e["id"]), reverse=True
+    )
+    duration = resolution(state)
+    start, end = instant(state["start_time"]), instant(state["end_time"])
+    bins = time_bins(state, duration)
+    origin = floor(start.timestamp() / duration) * duration
+    overall, by_detector = count_cells(scope, bins, origin, duration)
+    maximum = max((c["count"] for c in overall), default=0)
+    for lane_id, cells in [("", overall), *by_detector.items()]:
+        for cell in cells:
+            cell["volume"] = volume_band(cell["count"], maximum)
+            cell["selected"] = cell_selected(cell, lane_id, state)
+    lanes, row_count, row_page = detector_lanes(state, scope, by_detector)
     page = min(state["page"], max(1, ceil(len(results) / state["limit"])))
     state = state.copy()  # the returned scope reports the clamped pages
     state["page"], state["row_page"] = page, row_page
     first = (page - 1) * state["limit"]
     query_coverage = coverage(start, end, state["source"])
-    if state["source"] == "unprocessed":
-        empty_reason = "No detection results — this synthetic source has not been analysed."
-    elif state["source"] == "empty":
-        empty_reason = "No data available — this synthetic source contains no records."
-    elif query_coverage == "missing":
-        empty_reason = "No data coverage for this interval. Absence of anomalies is not evidence of health."
-    else:
-        empty_reason = "No anomalies match the selected scope."
+    zone = state["timezone"]
     return dict(
         state=state,
         revision=REVISION,
@@ -398,32 +491,19 @@ def build(state: InvestigationState) -> dict[str, Any]:
         events=[summary(e, state) for e in results[first : first + state["limit"]]],
         page_count=max(1, ceil(len(results) / state["limit"])),
         row_count=row_count,
-        row_page_count=max(1, ceil(row_count / 12)),
-        facets=facets,
+        row_page_count=max(1, ceil(row_count / LANES_PER_PAGE)),
+        facets=facet_counts(state, source_rows),
         timeline=dict(
             resolution=duration,
             bins=len(bins),
             overall=overall,
             lanes=lanes,
             volume_max=maximum,
-            volume_scale=volume_scale,
+            volume_scale=volume_scale(maximum),
         ),
         range_label=f"{display_time(iso(start), zone, True)} – {display_time(iso(end), zone, True)}",
-        coverage=dict(
-            status=query_coverage,
-            dataset=SOURCES[state["source"]],
-            interval=f"{iso(START)} – {iso(END - timedelta(minutes=15) if state['source'] == 'partial' else END)}"
-            if state["source"] in {"demo", "partial"}
-            else "Unavailable",
-            last_processed=None,
-            last_event=max((e["timestamp"] for e in source_rows), default=None),
-            ingestion="Not connected — synthetic fixture",
-            analysis="Not run — presentation records only",
-            freshness="Historical fixture; no live freshness measurement",
-            raw_log_count=None,
-            parsed_event_count=None,
-        ),
-        empty_reason=empty_reason,
+        coverage=coverage_summary(state["source"], query_coverage, source_rows),
+        empty_reason=empty_reason(state["source"], query_coverage),
         sources=SOURCES,
     )
 

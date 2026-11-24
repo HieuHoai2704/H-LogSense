@@ -132,88 +132,113 @@ def relation_options(event):
     ]
 
 
+CURSOR_MAX_AGE = 900  # seconds a related-events cursor stays valid
+MAX_CONTEXT_WINDOW = timedelta(hours=2)
+
+
+def context_interval(event, kind, args):
+    """The half-open interval searched for related events: +/- context_seconds, or the event's window."""
+    seconds = integer(args.get("context_seconds", 1800), 1, 3600, "Context window in seconds")
+    center = instant(event["timestamp"])
+    start, end = center - timedelta(seconds=seconds), center + timedelta(seconds=seconds)
+    if kind == "same_window":
+        start, end = instant(event["observation_start"]), instant(event["observation_end"])
+        if start >= end or end - start > MAX_CONTEXT_WINDOW:
+            raise QueryError("Observation window is invalid or exceeds the context query limit.")
+    return seconds, start, end
+
+
+def cursor_position(args, signer, fingerprint):
+    """Where the previous page ended, from a signed cursor bound to this exact query; None on page 1."""
+    cursor = args.get("context_cursor")
+    if not cursor:
+        return None
+    if len(cursor) > 2048:
+        raise QueryError("Invalid context cursor.")
+    try:
+        token = signer.loads(cursor, max_age=CURSOR_MAX_AGE)
+        if (
+            token["scope"] != fingerprint
+            or not isinstance(token["position"], list)
+            or len(token["position"]) != 2
+        ):
+            raise ValueError()
+        return (float(token["position"][0]), str(token["position"][1]))
+    except (BadData, KeyError, TypeError, ValueError, OverflowError) as exc:
+        raise QueryError(
+            "Context cursor expired or belongs to another query. Reload the first page."
+        ) from exc
+
+
+def related(candidate, event, kind, center):
+    """Whether ``candidate`` stands in relationship ``kind`` to ``event`` (time bounds checked by the caller)."""
+    stamp = instant(candidate["timestamp"])
+    if kind == "same_host":
+        return candidate.get("host") == event.get("host")
+    if kind == "same_service":
+        return candidate.get("service") == event.get("service")
+    if kind == "before":
+        return stamp < center
+    if kind == "after":
+        return stamp > center
+    if kind == "same_session":
+        return (candidate.get("session_id") or candidate.get("block_id")) == (
+            event.get("session_id") or event.get("block_id")
+        )
+    return True
+
+
+def relationship_reasons(candidate, event, kind, center, start, end):
+    reasons = [f"Within the explicit context interval [{iso(start)}, {iso(end)})"]
+    if candidate.get("host") == event.get("host"):
+        reasons.append("Same host")
+    if candidate.get("service") == event.get("service"):
+        reasons.append("Same service")
+    if kind == "same_session":
+        reasons.append("Same supplied session/block")
+    if kind == "same_window":
+        reasons.append("Same supplied observation window")
+    reasons.append("Before detection" if instant(candidate["timestamp"]) < center else "After detection")
+    return reasons
+
+
 def related_page(event, state, args, signer):
+    """One keyset-paginated page of fixture events related to ``event``, each with its reasons."""
     kind = args.get("relation", "same_host")
     if kind not in RELATIONS:
         raise QueryError("Unknown related-event relationship.")
     if not next(o["available"] for o in relation_options(event) if o["value"] == kind):
         raise QueryError("This relationship is unavailable because its source fields were not supplied.")
-    seconds = integer(args.get("context_seconds", 1800), 1, 3600, "Context window in seconds")
+    seconds, start, end = context_interval(event, kind, args)
     limit = integer(args.get("context_limit", 10), 1, 50, "Context page size")
     center = instant(event["timestamp"])
-    start, end = center - timedelta(seconds=seconds), center + timedelta(seconds=seconds)
-    if kind == "same_window":
-        start, end = instant(event["observation_start"]), instant(event["observation_end"])
-        if start >= end or end - start > timedelta(hours=2):
-            raise QueryError("Observation window is invalid or exceeds the context query limit.")
     fingerprint = hashlib.sha256(
         json.dumps([state["source"], event["id"], REVISION, kind, iso(start), iso(end), limit]).encode()
     ).hexdigest()
-    cursor = args.get("context_cursor")
-    after = None
-    if cursor:
-        if len(cursor) > 2048:
-            raise QueryError("Invalid context cursor.")
-        try:
-            token = signer.loads(cursor, max_age=900)
-            if (
-                token["scope"] != fingerprint
-                or not isinstance(token["position"], list)
-                or len(token["position"]) != 2
-            ):
-                raise ValueError()
-            after = (float(token["position"][0]), str(token["position"][1]))
-        except (BadData, KeyError, TypeError, ValueError, OverflowError) as exc:
-            raise QueryError(
-                "Context cursor expired or belongs to another query. Reload the first page."
-            ) from exc
+    after = cursor_position(args, signer, fingerprint)
 
     def key(candidate):
         value = instant(candidate["timestamp"]).timestamp()
         return (-value if kind == "before" else value, candidate["id"])
 
-    def candidates():
-        for candidate in iter_records(state["source"]):
-            stamp = instant(candidate["timestamp"])
-            if candidate["id"] == event["id"] or not start <= stamp < end:
-                continue
-            if kind == "same_host" and candidate.get("host") != event.get("host"):
-                continue
-            if kind == "same_service" and candidate.get("service") != event.get("service"):
-                continue
-            if kind == "before" and stamp >= center:
-                continue
-            if kind == "after" and stamp <= center:
-                continue
-            if kind == "same_session" and (candidate.get("session_id") or candidate.get("block_id")) != (
-                event.get("session_id") or event.get("block_id")
-            ):
-                continue
-            if after is not None and key(candidate) <= after:
-                continue
-            yield candidate
-
-    rows = heapq.nsmallest(limit + 1, candidates(), key=key)
+    candidates = (
+        candidate
+        for candidate in iter_records(state["source"])
+        if candidate["id"] != event["id"]
+        and start <= instant(candidate["timestamp"]) < end
+        and related(candidate, event, kind, center)
+        and (after is None or key(candidate) > after)
+    )
+    rows = heapq.nsmallest(limit + 1, candidates, key=key)
     has_more = len(rows) > limit
-    items = []
-    for candidate in rows[:limit]:
-        reasons = [f"Within the explicit context interval [{iso(start)}, {iso(end)})"]
-        if candidate.get("host") == event.get("host"):
-            reasons.append("Same host")
-        if candidate.get("service") == event.get("service"):
-            reasons.append("Same service")
-        if kind == "same_session":
-            reasons.append("Same supplied session/block")
-        if kind == "same_window":
-            reasons.append("Same supplied observation window")
-        reasons.append("Before detection" if instant(candidate["timestamp"]) < center else "After detection")
-        items.append(
-            {
-                field: candidate.get(field)
-                for field in ["id", "timestamp", "host", "service", "message", "severity"]
-            }
-            | {"relationship_reasons": reasons}
-        )
+    items = [
+        {
+            field: candidate.get(field)
+            for field in ["id", "timestamp", "host", "service", "message", "severity"]
+        }
+        | {"relationship_reasons": relationship_reasons(candidate, event, kind, center, start, end)}
+        for candidate in rows[:limit]
+    ]
     return dict(
         items=items,
         has_more=has_more,
@@ -229,22 +254,18 @@ def related_page(event, state, args, signer):
     )
 
 
-def evidence(event, state, args, signer):
-    is_ml = event["detector_id"] == "isolation-forest"
-    parsed, parsed_truncated = bounded_fields(
-        event.get("parsed_attributes")
-        or {"host": event.get("host"), "service": event.get("service"), "timestamp": event.get("timestamp")}
-    )
-    features, feature_truncated = bounded_fields(event.get("feature_evidence"))
-    schema, schema_truncated = bounded_fields(event.get("feature_schema"))
-    family = (
-        "ml"
-        if is_ml
-        else "rule"
-        if event["detector_id"] in {"error-burst", "timeout-frequency"}
-        else "unknown"
-    )
-    detector = dict(
+def detector_evidence(event):
+    """What the fixture says about the detector; anything not supplied is reported as unavailable."""
+    schema, _ = bounded_fields(event.get("feature_schema"))
+    features, _ = bounded_fields(event.get("feature_evidence"))
+    if event["detector_id"] == "isolation-forest":
+        family = "ml"
+    elif event["detector_id"] in {"error-burst", "timeout-frequency"}:
+        family = "rule"
+    else:
+        family = "unknown"
+    window = event.get("observation_start") and event.get("observation_end")
+    return dict(
         kind=family,
         method=event.get("detector"),
         model_name=event.get("model_name"),
@@ -258,7 +279,7 @@ def evidence(event, state, args, signer):
         configured_threshold=event.get("threshold"),
         reference_statistics=event.get("typical"),
         observation_window={"start": event["observation_start"], "end": event["observation_end"]}
-        if event.get("observation_start") and event.get("observation_end")
+        if window
         else None,
         score=event.get("score"),
         score_direction=event.get("score_direction"),
@@ -267,6 +288,17 @@ def evidence(event, state, args, signer):
         explanation=None,
         explanation_status="Explanation unavailable — no detector execution or explanation method is connected.",
     )
+
+
+def evidence(event, state, args, signer):
+    """The Evidence Drawer contract for one fixture anomaly; every field states its availability."""
+    parsed, parsed_truncated = bounded_fields(
+        event.get("parsed_attributes")
+        or {"host": event.get("host"), "service": event.get("service"), "timestamp": event.get("timestamp")}
+    )
+    _, feature_truncated = bounded_fields(event.get("feature_evidence"))
+    _, schema_truncated = bounded_fields(event.get("feature_schema"))
+    detector = detector_evidence(event)
     raw = raw_page(event, args)
     related = related_page(event, state, args, signer)
     metadata = {
