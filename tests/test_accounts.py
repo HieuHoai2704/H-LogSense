@@ -102,21 +102,34 @@ class SignInGateTests(unittest.TestCase):
             self.assertIn('name="username"', page)
             self.assertIn('name="admin-username"', page)
             self.assertIn('name="admin-portal" type="hidden" value="admin"', page)
-        self.assertIn('class="auth-card intro"', staff)
+        self.assertIn('data-mode="staff"', staff)
         # Every password field has a show/hide button tied to it.
         self.assertIn('data-reveal aria-controls="password" aria-pressed="false"', staff)
         self.assertIn('data-reveal aria-controls="admin-password" aria-pressed="false"', staff)
-        self.assertIn('class="auth-card intro admin"', admin)
+        self.assertIn('data-mode="admin"', admin)
 
-    def test_sign_up_is_public_and_linked_from_staff_sign_in(self):
+    def test_sign_up_is_a_mode_of_the_sign_in_card(self):
         staff = self.client.get("/account/login").get_data(as_text=True)
-        self.assertIn('href="/account/register"', staff)
+        self.assertIn('href="/account/register" data-auth-switch="signup"', staff)
+        self.assertIn('data-mode="staff"', staff)
         page = self.client.get("/account/register")
         self.assertEqual(page.status_code, 200)
         body = page.get_data(as_text=True)
-        for name in ("username", "email", "password", "confirm", "csrf_token"):
+        self.assertIn('data-mode="signup"', body)
+        self.assertIn('action="/account/register"', body)
+        for name in (
+            "signup-username",
+            "signup-email",
+            "signup-password",
+            "signup-confirm",
+            "signup-csrf_token",
+        ):
             self.assertIn(f'name="{name}"', body)
-        self.assertIn('data-reveal aria-controls="password"', body)
+        self.assertIn('data-reveal aria-controls="signup-password"', body)
+        # All three forms are on every mode of the card, so switching needs no reload.
+        for page in (staff, body):
+            for action in ("/account/login", "/account/register", "/account/admin"):
+                self.assertIn(f'action="{action}"', page)
 
     def test_sign_in_without_database_is_503_not_a_crash(self):
         page = self.client.get("/account/login").get_data(as_text=True)

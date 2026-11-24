@@ -1421,5 +1421,7 @@
   "Registration received": "가입 요청 접수",
   "New account waiting for approval": "승인 대기 중인 새 계정",
   "Account approved": "계정 승인됨",
-  "Registration declined": "가입 거절됨"
+  "Registration declined": "가입 거절됨",
+  "New staff account": "새 직원 계정",
+  "WELCOME!": "환영합니다!"
 }

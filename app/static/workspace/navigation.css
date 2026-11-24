@@ -108,3 +108,10 @@
 .workspace-account button:hover { background: color-mix(in srgb, var(--text) 9%, transparent); }
 .workspace-account button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .workspace-account .workspace-nav-icon { width: 16px; height: 16px; }
+
+/* Page to page: the browser cross-fades same-site navigations instead of flashing a blank page. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.28s; animation-timing-function: ease; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}

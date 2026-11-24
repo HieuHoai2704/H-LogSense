@@ -154,15 +154,18 @@ def portal_form(portal):
     )
 
 
-def auth_page(portal, login_form=None, status=200):
-    forms = {name: portal_form(name) for name in ("staff", "admin") if name != portal or login_form is None}
+def auth_page(mode, login_form=None, status=200, signup_form=None):
+    """The sign-in card in one of its modes: "staff", "signup" or "admin" (all three forms are on it)."""
+    forms = {name: portal_form(name) for name in ("staff", "admin")}
     if login_form is not None:
-        forms[portal] = login_form
+        forms[mode] = login_form
     return render_template(
         "account/auth.html",
-        portal=portal,
+        mode=mode,
+        portal="admin" if mode == "admin" else "staff",
         staff_form=localized(forms["staff"]),
         admin_form=localized(forms["admin"]),
+        signup_form=localized(signup_form or RegisterForm(prefix="signup")),
         accounts_ready=auth_available(),
     ), status
 
@@ -237,7 +240,7 @@ def register():
 
     if identity() is not None and request.method == "GET":
         return redirect(url_for("dashboard"))
-    form = RegisterForm()
+    form = RegisterForm(prefix="signup")
     status = 200
     if request.method == "POST":
         status = 400
@@ -274,7 +277,7 @@ def register():
                 notify_administrators(user)
                 flash("Registration received. You can sign in once an administrator approves it.", "success")
                 return redirect(url_for("accounts.login"), code=303)
-    return render_template("account/register.html", form=localized(form), portal="staff"), status
+    return auth_page("signup", status=status, signup_form=form)
 
 
 @accounts.route("/login", methods=["GET", "POST"])

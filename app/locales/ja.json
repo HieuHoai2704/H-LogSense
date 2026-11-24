@@ -1421,5 +1421,7 @@
   "Registration received": "登録を受け付けました",
   "New account waiting for approval": "承認待ちの新しいアカウント",
   "Account approved": "アカウントが承認されました",
-  "Registration declined": "登録が却下されました"
+  "Registration declined": "登録が却下されました",
+  "New staff account": "新しいスタッフアカウント",
+  "WELCOME!": "ようこそ!"
 }

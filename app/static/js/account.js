@@ -16,34 +16,36 @@
 
 })();
 
-// Staff / administrator switch without a reload: the panel sweeps across and the forms slide over.
+// Staff sign-in, sign-up and administrator sign-in share one card. Switching changes its data-mode:
+// the panel sweeps, the forms slide out and in, and the URL and title follow without a reload.
 (() => {
   const card = document.querySelector("[data-auth-card]");
   if (!card) return;
-  const staff = card.querySelector(".form-box.staff");
-  const admin = card.querySelector(".form-box.admin");
+  const modes = ["staff", "signup", "admin"];
+  const forms = Object.fromEntries(modes.map((mode) => [mode, card.querySelector(".form-box.pane-" + mode)]));
+  const infos = Object.fromEntries(modes.map((mode) => [mode, card.querySelector(".info-content.pane-" + mode)]));
+  const url = Object.fromEntries(modes.map((mode) => [mode, forms[mode].querySelector("form").getAttribute("action")]));
   const tabs = document.querySelectorAll(".auth-tabs [data-auth-switch]");
-  const url = { staff: staff.querySelector("form").getAttribute("action"), admin: admin.querySelector("form").getAttribute("action") };
   // The entrance animation is decoration: if a window does not paint frames, the form still appears.
   setTimeout(() => card.classList.remove("intro"), 2000);
 
-  function show(portal, push) {
-    const toAdmin = portal === "admin";
-    if (card.classList.contains("admin") === toAdmin) return;
+  function show(mode, push) {
+    if (!modes.includes(mode) || card.dataset.mode === mode) return;
     card.classList.remove("intro");
-    card.classList.toggle("admin", toAdmin);
-    staff.inert = toAdmin;
-    admin.inert = !toAdmin;
-    card.querySelector(".info-content.staff").setAttribute("aria-hidden", String(toAdmin));
-    card.querySelector(".info-content.admin").setAttribute("aria-hidden", String(!toAdmin));
-    for (const tab of tabs) {
-      if (tab.dataset.authSwitch === portal) tab.setAttribute("aria-current", "page");
-      else tab.removeAttribute("aria-current");
+    card.dataset.mode = mode;
+    for (const name of modes) {
+      forms[name].inert = name !== mode;
+      infos[name].setAttribute("aria-hidden", String(name !== mode));
     }
-    document.title = card.dataset[toAdmin ? "adminTitle" : "staffTitle"];
-    if (push) history.pushState({ portal }, "", url[portal] + location.search);
-    const target = (toAdmin ? admin : staff).querySelector("input:not([type=hidden])");
-    setTimeout(() => target?.focus({ preventScroll: true }), 900);
+    const tab = mode === "admin" ? "admin" : "staff";
+    for (const link of tabs) {
+      if (link.dataset.authSwitch === tab) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    }
+    document.title = card.dataset[mode + "Title"];
+    if (push) history.pushState({ mode }, "", url[mode] + (mode === "signup" ? "" : location.search));
+    const target = forms[mode].querySelector("input:not([type=hidden])");
+    setTimeout(() => target?.focus({ preventScroll: true }), 850);
   }
 
   document.addEventListener("click", (event) => {
@@ -52,7 +54,9 @@
     event.preventDefault();
     show(link.dataset.authSwitch, true);
   });
-  window.addEventListener("popstate", () => show(location.pathname === url.admin ? "admin" : "staff", false));
+  window.addEventListener("popstate", () => {
+    show(modes.find((mode) => url[mode] === location.pathname) || "staff", false);
+  });
 })();
 
 // Show / hide password. The field returns to hidden when its form is submitted.

@@ -102,8 +102,8 @@ html.auth-root, .auth-body {
     --text 0.9s var(--ease) 0.25s, --panel-text 0.9s var(--ease) 0.25s, --field-line 0.9s var(--ease) 0.25s,
     --field-muted 0.9s var(--ease) 0.25s, --field-danger 0.9s var(--ease) 0.25s;
 }
-/* Administrator portal: the palette inverts and the panel moves to the left. */
-.auth-card.admin {
+/* Administrator mode: the palette inverts. */
+.auth-card[data-mode="admin"] {
   --card: #f4f4f2;
   --panel: #0b0b0c;
   --panel-soft: #4a4a4a;
@@ -114,16 +114,17 @@ html.auth-root, .auth-body {
   --field-danger: #b3261e;
 }
 
-/* Diagonal panel behind the welcome text. Both positions are four-point polygons, so the browser
-   interpolates them and the panel sweeps from one side to the other. */
+/* Diagonal panel behind the welcome text: on the right for staff sign-in, on the left for sign-up and
+   the administrator. Both positions are four-point polygons, so the browser interpolates the sweep. */
 .auth-panel-shape {
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, var(--panel-soft) 0%, var(--panel) 58%);
   clip-path: polygon(40% 0, 100% 0, 100% 100%, 76% 100%);
-  transition: clip-path 0.9s var(--ease) 0.25s;
+  transition: clip-path 0.9s var(--ease) 0.2s;
+  will-change: clip-path;
 }
-.auth-card.admin .auth-panel-shape { clip-path: polygon(0 0, 60% 0, 24% 100%, 0 100%); }
+.auth-card:is([data-mode="signup"], [data-mode="admin"]) .auth-panel-shape { clip-path: polygon(0 0, 60% 0, 24% 100%, 0 100%); }
 .auth-card::after {
   content: "";
   position: absolute;
@@ -134,44 +135,55 @@ html.auth-root, .auth-body {
 }
 
 .form-box, .info-content { position: absolute; top: 0; height: 100%; width: 50%; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
-/* The welcome text has no controls, and a hidden form never takes a click. */
+.side-left { left: 0; }
+.side-right { right: 0; }
+.form-box.side-left { padding: 0 40px; }
+.form-box.side-right { padding: 0 44px; }
 .info-content { pointer-events: none; color: var(--panel-text); }
-.auth-card.admin .form-box.staff, .auth-card:not(.admin) .form-box.admin { pointer-events: none; }
-.form-box.staff { left: 0; padding: 0 40px; }
-.form-box.admin { right: 0; padding: 0 44px; }
-.info-content.staff { right: 0; padding: 0 40px 40px 130px; text-align: right; }
-.info-content.admin { left: 0; padding: 0 150px 40px 40px; }
+.info-content.side-right { padding: 0 40px 40px 130px; text-align: right; }
+.info-content.side-left { padding: 0 150px 40px 40px; }
+.info-content.side-right .info-badge { align-self: flex-end; }
+/* Only the visible pane takes clicks. */
+.auth-card .pane { pointer-events: none; }
+.auth-card[data-mode="staff"] .form-box.pane-staff,
+.auth-card[data-mode="signup"] .form-box.pane-signup,
+.auth-card[data-mode="admin"] .form-box.pane-admin { pointer-events: auto; }
 
 .form-box h1 { margin: 0 0 0.75rem; font-size: 2rem; text-align: center; letter-spacing: 0.02em; }
+.form-box.compact h1 { margin-bottom: 0.25rem; font-size: 1.8rem; }
+.form-box.compact .auth-field { margin: 0.55rem 0 0.75rem; }
 .info-content h2 { margin: 0.25rem 0 0.5rem; font-size: 2.1rem; line-height: 1.1; letter-spacing: 0.04em; }
 .info-content p { margin: 0; font-size: 0.95rem; }
 .info-badge { display: inline-flex; align-items: center; gap: 0.35rem; align-self: flex-start; padding: 0.15rem 0.65rem; border: 1.5px solid currentColor; border-radius: 999px; font-size: 0.75rem !important; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-.info-content.staff .info-badge { align-self: flex-end; }
 
-/* Staggered slide with blur. The leaving side goes out first; the arriving side follows the panel. */
-.animation { transition: transform 0.7s ease, opacity 0.7s ease, filter 0.7s ease; }
-.form-box.staff .animation, .info-content.staff .animation,
-.auth-card.admin .form-box.admin .animation, .auth-card.admin .info-content.admin .animation {
+/* Staggered slide with blur. A hidden pane waits off its own side; the leaving pane goes first and the
+   arriving one follows the panel sweep. */
+.animation {
+  transition: transform 0.65s var(--ease), opacity 0.55s ease, filter 0.55s ease;
+  will-change: transform, opacity;
+}
+.side-left .animation { transform: translateX(-115%); opacity: 0; filter: blur(8px); transition-delay: calc(0.05s * var(--d, 0)); }
+.side-right .animation { transform: translateX(115%); opacity: 0; filter: blur(8px); transition-delay: calc(0.05s * var(--d, 0)); }
+.auth-card[data-mode="staff"] .pane-staff .animation,
+.auth-card[data-mode="signup"] .pane-signup .animation,
+.auth-card[data-mode="admin"] .pane-admin .animation {
   transform: translateX(0);
   opacity: 1;
   filter: blur(0);
-  transition-delay: calc(0.6s + 0.08s * var(--d, 0));
+  transition-delay: calc(0.5s + 0.06s * var(--d, 0));
 }
-.auth-card.admin .form-box.staff .animation, .form-box.admin .animation { transform: translateX(-120%); opacity: 0; filter: blur(10px); transition-delay: calc(0.06s * var(--d, 0)); }
-.auth-card.admin .info-content.staff .animation, .info-content.admin .animation { transform: translateX(120%); opacity: 0; filter: blur(10px); transition-delay: calc(0.06s * var(--d, 0)); }
-.form-box.admin .animation { transform: translateX(120%); }
-.info-content.admin .animation { transform: translateX(-120%); }
-.auth-card.admin .form-box.admin .animation, .auth-card.admin .info-content.admin .animation { transform: translateX(0); }
 
-/* First paint: the visible side slides in once; switching then uses the transitions above. */
+/* First paint: the visible pane slides in once; switching then uses the transitions above. */
 @keyframes auth-in { from { transform: translateX(-40px); opacity: 0; filter: blur(8px); } }
 @keyframes auth-in-right { from { transform: translateX(40px); opacity: 0; filter: blur(8px); } }
-.auth-card.intro:not(.admin) .staff .animation, .auth-card.intro.admin .admin .animation {
-  animation: auth-in 0.7s ease backwards;
-  animation-delay: calc(0.08s * var(--d, 0));
+.auth-card.intro[data-mode="staff"] .pane-staff .animation,
+.auth-card.intro[data-mode="signup"] .pane-signup .animation,
+.auth-card.intro[data-mode="admin"] .pane-admin .animation {
+  animation: auth-in 0.7s var(--ease) backwards;
+  animation-delay: calc(0.07s * var(--d, 0));
   transition: none;
 }
-.auth-card.intro:not(.admin) .info-content.staff .animation, .auth-card.intro.admin .form-box.admin .animation { animation-name: auth-in-right; }
+.auth-card.intro .side-right .animation { animation-name: auth-in-right; }
 .auth-card.intro, .auth-card.intro .auth-panel-shape { transition: none; }
 
 /* ---- fields: underline inputs with a floating label and an icon ---- */
@@ -262,9 +274,19 @@ html.auth-root, .auth-body {
   .auth-panel-shape, .info-content { display: none; }
   .form-box { position: relative; width: 100%; padding: 2rem 1.5rem !important; }
   .auth-card .animation { animation: none !important; transform: none !important; opacity: 1 !important; filter: none !important; transition: none; }
-  .auth-card.admin .form-box.staff, .auth-card:not(.admin) .form-box.admin { display: none; }
+  .auth-card .form-box.pane { display: none; }
+  .auth-card[data-mode="staff"] .form-box.pane-staff,
+  .auth-card[data-mode="signup"] .form-box.pane-signup,
+  .auth-card[data-mode="admin"] .form-box.pane-admin { display: flex; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .auth-card, .auth-card * { transition-duration: 0.01s !important; transition-delay: 0s !important; animation: none !important; }
+}
+
+/* Page to page: the browser cross-fades same-site navigations instead of flashing a blank page. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.28s; animation-timing-function: ease; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
 }

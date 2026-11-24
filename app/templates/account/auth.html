@@ -1,13 +1,14 @@
 {% extends "account/layout.html" %}
 {% from "account/_icons.html" import field, icon with context %}
-{% block title %}{{ tr("Administrator sign-in") if portal == "admin" else tr("Staff sign-in") }} · {{ app_name }}{% endblock %}
-{% macro sign_in_form(form, endpoint, first) -%}
+{% set titles = {"staff": tr("Staff sign-in"), "signup": tr("Sign up"), "admin": tr("Administrator sign-in")} %}
+{% block title %}{{ titles[mode] }} · {{ app_name }}{% endblock %}
+{% macro sign_in_form(form, endpoint) -%}
 <form method="post" action="{{ url_for(endpoint) }}" novalidate>
   {{ form.hidden_tag() }}
   {% for error in (form.csrf_token.errors if form.csrf_token is defined else []) %}<p class="auth-error">{{ tr("The form expired. Try again.") }}</p>{% endfor %}
-  {{ field(form.username, "user", first + 1, "username") }}
-  {{ field(form.password, "lock", first + 2, "current-password") }}
-  <button class="auth-button animation" style="--d:{{ first + 3 }}">{{ tr("Sign in") }}</button>
+  {{ field(form.username, "user", 1, "username") }}
+  {{ field(form.password, "lock", 2, "current-password") }}
+  <button class="auth-button animation" style="--d:3">{{ tr("Sign in") }}</button>
   {{ caller() }}
 </form>
 {%- endmacro %}
@@ -16,37 +17,60 @@
 <p class="auth-flash auth-flash-danger" role="status">{{ tr("Accounts need the MySQL database. Start the demo environment first.") }}
   <br><code>python -m scripts.run.demo</code></p>
 {% endif %}
-{# One card, two portals: staff signs in on the left, administrators on the right. Switching sweeps the
-   diagonal panel across and inverts the palette. #}
-<section class="auth-card intro{% if portal == 'admin' %} admin{% endif %}" data-auth-card
-         data-staff-title="{{ tr('Staff sign-in') }} · {{ app_name }}" data-admin-title="{{ tr('Administrator sign-in') }} · {{ app_name }}">
+{# One card, three modes. Staff sign-in has its form on the left; sign-up and the administrator portal
+   have theirs on the right. Switching sweeps the diagonal panel, slides the forms out and in, and the
+   administrator mode inverts the palette. #}
+<section class="auth-card intro" data-auth-card data-mode="{{ mode }}"
+         data-staff-title="{{ titles.staff }} · {{ app_name }}" data-signup-title="{{ titles.signup }} · {{ app_name }}"
+         data-admin-title="{{ titles.admin }} · {{ app_name }}">
   <span class="auth-panel-shape" aria-hidden="true"></span>
 
-  <div class="form-box staff"{% if portal == "admin" %} inert{% endif %}>
+  <div class="form-box pane pane-staff side-left"{% if mode != "staff" %} inert{% endif %}>
     <h1 class="animation" style="--d:0">{{ tr("Sign in") }}</h1>
-    {% call sign_in_form(staff_form, "accounts.login", 0) %}
+    {% call sign_in_form(staff_form, "accounts.login") %}
     <p class="auth-switch animation" style="--d:4">
       <a href="{{ url_for('accounts.forgot') }}">{{ tr("Forgot password?") }}</a>
-      <span>{{ tr("No account yet?") }} <a href="{{ url_for('accounts.register') }}">{{ tr("Sign up") }}</a> · {{ tr("an administrator approves new accounts") }}</span>
+      <span>{{ tr("No account yet?") }} <a href="{{ url_for('accounts.register') }}" data-auth-switch="signup">{{ tr("Sign up") }}</a></span>
     </p>
     {% endcall %}
   </div>
-  <div class="info-content staff"{% if portal == "admin" %} aria-hidden="true"{% endif %}>
+  <div class="info-content pane pane-staff side-right"{% if mode != "staff" %} aria-hidden="true"{% endif %}>
     <p class="info-badge animation" style="--d:0">{{ tr("Staff") }}</p>
     <h2 class="animation" style="--d:1">{{ tr("WELCOME BACK!") }}</h2>
     <p class="animation" style="--d:2">{{ tr("Sign in to open your project workspace, investigations and log datasets.") }}</p>
   </div>
 
-  <div class="form-box admin"{% if portal != "admin" %} inert{% endif %}>
+  <div class="form-box pane pane-signup side-right compact"{% if mode != "signup" %} inert{% endif %}>
+    <h1 class="animation" style="--d:0">{{ tr("Sign up") }}</h1>
+    <form method="post" action="{{ url_for('accounts.register') }}" novalidate>
+      {{ signup_form.hidden_tag() }}
+      {% for error in (signup_form.csrf_token.errors if signup_form.csrf_token is defined else []) %}<p class="auth-error">{{ tr("The form expired. Try again.") }}</p>{% endfor %}
+      {{ field(signup_form.username, "user", 1, "username") }}
+      {{ field(signup_form.email, "mail", 2, "email") }}
+      {{ field(signup_form.password, "lock", 3, "new-password") }}
+      {{ field(signup_form.confirm, "lock", 4, "new-password") }}
+      <button class="auth-button animation" style="--d:5">{{ tr("Send sign-up request") }}</button>
+      <p class="auth-switch animation" style="--d:6">
+        <span>{{ tr("Already have an account?") }} <a href="{{ url_for('accounts.login') }}" data-auth-switch="staff">{{ tr("Sign in") }}</a></span>
+      </p>
+    </form>
+  </div>
+  <div class="info-content pane pane-signup side-left"{% if mode != "signup" %} aria-hidden="true"{% endif %}>
+    <p class="info-badge animation" style="--d:0">{{ tr("New staff account") }}</p>
+    <h2 class="animation" style="--d:1">{{ tr("WELCOME!") }}</h2>
+    <p class="animation" style="--d:2">{{ tr("New accounts are staff accounts. You can sign in once an administrator approves yours; we email you when that happens.") }}</p>
+  </div>
+
+  <div class="form-box pane pane-admin side-right"{% if mode != "admin" %} inert{% endif %}>
     <h1 class="animation" style="--d:0">{{ tr("Administrator") }}</h1>
-    {% call sign_in_form(admin_form, "accounts.admin_login", 0) %}
+    {% call sign_in_form(admin_form, "accounts.admin_login") %}
     <p class="auth-switch animation" style="--d:4">
       <a href="{{ url_for('accounts.forgot') }}">{{ tr("Forgot password?") }}</a>
       <a href="{{ url_for('accounts.login') }}" data-auth-switch="staff">{{ tr("Staff sign-in") }}</a>
     </p>
     {% endcall %}
   </div>
-  <div class="info-content admin"{% if portal != "admin" %} aria-hidden="true"{% endif %}>
+  <div class="info-content pane pane-admin side-left"{% if mode != "admin" %} aria-hidden="true"{% endif %}>
     <p class="info-badge animation" style="--d:0">{{ icon("shield") }} {{ tr("Administrator console") }}</p>
     <h2 class="animation" style="--d:1">{{ tr("RESTRICTED AREA") }}</h2>
     <p class="animation" style="--d:2">{{ tr("Administrators sign in here to manage accounts and access.") }}</p>

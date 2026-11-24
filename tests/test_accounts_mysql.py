@@ -312,11 +312,11 @@ class AccountMySQLTests(unittest.TestCase):
         return client.post(
             "/account/register",
             data={
-                "csrf_token": csrf(page),
-                "username": username,
-                "email": email,
-                "password": password,
-                "confirm": confirm or password,
+                "signup-csrf_token": csrf(page, "signup"),
+                "signup-username": username,
+                "signup-email": email,
+                "signup-password": password,
+                "signup-confirm": confirm or password,
             },
         )
 
