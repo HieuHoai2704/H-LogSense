@@ -49,6 +49,31 @@ class QuitPromptTests(unittest.TestCase):
         self.assertTrue(bridge.closing())
 
 
+class ExitWatchdogTests(unittest.TestCase):
+    def test_process_ends_although_a_thread_waits_forever(self):
+        import subprocess
+        import sys
+        import time
+
+        script = (
+            "import threading\n"
+            "from app.workbench.desktop import exit_when_shutdown_stalls\n"
+            "threading.Thread(target=threading.Event().wait).start()  # never finishes, not a daemon\n"
+            "exit_when_shutdown_stalls(grace=0.2)\n"
+            "print('main done', flush=True)\n"
+        )
+        started = time.monotonic()
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            cwd=Path(__file__).resolve().parents[1],
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        self.assertEqual((result.returncode, result.stdout.strip()), (0, "main done"), result.stderr)
+        self.assertLess(time.monotonic() - started, 10)
+
+
 class DemoDatabaseTests(unittest.TestCase):
     def setUp(self):
         folder = tempfile.TemporaryDirectory()

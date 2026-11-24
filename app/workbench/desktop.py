@@ -4,7 +4,9 @@ import os
 from pathlib import Path
 import secrets
 import sys
+import threading
 from threading import Lock, Thread
+import time
 
 from .files import WORKSPACES, WorkspaceError
 from .platforms import current as platform_backend
@@ -41,7 +43,14 @@ class DesktopBridge:
         if not self._authorized(token):
             return False
         self._quitting = True
-        Thread(target=self._window.destroy, name="h-logsen-quit", daemon=True).start()
+
+        def close_after_reply():
+            # pywebview sends this call's return value to the page after quit() returns; destroying the
+            # window first would leave that reply waiting forever.
+            time.sleep(0.2)
+            self._window.destroy()
+
+        Thread(target=close_after_reply, name="h-logsen-quit", daemon=True).start()
         return True
 
     def closing(self):
@@ -126,5 +135,28 @@ def desktop_window(url, token, store):
     webview.start(
         gui=gui, private_mode=False, storage_path=str(store.directory / "desktop-webview"), **start_options
     )
+    exit_when_shutdown_stalls()
     if webview.renderer != expected_renderer:
         raise RuntimeError(f"Desktop mode requires {expected_renderer}. See the platform installation guide.")
+
+
+def exit_when_shutdown_stalls(grace=2.0):
+    """After the window closes, make sure the process ends.
+
+    pywebview runs each page-to-Python call in a non-daemon thread that finally waits for the page to
+    accept its reply. A call that is still in flight when the window is destroyed waits forever, and
+    Python never finishes shutting down: the process stays, its window frozen ("not responding"). This
+    daemon watchdog waits until the main thread has finished (normal cleanup included), gives other
+    threads ``grace`` seconds, then ends the process. A clean shutdown never reaches it.
+    """
+
+    def watch():
+        main = threading.main_thread()
+        while main.is_alive():
+            time.sleep(0.2)
+        time.sleep(grace)
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(0)
+
+    Thread(target=watch, name="h-logsen-exit-watchdog", daemon=True).start()
