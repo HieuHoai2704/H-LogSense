@@ -45,13 +45,13 @@ fi
 .venv/bin/python -m pip --isolated install --prefer-binary "$package$extra"
 if [ -n "$extra" ]; then
     # The venv also sees system packages; only H-logsen's own dependency tree must be consistent.
-    .venv/bin/python -I -m app.workbench.linux check
+    .venv/bin/python -I -m app.workbench.platforms.linux check
 else
     .venv/bin/python -m pip check
 fi
 .venv/bin/python -I -m app.workbench --help >/dev/null
 if [ -n "$extra" ] && [ "${H_LOGSEN_NO_LAUNCHER:-}" != 1 ]; then
-    .venv/bin/python -I -m app.workbench.linux launcher ||
+    .venv/bin/python -I -m app.workbench.platforms.linux launcher ||
         echo 'Could not add H-logsen to the application menu. Open-H-logsen.sh is still available.' >&2
 fi
 echo 'H-logsen is installed. Run sh Open-H-logsen.sh to open the desktop workspace.'

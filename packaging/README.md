@@ -19,5 +19,7 @@ sh packaging/posix/Install-H-logsen.sh        # macOS / Linux, from a source che
 packaging\windows\Install-H-logsen.cmd        # Windows, from a source checkout
 ```
 
-Platform-specific runtime code (ConPTY, DWM glass, WKWebView, WebKitGTK, the Linux menu launcher) lives in
-`app/workbench/`, not here.
+Platform-specific runtime code lives in `app/workbench/platforms/` (`windows.py`: ConPTY, DWM glass, shortcuts;
+`macos.py`: WKWebView vibrancy; `linux.py`: WebKitGTK window and menu launcher; `posix.py`: shared PTY terminal).
+The installers call `python -m app.workbench.platforms.windows` (shortcuts) and
+`python -m app.workbench.platforms.linux check|launcher`.

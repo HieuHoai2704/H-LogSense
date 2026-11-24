@@ -21,13 +21,14 @@ from sqlalchemy.orm import Session
 from werkzeug.exceptions import NotFound
 
 from app.models import Dataset, ProcessingJob, SourceArtifact
+from app.paths import LOCAL_DIR, UPLOADS_DIR
 from app.domain import UserDataset
 from app.parsers.bgl import parse_line, MAX_LINE_BYTES
 from app.services.bgl_ingestion import fingerprint, ingest_bgl, import_lease, ImportBusyError
 from app.services.redaction import redact
 from app.security import Forbidden
 
-UPLOAD_ROOT = Path('.local/uploads')
+UPLOAD_ROOT = UPLOADS_DIR
 MAX_FILE_BYTES = 16 * 1024 * 1024
 MAX_REQUEST_BYTES = 17 * 1024 * 1024
 MAX_ROWS = 200000
@@ -44,7 +45,7 @@ class UploadError(Exception):
 
 def root_path():
     root = UPLOAD_ROOT.resolve()
-    local = (Path(__file__).resolve().parents[2] / '.local').resolve()
+    local = LOCAL_DIR.resolve()
     if not root.is_relative_to(local) or root == local:
         raise UploadError('upload_storage', 'Upload storage is not an owned local directory.', 503)
     root.mkdir(parents=True, exist_ok=True, mode=0o700)

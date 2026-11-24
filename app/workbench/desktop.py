@@ -7,6 +7,7 @@ import sys
 from threading import Lock
 
 from .files import WORKSPACES, WorkspaceError
+from .platforms import current as platform_backend
 
 RENDERERS = {"win32": ("edgechromium", "edgechromium"), "darwin": ("cocoa", "wkwebview"),
              "linux": ("gtk", "gtkwebkit2")}
@@ -29,19 +30,8 @@ class DesktopBridge:
     def set_window_glass(self, token, enabled):
         if type(enabled) is not bool or not self._authorized(token):
             return False
-        if sys.platform == "darwin":
-            from AppKit import NSWorkspace
-
-            return bool(self._window and self._window.transparent and enabled
-                        and not NSWorkspace.sharedWorkspace().accessibilityDisplayShouldReduceTransparency())
-        if sys.platform == "linux":
-            # GTK has no system blur, but an RGBA window lets the glass tint show the desktop.
-            return bool(self._window and self._window.transparent and enabled)
-        if sys.platform != "win32":
-            return False
-        from .windows import set_window_glass
-
-        return set_window_glass(self._window, enabled)
+        glass = getattr(platform_backend, "set_window_glass", None)
+        return bool(glass and glass(self._window, enabled))
 
     def pick_project(self, token, workspace="project"):
         if not self._authorized(token):
@@ -70,29 +60,7 @@ def desktop_window(url, token, store):
     except ImportError:
         raise RuntimeError("Install H-logsen with the platform installer to use desktop mode.") from None
 
-    window_options = {}
-    start_options = {}
-    if gui == "edgechromium":
-        from .windows import ICON, identify_process
-
-        identify_process()
-        start_options["icon"] = str(ICON)
-    elif gui == "cocoa":
-        window_options.update(transparent=True, vibrancy=True)
-    elif gui == "gtk":
-        from .linux import APP_ID, ICON
-
-        try:
-            from gi.repository import GLib
-
-            # The Wayland app_id and X11 WM_CLASS come from the program name. Match the
-            # installed h-logsen.desktop so the dock shows the H-logsen icon, not "python3".
-            GLib.set_prgname(APP_ID)
-            GLib.set_application_name("H-logsen")
-        except ImportError:
-            pass
-        start_options["icon"] = str(ICON)
-        window_options["transparent"] = True
+    window_options, start_options = platform_backend.desktop_options()
 
     bridge = DesktopBridge(token, store, webview.FileDialog.FOLDER)
     window = webview.create_window("H-logsen", url, width=1440, height=900, min_size=(900, 620),

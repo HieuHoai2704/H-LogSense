@@ -22,6 +22,7 @@ from sklearn.ensemble import IsolationForest
 from sqlalchemy import create_engine, select, func, case, text
 from sqlalchemy.orm import Session
 
+from app.paths import IF_STUDIES_DIR
 from app.models import Dataset, LogEvent, GroundTruthLabel
 from app.services.window_detection import aggregate_windows, EPOCH, second, FEATURE_NAMES
 from app.services.detector_calibration import (
@@ -29,7 +30,7 @@ from app.services.detector_calibration import (
 )
 from app.services.window_features import TrainReference
 
-ROOT = Path('.local/if_studies')
+ROOT = IF_STUDIES_DIR
 CANDIDATES = [
     {'id': 'base-100-256', 'features': 'base', 'n_estimators': 100, 'max_samples': 256, 'seed': 42},
     {'id': 'context-100-256', 'features': 'context', 'n_estimators': 100, 'max_samples': 256, 'seed': 42},

@@ -1,12 +1,15 @@
-"""Windows Explorer identity and shortcuts for the desktop launcher."""
+"""Windows integration: ConPTY terminals, DWM glass, taskbar identity and shortcuts."""
 
 from ctypes import POINTER, Structure, WinDLL, byref, c_int, c_void_p, sizeof, windll
 from ctypes import wintypes
+import os
 from pathlib import Path
 import sys
 
+from ..files import WorkspaceError
+
 APP_ID = "HieuHoai.HLogsen.Workbench"
-ICON = Path(__file__).resolve().parents[1] / "static" / "h-logsen.ico"
+ICON = Path(__file__).resolve().parents[2] / "static" / "h-logsen.ico"
 
 
 def identify_process():
@@ -53,6 +56,34 @@ def set_window_glass(window, enabled):
         return True
 
     return bool(form.Invoke(Func[Boolean](apply)))
+
+
+def desktop_options():
+    """Return (create_window options, webview.start options)."""
+    identify_process()
+    return {}, {"icon": str(ICON)}
+
+
+def shell_profiles():
+    system = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
+    return {"PowerShell": [str(system / "WindowsPowerShell/v1.0/powershell.exe"), "-NoLogo", "-NoProfile"],
+            "CMD": [str(system / "cmd.exe"), "/D"]}
+
+
+def open_terminal(command, directory, environment):
+    try:
+        from winpty import PtyProcess
+    except ImportError:
+        raise WorkspaceError("Install pywinpty to enable ConPTY.", 503) from None
+    return PtyProcess.spawn(command, cwd=str(directory), env=environment)
+
+
+def close_terminal(process):
+    process.close(force=True)
+
+
+def show_fatal_error(message):
+    windll.user32.MessageBoxW(None, str(message), "H-logsen", 0x10)
 
 
 def install_shortcuts():

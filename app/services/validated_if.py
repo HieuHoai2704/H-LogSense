@@ -8,7 +8,6 @@ persisted as database membership. No fitting or threshold selection occurs here.
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
-from pathlib import Path
 import re
 from uuid import uuid4
 
@@ -17,6 +16,7 @@ from sqlalchemy import select, func, case, text
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.orm import Session
 
+from app.paths import IF_HOLDOUT_DIR, VALIDATED_IF_INPUTS_DIR
 from app.models import Dataset, LogEvent, Detector, DetectorVersion, DetectorRun
 from app.services.bgl_ingestion import import_lease, fingerprint
 from app.services.window_detection import (
@@ -25,8 +25,8 @@ from app.services.window_detection import (
 from app.services.window_features import FEATURE_NAMES as CONTEXT_FEATURE_NAMES
 
 DEFAULT_MODEL_ID = 'f3e5a88403ab48fb84ea36904214e867'
-STUDY_ROOT = Path('.local/if_new_holdout')
-INPUT_ROOT = Path('.local/validated_if_inputs')
+STUDY_ROOT = IF_HOLDOUT_DIR
+INPUT_ROOT = VALIDATED_IF_INPUTS_DIR
 
 
 def _json(path):

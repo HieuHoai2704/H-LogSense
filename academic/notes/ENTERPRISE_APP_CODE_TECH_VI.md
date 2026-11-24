@@ -40,7 +40,7 @@
 | **Phân tích log** | BGL có quyền dataset, Timeline, Evidence và CSV. HDFS theo block chạy bằng CLI với SQLite và CSV riêng. | Tạo bộ đọc kết quả HDFS trong Phân tích. Truy vấn theo block, giữ mốc dòng gốc và hiển thị rõ kiểu đơn vị phân tích. | Bảng, Evidence và CSV phải khớp bộ lọc. Dữ liệu HDFS theo block và BGL theo host-window có nhãn riêng. |
 | **Mở app và remote** | Launcher Flask bind loopback, capability cho các thao tác cục bộ, terminal SSH dùng OpenSSH với host key đã xác minh. | So sánh launcher hiện tại với một lớp cửa sổ desktop mỏng. Xác minh SSH thật trên máy Mac trước khi nghiên cứu tác nhân đọc tệp từ xa. | Mở từ shortcut đi thẳng vào workspace. Terminal vẫn dùng đúng quyền người dùng. Thử riêng terminal từ xa và truy cập filesystem từ xa nếu có tác nhân. |
 
-Đối chiếu mã dự án qua [launcher](../../scripts/run/workbench.py), [quyền API cục bộ](../../app/workbench/api.py), [quản lý PTY](../../app/workbench/terminal.py), [frontend terminal](../../app/static/workspace/live-terminal.js), [supervisor](../../app/workbench/jobs.py) và [pipeline HDFS](../../app/services/hdfs_analysis.py).
+Đối chiếu mã dự án qua [launcher](../../scripts/run/workbench.py), [quyền API cục bộ](../../app/workbench/api.py), [quản lý PTY](../../app/workbench/terminal.py), [frontend terminal](../../app/static/workspace/live-terminal.js), [supervisor](../../app/workbench/jobs.py) và [pipeline HDFS](../experiments/hdfs_analysis.py).
 
 ### Luồng tham khảo do mình tổng hợp
 

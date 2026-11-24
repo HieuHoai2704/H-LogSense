@@ -61,9 +61,9 @@ def desktop_main():
     except Exception as error:
         if sys.platform != "win32":
             raise
-        from ctypes import windll
+        from app.workbench.platforms.windows import show_fatal_error
 
-        windll.user32.MessageBoxW(None, str(error), "H-logsen", 0x10)
+        show_fatal_error(error)
         return 1
     return 0
 

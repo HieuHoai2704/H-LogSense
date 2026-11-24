@@ -30,7 +30,7 @@ Nếu phiên web cũ đang dùng cổng 5000, dừng phiên đó trước khi m�
 
 ```cmd
 cd /d "D:\1)_KHUTAOSONG\2)Project\14)LogSense_AI"
-.venv\Scripts\python.exe -m pip install -r requirements-workbench.txt
+.venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe -m scripts.run.mysql_runtime --root .local/university-e2e-mysql start
 .venv\Scripts\python.exe .local\run-logsense.py web
 ```

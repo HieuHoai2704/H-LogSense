@@ -1,6 +1,0 @@
-pywinpty==2.0.15; sys_platform == 'win32'
-pywebview==6.2.1; sys_platform == 'win32' or sys_platform == 'darwin'
-pywin32==312; sys_platform == 'win32'
-pyarrow==25.0.1
-pypdfium2==5.15.1
-Pillow>=12.2,<13

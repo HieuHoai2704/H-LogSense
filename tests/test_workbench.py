@@ -563,7 +563,7 @@ class WorkbenchTest(unittest.TestCase):
             import pyarrow as arrow
             import pyarrow.parquet as parquet
         except ImportError:
-            self.skipTest("Install requirements-workbench.txt for Parquet")
+            self.skipTest("Install pyarrow for Parquet")
         path = self.project / "metrics.parquet"
         parquet.write_table(arrow.table({"epoch": [1, 1, 2], "loss": [0.2, 0.2, None]}), path, row_group_size=2)
         report = self.call("/external", "POST", json={"path": path.name, "format": "parquet"})

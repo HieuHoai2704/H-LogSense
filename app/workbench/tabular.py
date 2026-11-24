@@ -146,7 +146,7 @@ def parquet_profile(path):
         import pyarrow
         from pyarrow import parquet
     except ImportError:
-        raise WorkspaceError("Install requirements-workbench.txt to read Parquet.", 503) from None
+        raise WorkspaceError("Install pyarrow to read Parquet.", 503) from None
     with path.open("rb") as stream:
         stream.seek(0, 2)
         if stream.tell() > PARQUET_FILE_BYTES:

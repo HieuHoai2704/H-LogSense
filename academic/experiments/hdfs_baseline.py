@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from app.services.hdfs_analysis import run
+from academic.experiments.hdfs_analysis import run
 
 
 def main():

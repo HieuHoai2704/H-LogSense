@@ -45,7 +45,7 @@ if "%PACKAGE%"=="." (
 if errorlevel 1 goto failed
 ".venv\Scripts\python.exe" -m pip check
 if errorlevel 1 goto failed
-".venv\Scripts\python.exe" -I -m app.workbench.windows
+".venv\Scripts\python.exe" -I -m app.workbench.platforms.windows
 if errorlevel 1 echo Could not update Windows shortcuts. Open-H-logsen.cmd is still available.
 echo.
 echo H-logsen installed. Double-click Open-H-logsen.cmd to start.

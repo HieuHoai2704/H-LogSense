@@ -14,6 +14,7 @@ from sklearn.ensemble import IsolationForest
 from sqlalchemy import select, or_, and_, insert
 from sqlalchemy.orm import Session
 
+from app.paths import MODEL_ARTIFACTS_DIR
 from app.models import (
     Dataset,
     LogEvent,
@@ -58,7 +59,7 @@ def detect(
     kind="rule",
     train_size=1000,
     batch_size=500,
-    artifact_root=".local/model_artifacts",
+    artifact_root=None,
     seed=42,
 ):
     if (
@@ -106,7 +107,7 @@ def detect(
         "sklearn": sklearn.__version__,
     }
     if model is not None:
-        root = Path(artifact_root)
+        root = Path(artifact_root) if artifact_root else MODEL_ARTIFACTS_DIR
         root.mkdir(parents=True, exist_ok=True)
         model_key = uuid4().hex + ".joblib"
         path = root / model_key

@@ -84,7 +84,7 @@ def verify(directory, desktop=False):
                     raise ValueError("The Linux launcher does not start the installed environment.")
         if sys.platform == "linux":
             # The Linux venv uses --system-site-packages; distribution packages are out of scope.
-            subprocess.run([python, "-I", "-m", "app.workbench.linux", "check"], cwd=work, check=True)
+            subprocess.run([python, "-I", "-m", "app.workbench.platforms.linux", "check"], cwd=work, check=True)
         else:
             subprocess.run([python, "-I", "-m", "pip", "check"], cwd=work, check=True)
         subprocess.run([python, "-I", "-m", "app.workbench", "--help"], cwd=work, check=True)

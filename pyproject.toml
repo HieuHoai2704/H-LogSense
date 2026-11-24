@@ -8,13 +8,42 @@ version = "0.4.13"
 description = "Local workbench for code, data analysis, training runs and log investigation"
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
-dynamic = ["dependencies"]
+# Single source of truth for dependencies. requirements.txt only installs this project (-e .).
+dependencies = [
+    # Web application, MySQL investigation and detectors
+    "Flask>=3.1,<3.2",
+    "tzdata",
+    "Flask-SQLAlchemy>=3.1,<3.2",
+    "SQLAlchemy>=2.0.36,<2.1",
+    "Flask-Migrate>=4.0,<5",
+    "PyMySQL[rsa]>=1.1,<1.2",
+    "scikit-learn>=1.5,<1.8",
+    "psutil>=7,<8",
+    "Flask-WTF>=1.2.2,<1.3",
+    "WTForms>=3.2,<3.3",
+    "Bootstrap-Flask>=2.4,<3",
+    "Flask-Moment>=1,<2",
+    "Flask-Mail>=0.10,<0.11",
+    "requests>=2.32,<3",
+    # Desktop workbench: terminals, native window, Parquet and PDF preview
+    "pywinpty==2.0.15; sys_platform == 'win32'",
+    "pywebview==6.2.1; sys_platform == 'win32' or sys_platform == 'darwin'",
+    "pywin32==312; sys_platform == 'win32'",
+    "pyarrow==25.0.1",
+    "pypdfium2==5.15.2",
+    "Pillow>=12.2,<13",
+]
 
 [project.urls]
 Repository = "https://github.com/HieuHoai2704/H-LogSense"
 
 [project.optional-dependencies]
+# Linux uses the distribution's GTK/WebKitGTK bindings through the system Python.
 desktop = ["pywebview==6.2.1; sys_platform == 'linux'"]
+# Browser and accessibility QA in scripts/qa.
+qa = ["playwright==1.64.1"]
+# academic/course lab scripts only; never needed by the product.
+course = ["mysql-connector-python>=9,<10", "skyfield>=1.49,<2"]
 
 [project.scripts]
 h-logsen = "app.workbench.__main__:main"
@@ -32,6 +61,3 @@ namespaces = false
 
 [tool.setuptools.package-data]
 app = ["templates/**/*.html", "locales/*.json", "static/**/*"]
-
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt", "requirements-workbench-extra.txt"]}

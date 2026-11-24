@@ -1,19 +1,16 @@
 """Bounded, independent terminal sessions for the local workbench."""
 
-import codecs
 from collections import deque
 import os
 from pathlib import Path
 import re
 import secrets
 import shutil
-import signal
-import subprocess
-import sys
 from threading import Condition, Lock, Thread
 import time
 
 from .files import WorkspaceError
+from .platforms import current as backend
 
 MAX_BUFFER = 256 * 1024
 ENVIRONMENT = {
@@ -42,12 +39,7 @@ def terminal_environment(interpreter):
 
 
 def profiles():
-    if os.name == "nt":
-        system = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
-        options = {"PowerShell": [str(system / "WindowsPowerShell/v1.0/powershell.exe"), "-NoLogo", "-NoProfile"],
-                   "CMD": [str(system / "cmd.exe"), "/D"]}
-    else:
-        options = {name: [str(Path("/bin") / name)] for name in ("zsh", "bash", "sh")}
+    options = backend.shell_profiles()
     return {name: command for name, command in options.items() if Path(command[0]).is_file()}
 
 
@@ -64,78 +56,10 @@ def ssh_command(host, user, port):
             "-tt", "-p", str(port), "-l", user, "--", host]
 
 
-class PosixTerminal:
-    def __init__(self, command, directory, environment):
-        import pty
-
-        self.fd, slave = pty.openpty()
-        self.decoder = codecs.getincrementaldecoder("utf-8")("replace")
-        launcher = (
-            "import fcntl, os, sys, termios;"
-            "fcntl.ioctl(0, termios.TIOCSCTTY, 0);"
-            "os.execv(sys.argv[1], sys.argv[1:])"
-        )
-        try:
-            self.process = subprocess.Popen(
-                [sys.executable, "-I", "-c", launcher, *command],
-                stdin=slave, stdout=slave, stderr=slave, cwd=directory,
-                env=environment, start_new_session=True,
-            )
-            self.setwinsize(24, 80)
-        except BaseException:
-            os.close(self.fd)
-            if hasattr(self, "process"):
-                self.process.kill()
-                self.process.wait()
-            raise
-        finally:
-            os.close(slave)
-
-    def read(self, size):
-        data = os.read(self.fd, size)
-        if not data:
-            raise EOFError
-        return self.decoder.decode(data)
-
-    def write(self, value):
-        remaining = memoryview(value.encode("utf-8"))
-        while remaining:
-            remaining = remaining[os.write(self.fd, remaining):]
-
-    def setwinsize(self, rows, cols):
-        import fcntl
-        import struct
-        import termios
-
-        fcntl.ioctl(self.fd, termios.TIOCSWINSZ, struct.pack("HHHH", rows, cols, 0, 0))
-
-    def close(self):
-        try:
-            if self.process.poll() is None:
-                try:
-                    os.killpg(self.process.pid, signal.SIGHUP)
-                except ProcessLookupError:
-                    pass
-                try:
-                    self.process.wait(timeout=1)
-                except subprocess.TimeoutExpired:
-                    os.killpg(self.process.pid, signal.SIGKILL)
-                    self.process.wait(timeout=2)
-        finally:
-            os.close(self.fd)
-
-
 class Session:
     def __init__(self, command, root, interpreter=None):
         env = terminal_environment(interpreter)
-        if os.name == "nt":
-            try:
-                from winpty import PtyProcess
-            except ImportError:
-                raise WorkspaceError("Install requirements-workbench.txt to enable ConPTY.", 503) from None
-            self.process = PtyProcess.spawn(command, cwd=str(root), env=env)
-        else:
-            self.process = PosixTerminal(command, root, env)
+        self.process = backend.open_terminal(command, root, env)
         self.buffer = deque()
         self.length = 0
         self.offset = 0
@@ -209,10 +133,7 @@ class Session:
                     return
                 self.closed = True
                 self.lock.notify_all()
-            if os.name == "nt":
-                self.process.close(force=True)
-            else:
-                self.process.close()
+            backend.close_terminal(self.process)
 
 
 class Terminals:

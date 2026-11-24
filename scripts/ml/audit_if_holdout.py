@@ -26,13 +26,14 @@ import psutil
 import sklearn
 from sklearn.ensemble import IsolationForest
 
+from app.paths import IF_HOLDOUT_DIR
 from app.parsers.bgl import parse_line
 from app.services.detector_calibration import reservoir_sample, choose_threshold, binary_metrics
 from app.services.window_detection import aggregate_windows, EPOCH, FEATURE_NAMES
 from app.services.window_features import TrainReference
 from scripts.ml.audit_isolation_forest import digest, write_json, read_json, records
 
-ROOT = Path('.local/if_new_holdout')
+ROOT = IF_HOLDOUT_DIR
 CURATED = Path('docs/ml/measurements/if-july-holdout-2026-11-04')
 EXPOSED_TEST_END = int(datetime(2005, 6, 25, 18, 50, tzinfo=timezone.utc).timestamp())
 STUDY_ID = 'f3e5a88403ab48fb84ea36904214e867'

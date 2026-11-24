@@ -3,7 +3,6 @@
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 import hashlib, json, math, re
-from pathlib import Path
 from uuid import uuid4
 
 import joblib, numpy as np, sklearn
@@ -12,6 +11,7 @@ from sklearn.metrics import average_precision_score
 from sqlalchemy import select, func, case, text
 from sqlalchemy.orm import Session
 
+from app.paths import WINDOW_FEATURES_DIR
 from app.models import (
     Dataset,
     LogEvent,
@@ -157,7 +157,7 @@ def run_windows(engine, dataset_id, job_key, configuration):
     )
     if not start < train_end < validation_end < end:
         raise ValueError("Range too short for disjoint temporal splits.")
-    root = Path(".local/window_features")
+    root = WINDOW_FEATURES_DIR
     root.mkdir(parents=True, exist_ok=True)
     file = root / (uuid4().hex + ".jsonl")
     training = []

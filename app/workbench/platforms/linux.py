@@ -1,4 +1,4 @@
-"""Linux installer helpers: scoped dependency check and an application-menu launcher."""
+"""Linux desktop integration (WebKitGTK window, menu launcher) and installer helpers."""
 
 import argparse
 from importlib.metadata import PackageNotFoundError, distribution
@@ -8,10 +8,31 @@ import re
 import subprocess
 import sys
 
+from .posix import close_terminal, open_terminal, shell_profiles  # noqa: F401  (backend interface)
+
 APP_ID = "h-logsen"
 DESKTOP_MARKER = "X-H-logsen-Launcher=true"
-ICON = Path(__file__).resolve().parents[1] / "static" / "h-logsen.png"
+ICON = Path(__file__).resolve().parents[2] / "static" / "h-logsen.png"
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
+
+
+def desktop_options():
+    """Return (create_window options, webview.start options)."""
+    try:
+        from gi.repository import GLib
+
+        # The Wayland app_id and X11 WM_CLASS come from the program name. Match the
+        # installed h-logsen.desktop so the dock shows the H-logsen icon, not "python3".
+        GLib.set_prgname(APP_ID)
+        GLib.set_application_name("H-logsen")
+    except ImportError:
+        pass
+    # GTK has no system blur, but an RGBA window lets the glass tint show the desktop.
+    return {"transparent": True}, {"icon": str(ICON)}
+
+
+def set_window_glass(window, enabled):
+    return bool(window and window.transparent and enabled)
 
 
 def canonical(name):

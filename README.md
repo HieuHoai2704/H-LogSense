@@ -9,7 +9,7 @@ and the synthetic demo are separate data sources.
 
 | Path | What it is | Start here |
 | --- | --- | --- |
-| `app/` | The product: Flask application, workbench, templates, static assets, locales | `app/__init__.py` |
+| `app/` | The product: Flask application, workbench, templates, static assets, locales. OS-specific workbench code is isolated in `app/workbench/platforms/` | `app/__init__.py` |
 | `migrations/` | MySQL schema history (Alembic) | |
 | `tests/` | Product test suite: `python -B -m unittest discover -s tests` | |
 | `scripts/` | Operator and developer commands, `python -m scripts.<group>.<command>` | [scripts/README.md](scripts/README.md) |
@@ -18,7 +18,9 @@ and the synthetic demo are separate data sources.
 | `academic/` | Papers, research notes, experiments and coursework (not shipped) | [academic/README.md](academic/README.md) |
 | `sandbox/`, `data/`, `dist/`, `.local/` | Scratch space, datasets, builds and local runtime state (ignored by Git) | |
 
-Dependencies: `requirements.txt` (product), `requirements-workbench.txt` (adds the desktop workbench extras).
+Dependencies are declared once, in `pyproject.toml`. `pip install -r requirements.txt` installs this checkout
+(`-e .`) with everything the web app and workbench need; extras: `.[desktop]` (Linux window), `.[qa]`, `.[course]`.
+Local runtime state (uploads, model studies, caches) lives in `.local/` of the checkout, or `LOGSENSE_LOCAL_DIR`.
 
 The University MVP documents record the earlier academic baseline.
 Dataset metadata CRUD/RBAC, safe empty-dataset deletion, bounded queued uploads
@@ -144,7 +146,7 @@ Use the installer above for desktop mode. To run the source checkout in a local
 browser with filesystem access, editing, training runs and a real terminal:
 
 ```text
-python -m pip install -r requirements-workbench.txt
+python -m pip install -r requirements.txt
 python -m scripts.run.workbench --browser
 ```
 

@@ -21,7 +21,7 @@ PLATFORM_FILES = {"Windows": WINDOWS_FILES, "macOS": POSIX_FILES, "Linux": POSIX
 CRLF_NAMES = {".cmd", ".bat", *WINDOWS_FILES}
 EXECUTABLE_SUFFIXES = {".sh", ".command"}
 ROOT_FILES = (".env.example", ".gitattributes", ".gitignore", "README.md", "config.py", "pyproject.toml",
-              "requirements.txt", "requirements-workbench.txt", "requirements-workbench-extra.txt",
+              "requirements.txt",
               "THIRD_PARTY_NOTICES.md", ".github/workflows/workbench-ci.yml", "packaging/README.md",
               "docs/README.md", "scripts/README.md",
               *WINDOWS_FILES.values(), *POSIX_FILES.values())

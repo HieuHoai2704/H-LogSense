@@ -9,17 +9,17 @@ from datetime import timedelta
 import hashlib
 import json
 import math
-from pathlib import Path
 import re
 
 import joblib
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.paths import IF_STUDIES_DIR
 from app.models import Dataset, Detector, DetectorVersion, DetectorRun, LogEvent
 
 
-STUDY_ROOT = Path(".local/if_studies")
+STUDY_ROOT = IF_STUDIES_DIR
 
 
 def digest(path):
