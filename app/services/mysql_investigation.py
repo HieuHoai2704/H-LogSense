@@ -43,6 +43,8 @@ from app.services.investigation import (
 )
 from app.services.redaction import redact
 
+Record = dict[str, Any]
+
 HOST = func.coalesce(U.host, E.host)
 FIELDS = {
     "host": HOST,
@@ -250,21 +252,27 @@ def epoch_us(moment: datetime) -> int:
     return (moment - EPOCH) // timedelta(microseconds=1)
 
 
-def build(state: InvestigationState) -> dict[str, Any]:
-    start, end = instant(state["start_time"]), instant(state["end_time"])
-    duration = resolution(state)
-    origin = epoch_us(start) // (duration * 1000000) * (duration * 1000000)
-    cells: list[dict[str, Any]] = []
+MICROSECONDS = 1000000
+LANES_PER_PAGE = 12
+MAX_COVERAGE_ROWS = 5000
+
+
+def empty_cells(
+    state: InvestigationState, start: datetime, end: datetime, origin: int, duration: int
+) -> list[Record]:
+    """Zero-count timeline cells of ``duration`` seconds from ``origin`` (epoch microseconds), clipped to the range."""
+    zone = state["timezone"]
+    cells: list[Record] = []
     lower = origin
     while lower < epoch_us(end):
         a = max(start, EPOCH + timedelta(microseconds=lower))
-        b = min(end, EPOCH + timedelta(microseconds=lower + duration * 1000000))
+        b = min(end, EPOCH + timedelta(microseconds=lower + duration * MICROSECONDS))
         cells.append(
             dict(
                 start=iso(a),
                 end=iso(b),
-                label=display_time(iso(a), state["timezone"]),
-                full_label=f"{display_time(iso(a), state['timezone'], True)} – {display_time(iso(b), state['timezone'], True)}",
+                label=display_time(iso(a), zone),
+                full_label=f"{display_time(iso(a), zone, True)} – {display_time(iso(b), zone, True)}",
                 coverage="unknown",
                 partial_bin=(b - a).total_seconds() != duration,
                 count=0,
@@ -272,13 +280,26 @@ def build(state: InvestigationState) -> dict[str, Any]:
                 priority=0,
             )
         )
-        lower += duration * 1000000
-    query = base(state)
+        lower += duration * MICROSECONDS
+    return cells
+
+
+def new_lane(detector_id: str, name: str, family: str, cells: list[Record]) -> Record:
+    return dict(
+        id=detector_id, name=name, group=family, cells=deepcopy(cells), count=0, priority=0, recent=""
+    )
+
+
+def count_lanes(
+    state: InvestigationState, cells: list[Record], origin: int, duration: int
+) -> tuple[list[Record], dict[str, Record]]:
+    """Per-bin counts grouped in SQL: the overall lane and one lane per detector of the selected runs."""
     bucket = (func.timestampdiff(text("MICROSECOND"), EPOCH.replace(tzinfo=None), A.anchor_time) - origin).op(
         "DIV", precedence=100
-    )(duration * 1000000)
+    )(duration * MICROSECONDS)
     grouped = db.session.execute(
-        query.with_only_columns(
+        base(state)
+        .with_only_columns(
             D.id,
             D.detector_key,
             D.family,
@@ -286,51 +307,32 @@ def build(state: InvestigationState) -> dict[str, Any]:
             func.coalesce(A.priority, "Unknown"),
             func.count(),
             func.max(A.anchor_time),
-        ).group_by(D.id, D.detector_key, D.family, bucket, A.priority)
+        )
+        .group_by(D.id, D.detector_key, D.family, bucket, A.priority)
     ).all()
     overall = deepcopy(cells)
-    lanes: dict[str, dict[str, Any]] = {}
+    lanes: dict[str, Record] = {}
     for did, name, family in db.session.execute(
         select(D.id, D.detector_key, D.family)
         .join(R, R.detector_id == D.id)
-        .where(
-            R.dataset_id == dataset_id_of(state["source"]),
-            R.id.in_([int(x) for x in state["run_id"]]),
-        )
+        .where(R.dataset_id == dataset_id_of(state["source"]), R.id.in_([int(x) for x in state["run_id"]]))
     ):
-        lanes[str(did)] = dict(
-            id=str(did),
-            name=name,
-            group=family,
-            cells=deepcopy(cells),
-            count=0,
-            priority=0,
-            recent="",
-        )
+        lanes[str(did)] = new_lane(str(did), name, family, cells)
     for detector_id, name, family, index, priority, n, recent in grouped:
-        did = str(detector_id)
-        index = int(index)
-        lane = lanes.setdefault(
-            did,
-            dict(
-                id=did,
-                name=name,
-                group=family,
-                cells=deepcopy(cells),
-                count=0,
-                priority=0,
-                recent="",
-            ),
-        )
-        for cell in (overall[index], lane["cells"][index]):
+        lane = lanes.setdefault(str(detector_id), new_lane(str(detector_id), name, family, cells))
+        rank = PRIORITIES.get(priority, 0)
+        for cell in (overall[int(index)], lane["cells"][int(index)]):
             cell["count"] += n
             cell["severity"][priority] += n
-            cell["priority"] = max(cell["priority"], PRIORITIES.get(priority, 0))
+            cell["priority"] = max(cell["priority"], rank)
         lane["count"] += n
-        lane["priority"] = max(lane["priority"], PRIORITIES.get(priority, 0))
+        lane["priority"] = max(lane["priority"], rank)
         lane["recent"] = max(lane["recent"], iso(recent))
-    maximum = max((c["count"] for c in overall), default=0)
-    coverage_rows = list(
+    return overall, lanes
+
+
+def coverage_rows(state: InvestigationState, start: datetime, end: datetime) -> list[CoverageInterval]:
+    return list(
         db.session.scalars(
             select(CoverageInterval)
             .where(
@@ -339,83 +341,116 @@ def build(state: InvestigationState) -> dict[str, Any]:
                 CoverageInterval.end_time > start,
             )
             .order_by(CoverageInterval.start_time, CoverageInterval.id)  # deterministic cut-off
-            .limit(5000)
+            .limit(MAX_COVERAGE_ROWS)
         )
     )
 
-    def coverage(cell: dict[str, Any], did: str) -> str:
-        a, b = instant(cell["start"]), instant(cell["end"])
-        run_ids = [int(x) for x in state["run_id"]]
-        proofs = [
-            r
-            for r in coverage_rows
-            if r.start_time <= a and r.end_time >= b and (r.layer != "analysis" or r.run_id in run_ids)
-        ]
-        if any(r.state == "failed" for r in proofs):
-            return "missing"
-        if any(r.state == "not_processed" for r in proofs):
-            return "unprocessed"
-        complete = {r.layer for r in proofs if r.state == "complete"}
-        analyzed = {r.run_id for r in proofs if r.layer == "analysis" and r.state == "complete"}
-        if {"ingestion", "parsing", "analysis"} <= complete and set(run_ids) <= analyzed:
-            return "complete"
-        return "partial" if any(r.state == "partial" for r in proofs) else "unknown"
 
-    for did, grid in [("", overall)] + [(k, v["cells"]) for k, v in lanes.items()]:
-        for cell in grid:
-            cell["coverage"] = coverage(cell, did)
-            cell["volume"] = volume_band(cell["count"], maximum)
-            cell["selected"] = cell_selected(cell, did, state)
-    facets: dict[str, list[dict[str, Any]]] = {}
+def cell_coverage(cell: Record, intervals: list[CoverageInterval], run_ids: list[int]) -> str:
+    """Coverage proven for one cell: complete only when ingestion, parsing and every selected run cover it."""
+    a, b = instant(cell["start"]), instant(cell["end"])
+    proofs = [
+        r
+        for r in intervals
+        if r.start_time <= a and r.end_time >= b and (r.layer != "analysis" or r.run_id in run_ids)
+    ]
+    if any(r.state == "failed" for r in proofs):
+        return "missing"
+    if any(r.state == "not_processed" for r in proofs):
+        return "unprocessed"
+    complete = {r.layer for r in proofs if r.state == "complete"}
+    analyzed = {r.run_id for r in proofs if r.layer == "analysis" and r.state == "complete"}
+    if {"ingestion", "parsing", "analysis"} <= complete and set(run_ids) <= analyzed:
+        return "complete"
+    return "partial" if any(r.state == "partial" for r in proofs) else "unknown"
+
+
+def facet_counts(state: InvestigationState, lanes: dict[str, Record]) -> dict[str, list[Record]]:
+    """Each facet's top values under every other filter; selected values and in-scope detectors always listed."""
+    facets: dict[str, list[Record]] = {}
     chosen = cast(Mapping[str, list[str]], state)
+    labels: dict[int, str] = dict(db.session.execute(select(D.id, D.detector_key)).tuples().all())
     for key, column in FIELDS.items():
-        fq = base(state, excluded=key).with_only_columns(column, func.count()).group_by(column)
-        values = db.session.execute(fq.order_by(func.count().desc()).limit(100)).all()
-        labels: dict[int, str] = (
-            dict(db.session.execute(select(D.id, D.detector_key)).tuples().all()) if key == "detector" else {}
-        )
+        counted = base(state, excluded=key).with_only_columns(column, func.count()).group_by(column)
+        # Ties are ordered by value so the list does not reshuffle between requests.
+        values = db.session.execute(counted.order_by(func.count().desc(), column).limit(100)).all()
+        names = labels if key == "detector" else {}
         facets[key] = [
-            dict(
-                value=str(v),
-                label=labels.get(v, str(v)),
-                count=n,
-                selected=str(v) in chosen[key],
-            )
+            dict(value=str(v), label=names.get(v, str(v)), count=n, selected=str(v) in chosen[key])
             for v, n in values
             if v is not None
         ]
         present = {f["value"] for f in facets[key]}
         facets[key] += [
-            dict(
-                value=v,
-                label=labels.get(int(v), v) if key == "detector" else v,
-                count=0,
-                selected=True,
-            )
+            dict(value=v, label=names.get(int(v), v) if key == "detector" else v, count=0, selected=True)
             for v in chosen[key]
             if v not in present
         ]
         if key == "detector":
             known = {f["value"] for f in facets[key]}
             facets[key] += [
-                dict(value=k, label=v["name"], count=0, selected=k in chosen[key])
-                for k, v in lanes.items()
+                dict(value=k, label=lane["name"], count=0, selected=k in chosen[key])
+                for k, lane in lanes.items()
                 if k not in known
             ]
-    ordered = list(lanes.values())
-    ordered.sort(
+    return facets
+
+
+def lane_page(state: InvestigationState, lanes: dict[str, Record]) -> tuple[list[Record], int, int]:
+    """The requested page of lanes in the chosen order, the lane count and the clamped page."""
+    sort = state["sort"]
+    ordered = sorted(
+        lanes.values(),
         key=lambda r: (
-            r["recent"]
-            if state["sort"] == "recent"
-            else r["count"]
-            if state["sort"] == "count"
-            else r["priority"],
+            r["recent"] if sort == "recent" else r["count"] if sort == "count" else r["priority"],
             r["name"],
         ),
         reverse=True,
     )
     row_count = len(ordered)
-    row_page = min(state["row_page"], max(1, ceil(row_count / 12)))
+    row_page = min(state["row_page"], max(1, ceil(row_count / LANES_PER_PAGE)))
+    return ordered[(row_page - 1) * LANES_PER_PAGE : row_page * LANES_PER_PAGE], row_count, row_page
+
+
+def evaluation_rows(dataset_id: int, run_ids: list[str]) -> list[Record]:
+    """Stored evaluations of the selected runs; user-supplied labels are a separate, unverified row."""
+    from app.domain import EvaluationReport
+
+    rows: list[Record] = []
+    for r in db.session.scalars(
+        select(EvaluationReport).where(
+            EvaluationReport.dataset_id == dataset_id, EvaluationReport.run_id.in_([int(i) for i in run_ids])
+        )
+    ):
+        rows.append({"run_id": r.run_id, "metrics": r.metrics})
+        if isinstance(r.metrics.get("supplied_labels"), dict):
+            rows.append(
+                {
+                    "run_id": f"{r.run_id} · supplied labels (unverified)",
+                    "metrics": r.metrics["supplied_labels"],
+                }
+            )
+    return rows
+
+
+def build(state: InvestigationState) -> dict[str, Any]:
+    """The investigation view over persisted runs: timeline lanes, facets, one result page and coverage."""
+    start, end = instant(state["start_time"]), instant(state["end_time"])
+    duration = resolution(state)
+    step = duration * MICROSECONDS
+    origin = epoch_us(start) // step * step
+    cells = empty_cells(state, start, end, origin, duration)
+    overall, lanes = count_lanes(state, cells, origin, duration)
+    maximum = max((c["count"] for c in overall), default=0)
+    intervals = coverage_rows(state, start, end)
+    run_ids = [int(x) for x in state["run_id"]]
+    for lane_id, grid in [("", overall)] + [(k, v["cells"]) for k, v in lanes.items()]:
+        for cell in grid:
+            cell["coverage"] = cell_coverage(cell, intervals, run_ids)
+            cell["volume"] = volume_band(cell["count"], maximum)
+            cell["selected"] = cell_selected(cell, lane_id, state)
+    facets = facet_counts(state, lanes)
+    page_lanes, row_count, row_page = lane_page(state, lanes)
     results = base(state, selection=True)
     result_count = count(results)
     page = min(state["page"], max(1, ceil(result_count / state["limit"])))
@@ -427,34 +462,17 @@ def build(state: InvestigationState) -> dict[str, Any]:
     dataset = db.session.get(Dataset, dataset_id_of(state["source"]))
     if dataset is None:  # deleted after the scope was validated
         raise QueryError("Dataset not found.")
-    from app.domain import EvaluationReport
-
-    evaluations = []
-    for r in db.session.scalars(
-        select(EvaluationReport).where(
-            EvaluationReport.dataset_id == dataset.id,
-            EvaluationReport.run_id.in_([int(i) for i in state["run_id"]]),
-        )
-    ):
-        evaluations.append({"run_id": r.run_id, "metrics": r.metrics})
-        if isinstance(r.metrics.get("supplied_labels"), dict):
-            # Uploaded datasets: a separate, explicitly unverified row (never the trusted metrics).
-            evaluations.append(
-                {
-                    "run_id": f"{r.run_id} · supplied labels (unverified)",
-                    "metrics": r.metrics["supplied_labels"],
-                }
-            )
     sources = {
         dataset_source(d.id): d.name + " · MySQL"
         for d in db.session.scalars(select(Dataset).where(Dataset.id.in_(authorized_datasets())))
     }
+    zone = state["timezone"]
     return dict(
         state=dict(state, page=page, row_page=row_page),
         revision="mysql-runs-" + ",".join(state["run_id"]),
         mode="database",
         is_database=True,
-        evaluations=evaluations,
+        evaluations=evaluation_rows(dataset.id, state["run_id"]),
         dataset_mode=dataset.data_mode,
         scope_count=sum(c["count"] for c in overall),
         result_count=result_count,
@@ -462,17 +480,17 @@ def build(state: InvestigationState) -> dict[str, Any]:
         events=[row_summary(r, state) for r in rows],
         page_count=max(1, ceil(result_count / state["limit"])),
         row_count=row_count,
-        row_page_count=max(1, ceil(row_count / 12)),
+        row_page_count=max(1, ceil(row_count / LANES_PER_PAGE)),
         facets=facets,
         timeline=dict(
             resolution=duration,
             bins=len(cells),
             overall=overall,
-            lanes=ordered[(row_page - 1) * 12 : row_page * 12],
+            lanes=page_lanes,
             volume_max=maximum,
             volume_scale=volume_scale(maximum),
         ),
-        range_label=f"{display_time(iso(start), state['timezone'], True)} – {display_time(iso(end), state['timezone'], True)}",
+        range_label=f"{display_time(iso(start), zone, True)} – {display_time(iso(end), zone, True)}",
         coverage=dict(
             status="unknown",
             dataset=dataset.name,

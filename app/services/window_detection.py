@@ -31,6 +31,8 @@ from app.models import (
     UnitEvent,
 )
 from app.paths import WINDOW_FEATURES_DIR
+from app.services.bgl_ingestion import fingerprint
+from app.services.investigation import instant, iso
 
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 FEATURE_NAMES = [
@@ -120,22 +122,15 @@ def run_windows(
             model.unlink(missing_ok=True)
 
 
-def _run_windows(engine, dataset_id, job_key, configuration, files):
-    if "model_id" in configuration:
-        from app.services.validated_if import run_validated
+WINDOW_SECONDS = {60, 300, 900, 3600}
+MAX_FIT_WINDOWS = 20000
+PREDICTION_BATCH = 200
 
-        return run_validated(engine, dataset_id, job_key, configuration)
-    if "study_id" in configuration:
-        from app.services.window_deployment import run_study
 
-        return run_study(engine, dataset_id, job_key, configuration)
-    kind = configuration.get("detector", "rule")
-    seconds = int(configuration.get("window_seconds", 300))
-    seed = int(configuration.get("seed", 42))
-    if kind not in {"rule", "isolation_forest"} or seconds not in {60, 300, 900, 3600}:
-        raise ValueError("Invalid window detector.")
-    from app.services.investigation import instant, iso
+def window_range(engine, dataset_id, configuration, seconds):
+    """The dataset revision, its highest event id and the aligned [start, end) to analyse.
 
+    Explicit bounds must be whole windows; by default the range covers every parsed event."""
     with Session(engine) as session:
         dataset = session.get(Dataset, dataset_id)
         if dataset is None or dataset.state not in {"partial", "imported"}:
@@ -149,16 +144,14 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
         ).one()
         if first is None:
             raise ValueError("No parsed events.")
-    start = (
-        instant(configuration["start_time"])
-        if configuration.get("start_time")
-        else EPOCH + timedelta(seconds=(second(first) // seconds) * seconds)
-    )
-    end = (
-        instant(configuration["end_time"])
-        if configuration.get("end_time")
-        else EPOCH + timedelta(seconds=(second(last) // seconds + 1) * seconds)
-    )
+    if configuration.get("start_time"):
+        start = instant(configuration["start_time"])
+    else:
+        start = EPOCH + timedelta(seconds=(second(first) // seconds) * seconds)
+    if configuration.get("end_time"):
+        end = instant(configuration["end_time"])
+    else:
+        end = EPOCH + timedelta(seconds=(second(last) // seconds + 1) * seconds)
     if (
         start >= end
         or end - start > timedelta(days=366)
@@ -168,27 +161,29 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
         or second(end) % seconds
     ):
         raise ValueError("Use positive UTC-aligned whole windows, at most 366 days.")
+    return revision, maximum, start, end
+
+
+def temporal_splits(start, end, seconds):
+    """Disjoint chronological splits on window boundaries: train 1/2, validation 1/4, test the rest."""
     span = second(end) - second(start)
     train_end = EPOCH + timedelta(seconds=second(start) + (span // 2 // seconds) * seconds)
     validation_end = EPOCH + timedelta(seconds=second(start) + (span * 3 // 4 // seconds) * seconds)
     if not start < train_end < validation_end < end:
         raise ValueError("Range too short for disjoint temporal splits.")
-    root = WINDOW_FEATURES_DIR
-    root.mkdir(parents=True, exist_ok=True)
-    file = root / (uuid4().hex + ".jsonl")
-    files["features"] = file
-    training = []
-    validation = []
+    return train_end, validation_end
+
+
+def write_features(engine, dataset_id, maximum, window, file):
+    """Stream events into per-host windows, tag each with its split and write them to ``file`` (JSONL).
+
+    Returns the split counts and up to MAX_FIT_WINDOWS train and validation feature vectors."""
+    start, end, seconds, train_end, validation_end = window
+    training, validation = [], []
     counts = {"train": 0, "validation": 0, "test": 0}
     with Session(engine) as session, file.open("w", encoding="utf-8") as output:
         rows = session.execute(
-            select(
-                LogEvent.id,
-                LogEvent.timestamp,
-                LogEvent.host,
-                LogEvent.severity,
-                LogEvent.message,
-            )
+            select(LogEvent.id, LogEvent.timestamp, LogEvent.host, LogEvent.severity, LogEvent.message)
             .where(
                 LogEvent.dataset_id == dataset_id,
                 LogEvent.id <= maximum,
@@ -204,15 +199,20 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
             unit["phase"] = phase
             counts[phase] += 1
             output.write(json.dumps(unit) + "\n")
-            if phase == "train" and len(training) < 20000:
+            if phase == "train" and len(training) < MAX_FIT_WINDOWS:
                 training.append(unit["features"])
-            if phase == "validation" and len(validation) < 20000:
+            if phase == "validation" and len(validation) < MAX_FIT_WINDOWS:
                 validation.append(unit["features"])
     if len(training) < 16 or not validation or not counts["test"]:
         raise ValueError("Insufficient observed train/validation/test windows.")
+    return counts, training, validation
+
+
+def fit_detector(kind, training, validation, seed, root, files):
+    """Rule: p99 of training event counts. IF: fit on train, threshold at the validation p01 score.
+
+    Labels are never read. Returns the model (None for the rule), threshold, model artifact and reference."""
     x = np.asarray(training)
-    v = np.asarray(validation)
-    model = None
     if kind == "isolation_forest":
         model = IsolationForest(
             n_estimators=100,
@@ -221,21 +221,95 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
             random_state=seed,
             n_jobs=1,
         ).fit(x)
-        threshold = float(np.quantile(model.score_samples(v), 0.01))
+        threshold = float(np.quantile(model.score_samples(np.asarray(validation)), 0.01))
         model_path = root / (uuid4().hex + ".joblib")
         files["model"] = model_path
         joblib.dump(model, model_path)
-        artifact = {
-            "key": model_path.name,
-            "sha256": hashlib.sha256(model_path.read_bytes()).hexdigest(),
-        }
+        artifact = {"key": model_path.name, "sha256": hashlib.sha256(model_path.read_bytes()).hexdigest()}
     else:
+        model, artifact = None, None
         threshold = float(np.quantile(np.expm1(x[:, 0]), 0.99))
-        artifact = None
-    reference = {
-        "mean_event_count": float(np.expm1(x[:, 0]).mean()),
-        "threshold": threshold,
-    }
+    reference = {"mean_event_count": float(np.expm1(x[:, 0]).mean()), "threshold": threshold}
+    return model, threshold, artifact, reference
+
+
+def register_window_run(engine, dataset_id, job_key, kind, config, revision, files):
+    """Create the detector version and run for ``job_key``, or resume it if the input and settings match.
+
+    Returns the run id, or None when that run already completed (an idempotent retry)."""
+    version_key = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
+    with Session(engine) as session, session.begin():
+        ds = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
+        if ds.input_revision != revision:
+            raise ValueError("Dataset changed during feature creation.")
+        detector = session.scalar(select(Detector).where(Detector.detector_key == "host-window-" + kind))
+        if detector is None:
+            detector = Detector(
+                detector_key="host-window-" + kind,
+                family="classical_ml" if kind == "isolation_forest" else "rule",
+            )
+            session.add(detector)
+            session.flush()
+        run = session.scalar(
+            select(DetectorRun).where(DetectorRun.dataset_id == dataset_id, DetectorRun.run_key == job_key)
+        )
+        if run is None:
+            version = DetectorVersion(
+                detector_id=detector.id,
+                version=version_key,
+                configuration=config,
+                feature_schema={"names": FEATURE_NAMES, "version": "1", "label_free": True},
+                score_direction=config["score_direction"],
+            )
+            session.add(version)
+            session.flush()
+            run = DetectorRun(
+                dataset_id=dataset_id,
+                detector_id=detector.id,
+                version_id=version.id,
+                run_key=job_key,
+                state="running",
+                input_revision=revision,
+                configuration=config,
+            )
+            session.add(run)
+            session.flush()
+            files["model_referenced"] = True  # this run's configuration records the model file
+        elif run.input_revision != revision or any(
+            run.configuration.get(k) != config.get(k)
+            for k in ("detector", "window_seconds", "seed", "feature_file_sha256", "threshold")
+        ):
+            raise ValueError("Cannot retry against a different input or detector configuration.")
+        if run.state == "completed":
+            return None, run.id
+        run.state = "running"
+        return run.id, run.id
+
+
+def _run_windows(engine, dataset_id, job_key, configuration, files):
+    if "model_id" in configuration:
+        from app.services.validated_if import run_validated
+
+        return run_validated(engine, dataset_id, job_key, configuration)
+    if "study_id" in configuration:
+        from app.services.window_deployment import run_study
+
+        return run_study(engine, dataset_id, job_key, configuration)
+    kind = configuration.get("detector", "rule")
+    seconds = int(configuration.get("window_seconds", 300))
+    seed = int(configuration.get("seed", 42))
+    if kind not in {"rule", "isolation_forest"} or seconds not in WINDOW_SECONDS:
+        raise ValueError("Invalid window detector.")
+    revision, maximum, start, end = window_range(engine, dataset_id, configuration, seconds)
+    train_end, validation_end = temporal_splits(start, end, seconds)
+    root = WINDOW_FEATURES_DIR
+    root.mkdir(parents=True, exist_ok=True)
+    file = root / (uuid4().hex + ".jsonl")
+    files["features"] = file
+    counts, training, validation = write_features(
+        engine, dataset_id, maximum, (start, end, seconds, train_end, validation_end), file
+    )
+    model, threshold, artifact, reference = fit_detector(kind, training, validation, seed, root, files)
     config = dict(
         detector=kind,
         window_seconds=seconds,
@@ -258,113 +332,72 @@ def _run_windows(engine, dataset_id, job_key, configuration, files):
         sklearn=sklearn.__version__,
         input_revision=revision,
         maximum_event_id=maximum,
-        feature_file_sha256=__import__("app.services.bgl_ingestion", fromlist=["fingerprint"]).fingerprint(
-            file
-        ),
+        feature_file_sha256=fingerprint(file),
     )
-    version_key = hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest()
-    with Session(engine) as session, session.begin():
-        ds = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
-        if ds.input_revision != revision:
-            raise ValueError("Dataset changed during feature creation.")
-        detector = session.scalar(select(Detector).where(Detector.detector_key == "host-window-" + kind))
-        if detector is None:
-            detector = Detector(
-                detector_key="host-window-" + kind,
-                family="rule" if model is None else "classical_ml",
-            )
-            session.add(detector)
-            session.flush()
-        run = session.scalar(
-            select(DetectorRun).where(DetectorRun.dataset_id == dataset_id, DetectorRun.run_key == job_key)
-        )
-        if run is None:
-            version = DetectorVersion(
-                detector_id=detector.id,
-                version=version_key,
-                configuration=config,
-                feature_schema={
-                    "names": FEATURE_NAMES,
-                    "version": "1",
-                    "label_free": True,
-                },
-                score_direction=config["score_direction"],
-            )
-            session.add(version)
-            session.flush()
-            run = DetectorRun(
-                dataset_id=dataset_id,
-                detector_id=detector.id,
-                version_id=version.id,
-                run_key=job_key,
-                state="running",
-                input_revision=revision,
-                configuration=config,
-            )
-            session.add(run)
-            session.flush()
-            files["model_referenced"] = True  # this run's configuration records the model file
-        elif run.input_revision != revision or any(
-            run.configuration.get(k) != config.get(k)
-            for k in (
-                "detector",
-                "window_seconds",
-                "seed",
-                "feature_file_sha256",
-                "threshold",
-            )
-        ):
-            raise ValueError("Cannot retry against a different input or detector configuration.")
-        if run.state == "completed":
-            return {"run_id": run.id, "state": "completed", "retry": "idempotent"}
-        run.state = "running"
-        run_id = run.id
+    run_id, existing = register_window_run(engine, dataset_id, job_key, kind, config, revision, files)
+    if run_id is None:
+        return {"run_id": existing, "state": "completed", "retry": "idempotent"}
     try:
         with file.open(encoding="utf-8") as stream:
-            batch = []
-            for line in stream:
-                record = json.loads(line)
-                if record["phase"] != "test":
-                    continue
-                batch.append(record)
-                if len(batch) == 200:
-                    persist_predictions(
-                        engine,
-                        dataset_id,
-                        revision,
-                        maximum,
-                        run_id,
-                        batch,
-                        model,
-                        threshold,
-                        reference,
-                        seconds,
-                    )
-                    batch = []
-            if batch:
-                persist_predictions(
-                    engine,
-                    dataset_id,
-                    revision,
-                    maximum,
-                    run_id,
-                    batch,
-                    model,
-                    threshold,
-                    reference,
-                    seconds,
-                )
+            test_windows = (record for record in map(json.loads, stream) if record["phase"] == "test")
+            persist_in_batches(
+                engine,
+                dataset_id,
+                revision,
+                maximum,
+                run_id,
+                test_windows,
+                (model, threshold, reference, seconds),
+            )
         # Evaluate first: the timeline and evidence read completed runs only, so a run whose
         # evaluation fails is never shown and then withdrawn.
         evaluate_windows(engine, dataset_id, run_id)
         with Session(engine) as session, session.begin():
-            run = session.get(DetectorRun, run_id)
-            run.state = "completed"
+            session.get_one(DetectorRun, run_id).state = "completed"
     except Exception:
         with Session(engine) as session, session.begin():
-            session.get(DetectorRun, run_id).state = "failed"
+            session.get_one(DetectorRun, run_id).state = "failed"
         raise
     return {"run_id": run_id, "state": "completed", "split_counts": counts}
+
+
+def persist_in_batches(engine, dataset_id, revision, maximum, run_id, records, scoring, feature_names=None):
+    """Persist predictions for ``records`` in batches of PREDICTION_BATCH (each batch is one transaction).
+
+    ``scoring`` is (model, threshold, reference, window seconds)."""
+    model, threshold, reference, seconds = scoring
+    batch = []
+    for record in records:
+        batch.append(record)
+        if len(batch) == PREDICTION_BATCH:
+            persist_predictions(
+                engine,
+                dataset_id,
+                revision,
+                maximum,
+                run_id,
+                batch,
+                model,
+                threshold,
+                reference,
+                seconds,
+                feature_names=feature_names,
+            )
+            batch = []
+    if batch:
+        persist_predictions(
+            engine,
+            dataset_id,
+            revision,
+            maximum,
+            run_id,
+            batch,
+            model,
+            threshold,
+            reference,
+            seconds,
+            feature_names=feature_names,
+        )
 
 
 def persist_predictions(

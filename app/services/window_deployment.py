@@ -19,6 +19,8 @@ from sqlalchemy.orm import Session
 from app.contracts import JobConfiguration
 from app.models import Dataset, Detector, DetectorRun, DetectorVersion, LogEvent
 from app.paths import IF_STUDIES_DIR
+from app.services.investigation import iso
+from app.services.window_detection import EPOCH, evaluate_windows, persist_in_batches
 
 STUDY_ROOT = IF_STUDIES_DIR
 
@@ -94,43 +96,39 @@ def inspect_study(study_id, dataset_id):
     return manifest, selection, paths
 
 
-def run_study(
-    engine: Engine, dataset_id: int, job_key: str, configuration: JobConfiguration
-) -> dict[str, Any]:
-    """Score only the frozen test scope; never fit or calibrate in a worker."""
-    from app.services.investigation import iso
-    from app.services.window_detection import EPOCH, evaluate_windows, persist_predictions
+MAX_SAMPLE_IDS = 20
 
-    if set(configuration) != {"detector", "study_id"} or configuration.get("detector") != "isolation_forest":
-        raise ValueError("Frozen study configuration cannot override its model or scope.")
-    manifest, selection, paths = inspect_study(configuration["study_id"], dataset_id)
-    selection_hash = digest(paths["selection.json"])
-    revision = manifest["input_revision"]
-    maximum = manifest["maximum_event_id"]
-    seconds = manifest["seconds"]
-    splits = manifest["splits"]
-    threshold = selection["threshold"]
-    names = selection["feature_names"]
+
+def study_configuration(study_id, manifest, selection, selection_hash):
+    """The run configuration: everything frozen by the study, so a retry can be compared exactly."""
     config = {
         "detector": "isolation_forest",
-        "study_id": configuration["study_id"],
+        "study_id": study_id,
         "selection_sha256": selection_hash,
         "manifest_sha256": selection["manifest_sha256"],
-        "window_seconds": seconds,
-        "input_revision": revision,
-        "maximum_event_id": maximum,
-        "features": names,
+        "window_seconds": manifest["seconds"],
+        "input_revision": manifest["input_revision"],
+        "maximum_event_id": manifest["maximum_event_id"],
+        "features": selection["feature_names"],
         "feature_version": "observed-host-window-if-v2",
         "score_direction": "lower",
-        "threshold": threshold,
+        "threshold": selection["threshold"],
         "threshold_policy": "validation labels: constrained F1; frozen before test",
         "comparison": "<",
         "model_artifact": selection["model_artifact"],
         "selected_candidate": selection["selected"],
         "availability": "closed observed window; score is available after window end",
     }
-    for key, value in splits.items():
+    for key, value in manifest["splits"].items():
         config[key] = iso(EPOCH + timedelta(seconds=value))
+    return config
+
+
+def register_study_run(engine, dataset_id, job_key, config, selection_hash):
+    """Check the dataset is the frozen snapshot, then create or resume this job's run.
+
+    Returns (run id, None), or (None, existing id) when that run already completed."""
+    revision, maximum = config["input_revision"], config["maximum_event_id"]
     with Session(engine) as session, session.begin():
         dataset = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
         actual_maximum = session.scalar(
@@ -150,61 +148,121 @@ def run_study(
             if existing.configuration != config:
                 raise ValueError("Run key already refers to a different configuration.")
             if existing.state == "completed":
-                return {"run_id": existing.id, "state": "completed", "retry": "idempotent"}
+                return None, existing.id
             existing.state = "running"
-            run_id = existing.id
-        else:
-            detector = session.scalar(
-                select(Detector).where(Detector.detector_key == "host-window-isolation_forest-v2")
-            )
-            if detector is None:
-                detector = Detector(detector_key="host-window-isolation_forest-v2", family="classical_ml")
-                session.add(detector)
-                session.flush()
-            version = session.scalar(
-                select(DetectorVersion).where(
-                    DetectorVersion.detector_id == detector.id,
-                    DetectorVersion.version == selection_hash,
-                )
-            )
-            if version is None:
-                version = DetectorVersion(
-                    detector_id=detector.id,
-                    version=selection_hash,
-                    configuration=config,
-                    feature_schema={
-                        "names": names,
-                        "version": "2",
-                        "label_free": True,
-                        "threshold_uses_validation_labels": True,
-                    },
-                    score_direction="lower",
-                )
-                session.add(version)
-                session.flush()
-            run = DetectorRun(
-                dataset_id=dataset_id,
-                detector_id=detector.id,
-                version_id=version.id,
-                run_key=job_key,
-                state="running",
-                input_revision=revision,
-                configuration=config,
-            )
-            session.add(run)
+            return existing.id, None
+        detector = session.scalar(
+            select(Detector).where(Detector.detector_key == "host-window-isolation_forest-v2")
+        )
+        if detector is None:
+            detector = Detector(detector_key="host-window-isolation_forest-v2", family="classical_ml")
+            session.add(detector)
             session.flush()
-            run_id = run.id
+        version = session.scalar(
+            select(DetectorVersion).where(
+                DetectorVersion.detector_id == detector.id, DetectorVersion.version == selection_hash
+            )
+        )
+        if version is None:
+            version = DetectorVersion(
+                detector_id=detector.id,
+                version=selection_hash,
+                configuration=config,
+                feature_schema={
+                    "names": config["features"],
+                    "version": "2",
+                    "label_free": True,
+                    "threshold_uses_validation_labels": True,
+                },
+                score_direction="lower",
+            )
+            session.add(version)
+            session.flush()
+        run = DetectorRun(
+            dataset_id=dataset_id,
+            detector_id=detector.id,
+            version_id=version.id,
+            run_key=job_key,
+            state="running",
+            input_revision=revision,
+            configuration=config,
+        )
+        session.add(run)
+        session.flush()
+        return run.id, None
+
+
+def load_selected_model(paths, selection):
+    # This is the sole pickle-loading boundary. Only locally generated files
+    # under the trusted study root with the frozen checksum reach it.
+    bundle = joblib.load(paths["selected.joblib"])
+    if (
+        not isinstance(bundle, dict)
+        or bundle.get("features") != selection["selected"]["features"]
+        or not callable(getattr(bundle.get("model"), "score_samples", None))
+        or (bundle["features"] == "context" and bundle.get("reference") is None)
+    ):
+        raise ValueError("Invalid frozen model bundle.")
+    return bundle
+
+
+def frozen_test_windows(paths, manifest, bundle, names, counter):
+    """Yield the cached test windows with their model features, re-validating every one against the study.
+
+    Windows must be inside the test split, strictly ordered and well formed; the total must equal the
+    manifest (checked before the last batch is stored). ``counter`` receives the running count."""
+    splits, seconds, maximum = manifest["splits"], manifest["seconds"], manifest["maximum_event_id"]
+    previous = None
+    with paths["test.jsonl"].open(encoding="utf-8") as stream:
+        for line in stream:
+            record = json.loads(line)
+            bucket, host = record["bucket"], record["host"]
+            order = (bucket, host)
+            samples = record.get("sample_ids", [])
+            if (
+                not isinstance(bucket, int)
+                or not isinstance(host, str)
+                or not host
+                or not splits["validation_end"] <= bucket * seconds < splits["test_end"]
+                or (previous is not None and order <= previous)
+                or not isinstance(record["count"], int)
+                or record["count"] < 1
+                or len(samples) > MAX_SAMPLE_IDS
+                or any(not isinstance(i, int) or not 0 < i <= maximum for i in samples)
+            ):
+                raise ValueError("Cached unit is outside frozen test scope.")
+            previous = order
+            values = (
+                record["features"] if bundle["features"] == "base" else bundle["reference"].transform(record)
+            )
+            if len(values) != len(names) or not all(math.isfinite(x) for x in values):
+                raise ValueError("Invalid frozen feature vector.")
+            counter[0] += 1
+            yield dict(record, features=values)
+    if counter[0] != manifest["cache"]["test"]["count"]:
+        raise ValueError("Cached test count differs from frozen manifest.")
+
+
+def run_study(
+    engine: Engine, dataset_id: int, job_key: str, configuration: JobConfiguration
+) -> dict[str, Any]:
+    """Score only the frozen test scope; never fit or calibrate in a worker."""
+    if set(configuration) != {"detector", "study_id"} or configuration.get("detector") != "isolation_forest":
+        raise ValueError("Frozen study configuration cannot override its model or scope.")
+    manifest, selection, paths = inspect_study(configuration["study_id"], dataset_id)
+    selection_hash = digest(paths["selection.json"])
+    config = study_configuration(configuration["study_id"], manifest, selection, selection_hash)
+    run_id, completed = register_study_run(engine, dataset_id, job_key, config, selection_hash)
+    if run_id is None:
+        return {"run_id": completed, "state": "completed", "retry": "idempotent"}
+    revision, maximum, threshold = (
+        manifest["input_revision"],
+        manifest["maximum_event_id"],
+        selection["threshold"],
+    )
+    count = [0]
     try:
-        # This is the sole pickle-loading boundary. Only locally generated files
-        # under the trusted study root with the frozen checksum reach it.
-        bundle = joblib.load(paths["selected.joblib"])
-        if (
-            not isinstance(bundle, dict)
-            or bundle.get("features") != selection["selected"]["features"]
-            or not callable(getattr(bundle.get("model"), "score_samples", None))
-            or (bundle["features"] == "context" and bundle.get("reference") is None)
-        ):
-            raise ValueError("Invalid frozen model bundle.")
+        bundle = load_selected_model(paths, selection)
         reference = {
             "threshold": threshold,
             "selection_sha256": selection_hash,
@@ -212,71 +270,17 @@ def run_study(
         }
         if bundle.get("reference") is not None:
             reference["training_reference"] = bundle["reference"].summary()
-        count = 0
-        batch = []
-        previous = None
-        with paths["test.jsonl"].open(encoding="utf-8") as stream:
-            for line in stream:
-                record = json.loads(line)
-                bucket = record["bucket"]
-                host = record["host"]
-                order = (bucket, host)
-                if (
-                    not isinstance(bucket, int)
-                    or not isinstance(host, str)
-                    or not host
-                    or not splits["validation_end"] <= bucket * seconds < splits["test_end"]
-                    or (previous is not None and order <= previous)
-                    or not isinstance(record["count"], int)
-                    or record["count"] < 1
-                    or len(record.get("sample_ids", [])) > 20
-                    or any(
-                        not isinstance(i, int) or not 0 < i <= maximum for i in record.get("sample_ids", [])
-                    )
-                ):
-                    raise ValueError("Cached unit is outside frozen test scope.")
-                previous = order
-                values = (
-                    record["features"]
-                    if bundle["features"] == "base"
-                    else bundle["reference"].transform(record)
-                )
-                if len(values) != len(names) or not all(math.isfinite(x) for x in values):
-                    raise ValueError("Invalid frozen feature vector.")
-                row = dict(record, features=values)
-                batch.append(row)
-                count += 1
-                if len(batch) == 200:
-                    persist_predictions(
-                        engine,
-                        dataset_id,
-                        revision,
-                        maximum,
-                        run_id,
-                        batch,
-                        bundle["model"],
-                        threshold,
-                        reference,
-                        seconds,
-                        feature_names=names,
-                    )
-                    batch = []
-        if count != manifest["cache"]["test"]["count"]:
-            raise ValueError("Cached test count differs from frozen manifest.")
-        if batch:
-            persist_predictions(
-                engine,
-                dataset_id,
-                revision,
-                maximum,
-                run_id,
-                batch,
-                bundle["model"],
-                threshold,
-                reference,
-                seconds,
-                feature_names=names,
-            )
+        names = selection["feature_names"]
+        persist_in_batches(
+            engine,
+            dataset_id,
+            revision,
+            maximum,
+            run_id,
+            frozen_test_windows(paths, manifest, bundle, names, count),
+            (bundle["model"], threshold, reference, manifest["seconds"]),
+            feature_names=names,
+        )
         evaluate_windows(engine, dataset_id, run_id)
         with Session(engine) as session, session.begin():
             session.get_one(DetectorRun, run_id).state = "completed"
@@ -284,4 +288,4 @@ def run_study(
         with Session(engine) as session, session.begin():
             session.get_one(DetectorRun, run_id).state = "failed"
         raise
-    return {"run_id": run_id, "state": "completed", "evaluated_units": count}
+    return {"run_id": run_id, "state": "completed", "evaluated_units": count[0]}

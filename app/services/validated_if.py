@@ -26,7 +26,7 @@ from app.services.window_detection import (
     FEATURE_NAMES,
     aggregate_windows,
     evaluate_windows,
-    persist_predictions,
+    persist_in_batches,
     second,
 )
 from app.services.window_features import FEATURE_NAMES as CONTEXT_FEATURE_NAMES
@@ -204,11 +204,14 @@ def run_validated(
         return _run(engine, dataset_id, job_key, configuration["model_id"])
 
 
-def _run(engine, dataset_id, job_key, model_id):
-    bundle, card = load_frozen_model(model_id)
-    cutoff = datetime.fromisoformat(card["inference_start_utc"])
-    version = card["version"]
-    names = card["feature_names"]
+WINDOW = 300  # seconds; the frozen model was validated on 5-minute host windows
+
+
+def existing_run(engine, dataset_id, job_key, cutoff, version):
+    """Snapshot the dataset and look for this job's run.
+
+    Returns (revision, max event id, last timestamp, existing run or None). A retry must see the same
+    input and model; only events after the calibration cutoff may be scored."""
     with Session(engine) as session:
         dataset = session.get(Dataset, dataset_id)
         if dataset is None or dataset.state not in {"partial", "imported"}:
@@ -223,132 +226,166 @@ def _run(engine, dataset_id, job_key, model_id):
             raise ValueError(
                 "No events after model calibration cutoff; earlier data would cause temporal leakage."
             )
-        existing = session.scalar(
+        run = session.scalar(
             select(DetectorRun).where(DetectorRun.dataset_id == dataset_id, DetectorRun.run_key == job_key)
         )
-        if existing is not None:
-            if (
-                existing.input_revision != revision
-                or existing.configuration.get("maximum_event_id") != maximum
-                or existing.configuration.get("model_version") != version
-            ):
-                raise ValueError("Retry input/model changed; create a new job.")
-            if existing.state == "completed":
-                return {"run_id": existing.id, "state": "completed", "retry": "idempotent"}
-            config = existing.configuration
-            run_id = existing.id
-        else:
-            config = None
-    if config is None:
-        now_closed = (second(datetime.now(timezone.utc)) // 300) * 300
-        end_epoch = min(now_closed, (second(last) // 300 + 1) * 300)
-        end = EPOCH + timedelta(seconds=end_epoch)
+        if run is not None and (
+            run.input_revision != revision
+            or run.configuration.get("maximum_event_id") != maximum
+            or run.configuration.get("model_version") != version
+        ):
+            raise ValueError("Retry input/model changed; create a new job.")
+        if run is not None:
+            session.expunge(run)
+        return revision, maximum, last, run
+
+
+def extract_windows(engine, dataset_id, maximum, cutoff, end, context_features):
+    """Write the eligible closed windows to a new feature cache and count what was excluded and why.
+
+    Returns (cache path, window count, scope counts)."""
+    INPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    cache = INPUT_ROOT / (uuid4().hex + ".jsonl")
+    observed_units = 0
+    with Session(engine) as session, cache.open("x", encoding="utf-8", newline="\n") as stream:
+        snapshot = [LogEvent.dataset_id == dataset_id, LogEvent.id <= maximum]
+        counts = {
+            "excluded_pre_cutoff_events": session.scalar(
+                select(func.count()).select_from(LogEvent).where(*snapshot, LogEvent.timestamp < cutoff)
+            ),
+            "excluded_pre_cutoff_units": _unit_count(session, snapshot + [LogEvent.timestamp < cutoff]),
+            "excluded_open_or_future_events": session.scalar(
+                select(func.count()).select_from(LogEvent).where(*snapshot, LogEvent.timestamp >= end)
+            ),
+            "unknown_host_events_in_eligible_time": session.scalar(
+                select(func.count())
+                .select_from(LogEvent)
+                .where(
+                    *snapshot, LogEvent.timestamp >= cutoff, LogEvent.timestamp < end, LogEvent.host.is_(None)
+                )
+            ),
+        }
+        rows = session.execute(
+            select(LogEvent.id, LogEvent.timestamp, LogEvent.host, LogEvent.severity, LogEvent.message)
+            .where(*snapshot, LogEvent.timestamp >= cutoff, LogEvent.timestamp < end)
+            .order_by(LogEvent.timestamp, LogEvent.id)
+            .execution_options(yield_per=500)
+        )
+        for unit in aggregate_windows(rows, WINDOW, include_templates=context_features):
+            stream.write(json.dumps(unit, separators=(",", ":")) + "\n")
+            observed_units += 1
+    if not observed_units:
+        raise ValueError("No eligible observed host-windows; no fabricated host or evidence.")
+    return cache, observed_units, counts
+
+
+def inference_configuration(model_id, card, revision, maximum, cutoff, end, extracted):
+    cache, observed_units, counts = extracted
+    return {
+        "detector": "isolation_forest",
+        "model_id": model_id,
+        "model_version": card["version"],
+        "model_artifact": {
+            "key": "selected.joblib",
+            "sha256": _json(STUDY_ROOT / model_id / "selection.json")["selected_artifact_sha256"],
+        },
+        "window_seconds": WINDOW,
+        "features": card["feature_names"],
+        "feature_version": "validated-host-window-if-1",
+        "threshold": card["threshold"],
+        "score_direction": "lower",
+        "comparison": "<",
+        "threshold_policy": "frozen labeled-validation calibration; no fitting on this inference dataset",
+        "threshold_uses_validation_labels": True,
+        "input_revision": revision,
+        "maximum_event_id": maximum,
+        "inference_start": cutoff.isoformat(),
+        "inference_end": end.isoformat(),
+        "eligible_units": observed_units,
+        "scope_counts": counts,
+        "feature_cache_key": cache.name,
+        "feature_cache_sha256": fingerprint(cache),
+        "availability": "closed observed window; prediction available after window end; source completeness unknown",
+    }
+
+
+def register_validated_run(engine, dataset_id, job_key, revision, card, config):
+    """The shared validated detector and its frozen version (created once), and a new running run."""
+    with Session(engine) as session, session.begin():
+        ds = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
+        if ds.input_revision != revision or ds.state not in {"partial", "imported"}:
+            raise ValueError("Dataset changed during feature extraction.")
+        statement = insert(Detector).values(detector_key="host-window-if-validated", family="classical_ml")
+        session.execute(statement.on_duplicate_key_update(id=Detector.id))
+        detector = session.scalar(
+            select(Detector).where(Detector.detector_key == "host-window-if-validated").with_for_update()
+        )
+        frozen_version = session.scalar(
+            select(DetectorVersion).where(
+                DetectorVersion.detector_id == detector.id, DetectorVersion.version == card["version"]
+            )
+        )
+        if frozen_version is None:
+            frozen_version = DetectorVersion(
+                detector_id=detector.id,
+                version=card["version"],
+                configuration=card,
+                feature_schema={
+                    "names": card["feature_names"],
+                    "version": "validated-1",
+                    "label_free": True,
+                    "threshold_uses_validation_labels": True,
+                },
+                score_direction="lower",
+            )
+            session.add(frozen_version)
+            session.flush()
+        run = DetectorRun(
+            dataset_id=dataset_id,
+            detector_id=detector.id,
+            version_id=frozen_version.id,
+            run_key=job_key,
+            state="running",
+            input_revision=revision,
+            configuration=config,
+        )
+        session.add(run)
+        session.flush()
+        return run.id
+
+
+def cached_windows(cache, config, bundle, cutoff):
+    """Windows from the verified cache, each re-checked against the frozen eligible range."""
+    inference_end = datetime.fromisoformat(config["inference_end"])
+    with cache.open(encoding="utf-8") as stream:
+        for line in stream:
+            row = json.loads(line)
+            if not cutoff <= EPOCH + timedelta(seconds=row["bucket"] * WINDOW) < inference_end:
+                raise ValueError("Cached unit outside frozen eligible range.")
+            if bundle["features"] == "context":
+                row["features"] = bundle["reference"].transform(row)
+            yield row
+
+
+def _run(engine, dataset_id, job_key, model_id):
+    """Score closed host-windows after the frozen model's calibration cutoff; never fit on this dataset.
+
+    The feature cache is written once and verified by digest, so a retried job scores the same input."""
+    bundle, card = load_frozen_model(model_id)
+    cutoff = datetime.fromisoformat(card["inference_start_utc"])
+    revision, maximum, last, run = existing_run(engine, dataset_id, job_key, cutoff, card["version"])
+    if run is not None and run.state == "completed":
+        return {"run_id": run.id, "state": "completed", "retry": "idempotent"}
+    if run is not None:
+        config, run_id = run.configuration, run.id
+    else:
+        now_closed = (second(datetime.now(timezone.utc)) // WINDOW) * WINDOW
+        end = EPOCH + timedelta(seconds=min(now_closed, (second(last) // WINDOW + 1) * WINDOW))
         if end <= cutoff:
             raise ValueError("No eligible closed windows after model calibration cutoff.")
-        INPUT_ROOT.mkdir(parents=True, exist_ok=True)
-        cache = INPUT_ROOT / (uuid4().hex + ".jsonl")
-        observed_units = 0
-        with Session(engine) as session, cache.open("x", encoding="utf-8", newline="\n") as stream:
-            snapshot = [LogEvent.dataset_id == dataset_id, LogEvent.id <= maximum]
-            counts = {
-                "excluded_pre_cutoff_events": session.scalar(
-                    select(func.count()).select_from(LogEvent).where(*snapshot, LogEvent.timestamp < cutoff)
-                ),
-                "excluded_pre_cutoff_units": _unit_count(session, snapshot + [LogEvent.timestamp < cutoff]),
-                "excluded_open_or_future_events": session.scalar(
-                    select(func.count()).select_from(LogEvent).where(*snapshot, LogEvent.timestamp >= end)
-                ),
-                "unknown_host_events_in_eligible_time": session.scalar(
-                    select(func.count())
-                    .select_from(LogEvent)
-                    .where(
-                        *snapshot,
-                        LogEvent.timestamp >= cutoff,
-                        LogEvent.timestamp < end,
-                        LogEvent.host.is_(None),
-                    )
-                ),
-            }
-            rows = session.execute(
-                select(LogEvent.id, LogEvent.timestamp, LogEvent.host, LogEvent.severity, LogEvent.message)
-                .where(*snapshot, LogEvent.timestamp >= cutoff, LogEvent.timestamp < end)
-                .order_by(LogEvent.timestamp, LogEvent.id)
-                .execution_options(yield_per=500)
-            )
-            for unit in aggregate_windows(rows, 300, include_templates=bundle["features"] == "context"):
-                stream.write(json.dumps(unit, separators=(",", ":")) + "\n")
-                observed_units += 1
-        if not observed_units:
-            raise ValueError("No eligible observed host-windows; no fabricated host or evidence.")
-        config = {
-            "detector": "isolation_forest",
-            "model_id": model_id,
-            "model_version": version,
-            "model_artifact": {
-                "key": "selected.joblib",
-                "sha256": _json(STUDY_ROOT / model_id / "selection.json")["selected_artifact_sha256"],
-            },
-            "window_seconds": 300,
-            "features": names,
-            "feature_version": "validated-host-window-if-1",
-            "threshold": card["threshold"],
-            "score_direction": "lower",
-            "comparison": "<",
-            "threshold_policy": "frozen labeled-validation calibration; no fitting on this inference dataset",
-            "threshold_uses_validation_labels": True,
-            "input_revision": revision,
-            "maximum_event_id": maximum,
-            "inference_start": cutoff.isoformat(),
-            "inference_end": end.isoformat(),
-            "eligible_units": observed_units,
-            "scope_counts": counts,
-            "feature_cache_key": cache.name,
-            "feature_cache_sha256": fingerprint(cache),
-            "availability": "closed observed window; prediction available after window end; source completeness unknown",
-        }
-        with Session(engine) as session, session.begin():
-            ds = session.scalar(select(Dataset).where(Dataset.id == dataset_id).with_for_update())
-            if ds.input_revision != revision or ds.state not in {"partial", "imported"}:
-                raise ValueError("Dataset changed during feature extraction.")
-            statement = insert(Detector).values(
-                detector_key="host-window-if-validated", family="classical_ml"
-            )
-            session.execute(statement.on_duplicate_key_update(id=Detector.id))
-            detector = session.scalar(
-                select(Detector).where(Detector.detector_key == "host-window-if-validated").with_for_update()
-            )
-            frozen_version = session.scalar(
-                select(DetectorVersion).where(
-                    DetectorVersion.detector_id == detector.id, DetectorVersion.version == version
-                )
-            )
-            if frozen_version is None:
-                frozen_version = DetectorVersion(
-                    detector_id=detector.id,
-                    version=version,
-                    configuration=card,
-                    feature_schema={
-                        "names": names,
-                        "version": "validated-1",
-                        "label_free": True,
-                        "threshold_uses_validation_labels": True,
-                    },
-                    score_direction="lower",
-                )
-                session.add(frozen_version)
-                session.flush()
-            run = DetectorRun(
-                dataset_id=dataset_id,
-                detector_id=detector.id,
-                version_id=frozen_version.id,
-                run_key=job_key,
-                state="running",
-                input_revision=revision,
-                configuration=config,
-            )
-            session.add(run)
-            session.flush()
-            run_id = run.id
+        extracted = extract_windows(engine, dataset_id, maximum, cutoff, end, bundle["features"] == "context")
+        config = inference_configuration(model_id, card, revision, maximum, cutoff, end, extracted)
+        run_id = register_validated_run(engine, dataset_id, job_key, revision, card, config)
     cache = (INPUT_ROOT.resolve() / config["feature_cache_key"]).resolve()
     try:
         if (
@@ -358,67 +395,35 @@ def _run(engine, dataset_id, job_key, model_id):
         ):
             raise ValueError("Inference input cache integrity check failed.")
         with Session(engine) as session, session.begin():
-            session.get(DetectorRun, run_id).state = "running"
+            session.get_one(DetectorRun, run_id).state = "running"
         reference = {
             "threshold": card["threshold"],
-            "model_version": version,
+            "model_version": card["version"],
             "calibration": card["calibration"],
             "training": card["training"],
             "inference_cutoff": card["inference_start_utc"],
         }
         if bundle.get("reference") is not None:
             reference["training_reference"] = bundle["reference"].summary()
-        batch = []
-        with cache.open(encoding="utf-8") as stream:
-            for line in stream:
-                row = json.loads(line)
-                if (
-                    not cutoff
-                    <= EPOCH + timedelta(seconds=row["bucket"] * 300)
-                    < datetime.fromisoformat(config["inference_end"])
-                ):
-                    raise ValueError("Cached unit outside frozen eligible range.")
-                if bundle["features"] == "context":
-                    row["features"] = bundle["reference"].transform(row)
-                batch.append(row)
-                if len(batch) == 200:
-                    persist_predictions(
-                        engine,
-                        dataset_id,
-                        revision,
-                        maximum,
-                        run_id,
-                        batch,
-                        bundle["model"],
-                        card["threshold"],
-                        reference,
-                        300,
-                        feature_names=names,
-                    )
-                    batch = []
-            if batch:
-                persist_predictions(
-                    engine,
-                    dataset_id,
-                    revision,
-                    maximum,
-                    run_id,
-                    batch,
-                    bundle["model"],
-                    card["threshold"],
-                    reference,
-                    300,
-                    feature_names=names,
-                )
+        persist_in_batches(
+            engine,
+            dataset_id,
+            revision,
+            maximum,
+            run_id,
+            cached_windows(cache, config, bundle, cutoff),
+            (bundle["model"], card["threshold"], reference, WINDOW),
+            feature_names=card["feature_names"],
+        )
         evaluate_windows(engine, dataset_id, run_id)
         with Session(engine) as session, session.begin():
-            run = session.get(DetectorRun, run_id)
+            run = session.get_one(DetectorRun, run_id)
             if run.evaluated_units != config["eligible_units"]:
                 raise ValueError("Persisted inference count differs from frozen input.")
             run.state = "completed"
     except Exception:
         with Session(engine) as session, session.begin():
-            session.get(DetectorRun, run_id).state = "failed"
+            session.get_one(DetectorRun, run_id).state = "failed"
         raise
     return {
         "run_id": run_id,

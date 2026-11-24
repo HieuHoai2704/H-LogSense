@@ -220,6 +220,12 @@ class PlatformMySQLTests(unittest.TestCase):
             evidence.json["raw_event"]["page"]["text"],
             LINE.replace(b"INFO", b"ERROR").decode(),
         )
+        # An invalid page size is reported as such, not as an offset problem.
+        bad_limit = self.client.get(
+            f"/api/v1/anomalies/{identity}/evidence?raw_limit=1&" + urlencode(list(params.items(multi=True)))
+        )
+        self.assertEqual(bad_limit.status_code, 400)
+        self.assertIn("Raw limit", bad_limit.json["error"]["message"])
         from app.models import DetectorVersion
 
         run = self.session.get(DetectorRun, run_id)

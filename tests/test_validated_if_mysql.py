@@ -20,6 +20,7 @@ from app.domain import DetectionPrediction, EvaluationReport
 from app.models import AnomalyOutput, Dataset, DetectionUnit, DetectorRun, DetectorVersion, UnitEvent
 from app.services.bgl_ingestion import fingerprint
 import app.services.validated_if as validated
+import app.services.window_detection as window_detection
 from app.services.window_detection import second
 
 
@@ -239,7 +240,8 @@ class ValidatedIFMySQLTests(unittest.TestCase):
 
     def test_05_interrupted_committed_batch_resumes_without_duplicate_units(self):
         self.seed([self.cutoff + timedelta(seconds=1, minutes=5 * i) for i in range(201)])
-        original = validated.persist_predictions
+        # Batches are stored through window_detection.persist_predictions (via persist_in_batches).
+        original = window_detection.persist_predictions
         calls = []
 
         def interrupt(*args, **kwargs):
@@ -248,7 +250,10 @@ class ValidatedIFMySQLTests(unittest.TestCase):
             if len(calls) == 1:
                 raise RuntimeError("Synthetic failure after committed inference batch")
 
-        with patch.object(validated, "persist_predictions", interrupt), self.assertRaises(RuntimeError):
+        with (
+            patch.object(window_detection, "persist_predictions", interrupt),
+            self.assertRaises(RuntimeError),
+        ):
             validated.run_validated(self.engine, self.dataset_id, "resume-profile", self.config)
         with Session(self.engine) as session:
             run = session.scalar(select(DetectorRun).where(DetectorRun.dataset_id == self.dataset_id))

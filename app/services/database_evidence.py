@@ -174,10 +174,22 @@ def load_evidence(session, dataset_id, anomaly_id, *, raw_offset=0, raw_limit=20
     return result
 
 
-def evidence(identity, args):
-    anomaly_id = anomaly_id_of(identity)
-    scope = state(args)
-    dataset_id = dataset_id_of(scope["source"])
+RAW_INLINE_LIMIT = 262144  # bytes; the same inline bound as load_evidence
+RELATIONS = ["same_host", "same_service", "before", "after", "context_window", "same_session", "same_window"]
+QUERYABLE_RELATIONS = {"same_host", "same_service", "before", "after", "context_window", "same_window"}
+CURSOR_MAX_AGE = 900  # seconds
+NO_RAW = {"text": "", "offset": 0, "total_chars": 0, "next_offset": None}
+
+
+def raw_bounds(args):
+    return (
+        integer(args.get("raw_offset", 0), 0, 10000000, "Raw offset"),
+        integer(args.get("raw_limit", 2048), 128, 8192, "Raw limit"),
+    )
+
+
+def scoped_anomaly(scope, dataset_id, anomaly_id):
+    """The anomaly with its unit, event, detector, run and version, only from a completed run in scope."""
     row = db.session.execute(
         select(A, U, E, D, R, V)
         .join(U, (U.id == A.unit_id) & (U.dataset_id == A.dataset_id))
@@ -194,124 +206,121 @@ def evidence(identity, args):
     ).first()
     if row is None:
         raise NotFound()
-    anomaly, unit, event, detector, run, version = row
-    metadata = row_summary(row, scope)
-    metadata.update(
-        dataset_id=dataset_id,
-        dataset_name=db.session.get(Dataset, dataset_id).name,
-        model_run_id=run.id,
+    return row
+
+
+def sampled_raw(args, dataset_id, unit):
+    """For a window unit (no single event): the first member event's raw line, clearly marked as a sample."""
+    sample = db.session.scalar(
+        select(UnitEvent.event_id)
+        .where(UnitEvent.dataset_id == dataset_id, UnitEvent.unit_id == unit.id)
+        .order_by(UnitEvent.id)
+        .limit(1)
     )
+    parsed = db.session.get(E, sample) if sample else None
+    if parsed is None:
+        return None
+    size = db.session.scalar(
+        select(func.length(RawLogRecord.raw_bytes)).where(
+            RawLogRecord.dataset_id == dataset_id, RawLogRecord.id == parsed.raw_id
+        )
+    )
+    if size is None or size > RAW_INLINE_LIMIT:
+        return None
+    # The unit stays the window in the contract; this row only supports it.
+    raw = db.session.get(RawLogRecord, parsed.raw_id)
+    artifact = db.session.get(SourceArtifact, raw.artifact_id)
+    full = redact(raw.raw_bytes.decode("utf-8", errors="replace"))
+    offset = integer(args.get("raw_offset", 0), 0, len(full), "Raw offset")
+    limit = integer(args.get("raw_limit", 2048), 128, 8192, "Raw limit")
+    return {
+        "text": full[offset : offset + limit],
+        "offset": offset,
+        "total_chars": len(full),
+        "next_offset": offset + limit if offset + limit < len(full) else None,
+        "raw_timestamp": parsed.raw_timestamp,
+        "parsed_timestamp": iso(parsed.timestamp),
+        "host": parsed.host,
+        "service": parsed.service,
+        "source_artifact": artifact.artifact_key,
+        "source_line": raw.line_number,
+        "parsed_attributes": redact(parsed.attributes),
+        "parsing_status": "parsed; sampled supporting event for observed window",
+    }
+
+
+def raw_material(args, dataset_id, anomaly_id, unit):
+    """The anomaly's own raw text page, else a sampled member line, else nothing."""
+    raw_offset, raw_limit = raw_bounds(args)
     try:
         material = load_evidence(
-            db.session,
-            dataset_id,
-            anomaly_id,
-            raw_offset=integer(args.get("raw_offset", 0), 0, 10000000, "Raw offset"),
-            raw_limit=integer(args.get("raw_limit", 2048), 128, 8192, "Raw limit"),
+            db.session, dataset_id, anomaly_id, raw_offset=raw_offset, raw_limit=raw_limit
         )
     except ValueError:  # offset past the raw text: a client error, as on /api/v1/database
         raise QueryError("Raw offset is beyond the available evidence.") from None
     supplied = material.get("raw_event")
     if supplied is None:
-        sample = db.session.scalar(
-            select(UnitEvent.event_id)
-            .where(UnitEvent.dataset_id == dataset_id, UnitEvent.unit_id == unit.id)
-            .order_by(UnitEvent.id)
-            .limit(1)
-        )
-        from app.models import RawLogRecord, SourceArtifact
+        supplied = sampled_raw(args, dataset_id, unit)
+    return supplied or dict(NO_RAW)
 
-        parsed = db.session.get(E, sample) if sample else None
-        size = parsed and db.session.scalar(
-            select(func.length(RawLogRecord.raw_bytes)).where(
-                RawLogRecord.dataset_id == dataset_id, RawLogRecord.id == parsed.raw_id
-            )
-        )
-        if parsed is not None and size is not None and size <= 262144:  # same inline bound as load_evidence
-            # Resolve a genuine sample raw row without pretending it represents the
-            # whole window. The original unit remains the window in the contract.
-            raw = db.session.get(RawLogRecord, parsed.raw_id)
-            artifact = db.session.get(SourceArtifact, raw.artifact_id)
-            full = redact(raw.raw_bytes.decode("utf-8", errors="replace"))
-            offset = integer(args.get("raw_offset", 0), 0, len(full), "Raw offset")
-            limit = integer(args.get("raw_limit", 2048), 128, 8192, "Raw limit")
-            supplied = {
-                "text": full[offset : offset + limit],
-                "offset": offset,
-                "total_chars": len(full),
-                "next_offset": offset + limit if offset + limit < len(full) else None,
-                "raw_timestamp": parsed.raw_timestamp,
-                "parsed_timestamp": iso(parsed.timestamp),
-                "host": parsed.host,
-                "service": parsed.service,
-                "source_artifact": artifact.artifact_key,
-                "source_line": raw.line_number,
-                "parsed_attributes": redact(parsed.attributes),
-                "parsing_status": "parsed; sampled supporting event for observed window",
-            }
-    supplied = supplied or {
-        "text": "",
-        "offset": 0,
-        "total_chars": 0,
-        "next_offset": None,
-    }
-    raw_page = {
+
+def raw_page(supplied, args):
+    return {
         "text": supplied["text"],
         "offset": supplied["offset"],
         "total_chars": supplied["total_chars"],
-        "limit": integer(args.get("raw_limit", 2048), 128, 8192, "Raw limit"),
+        "limit": raw_bounds(args)[1],
         "has_more": supplied["next_offset"] is not None,
         "next_offset": supplied["next_offset"],
         "synthetic": False,
         "redacted": True,
         "redaction_note": "Pattern redaction before pagination; not exhaustive PII detection.",
     }
-    anchor = (anomaly.anchor_time, anomaly.id)
-    membership = base(scope, selection=True).where(A.id == anomaly_id)
-    in_scope = db.session.execute(membership.limit(1)).first() is not None
-    previous = (
-        db.session.scalar(
-            base(scope, selection=True)
-            .with_only_columns(A.id)
-            .where(
-                or_(
-                    A.anchor_time > anchor[0],
-                    and_(A.anchor_time == anchor[0], A.id > anchor[1]),
-                )
-            )
-            .order_by(A.anchor_time, A.id)
-            .limit(1)
-        )
-        if in_scope
-        else None
+
+
+def raw_provenance(supplied, metadata):
+    upload = (supplied.get("parsed_attributes") or {}).get("upload")
+    return {
+        "raw_timestamp": supplied.get("raw_timestamp"),
+        "parsed_timestamp": supplied.get("parsed_timestamp"),
+        "host": supplied.get("host"),
+        "source_file": supplied.get("source_artifact"),
+        "source_line": supplied.get("source_line"),
+        "event_reference": metadata["id"],
+        "parsing_status": supplied.get("parsing_status", "unavailable"),
+        "original_log_available": bool(supplied.get("source_line")),
+        "upload": upload,
+        "source_kind": "normalized-upload" if upload else "operator-source",
+    }
+
+
+def neighbours(scope, anomaly):
+    """Whether the anomaly is in the result scope, and the newer/older result next to it (result order)."""
+    results = base(scope, selection=True)
+    in_scope = db.session.execute(results.where(A.id == anomaly.id).limit(1)).first() is not None
+    if not in_scope:
+        return False, None, None
+    newer = or_(
+        A.anchor_time > anomaly.anchor_time, and_(A.anchor_time == anomaly.anchor_time, A.id > anomaly.id)
     )
-    following = (
-        db.session.scalar(
-            base(scope, selection=True)
-            .with_only_columns(A.id)
-            .where(
-                or_(
-                    A.anchor_time < anchor[0],
-                    and_(A.anchor_time == anchor[0], A.id < anchor[1]),
-                )
-            )
-            .order_by(A.anchor_time.desc(), A.id.desc())
-            .limit(1)
-        )
-        if in_scope
-        else None
+    older = or_(
+        A.anchor_time < anomaly.anchor_time, and_(A.anchor_time == anomaly.anchor_time, A.id < anomaly.id)
     )
+    previous = db.session.scalar(
+        results.with_only_columns(A.id).where(newer).order_by(A.anchor_time, A.id).limit(1)
+    )
+    following = db.session.scalar(
+        results.with_only_columns(A.id).where(older).order_by(A.anchor_time.desc(), A.id.desc()).limit(1)
+    )
+    return True, previous, following
+
+
+def related_events(args, scope, dataset_id, anomaly, unit, metadata):
+    """One keyset page of persisted anomalies related to this one, ignoring the result filters."""
     relation = args.get("relation", "same_host")
     seconds = integer(args.get("context_seconds", 1800), 1, 3600, "Context seconds")
     limit = integer(args.get("context_limit", 10), 1, 50, "Context limit")
-    if relation not in {
-        "same_host",
-        "same_service",
-        "before",
-        "after",
-        "context_window",
-        "same_window",
-    }:
+    if relation not in QUERYABLE_RELATIONS:
         raise QueryError("Relationship unavailable.")
     start, end = (
         anomaly.anchor_time - timedelta(seconds=seconds),
@@ -321,7 +330,7 @@ def evidence(identity, args):
         if unit.end_time is None:
             raise QueryError("No interval supplied.")
         start, end = unit.start_time, unit.end_time
-    related_scope = dict(
+    unfiltered = dict(
         scope,
         start_time=iso(start),
         end_time=iso(end),
@@ -334,64 +343,45 @@ def evidence(identity, args):
         selection_end="",
         selection_detector="",
     )
-    related_query = base(related_scope).where(A.id != anomaly_id)
-    host = metadata["host"]
-    service = metadata["service"]
+    query = base(unfiltered).where(A.id != anomaly.id)
+    host, service = metadata["host"], metadata["service"]
     if relation == "same_host":
-        related_query = related_query.where(host == HOST) if host else related_query.where(A.id < 0)
-    if relation == "same_service":
-        related_query = (
-            related_query.where(E.service == service) if service else related_query.where(A.id < 0)
-        )
-    if relation == "before":
-        related_query = related_query.where(A.anchor_time < anomaly.anchor_time)
-    if relation == "after":
-        related_query = related_query.where(A.anchor_time > anomaly.anchor_time)
+        query = query.where(host == HOST) if host else query.where(A.id < 0)
+    elif relation == "same_service":
+        query = query.where(E.service == service) if service else query.where(A.id < 0)
+    elif relation == "before":
+        query = query.where(A.anchor_time < anomaly.anchor_time)
+    elif relation == "after":
+        query = query.where(A.anchor_time > anomaly.anchor_time)
     fingerprint = hashlib.sha256(
-        json.dumps(
-            [
-                dataset_id,
-                anomaly_id,
-                scope["run_id"],
-                relation,
-                iso(start),
-                iso(end),
-                limit,
-            ]
-        ).encode()
+        json.dumps([dataset_id, anomaly.id, scope["run_id"], relation, iso(start), iso(end), limit]).encode()
     ).hexdigest()
     signer = URLSafeTimedSerializer(current_app.config["EVIDENCE_CURSOR_SECRET"], salt="mysql-related")
     cursor = args.get("context_cursor")
     if cursor:
         try:
-            position = signer.loads(cursor, max_age=900)
+            position = signer.loads(cursor, max_age=CURSOR_MAX_AGE)
             if position["scope"] != fingerprint:
                 raise ValueError()
             stamp = instant(position["time"])
             cid = integer(position["id"], 1, 2**63 - 1, "Cursor")
-            related_query = related_query.where(
-                or_(A.anchor_time > stamp, and_(A.anchor_time == stamp, A.id > cid))
-            )
+            query = query.where(or_(A.anchor_time > stamp, and_(A.anchor_time == stamp, A.id > cid)))
         except (BadData, ValueError, KeyError):
             raise QueryError("Related cursor expired or scope changed.") from None
-    related_rows = db.session.execute(related_query.order_by(A.anchor_time, A.id).limit(limit + 1)).all()
-    items = [
-        row_summary(r, scope) | {"relationship_reasons": [relation, "Within explicit context [start,end)"]}
-        for r in related_rows[:limit]
-    ]
+    rows = db.session.execute(query.order_by(A.anchor_time, A.id).limit(limit + 1)).all()
     next_cursor = (
         signer.dumps(
-            {
-                "scope": fingerprint,
-                "time": iso(related_rows[limit - 1][0].anchor_time),
-                "id": related_rows[limit - 1][0].id,
-            }
+            {"scope": fingerprint, "time": iso(rows[limit - 1][0].anchor_time), "id": rows[limit - 1][0].id}
         )
-        if len(related_rows) > limit
+        if len(rows) > limit
         else None
     )
-    related = dict(
-        items=items,
+    return dict(
+        items=[
+            row_summary(r, scope)
+            | {"relationship_reasons": [relation, "Within explicit context [start,end)"]}
+            for r in rows[:limit]
+        ],
         has_more=next_cursor is not None,
         next_cursor=next_cursor,
         limit=limit,
@@ -399,78 +389,66 @@ def evidence(identity, args):
         interval={"start": iso(start), "end": iso(end)},
         available_relations=[
             dict(
-                value=k,
-                available=(unit.end_time is not None if k == "same_window" else k != "same_session"),
+                value=k, available=(unit.end_time is not None if k == "same_window" else k != "same_session")
             )
-            for k in [
-                "same_host",
-                "same_service",
-                "before",
-                "after",
-                "context_window",
-                "same_session",
-                "same_window",
-            ]
+            for k in RELATIONS
         ],
     )
+
+
+def detector_evidence(anomaly, unit, detector, run, version):
+    """What the run recorded about this detection; ML runs have no explanation."""
     model = detector.family != "rule"
-    e = anomaly.evidence
+    stored = anomaly.evidence
+    return {
+        "kind": "ml" if model else "rule",
+        "method": detector.detector_key,
+        "model_name": detector.detector_key,
+        "model_version": version.version,
+        "model_run_id": run.id,
+        "feature_schema": version.feature_schema,
+        "feature_evidence": stored.get("feature_values"),
+        "rule_id": detector.detector_key if not model else None,
+        "rule_version": version.version if not model else None,
+        "observed_value": stored.get("observed_event_count", stored.get("feature_values")),
+        "configured_threshold": stored.get("threshold"),
+        "reference_statistics": stored.get("reference"),
+        "observation_window": {"start": iso(unit.start_time), "end": iso(unit.end_time)}
+        if unit.end_time
+        else None,
+        "score": anomaly.score,
+        "score_direction": version.score_direction,
+        "score_interpretation": "Native detector score, not probability or confirmed cause. Do not compare scales across detectors.",
+        "detection_unit": unit.kind,
+        "explanation_status": "Explanation unavailable" if model else "Actual configured rule evidence",
+    }
+
+
+def evidence(identity, args):
+    """The Evidence Drawer contract for one persisted anomaly in the validated investigation scope."""
+    anomaly_id = anomaly_id_of(identity)
+    scope = state(args)
+    dataset_id = dataset_id_of(scope["source"])
+    row = scoped_anomaly(scope, dataset_id, anomaly_id)
+    anomaly, unit, _, detector, run, version = row
+    metadata = row_summary(row, scope)
+    metadata.update(
+        dataset_id=dataset_id, dataset_name=db.session.get(Dataset, dataset_id).name, model_run_id=run.id
+    )
+    supplied = raw_material(args, dataset_id, anomaly_id, unit)
+    page = raw_page(supplied, args)
+    in_scope, previous, following = neighbours(scope, anomaly)
+    related = related_events(args, scope, dataset_id, anomaly, unit, metadata)
     return redact(
         dict(
             schema_version="1.0",
             mode="database",
             revision="mysql-runs-" + ",".join(scope["run_id"]),
             anomaly=metadata,
-            summary={
-                "observed_signal": metadata["message"],
-                "hypotheses": [],
-                "root_cause": None,
-            },
-            raw_event={
-                "page": raw_page,
-                "provenance": {
-                    "raw_timestamp": supplied.get("raw_timestamp"),
-                    "parsed_timestamp": supplied.get("parsed_timestamp"),
-                    "host": supplied.get("host"),
-                    "source_file": supplied.get("source_artifact"),
-                    "source_line": supplied.get("source_line"),
-                    "event_reference": metadata["id"],
-                    "parsing_status": supplied.get("parsing_status", "unavailable"),
-                    "original_log_available": bool(supplied.get("source_line")),
-                    "upload": (supplied.get("parsed_attributes") or {}).get("upload"),
-                    "source_kind": "normalized-upload"
-                    if (supplied.get("parsed_attributes") or {}).get("upload")
-                    else "operator-source",
-                },
-            },
+            summary={"observed_signal": metadata["message"], "hypotheses": [], "root_cause": None},
+            raw_event={"page": page, "provenance": raw_provenance(supplied, metadata)},
             parsed_fields=supplied.get("parsed_attributes"),
-            detector_evidence={
-                "kind": "ml" if model else "rule",
-                "method": detector.detector_key,
-                "model_name": detector.detector_key,
-                "model_version": version.version,
-                "model_run_id": run.id,
-                "feature_schema": version.feature_schema,
-                "feature_evidence": e.get("feature_values"),
-                "rule_id": detector.detector_key if not model else None,
-                "rule_version": version.version if not model else None,
-                "observed_value": e.get("observed_event_count", e.get("feature_values")),
-                "configured_threshold": e.get("threshold"),
-                "reference_statistics": e.get("reference"),
-                "observation_window": {
-                    "start": iso(unit.start_time),
-                    "end": iso(unit.end_time),
-                }
-                if unit.end_time
-                else None,
-                "score": anomaly.score,
-                "score_direction": version.score_direction,
-                "score_interpretation": "Native detector score, not probability or confirmed cause. Do not compare scales across detectors.",
-                "detection_unit": unit.kind,
-                "explanation_status": "Explanation unavailable"
-                if model
-                else "Actual configured rule evidence",
-            },
+            detector_evidence=detector_evidence(anomaly, unit, detector, run, version),
             related_events=related,
             navigation={
                 "previous_id": anomaly_identity(previous) if previous else None,
@@ -480,7 +458,7 @@ def evidence(identity, args):
             },
             availability={
                 "raw_event": "actual" if supplied.get("source_line") else "unavailable",
-                "redaction": raw_page["redaction_note"],
+                "redaction": page["redaction_note"],
             },
         )
     )
