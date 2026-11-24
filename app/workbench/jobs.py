@@ -61,7 +61,7 @@ def package_list(executable, root):
                                 capture_output=True, text=True, timeout=8, check=True, creationflags=NO_WINDOW)
         return json.loads(output.stdout)
     except (OSError, subprocess.SubprocessError, ValueError):
-        raise WorkspaceError("Không đọc được môi trường Python đã chọn.", 422) from None
+        raise WorkspaceError("Could not read the selected Python environment.", 422) from None
 
 
 def sample_machine(include_gpu):
@@ -111,7 +111,7 @@ def utc_timestamp(value):
 def training_metrics(text):
     reader = csv.DictReader(StringIO(text))
     if not reader.fieldnames or "epoch" not in reader.fieldnames or not {"train_loss", "val_loss"} & set(reader.fieldnames):
-        raise WorkspaceError("metrics.csv cần cột epoch và train_loss hoặc val_loss.", 422)
+        raise WorkspaceError("metrics.csv needs an epoch column and train_loss or val_loss.", 422)
     rows = deque(maxlen=120)
     for row in reader:
         epoch, training, validation = (number(row.get(key)) for key in ("epoch", "train_loss", "val_loss"))
@@ -166,17 +166,17 @@ class Runs:
 
     def path(self, run_id):
         if not isinstance(run_id, str) or not re.fullmatch(r"[a-f0-9]{32}", run_id):
-            raise WorkspaceError("Mã lượt chạy không hợp lệ.")
+            raise WorkspaceError("Invalid run ID.")
         folder = self.directory / run_id
         if not folder.is_dir() or linked(folder):
-            raise WorkspaceError("Không tìm thấy lượt chạy.", 404)
+            raise WorkspaceError("Run not found.", 404)
         return folder
 
     def get(self, run_id, root):
         folder = self.path(run_id)
         record = json.loads((folder / "run.json").read_text(encoding="utf-8"))
         if record["root"] != str(root):
-            raise WorkspaceError("Không tìm thấy lượt chạy trong dự án này.", 404)
+            raise WorkspaceError("Run not found in this project.", 404)
         if record.get("source") == "attached":
             record["status"] = attached.status(record, root)
         elif record["status"] in {"starting", "running"} and not running(record):
@@ -200,20 +200,20 @@ class Runs:
         interpreter = choices[identifier]
         file = self.store.resolve(script, root=root)
         if file.suffix.casefold() != ".py" or not file.is_file():
-            raise WorkspaceError("Chọn một tệp Python trong dự án.")
+            raise WorkspaceError("Choose a Python file in the project.")
         if (not isinstance(args, list) or len(args) > 40
                 or any(not isinstance(item, str) or len(item) > 1024 or "\0" in item for item in args)):
-            raise WorkspaceError("Tham số chạy không hợp lệ.")
+            raise WorkspaceError("Invalid run arguments.")
         if not isinstance(config_files, list) or len(config_files) > 8:
-            raise WorkspaceError("Chọn tối đa tám tệp cấu hình trong dự án.")
+            raise WorkspaceError("Choose up to eight configuration files in the project.")
         for name in config_files:
             path = self.store.resolve(name, root=root)
             if path.suffix.casefold() not in run_profile.CONFIG_SUFFIXES or not path.is_file():
-                raise WorkspaceError("Chọn tệp cấu hình JSON, TOML, YAML, INI, CFG, TXT hoặc lockfile.")
+                raise WorkspaceError("Choose a JSON, TOML, YAML, INI, CFG, TXT or lockfile configuration file.")
         with self.store.profile_lock():
             if sum(row.get("source") != "attached" and row["status"] in {"starting", "running"}
                    for row in self.recent(root)) >= RUN_LIMIT:
-                raise WorkspaceError("Tối đa hai lượt chạy đồng thời cho dự án.", 409)
+                raise WorkspaceError("At most two concurrent runs per project.", 409)
             folder = self.directory / run_id
             folder.mkdir(mode=0o700)
             (folder / "artifacts").mkdir(mode=0o700)
@@ -230,7 +230,7 @@ class Runs:
                                            **options)
             except OSError:
                 save_record(folder, {**record, "status": "failed", "ended_at": now()})
-                raise WorkspaceError("Không khởi động được bộ theo dõi.", 503) from None
+                raise WorkspaceError("Could not start the run supervisor.", 503) from None
             from threading import Thread
             Thread(target=process.wait, daemon=True).start()
             return record
@@ -239,7 +239,7 @@ class Runs:
         reference = values.get("run_id")
         pid = values.get("pid")
         if (reference is None) == (pid is None):
-            raise WorkspaceError("Chọn PID hoặc run_id.")
+            raise WorkspaceError("Choose a PID or run_id.")
         if reference is not None:
             reference = attached.run_id(reference)
             if re.fullmatch(r"[0-9a-f]{32}", reference) and (self.directory / reference).exists():
@@ -259,7 +259,7 @@ class Runs:
             if existing.is_file():
                 previous = self.get(identifier, root)
                 if previous.get("source") != "attached":
-                    raise WorkspaceError("run_id đã được sử dụng.", 409)
+                    raise WorkspaceError("run_id is already in use.", 409)
                 reference = reference or previous.get("external_id")
             record = {"id": identifier, "root": str(root), "source": "attached", "pid": process.pid,
                       "process_created": created, "status": "running", "started_at": attached.timestamp(created),
@@ -270,9 +270,9 @@ class Runs:
     def stop(self, run_id, root):
         record = self.get(run_id, root)
         if record.get("source") == "attached":
-            raise WorkspaceError("Lượt chạy gắn ngoài chỉ được theo dõi.", 403)
+            raise WorkspaceError("Attached runs can only be monitored.", 403)
         if record["status"] not in {"starting", "running"}:
-            raise WorkspaceError("Lượt chạy đã kết thúc.", 409)
+            raise WorkspaceError("The run has already ended.", 409)
         (self.path(run_id) / "stop.requested").touch()
 
     def profile(self, run_id, root):
@@ -296,10 +296,10 @@ class Runs:
 
     def compare(self, left, right, root):
         if left == right:
-            raise WorkspaceError("Chọn hai lượt chạy khác nhau.")
+            raise WorkspaceError("Choose two different runs.")
         runs = [self.get(identifier, root) for identifier in (left, right)]
         if any(record.get("source") == "attached" for record in runs):
-            raise WorkspaceError("So sánh hiện dùng các lượt do H-logsen khởi chạy.")
+            raise WorkspaceError("Comparison currently uses runs started by H-logsen.")
         compared = []
         for record in runs:
             folder = self.path(record["id"])

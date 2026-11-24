@@ -1,6 +1,7 @@
 "use strict";
 
 (() => {
+  const tr = window.logsenseTranslate;
   const panel = document.getElementById("run-detail");
   if (!panel) return;
   const byId = (id) => document.getElementById(id);
@@ -79,7 +80,7 @@
     container.replaceChildren();
     const values = points.flatMap((point) => series.map(([key]) => point[key])).filter(Number.isFinite);
     if (!values.length) {
-      container.textContent = percent ? "Chưa có mẫu tải máy có thời gian." : "Chưa có điểm loss ghép được với thời gian.";
+      container.textContent = percent ? tr("No timed machine-load samples yet.") : tr("No loss points matched to a time yet.");
       return;
     }
     const start = times[0], end = times.at(-1);
@@ -144,18 +145,18 @@
     pre.replaceChildren();
     if (first === undefined) {
       const text = log.lines.filter((line) => line.trim()).slice(-5).join("\n");
-      note.textContent = text ? "Các dòng cuối chưa có mốc giờ để đối chiếu." : "Chưa có đầu ra từ lượt chạy.";
+      note.textContent = text ? tr("The last lines have no timestamp to match.") : tr("No output from the run yet.");
       pre.textContent = text;
       return;
     }
     if (time === undefined || time < first || time > last) {
-      note.textContent = "Mốc này nằm ngoài phạm vi log có thời gian đang đọc.";
+      note.textContent = tr("This point is outside the timed log range being read.");
       return;
     }
     const entry = log.markers.find((marker) => marker.time === time && marker.raw === checkpoint) ??
       log.timed[closestIndex(model.logTimes, time)];
-    note.textContent = entry.time === time ? "Log trùng mốc · " + iso(entry.time) :
-      "Log gần nhất · " + iso(entry.time) + " · lệch " + Math.abs(time - entry.time) / 1000 + " giây";
+    note.textContent = entry.time === time ? tr("Log at this point · {0}", iso(entry.time)) :
+      tr("Nearest log · {0} · {1} s off", iso(entry.time), Math.abs(time - entry.time) / 1000);
     const before = log.lines.slice(Math.max(0, entry.index - 2), entry.index);
     const after = log.lines.slice(entry.index + 1, entry.index + 3);
     const mark = document.createElement("mark");
@@ -169,7 +170,7 @@
     slider.max = String(Math.max(0, times.length - 1));
     slider.disabled = !times.length;
     slider.value = String(times.length ? closestIndex(times, time) : 0);
-    timeValue.textContent = time === undefined ? "Chưa có mốc" : iso(time);
+    timeValue.textContent = time === undefined ? tr("No point yet") : iso(time);
     slider.setAttribute("aria-valuetext", timeValue.textContent);
     follow.setAttribute("aria-pressed", String(pinned === null));
     draw(byId("run-loss"), loss, lossSeries, time);
@@ -192,29 +193,29 @@
     const { run, profile, streams, artifacts } = data;
     profileRows.replaceChildren();
     profileFiles.replaceChildren();
-    addProfileRow("Thư mục dự án", run.root);
-    addProfileRow("Thời gian (UTC)", [run.started_at, run.ended_at].filter(Boolean).join(" → "));
-    if (run.exit_code !== null) addProfileRow("Mã thoát", run.exit_code);
+    addProfileRow(tr("Project folder"), run.root);
+    addProfileRow(tr("Time (UTC)"), [run.started_at, run.ended_at].filter(Boolean).join(" → "));
+    if (run.exit_code !== null) addProfileRow(tr("Exit code"), run.exit_code);
     if (profile) {
       const { git, interpreter, script } = profile;
-      const change = git.dirty === null ? "Chưa xác định thay đổi" : git.dirty ? "Có thay đổi chưa commit" : "Sạch";
-      addProfileRow("Chụp metadata (UTC)", profile.captured_at);
+      const change = git.dirty === null ? tr("Changes not determined") : git.dirty ? tr("Uncommitted changes") : tr("Clean");
+      addProfileRow(tr("Metadata captured (UTC)"), profile.captured_at);
       addProfileRow("Git", git.status === "available" ?
-        [git.branch, git.commit || "Chưa đọc được commit", change].filter(Boolean).join(" · ") : "Git không khả dụng");
-      addProfileRow("Môi trường Python", [interpreter.id, interpreter.version || "Chưa đọc được phiên bản",
+        [git.branch, git.commit || tr("Could not read commit"), change].filter(Boolean).join(" · ") : tr("Git unavailable"));
+      addProfileRow(tr("Python environment"), [interpreter.id, interpreter.version || tr("Could not read version"),
         interpreter.platform, interpreter.architecture].filter(Boolean).join(" · "));
       addProfileRow("Interpreter", interpreter.executable);
-      addProfileRow("SHA-256 mã chạy", script.sha256 || fingerprintLabel(script.status));
+      addProfileRow(tr("Script SHA-256"), script.sha256 || fingerprintLabel(script.status));
       const parameters = profile.parameters.map(({ name, value }) => name + "=" + value).join(" · ");
-      addProfileRow("Tham số chạy", profile.argument_count + " đối số" + (parameters ? " · " + parameters : ""));
-      addProfileRow("Lấy mẫu GPU", profile.gpu_sampling ? "Bật" : "Tắt");
+      addProfileRow(tr("Run parameters"), tr("{0} arguments", profile.argument_count) + (parameters ? " · " + parameters : ""));
+      addProfileRow(tr("GPU sampling"), profile.gpu_sampling ? tr("On") : tr("Off"));
       for (const file of profile.config_files) {
         addProfileRow(file.path, file.sha256 || fingerprintLabel(file.status));
       }
     }
-    if (data.artifact_directory) addProfileRow("Thư mục kết quả", data.artifact_directory);
+    if (data.artifact_directory) addProfileRow(tr("Output folder"), data.artifact_directory);
     const number = new Intl.NumberFormat("vi");
-    const kinds = { log: "Log", machine: "Số đo máy", training: "Chỉ số train", artifact: "Kết quả" };
+    const kinds = { log: "Log", machine: tr("Machine measurements"), training: tr("Training metrics"), artifact: tr("Results") };
     for (const file of [...streams, ...artifacts]) {
       const item = document.createElement("li");
       item.textContent = kinds[file.kind] + " · " + file.path + " · " + number.format(file.bytes) + " B";
@@ -222,17 +223,17 @@
     }
     if (!profileFiles.childElementCount) {
       const item = document.createElement("li");
-      item.textContent = "Chưa có tệp đầu ra.";
+      item.textContent = tr("No output files yet.");
       profileFiles.append(item);
     }
-    const status = profile ? "Đã đọc hồ sơ." : run.status === "starting" ?
-      "Đang chụp hồ sơ trước khi chạy." : "Lượt này chưa có hồ sơ môi trường lúc chạy.";
-    profileStatus.textContent = status + (data.artifacts_limited ? " Danh sách tệp đã giới hạn." : "");
+    const status = profile ? tr("Profile loaded.") : run.status === "starting" ?
+      tr("Capturing the profile before the run.") : tr("This run has no runtime environment profile.");
+    profileStatus.textContent = status + (data.artifacts_limited ? " " + tr("File list truncated.") : "");
   }
 
   function fingerprintLabel(status) {
-    if (status === "too_large") return "Tệp vượt 1 MiB";
-    return status === "changed" ? "Tệp thay đổi trong lúc đọc" : "Chưa đọc được";
+    if (status === "too_large") return tr("File exceeds 1 MiB");
+    return status === "changed" ? tr("File changed while reading") : tr("Could not read");
   }
 
   async function loadProfile() {
@@ -240,7 +241,7 @@
     const id = runId;
     const request = ++profileRequest;
     profileRefresh.disabled = true;
-    profileStatus.textContent = "Đang đọc hồ sơ…";
+    profileStatus.textContent = tr("Reading profile…");
     try {
       const data = await window.localWorkbench.call("/runs/" + id + "/profile");
       if (request === profileRequest && id === runId) renderProfile(data);
@@ -302,7 +303,7 @@
         button.addEventListener("click", () => select(marker.time, marker.raw));
         checkpoints.append(button);
       }
-      if (!checkpoints.childElementCount) checkpoints.textContent = "Chưa thấy dòng ghi lưu checkpoint có thời gian.";
+      if (!checkpoints.childElementCount) checkpoints.textContent = tr("No timed checkpoint save lines found yet.");
     }
     latest = log;
     renderKey = key;
@@ -317,9 +318,9 @@
     model = { loss, machine, logTimes, times, markers };
     byId("run-detail-meta").textContent = result.run.script + " · " + result.run.status + " · " + runId;
     const unsynced = result.training.length - loss.length;
-    const missing = unsynced ? " " + unsynced + " điểm loss thiếu mốc tin cậy, vẫn xem được trong biểu đồ theo epoch." : "";
-    const scope = result.run.source === "attached" ? "PID " + result.run.pid + " · CPU/RAM theo tiến trình · " : "";
-    byId("run-coverage").textContent = scope + "UTC · Tối đa 64 KiB log gần nhất và 120 điểm mỗi loại chỉ số." + missing;
+    const missing = unsynced ? " " + tr("{0} loss points lack a reliable timestamp and are still shown in the epoch chart.", unsynced) : "";
+    const scope = result.run.source === "attached" ? tr("PID {0} · CPU/RAM for the process", result.run.pid) + " · " : "";
+    byId("run-coverage").textContent = scope + tr("UTC · Up to the latest 64 KiB of log and 120 points per metric type.") + missing;
     panel.hidden = false;
     render();
   }

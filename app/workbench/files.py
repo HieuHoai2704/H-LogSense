@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import stat
 from tempfile import NamedTemporaryFile
 import time
@@ -25,9 +26,20 @@ ACTIVE_ROOT = ContextVar("workbench_project_root", default=None)
 
 
 class WorkspaceError(Exception):
-    def __init__(self, message, status=400):
-        super().__init__(message)
+    """English catalog key plus values; translate with ``translated()`` at the HTTP boundary."""
+
+    def __init__(self, message, status=400, values=()):
+        self.message = message
+        self.values = tuple(values)
+        super().__init__(re.sub(r"\{(\d+)\}", lambda match: (
+            str(self.values[int(match[1])]) if int(match[1]) < len(self.values) else match[0]
+        ), message))
         self.status = status
+
+    def translated(self):
+        from app.i18n import translate
+
+        return translate(self.message, *self.values)
 
 
 def atomic_write(path, data, mode=None):
@@ -88,22 +100,22 @@ def windows_reserved(name):
 
 def project_path(root, name, *, missing=False):
     if not isinstance(name, str) or len(name) > 1024:
-        raise WorkspaceError("Đường dẫn tệp không hợp lệ.")
+        raise WorkspaceError("Invalid file path.")
     if name == "":
         return root
     path = root
     parts = name.split("/")
     for index, part in enumerate(parts):
         if not component(part):
-            raise WorkspaceError("Đường dẫn này nằm ngoài phạm vi dự án.", 403)
+            raise WorkspaceError("This path is outside the project.", 403)
         path /= part
         try:
             if linked(path):
-                raise WorkspaceError("Không mở liên kết tệp hoặc thư mục.", 403)
+                raise WorkspaceError("File and folder links are not opened.", 403)
         except FileNotFoundError:
             if missing and index == len(parts) - 1:
                 return path
-            raise WorkspaceError("Tệp hoặc thư mục đã thay đổi.", 404) from None
+            raise WorkspaceError("The file or folder has changed.", 404) from None
     return path
 
 
@@ -131,7 +143,7 @@ class ProjectStore:
         except FileNotFoundError:
             pass
         except (ValueError, TypeError):
-            raise WorkspaceError("Cấu hình dự án không hợp lệ. Hãy kiểm tra projects.json.") from None
+            raise WorkspaceError("Invalid project configuration. Check projects.json.") from None
         if state["root"]:
             for workspace in ("analysis", "code"):
                 state["roots"].setdefault(workspace, state["root"])
@@ -167,16 +179,16 @@ class ProjectStore:
 
     def select(self, value, workspace="project"):
         if workspace not in WORKSPACES:
-            raise WorkspaceError("Không gian làm việc không hợp lệ.")
+            raise WorkspaceError("Invalid workspace.")
         if not isinstance(value, str) or not value or "\0" in value or len(value) > 2048:
-            raise WorkspaceError("Nhập đường dẫn tuyệt đối của thư mục dự án.")
+            raise WorkspaceError("Enter the absolute path of the project folder.")
         candidate = Path(value).expanduser()
         if not candidate.is_absolute() or candidate.anchor.startswith("\\\\"):
-            raise WorkspaceError("Chọn một thư mục cục bộ bằng đường dẫn tuyệt đối.")
+            raise WorkspaceError("Choose a local folder by its absolute path.")
         try:
             root = candidate.resolve(strict=True)
         except (OSError, RuntimeError):
-            raise WorkspaceError("Thư mục không tồn tại hoặc không truy cập được.", 404) from None
+            raise WorkspaceError("The folder does not exist or cannot be accessed.", 404) from None
         protected = {Path.home().resolve(), Path(root.anchor), self.directory}
         if os.name == "nt":
             protected.update(Path(os.environ[name]).resolve() for name in ("WINDIR", "PROGRAMFILES", "PROGRAMDATA") if name in os.environ)
@@ -184,7 +196,7 @@ class ProjectStore:
             protected.update(map(Path, ("/etc", "/proc", "/sys", "/dev", "/usr", "/bin", "/sbin")))
         if not root.is_dir() or any(root == path or (path != Path(root.anchor) and path != Path.home().resolve()
                                                   and root.is_relative_to(path)) for path in protected):
-            raise WorkspaceError("Chọn thư mục cụ thể của dự án.")
+            raise WorkspaceError("Choose a specific project folder.")
         with self.edit_profile() as state:
             roots = state["roots"]
             recents = state["workspace_recents"]
@@ -211,7 +223,7 @@ class ProjectStore:
     def save_workspace_view(self, workspace, project, changes):
         def relative(path):
             if not isinstance(path, str) or len(path) > 1024 or (path and not all(map(component, path.split("/")))):
-                raise WorkspaceError("Đường dẫn giao diện không hợp lệ.")
+                raise WorkspaceError("Invalid view path.")
             return path
 
         cleaned = {}
@@ -227,11 +239,11 @@ class ProjectStore:
             elif key == "editor" and workspace == "code" and isinstance(value, dict):
                 split, active, ratio = value.get("split"), value.get("active"), value.get("ratio")
                 if type(split) is not bool or active not in ("left", "right") or type(ratio) is not int or not 25 <= ratio <= 75:
-                    raise WorkspaceError("Bố cục Code không hợp lệ.")
+                    raise WorkspaceError("Invalid Code layout.")
                 cleaned[key] = {"left": relative(value.get("left")), "right": relative(value.get("right")) if split else "",
                                 "split": split, "active": active if split else "left", "ratio": ratio}
             else:
-                raise WorkspaceError("Trạng thái giao diện không hợp lệ.")
+                raise WorkspaceError("Invalid view state.")
 
         with self.edit_profile() as state:
             views = state["views"]
@@ -247,7 +259,7 @@ class ProjectStore:
 
     def workspace_root(self, workspace):
         if workspace not in WORKSPACES:
-            raise WorkspaceError("Không gian làm việc không hợp lệ.")
+            raise WorkspaceError("Invalid workspace.")
         state = self.state
         value = state["root"] if workspace == "project" else state["roots"].get(workspace)
         return self._checked_root(value)
@@ -258,7 +270,7 @@ class ProjectStore:
             root = Path(value)
             if root.is_dir() and not linked(root) and root.resolve() == root:
                 return root
-        raise WorkspaceError("Chọn thư mục dự án trước.", 409)
+        raise WorkspaceError("Choose a project folder first.", 409)
 
     def resolve(self, name, *, missing=False, root=None):
         return project_path(root or self.root(), name, missing=missing)
@@ -266,7 +278,7 @@ class ProjectStore:
     def listing(self, name, start=0):
         folder = self.resolve(name)
         if not folder.is_dir():
-            raise WorkspaceError("Đường dẫn không phải thư mục.")
+            raise WorkspaceError("The path is not a folder.")
         rows = []
         with os.scandir(folder) as entries:
             for entry in entries:
@@ -276,14 +288,14 @@ class ProjectStore:
                 if is_dir or entry.is_file(follow_symlinks=False):
                     rows.append({"name": entry.name, "directory": is_dir})
                 if len(rows) > 10_000:
-                    raise WorkspaceError("Thư mục vượt giới hạn 10.000 mục. Chọn thư mục con.", 422)
+                    raise WorkspaceError("The folder exceeds the 10,000-entry limit. Choose a subfolder.", 422)
         rows.sort(key=lambda item: (not item["directory"], item["name"].casefold(), item["name"]))
         return {"entries": rows[start:start + 300], "next": start + 300 if len(rows) > start + 300 else None}
 
     def search(self, query):
         needle = query.strip().replace("\\", "/").casefold()
         if not needle or len(needle) > 120 or any(ord(char) < 32 for char in needle):
-            raise WorkspaceError("Nhập từ 1 đến 120 ký tự để tìm trong dự án.")
+            raise WorkspaceError("Enter 1 to 120 characters to search the project.")
         root = self.root()
         folders = deque([root])
         matches = []
@@ -330,24 +342,24 @@ class ProjectStore:
     def read(self, name):
         path = self.resolve(name)
         if not path.is_file():
-            raise WorkspaceError("Chọn một tệp văn bản.")
+            raise WorkspaceError("Choose a text file.")
         with path.open("rb") as stream:
             data = stream.read(MAX_TEXT + 1)
         if len(data) > MAX_TEXT or b"\0" in data:
-            raise WorkspaceError("Trình sửa chỉ mở tệp UTF-8 tối đa 1 MiB.", 422)
+            raise WorkspaceError("The editor only opens UTF-8 files up to 1 MiB.", 422)
         try:
             return {"text": data.decode("utf-8-sig"), "revision": hashlib.sha256(data).hexdigest()}
         except UnicodeDecodeError:
-            raise WorkspaceError("Tệp không dùng mã hóa UTF-8.", 422) from None
+            raise WorkspaceError("The file is not UTF-8 encoded.", 422) from None
 
     def write(self, name, text, revision):
         if not isinstance(text, str) or not isinstance(revision, str) or "\0" in text:
-            raise WorkspaceError("Nội dung hoặc phiên bản tệp không hợp lệ.")
+            raise WorkspaceError("Invalid file content or revision.")
         with self.profile_lock():
             path = self.resolve(name)
             current = self.read(name)
             if current["revision"] != revision:
-                raise WorkspaceError("Tệp đã thay đổi trên đĩa. Mở lại trước khi lưu.", 409)
+                raise WorkspaceError("The file changed on disk. Reopen it before saving.", 409)
             with path.open("rb") as stream:
                 prefix = stream.read(3)
             # The textarea uses LF. Keep the source's newline style and optional BOM.
@@ -357,15 +369,15 @@ class ProjectStore:
             try:
                 data = (b"\xef\xbb\xbf" if prefix == b"\xef\xbb\xbf" else b"") + normalized.encode("utf-8")
             except UnicodeEncodeError:
-                raise WorkspaceError("Nội dung không dùng được với UTF-8.", 422) from None
+                raise WorkspaceError("The content cannot be encoded as UTF-8.", 422) from None
             if len(data) > MAX_TEXT:
-                raise WorkspaceError("Tệp vượt giới hạn 1 MiB.", 413)
+                raise WorkspaceError("The file exceeds the 1 MiB limit.", 413)
             atomic_write(path, data, path.stat().st_mode)
             return {"revision": hashlib.sha256(data).hexdigest()}
 
     def manage(self, name, action, target=None):
         if not isinstance(name, str) or not name:
-            raise WorkspaceError("Không thay đổi thư mục gốc từ cây tệp.")
+            raise WorkspaceError("The root folder cannot be changed from the file tree.")
         with self.profile_lock():
             if action == "directory":
                 self.resolve(name, missing=True).mkdir()
@@ -374,20 +386,20 @@ class ProjectStore:
                     pass
             elif action == "rename":
                 if not isinstance(target, str) or not target:
-                    raise WorkspaceError("Đường dẫn đích không hợp lệ.")
+                    raise WorkspaceError("Invalid target path.")
                 source = self.resolve(name)
                 destination = self.resolve(target, missing=True)
                 if destination.exists():
-                    raise WorkspaceError("Tên đích đã tồn tại.", 409)
+                    raise WorkspaceError("The target name already exists.", 409)
                 source.rename(destination)
             else:
-                raise WorkspaceError("Thao tác thư mục không hợp lệ.")
+                raise WorkspaceError("Invalid folder action.")
 
 
 def tail(path, offset=None, stamp=None):
     """Bounded snapshots; client replaces the view on rotations or cursor loss."""
     if not path.is_file():
-        raise WorkspaceError("Chọn tệp log.", 404)
+        raise WorkspaceError("Choose a log file.", 404)
     with path.open("rb") as stream:
         info = os.fstat(stream.fileno())
         identity = f"{info.st_dev}:{info.st_ino}"

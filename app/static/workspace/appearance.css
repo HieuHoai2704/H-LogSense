@@ -140,6 +140,13 @@
   background-color: var(--background, #191919);
 }
 
+/* Palette tokens are opaque; on a see-through window a selected row would read as a solid bar.
+   Tint the text colour instead so selection stays visible at every frame transparency. */
+:root[data-theme|="glass"][data-native-glass],
+:root[data-theme|="glass"][data-native-glass] :is(.project-shell, .workspace-nav, .detached-shell, .workspace-launch) {
+  --selected: color-mix(in srgb, var(--text) 13%, transparent);
+}
+
 :root[data-theme|="glass"][data-native-glass] {
   --glass-layer: var(--glass-opacity-override, var(--glass-opacity));
   --glass-surface: rgb(var(--glass-tint) / calc(var(--glass-layer) * .5));
@@ -208,6 +215,7 @@
 }
 
 #glass-controls, #glass-unavailable { display: none; }
+:root[data-theme|="glass"][data-native-glass] #glass-reset { background-color: var(--glass-surface); }
 :root[data-theme|="glass"][data-native-glass] #glass-controls {
   display: grid;
   gap: 6px;

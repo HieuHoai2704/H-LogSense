@@ -1,6 +1,7 @@
 "use strict";
 
 (() => {
+  const tr = window.logsenseTranslate;
   const $ = (id) => document.getElementById(id);
   const dock = $("terminal-dock");
   const tabs = [...dock.querySelectorAll("[data-dock-tab]")];
@@ -24,20 +25,20 @@
     const status = $("dock-ports-status");
     $("dock-port-rows").replaceChildren();
     const root = inCode() ? state.codeRoot : state.localRoot;
-    status.textContent = root ? "Đang đọc các cổng TCP…" : "Mở thư mục để xem các cổng trên máy.";
+    status.textContent = root ? tr("Reading TCP ports…") : tr("Open a folder to see ports on this machine.");
     if (!root) return;
     try {
       const result = await (inCode() ? codeApi : api).call("/ports");
       if (observed !== portRequest) return;
       const rows = result.ports.map(({ address, port, pid, status }) => {
         const row = document.createElement("tr");
-        for (const value of [address, port, pid ?? "—", status === "listening" ? "Lắng nghe" : "Chưa rõ"]) {
+        for (const value of [address, port, pid ?? "—", status === "listening" ? tr("Listening") : tr("Unknown")]) {
           row.insertCell().textContent = value;
         }
         return row;
       });
       $("dock-port-rows").replaceChildren(...rows);
-      status.textContent = rows.length + (result.truncated ? "+ cổng" : " cổng");
+      status.textContent = tr(result.truncated ? "{0}+ ports" : "{0} ports", rows.length);
     } catch (error) {
       if (observed === portRequest) status.textContent = error.message;
     }
@@ -59,7 +60,7 @@
   $("dock-ports-refresh").addEventListener("click", refreshPorts);
 
   function updateLog(text, entries, root) {
-    $("dock-output-text").textContent = text || "Chờ đầu ra của tệp log hoặc lượt chạy.";
+    $("dock-output-text").textContent = text || tr("Waiting for output from a log file or run.");
     const problems = $("dock-problem-rows");
     const source = window.WorkbenchSourceLinks;
     const found = [];
@@ -80,9 +81,9 @@
     }));
     logProblems = found.length;
     syncProblemCount();
-    $("dock-problems-status").textContent = !entries.length ? "Chờ nguồn log." :
-      found.length > 100 ? "100 mục gần nhất trong " + found.length + " mục từ log." :
-      found.length ? found.length + " mục từ log." : "Chưa ghi nhận cảnh báo, lỗi hoặc traceback.";
+    $("dock-problems-status").textContent = !entries.length ? tr("Waiting for a log source.") :
+      found.length > 100 ? tr("Latest 100 of {0} log entries.", found.length) :
+      found.length ? tr("{0} log entries.", found.length) : tr("No warnings, errors or tracebacks recorded.");
   }
 
   function activeCodeProblems() {
@@ -107,7 +108,7 @@
       const parts = [];
       if (result.completed.length) {
         const count = result.total > result.issues.length ? result.issues.length + "/" + result.total : result.total;
-        parts.push(result.completed.join(" + ") + " · " + count + " mục");
+        parts.push(result.completed.join(" + ") + " · " + tr("{0} items", count));
       }
       parts.push(...Object.values(result.unavailable));
       status.textContent = parts.join(" · ");
@@ -120,7 +121,7 @@
         issues.append(row);
       }
     } else {
-      status.textContent = result?.status || (code.dirty ? "Lưu tệp rồi kiểm tra lại." : "Bấm Kiểm tra Python để chạy Ruff và Pyright.");
+      status.textContent = result?.status || (code.dirty ? tr("Save the file, then check again.") : tr("Click Check Python to run Ruff and Pyright."));
     }
     syncProblemCount();
   }
@@ -134,8 +135,8 @@
     debugStart.disabled = !ready || code.dirty || Boolean(debuggerSession);
     debugStop.hidden = debugHost.hidden = !debuggerSession;
     if (debuggerSession) return;
-    debugStatus.textContent = !ready ? "Mở một tệp Python trong Code." :
-      code.dirty ? "Lưu " + code.path + " trước khi gỡ lỗi." : code.path + " · Python pdb";
+    debugStatus.textContent = !ready ? tr("Open a Python file in Code.") :
+      code.dirty ? tr("Save {0} before debugging.", code.path) : code.path + " · Python pdb";
   }
   function stopDebug() {
     debuggerSession?.close();
@@ -144,7 +145,7 @@
   }
   debugStart.addEventListener("click", () => {
     if (debugStart.disabled) return;
-    debugStatus.textContent = code.path + " · n: bước tiếp · s: vào hàm · c: chạy tiếp · q: thoát";
+    debugStatus.textContent = tr("{0} · n: next · s: step into · c: continue · q: quit", code.path);
     debuggerSession = new window.WorkbenchTerminal(debugHost, { shell: "Python Debug", path: code.path, workspace: "code" },
       (message) => { debugStatus.textContent = message; });
     syncDebug();

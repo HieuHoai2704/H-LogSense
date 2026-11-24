@@ -9,9 +9,9 @@ const logExtensions = new Set(["log", "txt", "jsonl"]);
 const projectExtensions = new Set(["py", "md", "txt", "log", "json", "jsonl", "csv", "yaml", "yml", "toml", "ini", "html", "css", "js", "ts", "sql", "sh", "ps1"]);
 const skippedFolders = new Set(["node_modules", "__pycache__", "venv", "dist", "build"]);
 const codeExamples = {
-  "train.py": '"""Ví dụ chạy huấn luyện trong dự án mẫu."""\n\nimport logging\nfrom pathlib import Path\n\nLOG_DIR = Path("runs") / "vl-024"\n\ndef main() -> None:\n    LOG_DIR.mkdir(parents=True, exist_ok=True)\n    logging.basicConfig(\n        filename=LOG_DIR / "train.log",\n        level=logging.INFO,\n        format="%(asctime)s %(levelname)s %(message)s",\n    )\n    logging.info("Training started")\n\nif __name__ == "__main__":\n    main()\n',
+  "train.py": '"""' + tr("Example training run in the sample project.") + '"""\n\nimport logging\nfrom pathlib import Path\n\nLOG_DIR = Path("runs") / "vl-024"\n\ndef main() -> None:\n    LOG_DIR.mkdir(parents=True, exist_ok=True)\n    logging.basicConfig(\n        filename=LOG_DIR / "train.log",\n        level=logging.INFO,\n        format="%(asctime)s %(levelname)s %(message)s",\n    )\n    logging.info("Training started")\n\nif __name__ == "__main__":\n    main()\n',
   "config.yaml": "training:\n  epochs: 8\n  batch_size: 32\n  learning_rate: 0.001\n",
-  "README.md": "# Dự án mẫu\n\nThư mục minh họa luồng xem log và số liệu train.\n",
+  "README.md": "# " + tr("Sample project") + "\n\n" + tr("Sample folder illustrating the log and training-metrics viewing flow.") + "\n",
 };
 const previewFiles = new Map();
 let previewPath = null;
@@ -75,7 +75,7 @@ function resetDemo(project = "vision-lab") {
     cpu_percent: cpu,
     gpu_percent: demoGpu[index],
   }));
-  state.source = "Luồng minh họa";
+  state.source = tr("Demo stream");
   state.demo = true;
   state.demoProject = project;
   state.folder = null;
@@ -215,15 +215,15 @@ function renderResults() {
     button.dataset.openLog = index;
     button.dataset.level = signalLevel(entry);
     severity.textContent = button.dataset.level;
-    button.title = "Mở log trong terminal";
-    time.textContent = entry.time === null ? "D" + entry.line : clock.format(entry.time);
+    button.title = tr("Open log in terminal");
+    time.textContent = entry.time === null ? tr("L{0}", entry.line) : clock.format(entry.time);
     raw.textContent = entry.raw;
     button.append(time, severity, raw);
     return button;
   });
   const resultList = $("result-list");
   resultList.toggleAttribute("data-empty", !rows.length);
-  resultList.replaceChildren(...(rows.length ? rows : ["Chưa có WARN hoặc ERROR trong phạm vi này."]));
+  resultList.replaceChildren(...(rows.length ? rows : [tr("No WARN or ERROR in this range.")]));
   return entries.length;
 }
 
@@ -349,7 +349,7 @@ function renderMetrics() {
       '<line class="guide" x1="0" x2="500" y1="' + y(loss) + '" y2="' + y(loss) + '"></line>').join("");
     const ticks = [2, 1.5, 1, .5, 0].map((loss) => '<span>' + number.format(loss) + '</span>').join("");
     container.innerHTML = '<div class="metric-plot"><div class="metric-axis" aria-hidden="true">' + ticks +
-      '</div><svg class="plot" viewBox="0 0 500 124" preserveAspectRatio="none" role="img" aria-label="Biểu đồ mô phỏng: Train loss, Validation loss">' +
+      '</div><svg class="plot" viewBox="0 0 500 124" preserveAspectRatio="none" role="img" aria-label="' + tr("Simulated chart: Train loss, Validation loss") + '">' +
       grid + '<polyline class="lane reference" points="' + points([1.84, 1.42, 1.16, .88, .76, .63, .57, .49]) +
       '"></polyline><polyline class="lane secondary" points="' + points([1.91, 1.66, 1.32, 1.03, .94, .87, .83, .81]) +
       '"></polyline></svg></div><div class="axis-x metric-axis-x"><span>Epoch 1</span><span>Epoch 8</span></div>' +
@@ -370,7 +370,7 @@ function renderProject() {
   $("run-label").textContent = state.demo ? "/ " + exampleProjects.get(state.demoProject) : "";
   $("tree-source").textContent = window.localWorkbench
     ? tr($("editor").hidden ? "Project folder scope" : "Code folder scope")
-    : state.demo ? "Dự án mẫu" : state.folder || state.activeFile ? "Tệp đã chọn trên máy" : tr("Select a folder or log file");
+    : state.demo ? tr("Sample project") : state.folder || state.activeFile ? tr("Files selected on this computer") : tr("Select a folder or log file");
 
   const tree = $("project-files");
   const openFolders = new Map([...tree.querySelectorAll("details[data-folder-key]")].map((item) => [item.dataset.folderKey, item.open]));
@@ -487,12 +487,12 @@ function renderEditor() {
     });
     return button;
   }));
-  $("editor-file-path").textContent = doc ? previewPath + (doc.truncated ? " · Hiển thị 2.000 dòng đầu" : "") : "";
+  $("editor-file-path").textContent = doc ? previewPath + (doc.truncated ? " · " + tr("Showing the first 2,000 lines") : "") : "";
   const target = $("editor-code");
   $("editor-preview").hidden = Boolean($("local-editor")) && !state.demo;
   if ($("local-editor")) $("local-editor").hidden = state.demo;
   if (!doc) {
-    target.textContent = "Chọn tệp văn bản từ cây dự án để xem nội dung.";
+    target.textContent = tr("Choose a text file from the project tree to view its contents.");
     return;
   }
   target.replaceChildren(...doc.lines.map((line, index) => {
@@ -509,10 +509,10 @@ async function openPreview(name, path, file) {
   navigateProject("editor");
   try {
     if (!previewFiles.has(path)) {
-      if (file?.size > fileLimit) throw new Error("Bản xem trước mở tệp văn bản tối đa 1 MiB.");
+      if (file?.size > fileLimit) throw new Error(tr("The preview opens text files up to 1 MiB."));
       const content = file ? await file.text() : codeExamples[name];
       if (request !== previewRequest) return;
-      if (content.includes("\0")) throw new Error("Tệp này có nội dung nhị phân.");
+      if (content.includes("\0")) throw new Error(tr("This file has binary content."));
       const lines = content.split(/\r\n|\n|\r/);
       if (previewFiles.size >= 8) previewFiles.delete(previewFiles.keys().next().value);
       previewFiles.set(path, { name, lines: lines.slice(0, 2000), truncated: lines.length > 2000 });
@@ -559,7 +559,7 @@ function renderTerminal() {
     row.className = "log-line";
     row.dataset.level = signalLevel(item);
     if (item === machineContext?.anchor) row.classList.add("machine-log-anchor");
-    time.textContent = item.time !== null ? clock.format(item.time) : "D" + item.line;
+    time.textContent = item.time !== null ? clock.format(item.time) : tr("L{0}", item.line);
     if (item.time !== null) time.dateTime = new Date(item.time).toISOString();
     level.className = "log-level";
     level.textContent = signalLevel(item);
@@ -575,8 +575,8 @@ function renderTerminal() {
   if (!lines.length) fragment.append(tr("No logs in this range"));
   panel.replaceChildren(fragment);
   const scope = chosen?.label ?? tr("Full range");
-  terminalScope.textContent = scope + " · " + number.format(lines.length) +
-    (visible.length > lines.length ? "/" + number.format(visible.length) : "") + " dòng";
+  terminalScope.textContent = tr("{0} · {1} lines", scope, number.format(lines.length) +
+    (visible.length > lines.length ? "/" + number.format(visible.length) : ""));
   terminalFollow.setAttribute("aria-pressed", String(state.follow && !machineContext));
   panel.scrollTop = machineContext ? 0 : state.follow ? panel.scrollHeight : oldScroll;
 }
@@ -591,16 +591,16 @@ function render() {
   const activeChart = document.activeElement?.closest("#severity-chart");
   const activeBin = document.activeElement?.dataset.bin;
   const activeLane = document.activeElement?.dataset.lane;
-  $("source-state").textContent = state.demo ? (state.playing ? "Đang mô phỏng" : "Mô phỏng tạm dừng") :
-    state.localSource ? "Theo dõi tệp cục bộ" : state.activeFile ? "Lịch sử từ tệp" : tr("No log open");
+  $("source-state").textContent = state.demo ? (state.playing ? tr("Simulating") : tr("Simulation paused")) :
+    state.localSource ? tr("Following local file") : state.activeFile ? tr("History from file") : tr("No log open");
   $("source-state").dataset.live = String(state.demo && state.playing);
   $("pause").hidden = !state.demo;
-  $("pause").textContent = state.playing ? "Giữ màn hình" : "Theo dõi tiếp";
-  $("source-name").textContent = state.source + (state.demo ? " · Mẫu mỗi 3 giây" : state.localSource ? " · Tối đa 64 KiB cuối" : state.activeFile ? " · Đọc cục bộ" : "");
+  $("pause").textContent = state.playing ? tr("Hold view") : tr("Resume following");
+  $("source-name").textContent = state.source + (state.demo ? " · " + tr("Sample every 3 seconds") : state.localSource ? " · " + tr("Last 64 KiB at most") : state.activeFile ? " · " + tr("Read locally") : "");
   $("source-name").hidden = state.source === tr("No log open");
 
   const options = state.buckets.map((bucket, index) => new Option(bucket.label, index));
-  $("bucket").replaceChildren(new Option(state.demo ? "Tất cả · mốc mới nhất" : tr("All data"), "all"), ...options);
+  $("bucket").replaceChildren(new Option(state.demo ? tr("All · latest point") : tr("All data"), "all"), ...options);
   $("bucket").value = state.selected ?? "all";
 
   const stats = state.buckets.map(summarize);
@@ -608,7 +608,7 @@ function render() {
   setMetric("signal-metric", active.reduce((sum, item) => sum + item[state.selected === null ? "all" : selectedLane], 0), tr("warnings and errors"));
   renderActivity(stats);
   renderActivityStatus();
-  setMetric("volume-metric", renderResults(), "dòng cần xem");
+  setMetric("volume-metric", renderResults(), tr("lines to review"));
   renderTerminal();
   if (activeChart && activeBin !== undefined) {
     activeChart.querySelector('[data-bin="' + activeBin + '"][data-lane="' + activeLane + '"]')?.focus({ preventScroll: true });
@@ -672,8 +672,8 @@ function showView(view) {
     const files = state.folder?.files || (state.activeFile ? [state.activeFile] : []);
     const kinds = new Set(files.map((file) => file.name.split(".").at(-1).toUpperCase()));
     $("settings-project").textContent = $("workspace-source").textContent;
-    $("settings-file-count").textContent = state.demo ? "Cây minh họa" : state.localRoot ? "Đếm theo từng thư mục trong cây" : number.format(files.length);
-    $("settings-file-types").textContent = kinds.size ? [...kinds].sort().join(", ") : "Chưa có thư mục thật";
+    $("settings-file-count").textContent = state.demo ? tr("Demo tree") : state.localRoot ? tr("Counted per folder in the tree") : number.format(files.length);
+    $("settings-file-types").textContent = kinds.size ? [...kinds].sort().join(", ") : tr("No real folder yet");
     $("settings-log-source").textContent = state.source;
   }
 }
@@ -681,9 +681,9 @@ function showView(view) {
 function parseEntry(raw, line, structured) {
   let value = null;
   if (structured) {
-    try { value = JSON.parse(raw); } catch { throw new Error("JSONL không hợp lệ ở dòng " + line + "."); }
+    try { value = JSON.parse(raw); } catch { throw new Error(tr("Invalid JSONL on line {0}.", line)); }
     if (!value || typeof value !== "object" || Array.isArray(value)) {
-      throw new Error("JSONL cần một đối tượng ở dòng " + line + ".");
+      throw new Error(tr("JSONL needs an object on line {0}.", line));
     }
   }
   const iso = /\b\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})\b/i;
@@ -705,7 +705,7 @@ function groupEntries(entries) {
     const buckets = [];
     for (let offset = 0; offset < entries.length; offset += perBucket) {
       const group = entries.slice(offset, offset + perBucket);
-      buckets.push({ label: "D" + group[0].line + "–" + group.at(-1).line, entries: group });
+      buckets.push({ label: tr("L{0}–{1}", group[0].line, group.at(-1).line), entries: group });
     }
     return buckets;
   }
@@ -731,21 +731,21 @@ async function openLog(file, folder = null) {
   $("import-button").disabled = true;
   $("use-demo").disabled = true;
   try {
-    if (!logExtensions.has(extension)) throw new Error("Chọn tệp .log, .txt hoặc .jsonl.");
-    if (file.size > fileLimit) throw new Error("Tệp lớn hơn giới hạn 1 MiB của trình xem.");
+    if (!logExtensions.has(extension)) throw new Error(tr("Choose a .log, .txt or .jsonl file."));
+    if (file.size > fileLimit) throw new Error(tr("The file exceeds the viewer's 1 MiB limit."));
     const content = await file.text();
-    if (content.includes("\0")) throw new Error("Tệp cần ở dạng văn bản UTF-8.");
+    if (content.includes("\0")) throw new Error(tr("The file must be UTF-8 text."));
     const lines = content.split(/\r\n|\n|\r/);
     if (lines.at(-1) === "") lines.pop();
-    if (lines.length > 12000) throw new Error("Tệp vượt giới hạn 12.000 dòng của trình xem.");
+    if (lines.length > 12000) throw new Error(tr("The file exceeds the viewer's 12,000-line limit."));
     const entries = lines.flatMap((line, index) =>
       line.trim() ? [parseEntry(line, index + 1, extension === "jsonl")] : []);
-    if (!entries.length) throw new Error("Tệp không có dòng log.");
+    if (!entries.length) throw new Error(tr("The file has no log lines."));
     const buckets = groupEntries(entries);
     if (state.folder !== folder || state.demo) clearPreview();
     Object.assign(state, { source: file.name, demo: false, playing: false, buckets, terminalBuckets: buckets,
       selected: null, logSelection: null, follow: true, folder, activeFile: file });
-    importStatus("Đã mở " + number.format(entries.length) + " dòng.");
+    importStatus(tr("Opened {0} lines.", number.format(entries.length)));
     renderProject();
     render();
     $("project-file").open = false;
@@ -770,8 +770,8 @@ $("project-folder").addEventListener("change", (event) => {
   const files = Array.from(event.target.files).filter((file) =>
     projectExtensions.has(file.name.split(".").at(-1).toLowerCase()) &&
     !file.webkitRelativePath.split("/").slice(1).some((part) => part.startsWith(".") || skippedFolders.has(part.toLowerCase())));
-  if (!files.length) return importStatus("Thư mục này chưa có tệp văn bản phù hợp để hiển thị.", true);
-  if (files.length > 400) return importStatus("Trình xem hiển thị tối đa 400 tệp mỗi thư mục. Hãy chọn một thư mục con.", true);
+  if (!files.length) return importStatus(tr("This folder has no suitable text files to show."), true);
+  if (files.length > 400) return importStatus(tr("The viewer shows at most 400 files per folder. Choose a subfolder."), true);
   const folder = { name: files[0].webkitRelativePath.split("/")[0], files };
   clearPreview();
   const buckets = [];

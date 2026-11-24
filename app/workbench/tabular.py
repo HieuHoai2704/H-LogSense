@@ -21,7 +21,7 @@ NUMERIC = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", re.ASCII)
 
 def column_names(names):
     if len(names) > MAX_COLUMNS or any(not name.strip() or len(name) > 200 for name in names) or len(set(names)) != len(names):
-        raise WorkspaceError("Cần tối đa 64 tên cột duy nhất, không rỗng và dài tối đa 200 ký tự.", 422)
+        raise WorkspaceError("Up to 64 unique, non-empty column names of at most 200 characters are required.", 422)
     return list(names)
 
 
@@ -138,7 +138,7 @@ def text_profile(text, format_name):
         header = next(csv.reader(StringIO(text, newline=""), strict=True), [])
         return summarize(csv_rows(text), format_name, dict.fromkeys(column_names(header)))
     except (csv.Error, RecursionError):
-        raise WorkspaceError("CSV có cú pháp không hợp lệ.", 422) from None
+        raise WorkspaceError("CSV syntax is invalid.", 422) from None
 
 
 def parquet_profile(path):
@@ -146,11 +146,11 @@ def parquet_profile(path):
         import pyarrow
         from pyarrow import parquet
     except ImportError:
-        raise WorkspaceError("Cài requirements-workbench.txt để đọc Parquet.", 503) from None
+        raise WorkspaceError("Install requirements-workbench.txt to read Parquet.", 503) from None
     with path.open("rb") as stream:
         stream.seek(0, 2)
         if stream.tell() > PARQUET_FILE_BYTES:
-            raise WorkspaceError("Parquet vượt giới hạn xem trước 256 MiB.", 413)
+            raise WorkspaceError("Parquet exceeds the 256 MiB preview limit.", 413)
         stream.seek(0)
         try:
             with parquet.ParquetFile(stream, thrift_string_size_limit=8 * 1024 * 1024,
@@ -170,4 +170,4 @@ def parquet_profile(path):
                            for row in batch.to_pylist())
                 return summarize(records, "parquet", fields, total=file.metadata.num_rows)
         except (pyarrow.ArrowException, ValueError, OverflowError, RecursionError):
-            raise WorkspaceError("Không đọc được tệp Parquet hoặc schema vượt giới hạn xem trước.", 422) from None
+            raise WorkspaceError("Could not read the Parquet file, or its schema exceeds the preview limit.", 422) from None

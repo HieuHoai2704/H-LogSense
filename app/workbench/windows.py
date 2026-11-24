@@ -11,7 +11,7 @@ ICON = Path(__file__).resolve().parents[1] / "static" / "h-logsen.ico"
 
 def identify_process():
     if windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID):
-        raise RuntimeError("Không đăng ký được H-logsen với thanh tác vụ Windows.")
+        raise RuntimeError("Could not register H-logsen with the Windows taskbar.")
 
 
 class _FrameMargins(Structure):

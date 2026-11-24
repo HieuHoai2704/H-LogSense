@@ -23,10 +23,16 @@ def verify_desktop_glass(window):
         def matches(expected):
             return native.Invoke(Func[Boolean](lambda: native.Opacity == 1.0 and
                                  (native.webview.DefaultBackgroundColor.A == 0) == expected))
-    else:
+    elif sys.platform == "darwin":
         from AppKit import NSWorkspace
 
         supported = not reduced and not NSWorkspace.sharedWorkspace().accessibilityDisplayShouldReduceTransparency()
+
+        def matches(expected):
+            return window.transparent
+    else:
+        # GTK: an RGBA window without a system blur; the CSS tint provides the glass.
+        supported = not reduced
 
         def matches(expected):
             return window.transparent
@@ -90,8 +96,7 @@ def verify():
                         if sys.platform == "win32":
                             if window.evaluate_js("document.getElementById('local-shell').value") != "CMD":
                                 raise RuntimeError("Windows did not start with CMD selected.")
-                        if sys.platform in ("win32", "darwin"):
-                            verify_desktop_glass(window)
+                        verify_desktop_glass(window)
                         checked.append(webview.renderer)
                         break
                     time.sleep(0.1)

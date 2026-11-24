@@ -1,6 +1,6 @@
 # Third-party notices
 
-H-logsen includes the following JavaScript assets in the source archive and the Windows wheel. Their copyright and license texts are distributed alongside the assets.
+H-logsen includes the following JavaScript and icon assets in the source archive and the Windows wheel. Their copyright and license texts are distributed alongside the assets.
 
 | Component | License | License text |
 | --- | --- | --- |
@@ -8,6 +8,7 @@ H-logsen includes the following JavaScript assets in the source archive and the 
 | xterm.js Fit addon | MIT | [Fit addon notice](app/static/vendor/xterm-fit/LICENSE) |
 | Moment.js | MIT | [Moment notice](app/static/vendor/moment/LICENSE) |
 | Highlight.js | BSD 3-Clause | [Highlight notice](app/static/vendor/highlight/LICENSE) |
+| Lucide icons (navigation) | ISC | [Lucide notice](app/static/vendor/lucide/LICENSE) |
 
 Python dependencies are resolved separately at installation from the project metadata. Their distribution terms remain with their respective packages. Microsoft Edge WebView2 is a Windows prerequisite installed separately.
 

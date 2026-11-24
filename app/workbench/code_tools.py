@@ -7,6 +7,8 @@ from pathlib import Path
 from tempfile import TemporaryFile
 from threading import BoundedSemaphore
 
+from app.i18n import translate
+
 from .files import MAX_TEXT, WorkspaceError
 from .jobs import NO_WINDOW, interpreters, runtime_id
 from .terminal import terminal_environment
@@ -24,7 +26,7 @@ def project_python(store, root):
 def node_command():
     node = shutil.which("node.exe" if NO_WINDOW else "node")
     if not node:
-        raise WorkspaceError("Cần Node.js trên PATH để chạy JavaScript hoặc công cụ npm.", 422)
+        raise WorkspaceError("Node.js on PATH is required to run JavaScript or npm tools.", 422)
     return node
 
 
@@ -34,13 +36,14 @@ def node_tool(root, name):
         if not entry.is_relative_to(root) or not entry.is_file():
             raise FileNotFoundError
     except (OSError, RuntimeError):
-        raise WorkspaceError(f"Cài {name} trong dự án bằng npm install -D {name.lower()}.", 422) from None
+        raise WorkspaceError("Install {0} in the project with npm install -D {1}.", 422,
+                             values=(name, name.lower())) from None
     return [node_command(), str(entry)]
 
 
 def run_tool(command, root, interpreter, name, *, text=None, valid_codes=(0,)):
     if not _TOOL_SLOTS.acquire(blocking=False):
-        raise WorkspaceError("Công cụ đang bận. Thử lại sau.", 429)
+        raise WorkspaceError("The tool is busy. Try again later.", 429)
     try:
         with TemporaryFile() as output, TemporaryFile() as errors:
             result = subprocess.run(
@@ -53,16 +56,17 @@ def run_tool(command, root, interpreter, name, *, text=None, valid_codes=(0,)):
             errors.seek(0)
             error = errors.read(8_192).decode("utf-8", errors="replace")
         if len(data) > 2 * MAX_TEXT:
-            raise WorkspaceError(f"Đầu ra {name} vượt giới hạn.", 422)
+            raise WorkspaceError("{0} output exceeds the limit.", 422, values=(name,))
         if result.returncode not in valid_codes:
             if name == "Ruff" and "No module named ruff" in error:
-                raise WorkspaceError("Cài Ruff trong Python đang chọn bằng python -m pip install ruff.", 422)
-            raise WorkspaceError(f"{name} không hoàn tất. Kiểm tra cú pháp và cấu hình của dự án.", 422)
+                raise WorkspaceError("Install Ruff in the selected Python with python -m pip install ruff.", 422)
+            raise WorkspaceError("{0} did not finish. Check the project's syntax and configuration.", 422,
+                                 values=(name,))
         return data.decode("utf-8")
     except subprocess.TimeoutExpired:
-        raise WorkspaceError(f"{name} vượt giới hạn 15 giây.", 504) from None
+        raise WorkspaceError("{0} exceeded the 15-second limit.", 504, values=(name,)) from None
     except (OSError, UnicodeError):
-        raise WorkspaceError(f"Không đọc được đầu ra của {name}.", 422) from None
+        raise WorkspaceError("Could not read {0} output.", 422, values=(name,)) from None
     finally:
         _TOOL_SLOTS.release()
 
@@ -72,17 +76,17 @@ def script_command(path, interpreter):
         return [str(interpreter), "-u", str(path)]
     if path.suffix.casefold() == ".js":
         return [node_command(), str(path)]
-    raise WorkspaceError("Chạy trực tiếp hỗ trợ tệp .py và .js.")
+    raise WorkspaceError("Direct run supports .py and .js files.")
 
 
 def format_text(path, root, interpreter, text):
     if not isinstance(text, str) or "\0" in text:
-        raise WorkspaceError("Cần nội dung văn bản UTF-8 hợp lệ.")
+        raise WorkspaceError("Valid UTF-8 text content is required.")
     try:
         if len(text.encode("utf-8")) > MAX_TEXT:
-            raise WorkspaceError("Nội dung vượt giới hạn 1 MiB.", 413)
+            raise WorkspaceError("Content exceeds the 1 MiB limit.", 413)
     except UnicodeEncodeError:
-        raise WorkspaceError("Cần nội dung văn bản UTF-8 hợp lệ.") from None
+        raise WorkspaceError("Valid UTF-8 text content is required.") from None
     suffix = path.suffix.casefold()
     if suffix == ".py":
         tool = "Ruff"
@@ -91,10 +95,10 @@ def format_text(path, root, interpreter, text):
         tool = "Prettier"
         command = [*node_tool(root, tool), "--stdin-filepath", str(path)]
     else:
-        raise WorkspaceError("Định dạng chưa hỗ trợ loại tệp này.")
+        raise WorkspaceError("Formatting does not support this file type yet.")
     formatted = run_tool(command, root, interpreter, tool, text=text)
     if len(formatted.encode("utf-8")) > MAX_TEXT:
-        raise WorkspaceError("Nội dung đã định dạng vượt giới hạn 1 MiB.", 422)
+        raise WorkspaceError("Formatted content exceeds the 1 MiB limit.", 422)
     return {"text": formatted.replace("\r\n", "\n"), "tool": tool}
 
 
@@ -132,8 +136,8 @@ def diagnostics(path, root, interpreter, text):
             issues.extend(list(found))
             completed.append(name)
         except WorkspaceError as error:
-            unavailable[name] = str(error)
+            unavailable[name] = error.translated()
         except (ValueError, KeyError, TypeError):
-            unavailable[name] = f"Không đọc được kết quả từ {name}."
+            unavailable[name] = translate("Could not read results from {0}.", name)
     issues.sort(key=lambda item: (item["line"], item["column"], item["tool"]))
     return {"issues": issues[:100], "total": len(issues), "completed": completed, "unavailable": unavailable}

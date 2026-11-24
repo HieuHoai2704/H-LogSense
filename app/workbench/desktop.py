@@ -34,6 +34,9 @@ class DesktopBridge:
 
             return bool(self._window and self._window.transparent and enabled
                         and not NSWorkspace.sharedWorkspace().accessibilityDisplayShouldReduceTransparency())
+        if sys.platform == "linux":
+            # GTK has no system blur, but an RGBA window lets the glass tint show the desktop.
+            return bool(self._window and self._window.transparent and enabled)
         if sys.platform != "win32":
             return False
         from .windows import set_window_glass
@@ -89,6 +92,7 @@ def desktop_window(url, token, store):
         except ImportError:
             pass
         start_options["icon"] = str(ICON)
+        window_options["transparent"] = True
 
     bridge = DesktopBridge(token, store, webview.FileDialog.FOLDER)
     window = webview.create_window("H-logsen", url, width=1440, height=900, min_size=(900, 620),

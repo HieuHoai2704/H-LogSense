@@ -18,6 +18,27 @@ window.createWorkbenchExplorer = ({ api: initialApi = window.localWorkbench, onS
     return element;
   }
 
+  // Icon kinds are drawn by explorer.css; the label keeps the plain file name for search and tests.
+  const fileKinds = {
+    code: "py pyw ipynb js mjs cjs ts tsx jsx sh bash zsh ps1 bat cmd c h cpp hpp cs java kt go rs rb php html css scss sql r lua",
+    data: "csv tsv json jsonl ndjson parquet xlsx xls yaml yml toml xml npy npz h5 hdf5 db sqlite",
+    log: "log out err trace",
+    text: "md markdown txt rst pdf doc docx tex",
+    image: "png jpg jpeg gif svg webp ico bmp",
+    archive: "zip tar gz tgz bz2 xz 7z rar whl"
+  };
+  const kindByExtension = new Map(Object.entries(fileKinds).flatMap(([kind, list]) => list.split(" ").map((ext) => [ext, kind])));
+  function fileKind(name) {
+    const dot = name.lastIndexOf(".");
+    return dot > 0 ? kindByExtension.get(name.slice(dot + 1).toLowerCase()) || "file" : "file";
+  }
+  function entryContent(name, kind) {
+    const icon = node("span", undefined, "tree-icon");
+    icon.dataset.kind = kind;
+    icon.setAttribute("aria-hidden", "true");
+    return [icon, node("span", name, "tree-label")];
+  }
+
   const checked = new Map();
   let generation = 0;
   let selectedPath = "";
@@ -43,7 +64,11 @@ window.createWorkbenchExplorer = ({ api: initialApi = window.localWorkbench, onS
 
   function folderButton(name, path) {
     const details = node("details");
-    const summary = node("summary", name);
+    const summary = node("summary");
+    const chevron = node("span", undefined, "tree-chevron");
+    chevron.setAttribute("aria-hidden", "true");
+    summary.append(chevron, ...entryContent(name, "folder"));
+    summary.title = name;
     const contents = node("div", undefined, "tree-children");
     details.dataset.path = path;
     details.append(summary, contents);
@@ -94,7 +119,9 @@ window.createWorkbenchExplorer = ({ api: initialApi = window.localWorkbench, onS
       const next = child(path, entry.name);
       if (entry.directory) target.append(folderButton(entry.name, next));
       else {
-        const button = node("button", entry.name);
+        const button = node("button");
+        button.append(...entryContent(entry.name, fileKind(entry.name)));
+        button.title = entry.name;
         button.type = "button";
         button.dataset.path = next;
         button.setAttribute("aria-pressed", String(selectedPath === next));
@@ -103,7 +130,7 @@ window.createWorkbenchExplorer = ({ api: initialApi = window.localWorkbench, onS
       }
     }
     if (result.next !== null) {
-      const more = node("button", "Xem thêm", "load-more");
+      const more = node("button", tr("Show more"), "load-more");
       more.type = "button";
       more.addEventListener("click", async () => {
         more.disabled = true;
@@ -143,7 +170,7 @@ window.createWorkbenchExplorer = ({ api: initialApi = window.localWorkbench, onS
         if (checked.get(parentPath)?.next === offset) break;
       }
       if (observed !== generation) return;
-      if (!folder || folder.tagName !== "DETAILS") throw new Error("Thư mục đã thay đổi. Hãy tìm lại.");
+      if (!folder || folder.tagName !== "DETAILS") throw new Error(tr("The folder changed. Search again."));
       folder.open = true;
       parentPath = nextPath;
       target = folder.querySelector(":scope > .tree-children");
@@ -159,7 +186,10 @@ window.createWorkbenchExplorer = ({ api: initialApi = window.localWorkbench, onS
       button.type = "button";
       button.dataset.path = entry.path;
       button.setAttribute("aria-pressed", String(selectedPath === entry.path));
-      button.append(node("span", entry.name), node("small", entry.path, "search-path"));
+      const [icon, label] = entryContent(entry.name, entry.directory ? "folder" : fileKind(entry.name));
+      const text = node("span", undefined, "search-text");
+      text.append(label, node("small", entry.path, "search-path"));
+      button.append(icon, text);
       button.addEventListener("click", async () => {
         try {
           if (entry.directory) await revealFolder(entry.path);
@@ -219,7 +249,8 @@ window.createWorkbenchExplorer = ({ api: initialApi = window.localWorkbench, onS
     const rootLabel = $("local-active-root");
     const name = $("local-root-name");
     name.hidden = !root;
-    name.textContent = root ? tr("Open folder label") + " · " + root.split(/[\\/]/).at(-1) : "";
+    name.textContent = root ? root.split(/[\\/]/).filter(Boolean).at(-1) || root : "";
+    name.title = root || "";
     rootLabel.textContent = root || tr("No folder selected");
     rootLabel.title = root || "";
     checked.clear();

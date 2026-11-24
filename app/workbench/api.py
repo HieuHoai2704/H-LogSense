@@ -8,6 +8,7 @@ import sys
 
 from flask import Blueprint, Response, g, jsonify, request
 
+from app.i18n import translate
 from app.workbench import code_tools, external, jobs, pdf_preview, tabular, terminal
 from app.workbench.files import ACTIVE_ROOT, MAX_TEXT, WORKSPACES, ProjectStore, WorkspaceError, tail
 
@@ -37,10 +38,10 @@ def authorize():
             or request.headers.get("Origin", f"http://{expected}") != f"http://{expected}"
             or request.headers.get("Sec-Fetch-Site") not in (None, "same-origin")
             or not secrets.compare_digest(request.headers.get("Authorization", "").encode(), b"Bearer " + config["token"].encode())):
-        raise WorkspaceError("Phiên làm việc cục bộ chưa được cấp quyền.", 403)
+        raise WorkspaceError("The local session is not authorized.", 403)
     g.workspace = request.headers.get("X-Workspace", "project")
     if g.workspace not in WORKSPACES:
-        raise WorkspaceError("Không gian làm việc không hợp lệ.")
+        raise WorkspaceError("Invalid workspace.")
     unscoped = {"session_info", "select_project", "set_feature", "start_terminal", "terminal_output", "terminal_input",
                 "close_terminal"}
     if request.endpoint.rsplit(".", 1)[-1] not in unscoped:
@@ -50,7 +51,7 @@ def authorize():
 def authorized_project():
     root = store().workspace_root(g.workspace)
     if request.headers.get("X-Project") != project_id(str(root)):
-        raise WorkspaceError("Dự án đã thay đổi. Tải lại bàn làm việc trước khi thao tác.", 409)
+        raise WorkspaceError("The project changed. Reload the workbench before continuing.", 409)
     return root
 
 
@@ -73,28 +74,28 @@ def private(response):
 
 @workbench.errorhandler(WorkspaceError)
 def rejected(error):
-    return jsonify(error=str(error)), error.status
+    return jsonify(error=error.translated()), error.status
 
 
 @workbench.errorhandler(OSError)
 def inaccessible(error):
     if isinstance(error, FileExistsError):
-        return jsonify(error="Tên này đã tồn tại."), 409
+        return jsonify(error=translate("This name already exists.")), 409
     if isinstance(error, FileNotFoundError):
-        return jsonify(error="Tệp hoặc thư mục đã thay đổi."), 404
-    return jsonify(error="Thao tác bị hệ điều hành từ chối hoặc tệp đang bận."), 422
+        return jsonify(error=translate("The file or folder has changed.")), 404
+    return jsonify(error=translate("The operating system denied the action or the file is busy.")), 422
 
 
 def body():
     value = request.get_json(silent=True)
     if not isinstance(value, dict):
-        raise WorkspaceError("Cần đối tượng JSON.")
+        raise WorkspaceError("A JSON object is required.")
     return value
 
 
 def integer(value, minimum, maximum):
     if type(value) is not int or not minimum <= value <= maximum:
-        raise WorkspaceError("Giá trị số nằm ngoài phạm vi.")
+        raise WorkspaceError("Numeric value is out of range.")
     return value
 
 
@@ -165,14 +166,14 @@ def save_file():
 
 def code_file(values):
     if g.workspace != "code":
-        raise WorkspaceError("Mở tệp trong không gian Code.", 403)
+        raise WorkspaceError("Open the file in the Code workspace.", 403)
     name = values.get("path")
     path = store().resolve(name)
     if not path.is_file():
-        raise WorkspaceError("Chọn một tệp trong Code.")
+        raise WorkspaceError("Choose a file in Code.")
     snapshot = store().read(name)
     if snapshot["revision"] != values.get("revision"):
-        raise WorkspaceError("Tệp đã đổi trên đĩa. Mở lại trước khi thao tác.", 409)
+        raise WorkspaceError("The file changed on disk. Reopen it before continuing.", 409)
     return path, snapshot
 
 
@@ -182,7 +183,7 @@ def check_code():
     values = body()
     path, snapshot = code_file(values)
     if path.suffix.casefold() != ".py":
-        raise WorkspaceError("Chọn một tệp Python.")
+        raise WorkspaceError("Choose a Python file.")
     root = store().root()
     result = code_tools.diagnostics(path, root, code_tools.project_python(store(), root), snapshot["text"])
     code_file(values)
@@ -202,7 +203,7 @@ def format_code():
 def read_log():
     file = store().resolve(request.args.get("path", ""))
     if file.suffix.casefold() not in {".log", ".txt", ".jsonl"}:
-        raise WorkspaceError("Chọn tệp .log, .txt hoặc .jsonl.")
+        raise WorkspaceError("Choose a .log, .txt or .jsonl file.")
     return jsonify(tail(file, offset(), request.args.get("stamp")))
 
 
@@ -234,7 +235,7 @@ def metrics():
             text = project.read(name)["text"] if key == "training" else tail(project.resolve(name))["text"]
             output[key] = loader(text)
         except (WorkspaceError, ValueError, csv.Error):
-            output["warnings"].append(f"Không đọc được {name}.")
+            output["warnings"].append(translate("Could not read {0}.", name))
     if request.args.get("sample") == "1":
         output["live"] = jobs.sample_machine(project.state["features"]["gpu"])
     return jsonify(output)
@@ -258,7 +259,7 @@ def select_environment():
     root = project.root()
     selected = body().get("interpreter")
     if not isinstance(selected, str) or selected not in jobs.interpreters(root):
-        raise WorkspaceError("Interpreter không có trong dự án.")
+        raise WorkspaceError("The interpreter is not in the project.")
     with project.edit_profile() as profile:
         profile["interpreters"][str(root)] = selected
     return jsonify(selected=selected)
@@ -272,7 +273,7 @@ def set_feature():
     with project.edit_profile() as profile:
         current = profile["features"]
         if not isinstance(feature, str) or feature not in current or type(enabled) is not bool:
-            raise WorkspaceError("Tiện ích không hợp lệ.")
+            raise WorkspaceError("Invalid extension.")
         current[feature] = enabled
     return jsonify(features=current)
 
@@ -282,12 +283,12 @@ def start_terminal():
     values = body()
     shell = values.get("shell")
     if not isinstance(shell, str):
-        raise WorkspaceError("Chọn một shell.")
+        raise WorkspaceError("Choose a shell.")
     interpreter = None
     if shell == "SSH":
         root = authorized_project()
         if not store().state["features"]["ssh"]:
-            raise WorkspaceError("Tiện ích SSH đang tắt.", 403)
+            raise WorkspaceError("The SSH extension is off.", 403)
         command = terminal.ssh_command(values.get("host"), values.get("user"), values.get("port", 22))
     elif shell == "Run File":
         root = authorized_project()
@@ -299,7 +300,7 @@ def start_terminal():
         root = authorized_project()
         script = store().resolve(values.get("path", ""), root=root)
         if not script.is_file() or script.suffix.casefold() != ".py":
-            raise WorkspaceError("Chọn một tệp Python trong dự án để gỡ lỗi.")
+            raise WorkspaceError("Choose a Python file in the project to debug.")
         available = jobs.interpreters(root)
         interpreter = available[jobs.runtime_id(store(), root, available)]
         command = [str(interpreter), "-I", "-u", "-m", "pdb", str(script)]
@@ -308,7 +309,7 @@ def start_terminal():
         root = authorized_project() if scoped else Path.home()
         command = terminal.profiles().get(shell)
         if not command:
-            raise WorkspaceError("Shell không khả dụng.")
+            raise WorkspaceError("Shell is unavailable.")
         available = jobs.interpreters(root)
         interpreter = available[jobs.runtime_id(store(), root, available) if scoped else "app"]
     session = state()["terminals"].add(command, root, interpreter)
@@ -323,7 +324,7 @@ def listening_ports():
     try:
         sockets = psutil.net_connections(kind="tcp")
     except (psutil.AccessDenied, NotImplementedError) as error:
-        raise WorkspaceError("Hệ điều hành chưa cấp quyền đọc các cổng TCP.", 403) from error
+        raise WorkspaceError("The operating system has not granted permission to read TCP ports.", 403) from error
     rows = sorted({(conn.status != psutil.CONN_LISTEN, conn.laddr.port, conn.laddr.ip, conn.pid or 0)
                    for conn in sockets if conn.laddr and not conn.raddr
                    and conn.status in (psutil.CONN_LISTEN, psutil.CONN_NONE)})
@@ -337,7 +338,7 @@ def listening_ports():
 def terminal_output(session_id):
     wait_ms = request.args.get("wait_ms", type=int) if "wait_ms" in request.args else 0
     if wait_ms is None or not 0 <= wait_ms <= 600:
-        raise WorkspaceError("Thời gian chờ terminal không hợp lệ.")
+        raise WorkspaceError("Invalid terminal wait time.")
     return jsonify(state()["terminals"].get(session_id).snapshot(offset(), wait_ms))
 
 
@@ -348,12 +349,12 @@ def terminal_input(session_id):
     if "text" in values:
         text = values["text"]
         if not isinstance(text, str) or not text or len(text) > 32768:
-            raise WorkspaceError("Dữ liệu nhập terminal không hợp lệ.")
+            raise WorkspaceError("Invalid terminal input.")
         session.write(text)
     elif "rows" in values and "columns" in values:
         session.resize(integer(values["rows"], 2, 180), integer(values["columns"], 2, 400))
     else:
-        raise WorkspaceError("Thao tác terminal không hợp lệ.")
+        raise WorkspaceError("Invalid terminal action.")
     return "", 204
 
 
@@ -403,16 +404,16 @@ def stop_run(run_id):
 @workbench.post("/external")
 def external_preview():
     if not store().state["features"]["external_parsers"]:
-        raise WorkspaceError("Tiện ích phân tích tệp đang tắt.", 403)
+        raise WorkspaceError("The file analysis extension is off.", 403)
     values = body()
     path = values.get("path")
     format_name = values.get("format")
     if not isinstance(format_name, str):
-        raise WorkspaceError("Chọn định dạng tệp.")
+        raise WorkspaceError("Choose a file format.")
     if format_name == "parquet":
         file = store().resolve(path)
         if file.suffix.casefold() != ".parquet" or not file.is_file():
-            raise WorkspaceError("Chọn một tệp .parquet trong dự án.", 422)
+            raise WorkspaceError("Choose a .parquet file in the project.", 422)
         return jsonify(tabular.parquet_profile(file))
     content = store().read(path)["text"]
     if format_name in ("csv", "jsonl"):
@@ -421,4 +422,4 @@ def external_preview():
     try:
         return jsonify(external.analyze(content, legacy_formats.get(format_name, format_name), values.get("unit")))
     except csv.Error:
-        raise WorkspaceError("CSV có cú pháp không hợp lệ.", 422) from None
+        raise WorkspaceError("CSV syntax is invalid.", 422) from None

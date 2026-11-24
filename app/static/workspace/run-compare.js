@@ -1,6 +1,7 @@
 "use strict";
 
 (() => {
+  const tr = window.logsenseTranslate;
   const panel = document.getElementById("run-compare");
   if (!panel) return;
   const toggle = document.getElementById("run-compare-toggle");
@@ -49,13 +50,13 @@
     const oldLeft = left.value;
     const oldRight = right.value;
     for (const select of [left, right]) {
-      select.replaceChildren(new Option("Chọn lượt chạy", ""), ...runs.map((run) =>
+      select.replaceChildren(new Option(tr("Choose a run"), ""), ...runs.map((run) =>
         new Option(run.script + " · " + run.status + " · " + new Date(run.started_at).toLocaleString("vi") + " · " + run.id.slice(0, 8), run.id)));
     }
     left.value = ids.has(oldLeft) ? oldLeft : ids.has(selected) ? selected : runs[0]?.id ?? "";
     right.value = ids.has(oldRight) ? oldRight : runs.find((run) => run.id !== left.value)?.id ?? "";
     if (left.value !== oldLeft || right.value !== oldRight) invalidate();
-    if (runs.length < 2) status.textContent = "Cần ít nhất hai lượt chạy trong dự án.";
+    if (runs.length < 2) status.textContent = tr("At least two runs are needed in the project.");
     syncSubmit();
   }
 
@@ -84,7 +85,7 @@
   function gitLabel(profile) {
     const git = profile?.git;
     if (git?.status !== "available") return null;
-    const state = git.dirty === null ? "chưa rõ thay đổi" : git.dirty ? "có thay đổi chưa commit" : "sạch";
+    const state = git.dirty === null ? tr("changes unknown") : git.dirty ? tr("uncommitted changes") : tr("clean");
     return [git.commit, git.branch, state].filter(Boolean).join(" · ");
   }
 
@@ -103,20 +104,20 @@
     const series = [first, second].map((points) => new Map(points.map((point) => [point.epoch, point[field]])));
     const epochs = [...new Set([...series[0].keys(), ...series[1].keys()])].sort((a, b) => a - b);
     const rows = epochs.map((epoch) => ({ epoch, left: series[0].get(epoch), right: series[1].get(epoch) }));
-    renderMeasured(document.getElementById(container), rows, ["left", "right"], ["Lượt A", "Lượt B"], "epoch");
+    renderMeasured(document.getElementById(container), rows, ["left", "right"], [tr("Run A"), tr("Run B")], "epoch");
     return rows.filter((row) => Number.isFinite(row.left) && Number.isFinite(row.right)).at(-1);
   }
 
   function render([first, second]) {
     body.replaceChildren();
-    add("Lượt chạy", first.run.script + " · " + first.run.id, second.run.script + " · " + second.run.id);
-    add("Trạng thái", first.run.status, second.run.status);
-    add("Thời gian từ lúc yêu cầu chạy", elapsed(first.run), elapsed(second.run));
+    add(tr("Compared run"), first.run.script + " · " + first.run.id, second.run.script + " · " + second.run.id);
+    add(tr("Status"), first.run.status, second.run.status);
+    add(tr("Time since the run was requested"), elapsed(first.run), elapsed(second.run));
     add("Git", gitLabel(first.profile), gitLabel(second.profile), true);
     add("Python", environmentLabel(first.profile), environmentLabel(second.profile), true);
-    add("SHA-256 mã chạy", first.profile?.script.sha256, second.profile?.script.sha256, true);
+    add(tr("Script SHA-256"), first.profile?.script.sha256, second.profile?.script.sha256, true);
     const parameters = (profile) => profile?.parameters.map(({ name, value }) => name + "=" + value).join(" · ") || null;
-    add("Tham số số đã ghi", parameters(first.profile), parameters(second.profile), true);
+    add(tr("Recorded numeric parameters"), parameters(first.profile), parameters(second.profile), true);
     const files = [first, second].map((item) => new Map(item.profile?.config_files.map((file) => [file.path, file.sha256]) ?? []));
     for (const path of new Set([...files[0].keys(), ...files[1].keys()])) {
       add(path, files[0].get(path), files[1].get(path), true);
@@ -125,18 +126,18 @@
       ["ram_percent", "RAM", "%"], ["vram_used_mib", "VRAM", " MiB"]]) {
       const peak = (run) => {
         const measure = run.machine[key];
-        return measure.samples ? numeric(measure.peak, unit) + " · " + measure.samples + " mẫu" : null;
+        return measure.samples ? numeric(measure.peak, unit) + " · " + tr("{0} samples", measure.samples) : null;
       };
-      add("Đỉnh " + label, peak(first), peak(second));
+      add(tr("Peak {0}", label), peak(first), peak(second));
     }
     for (const [field, label, id] of [["train_loss", "Train loss", "compare-train-loss"],
       ["val_loss", "Validation loss", "compare-validation-loss"]]) {
       const latest = loss(first.training, second.training, field, id);
-      add(label + (latest ? " · epoch " + latest.epoch : " · chưa có epoch chung"),
+      add(label + (latest ? " · epoch " + latest.epoch : " · " + tr("no shared epoch")),
         numeric(latest?.left), numeric(latest?.right));
     }
     content.hidden = false;
-    status.textContent = "Đã so sánh hai lượt. Loss và tải máy dùng tối đa 120 điểm đã đọc cho mỗi lượt.";
+    status.textContent = tr("Compared the two runs. Loss and machine load use at most 120 points read per run.");
   }
 
   form.addEventListener("change", invalidate);
@@ -147,7 +148,7 @@
     pending = true;
     syncSubmit();
     content.hidden = true;
-    status.textContent = "Đang đọc hai lượt chạy…";
+    status.textContent = tr("Reading both runs…");
     try {
       const api = window.localWorkbench;
       const result = await api.call(api.query("/runs/compare", { left: left.value, right: right.value }));

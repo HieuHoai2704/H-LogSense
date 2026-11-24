@@ -38,13 +38,16 @@
     syncWindowGlass();
   }
 
+  // Resolved at call time; logs.html loads this file without i18n.js, so keep the English key there.
+  const tr = (message) => window.logsenseTranslate ? window.logsenseTranslate(message) : message;
+
   function query(path, values) {
     const search = new URLSearchParams(Object.entries(values).filter(([, value]) => value !== null && value !== undefined));
     return search.size ? path + "?" + search : path;
   }
 
   async function call(workspace, project, path, method = "GET", data, keepalive = false, signal) {
-    if (!token) throw new Error("Mở app từ trình khởi chạy bàn làm việc để cấp quyền.");
+    if (!token) throw new Error(tr("Open the app from the desktop launcher to grant access."));
     const headers = { Authorization: "Bearer " + token, "X-Workspace": workspace };
     if (project) headers["X-Project"] = project;
     if (data !== undefined) headers["Content-Type"] = "application/json";
@@ -60,13 +63,13 @@
       return response.json();
     }
     const result = await response.json().catch(() => null);
-    const error = new Error(typeof result?.error === "string" ? result.error : "Yêu cầu thất bại.");
+    const error = new Error(typeof result?.error === "string" ? result.error : tr("Request failed."));
     error.status = response.status;
     throw error;
   }
 
   async function pickProject(workspace) {
-    if (!token || !window.pywebview?.api?.pick_project) throw new Error("Hộp thoại đang khởi tạo. Bấm lại sau.");
+    if (!token || !window.pywebview?.api?.pick_project) throw new Error(tr("The dialog is still starting. Try again shortly."));
     return window.pywebview.api.pick_project(token, workspace);
   }
 

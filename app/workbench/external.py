@@ -46,30 +46,30 @@ def structured(row):
 
 def evaluate(text, unit):
     if unit not in ("event", "hdfs_block", "openstack_instance"):
-        raise WorkspaceError("Chọn đơn vị đánh giá phù hợp với tệp dự đoán.")
+        raise WorkspaceError("Choose an evaluation unit that matches the prediction file.")
     reader = csv.DictReader(StringIO(text))
     if not reader.fieldnames or not {"unit_id", "label", "prediction"}.issubset(reader.fieldnames):
-        raise WorkspaceError("CSV đánh giá cần cột unit_id,label,prediction.", 422)
+        raise WorkspaceError("Evaluation CSV needs unit_id,label,prediction columns.", 422)
     counts = Counter()
     seen = set()
     for row in reader:
         key = row["unit_id"]
         label, prediction = row["label"], row["prediction"]
         if not key or key in seen or label not in ("0", "1") or prediction not in ("0", "1"):
-            raise WorkspaceError("Mỗi đơn vị cần ID duy nhất và nhãn/dự đoán 0 hoặc 1.", 422)
+            raise WorkspaceError("Each unit needs a unique ID and a label/prediction of 0 or 1.", 422)
         if unit == "hdfs_block" and not BLOCK.fullmatch(key):
-            raise WorkspaceError("ID HDFS phải là block ID.", 422)
+            raise WorkspaceError("HDFS IDs must be block IDs.", 422)
         if unit == "openstack_instance":
             from uuid import UUID
             try:
                 if str(UUID(key)) != key:
                     raise ValueError
             except ValueError:
-                raise WorkspaceError("ID OpenStack phải là UUID của VM.", 422) from None
+                raise WorkspaceError("OpenStack IDs must be VM UUIDs.", 422) from None
         seen.add(key)
         counts[label, prediction] += 1
     if not seen:
-        raise WorkspaceError("Tệp đánh giá chưa có dữ liệu.", 422)
+        raise WorkspaceError("The evaluation file has no data.", 422)
     tp, fp, fn, tn = (counts[pair] for pair in (("1", "1"), ("0", "1"), ("1", "0"), ("0", "0")))
 
     def ratio(a, b):
@@ -84,7 +84,7 @@ def analyze(text, format_name, unit=None):
     if format_name == "evaluation":
         return evaluate(text, unit)
     if format_name not in ("hdfs", "openstack", "jsonl", "csv"):
-        raise WorkspaceError("Chọn HDFS, OpenStack, JSONL, CSV hoặc CSV đánh giá.")
+        raise WorkspaceError("Choose HDFS, OpenStack, JSONL, CSV or evaluation CSV.")
     source = csv.DictReader(StringIO(text), strict=True) if format_name == "csv" else text.splitlines()
     counts = Counter()
     sample = []
@@ -105,7 +105,7 @@ def analyze(text, format_name, unit=None):
             if len(sample) < 30:
                 sample.append({"record": index, **parsed})
     except csv.Error:
-        raise WorkspaceError("CSV có cú pháp không hợp lệ.", 422) from None
+        raise WorkspaceError("CSV syntax is invalid.", 422) from None
     return {"format": format_name, "events": sum(counts.values()), "malformed": malformed,
             "severity": dict(counts), "distinct_unit_ids": len(units) if format_name in ("hdfs", "openstack") else None,
             "unit": {"hdfs": "hdfs_block", "openstack": "openstack_instance"}.get(format_name, "event"),

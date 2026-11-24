@@ -20,14 +20,14 @@ MAX_SAMPLES = 120
 
 def process_for(root, pid, created=None):
     if type(pid) is not int or not 1 <= pid <= 2**31 - 1:
-        raise WorkspaceError("PID không hợp lệ.")
+        raise WorkspaceError("Invalid PID.")
     process = psutil.Process(pid)
     if created is not None and process.create_time() != created:
         raise psutil.NoSuchProcess(pid)
     if not process.is_running() or process.status() == psutil.STATUS_ZOMBIE:
         raise psutil.NoSuchProcess(pid)
     if process.username() != psutil.Process().username() or not Path(process.cwd()).resolve().is_relative_to(root):
-        raise WorkspaceError("PID phải thuộc tài khoản hiện tại và chạy trong thư mục dự án.", 403)
+        raise WorkspaceError("The PID must belong to the current account and run in the project folder.", 403)
     return process
 
 
@@ -35,14 +35,14 @@ def validated_process(root, pid, created=None):
     try:
         return process_for(root, pid, created)
     except psutil.NoSuchProcess as error:
-        raise WorkspaceError("PID không còn chạy hoặc đã được dùng lại.", 404) from error
+        raise WorkspaceError("The PID is no longer running or has been reused.", 404) from error
     except (psutil.AccessDenied, OSError) as error:
-        raise WorkspaceError("Không đọc được tiến trình này.", 403) from error
+        raise WorkspaceError("Could not read this process.", 403) from error
 
 
 def run_id(value):
     if not isinstance(value, str) or not ATTACH_ID.fullmatch(value) or not component(value):
-        raise WorkspaceError("run_id cần 1–64 ký tự chữ, số, dấu gạch, dấu chấm hoặc gạch dưới.")
+        raise WorkspaceError("run_id needs 1–64 letters, digits, hyphens, dots or underscores.")
     return value
 
 
@@ -54,7 +54,7 @@ def checked_paths(root, log, metrics):
             continue
         path = project_path(root, value, missing=True)
         if path.suffix.casefold() not in suffixes or (path.exists() and not path.is_file()):
-            raise WorkspaceError("Chọn log .log/.txt và chỉ số .csv trong dự án.")
+            raise WorkspaceError("Choose a .log/.txt log and .csv metrics in the project.")
         paths[key] = value
     return paths
 
@@ -63,7 +63,7 @@ def manifest(root, identifier):
     identifier = run_id(identifier)
     path = project_path(root, f"runs/{identifier}/{MANIFEST_NAME}")
     if not path.is_file() or path.stat().st_size > 8192:
-        raise WorkspaceError("Manifest lượt chạy không hợp lệ.")
+        raise WorkspaceError("Invalid run manifest.")
     try:
         with path.open("rb") as stream:
             raw = stream.read(8193)
@@ -73,7 +73,7 @@ def manifest(root, identifier):
         paths = checked_paths(root, data.get("log", ""), data.get("metrics", ""))
         process = validated_process(root, data["pid"], data["process_created"])
     except (KeyError, ValueError, RecursionError) as error:
-        raise WorkspaceError("Manifest lượt chạy không hợp lệ.") from error
+        raise WorkspaceError("Invalid run manifest.") from error
     return process, paths
 
 

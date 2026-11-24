@@ -1,6 +1,7 @@
 "use strict";
 
 (() => {
+  const tr = window.logsenseTranslate;
   const local = window.localWorkbench;
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const requestTimeout = 5000;
@@ -28,13 +29,13 @@
 
     async begin() {
       try {
-        if (!this.service.authorized) throw new Error("Mở bàn làm việc từ trình khởi chạy.");
-        if (!window.Terminal || !window.FitAddon) throw new Error("Thiếu tài nguyên xterm.js.");
+        if (!this.service.authorized) throw new Error(tr("Open the workbench from the launcher."));
+        if (!window.Terminal || !window.FitAddon) throw new Error(tr("Missing xterm.js assets."));
         const { id, cwd, interpreter } = await this.service.call("/terminals", "POST", this.profile);
         if (this.closed) await this.service.call("/terminals/" + id, "DELETE", undefined, true);
         else {
           this.session = id;
-          if (cwd) this.host.title = "Thư mục khi mở phiên: " + cwd + (interpreter ? "\nPython: " + interpreter : "");
+          if (cwd) this.host.title = tr("Folder when the session opened: {0}", cwd) + (interpreter ? "\nPython: " + interpreter : "");
           this.attach();
         }
       } catch (error) {
@@ -57,7 +58,7 @@
       const status = owner.createElement("div");
       status.className = "terminal-connection";
       status.setAttribute("role", "status");
-      status.textContent = "Đang kết nối phiên…";
+      status.textContent = tr("Connecting to session…");
       const viewport = owner.createElement("div");
       viewport.className = "live-shell-viewport";
       this.host.replaceChildren(status, viewport);
@@ -155,7 +156,7 @@
         if (this.current(generation) && epoch === this.inputEpoch) {
           this.inputEpoch += 1;
           this.discardPendingInput();
-          this.reportError(error.status ? error.message : "Chưa xác nhận lệnh đã đến shell. Kiểm tra đầu ra trước khi gửi lại.");
+          this.reportError(error.status ? error.message : tr("Could not confirm the command reached the shell. Check the output before sending it again."));
         }
       } finally {
         clearTimeout(timeout);
@@ -186,20 +187,20 @@
           if (!this.current(generation)) return;
           if (output.reset) {
             const skipped = output.start_offset - offset;
-            const message = skipped > 0 ? skipped + " ký tự đầu ra đã vượt bộ đệm." : "Vị trí đọc đã thay đổi.";
+            const message = skipped > 0 ? tr("{0} output characters exceeded the buffer.", skipped) : tr("The read position changed.");
             emulator.write("\r\n[" + message + "]\r\n");
           }
           if (output.text) emulator.write(output.text);
           offset = output.offset;
           if (output.finished) {
             emulator.options.disableStdin = true;
-            status.textContent = "Phiên đã kết thúc.";
-            emulator.write("\r\n[Phiên đã kết thúc]\r\n");
+            status.textContent = tr("Session ended.");
+            emulator.write("\r\n[" + tr("Session ended") + "]\r\n");
             return;
           }
           if (emulator.options.disableStdin) {
             emulator.options.disableStdin = false;
-            status.textContent = interrupted ? "Đã kết nối lại cùng phiên." : "";
+            status.textContent = interrupted ? tr("Reconnected to the same session.") : "";
             resize();
             const pane = this.host.closest(".terminal-pane");
             if (!interrupted && !pane?.dataset.tool && pane?.contains(this.host.ownerDocument.activeElement)) emulator.focus();
@@ -216,11 +217,11 @@
             this.inputRequest?.abort();
           }
           if (!canRetry(error)) {
-            status.textContent = error.status === 404 ? "Phiên shell không còn trên máy chủ." : error.message;
+            status.textContent = error.status === 404 ? tr("The shell session no longer exists on the server.") : error.message;
             return;
           }
           interrupted = true;
-          status.textContent = "Mất kết nối. Đang thử nối lại phiên…";
+          status.textContent = tr("Connection lost. Trying to reconnect to the session…");
           await delay(retryDelay);
           retryDelay = Math.min(retryDelay * 2, 4000);
         }

@@ -35,7 +35,9 @@
     const link = document.createElement("button");
     link.type = "button";
     link.className = "source-jump";
-    link.textContent = "Mở " + target.path + (target.line ? ":" + target.line : " · chưa rõ dòng");
+    link.textContent = target.line
+      ? window.logsenseTranslate("Open {0}:{1}", target.path, target.line)
+      : window.logsenseTranslate("Open {0} · line unknown", target.path);
     link.addEventListener("click", () => open(target));
     return link;
   }

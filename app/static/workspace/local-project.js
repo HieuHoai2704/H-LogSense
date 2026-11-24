@@ -38,7 +38,7 @@
     selectedPath = path;
     selectedDirectory = directory;
     document.querySelector('[data-file-action="rename"]').disabled = !path;
-    $("local-selected").textContent = path || "Thư mục gốc";
+    $("local-selected").textContent = path || tr("Root folder");
     const canWatch = !directory && visibleScope().root === current && /\.(log|txt|jsonl)$/i.test(path);
     const canEdit = !directory && codeFile(path);
     $("local-watch-log").hidden = !canWatch;
@@ -168,7 +168,7 @@
 
   async function selectFile(path, target = null, root = visibleScope().root) {
     if (root !== codeScope.root) {
-      setStatus("Mở thư mục này trong tab Code để chỉnh sửa tệp: " + root);
+      setStatus(tr("Open this folder in the Code tab to edit files: {0}", root));
       return;
     }
     const pane = await codeEditor.open(path);
@@ -249,7 +249,7 @@
     const info = await codeApi.call("/environment");
     if (root !== codeScope.root) return;
     codeInterpreter.replaceChildren(...Object.entries(info.interpreters).map(([key, path]) => {
-      const option = new Option(key === "app" ? "Python của H-logsen" : "Python · " + key, key);
+      const option = new Option(key === "app" ? tr("H-logsen Python") : "Python · " + key, key);
       option.title = path;
       return option;
     }));
@@ -264,7 +264,7 @@
     codeInterpreter.disabled = true;
     try {
       await codeApi.call("/environment", "PUT", { interpreter });
-      if (root === codeScope.root) setStatus("Đã chọn Python. Mở phiên terminal mới để dùng môi trường này.");
+      if (root === codeScope.root) setStatus(tr("Python selected. Open a new terminal session to use this environment."));
     } catch (error) { setStatus(error.message); }
     finally {
       codeInterpreter.disabled = false;
@@ -338,14 +338,14 @@
       const action = button.dataset.fileAction;
       const scope = visibleScope();
       if (action === "rename" && scope.root === codeScope.root && codeEditor.hasOpen(selectedPath)) {
-        setStatus("Đóng tệp đang mở trong Code trước khi đổi tên.");
+        setStatus(tr("Close the file open in Code before renaming."));
         return;
       }
       const lastSlash = selectedPath.lastIndexOf("/");
       const parent = selectedDirectory && action !== "rename" ? selectedPath : selectedPath.slice(0, Math.max(0, lastSlash));
       pendingAction = { action, parent, path: selectedPath, directory: selectedDirectory, button, scope, root: scope.root };
-      const title = { file: "Tạo tệp", directory: "Tạo thư mục", rename: "Đổi tên" }[action];
-      $("local-file-label").textContent = title + " · " + (parent || "Thư mục gốc");
+      const title = { file: tr("Create file"), directory: tr("Create folder"), rename: tr("Rename") }[action];
+      $("local-file-label").textContent = title + " · " + (parent || tr("Root folder"));
       fileName.value = action === "rename" ? selectedPath.split("/").at(-1) : "";
       fileStatus.textContent = "";
       manage.hidden = false;
@@ -362,7 +362,7 @@
     if (!pending || pending.scope.root !== pending.root) return;
     const name = fileName.value.trim();
     if (!name || /[/\\]/.test(name)) {
-      fileStatus.textContent = "Nhập tên, không kèm đường dẫn.";
+      fileStatus.textContent = tr("Enter a name without a path.");
       fileName.focus();
       return;
     }
@@ -370,7 +370,7 @@
     const { action, path } = pending;
     try {
       if (action === "rename" && pending.root === codeScope.root && codeEditor.hasOpen(path)) {
-        fileStatus.textContent = "Đóng tệp đang mở trong Code trước khi đổi tên.";
+        fileStatus.textContent = tr("Close the file open in Code before renaming.");
         return;
       }
       await pending.scope.api.call("/tree", "POST", action === "rename" ? { action, path, target } : { action, path: target });
@@ -378,7 +378,7 @@
       explorer.select(target, action === "directory" || (action === "rename" && pending.directory));
       cancelFileAction();
       await explorer.refresh();
-      setStatus("Đã cập nhật cây dự án.");
+      setStatus(tr("Project tree updated."));
     } catch (error) {
       if (pendingAction === pending) fileStatus.textContent = error.message;
     }
@@ -407,7 +407,7 @@
     resetLogView();
     if (run) {
       logPath = null;
-      $("local-run-status").textContent = "Đang đọc lượt chạy…";
+      $("local-run-status").textContent = tr("Reading run…");
       $("local-stop-run").hidden = true;
       navigateProject("monitor");
       renderMetrics();
@@ -432,8 +432,8 @@
 
   $("local-run-file").addEventListener("click", async () => {
     const file = codeEditor.file();
-    if (!file || codeEditor.dirty()) return setStatus("Lưu tệp trước khi chạy.");
-    if (codeScope.root !== current && runActive(codeRun)) return setStatus("Dừng lượt chạy hiện tại trước khi chạy tệp khác.");
+    if (!file || codeEditor.dirty()) return setStatus(tr("Save the file before running."));
+    if (codeScope.root !== current && runActive(codeRun)) return setStatus(tr("Stop the current run before running another file."));
     try {
       $("local-run-file").disabled = true;
       const raw = $("local-run-args").value.trim();
@@ -452,7 +452,7 @@
         }
         await refreshCodeRun();
       }
-      setStatus("Đã khởi động lượt chạy.");
+      setStatus(tr("Run started."));
     } catch (error) { setStatus(error.message); }
     finally { $("local-run-file").disabled = false; }
   });
@@ -469,13 +469,13 @@
     attachForm.elements.run_id.disabled = byPid;
     attachForm.elements.run_id.required = !byPid;
     $("attach-run-hint").textContent = byPid
-      ? "Chọn PID đang chạy trong dự án. Tệp log và CSV loss là tùy chọn."
-      : "Nhập ID lượt chạy H-logsen hoặc ID đã đăng ký trong runs/<run_id>/h-logsen.json.";
+      ? tr("Choose a running PID in the project. The log file and loss CSV are optional.")
+      : tr("Enter an H-logsen run ID or an ID registered in runs/<run_id>/h-logsen.json.");
     attachError.hidden = true;
   }
   attachMode.addEventListener("change", updateAttachForm);
   $("open-attach-run").addEventListener("click", () => {
-    if (!current) return setStatus("Mở thư mục dự án trước khi gắn lượt chạy.");
+    if (!current) return setStatus(tr("Open a project folder before attaching a run."));
     updateAttachForm();
     attachDialog.showModal();
   });
@@ -503,7 +503,7 @@
     button.disabled = true;
     try {
       await api.call("/runs/" + run + "/stop", "POST");
-      setStatus("Đã yêu cầu dừng lượt chạy.");
+      setStatus(tr("Run stop requested."));
     } catch (error) { setStatus(error.message); }
     finally { button.disabled = false; }
   });
@@ -520,7 +520,7 @@
   $("local-interpreter").addEventListener("change", async (event) => {
     try {
       await api.call("/environment", "PUT", { interpreter: event.target.value });
-      $("local-package-list").textContent = "Đã đổi interpreter. Bấm xem gói để tải danh sách.";
+      $("local-package-list").textContent = tr("Interpreter changed. View installed packages to load the list.");
       if (current === codeScope.root) await refreshCodeInterpreter();
     } catch (error) { setStatus(error.message); }
   });
@@ -528,7 +528,7 @@
   document.querySelector('[data-setting="environments"]').addEventListener("click", () => refreshEnvironment().catch((error) => setStatus(error.message)));
 
   submit($("local-ssh"), async () => {
-    if (!current) throw new Error("Mở một dự án cục bộ trước.");
+    if (!current) throw new Error(tr("Open a local project first."));
     const values = Object.fromEntries(new FormData($("local-ssh")));
     navigateProject("monitor");
     document.dispatchEvent(new CustomEvent("workspace:ssh", { detail: { shell: "SSH", host: values.host, user: values.user, port: Number(values.port) } }));

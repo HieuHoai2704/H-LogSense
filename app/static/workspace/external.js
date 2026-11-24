@@ -3,6 +3,9 @@
 (() => {
   const panel = document.getElementById("external-preview");
   if (!panel) return;
+  // logs.html includes this panel without i18n.js; fall back to the English key there.
+  const tr = window.logsenseTranslate || ((message, ...values) =>
+    message.replace(/\{(\d+)\}/g, (match, index) => Number(index) < values.length ? String(values[index]) : match));
   const form = panel.querySelector("form");
   const output = document.getElementById("external-raw");
   const status = document.getElementById("external-status");
@@ -30,7 +33,7 @@
     const chart = columns[Number(column.value)]?.distribution;
     graph.replaceChildren();
     if (!chart || (chart.kind === "top" && !chart.values.length)) {
-      graph.textContent = "Chưa có phân phối cho kiểu dữ liệu này.";
+      graph.textContent = tr("No distribution for this data type yet.");
       return;
     }
     const histogram = chart.kind === "histogram";
@@ -41,16 +44,16 @@
         number.format(edge(index + 1)) + (index === size - 1 ? "]" : ")");
       return { count, label };
     }) : chart.values;
-    if (histogram) graph.append(element("p", number.format(chart.min) + " → " + number.format(chart.max) + " · " + bins.length + " khoảng đều"));
+    if (histogram) graph.append(element("p", tr("{0} → {1} · {2} equal bins", number.format(chart.min), number.format(chart.max), bins.length)));
     const max = Math.max(1, ...bins.map((item) => item.count));
     for (const { label, count } of bins) {
       const line = element("div");
       const meter = element("progress");
       meter.max = max;
       meter.value = count;
-      meter.setAttribute("aria-label", label || "Chuỗi rỗng");
+      meter.setAttribute("aria-label", label || tr("Empty string"));
       meter.textContent = count + "/" + max;
-      line.append(element("span", (label || "(chuỗi rỗng)") + " · " + count + " "), meter);
+      line.append(element("span", (label || tr("(empty string)")) + " · " + count + " "), meter);
       graph.append(line);
     }
   }
@@ -68,11 +71,10 @@
     if (columns.length) header.append(row("th", columns.map((item) => item.name)));
     body.append(...report.preview.map((item) => row("td", item)));
     sample.replaceChildren(header, body);
-    status.textContent = number.format(report.scanned_rows) +
-      (report.total_rows === null ? "" : "/" + number.format(report.total_rows)) +
-      " dòng đã đọc · " + number.format(report.valid_rows) + " hợp lệ · " + number.format(report.malformed_rows) +
-      " lỗi · " + number.format(report.duplicate_rows) + " trùng" +
-      (report.sampled ? " · Thống kê trên phần dữ liệu đã đọc." : "");
+    status.textContent = tr("{0} rows read · {1} valid · {2} malformed · {3} duplicates",
+      number.format(report.scanned_rows) + (report.total_rows === null ? "" : "/" + number.format(report.total_rows)),
+      number.format(report.valid_rows), number.format(report.malformed_rows), number.format(report.duplicate_rows)) +
+      (report.sampled ? " · " + tr("Statistics cover only the rows read.") : "");
     data.hidden = false;
   }
 
@@ -137,7 +139,7 @@
     const observed = ++revision;
     const submit = form.querySelector('button[type="submit"]');
     submit.disabled = true;
-    status.textContent = "Đang đọc tệp…";
+    status.textContent = tr("Reading file…");
     data.hidden = output.hidden = true;
     try {
       const values = Object.fromEntries(new FormData(form));
@@ -148,7 +150,7 @@
       else {
         output.textContent = JSON.stringify(report, null, 2);
         output.hidden = false;
-        status.textContent = "Đã đọc tệp.";
+        status.textContent = tr("File read.");
       }
     } catch (error) {
       if (observed === revision) status.textContent = error.message;

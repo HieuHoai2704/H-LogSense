@@ -40,22 +40,22 @@
   {% include "partials/workspace_navigation.html" %}
   <div class="project-shell" data-view="{{ workspace_view }}">
     <aside class="project-sidebar" id="project-sidebar">
-      <section class="project-tree" aria-label="Tệp của dự án">
+      <section class="project-tree" aria-label="{{ tr('Project files') }}">
         <h2 id="local-explorer-title">{{ tr("Project folders") }}</h2>
         <p id="tree-source" class="muted">{{ tr("No project open") }}</p>
         <div id="project-files"{% if workbench_enabled %} hidden{% endif %}></div>
         {% if workbench_enabled %}
         {% include "partials/workbench_folder.html" %}
-        <div class="file-tools" id="local-controls" aria-label="Quản lý tệp" hidden>
-          <button type="button" data-file-action="file">+ Tệp</button>
-          <button type="button" data-file-action="directory">+ Thư mục</button>
-          <button type="button" data-file-action="rename" disabled>Đổi tên</button>
+        <div class="file-tools" id="local-controls" aria-label="{{ tr('Manage files') }}" hidden>
+          <button type="button" data-file-action="file">{{ tr("+ File") }}</button>
+          <button type="button" data-file-action="directory">{{ tr("+ Folder") }}</button>
+          <button type="button" data-file-action="rename" disabled>{{ tr("Rename") }}</button>
         </div>
         <p id="local-selected" class="sr-only"></p>
         <form id="local-manage" class="file-inline-form" hidden>
-          <label for="local-target" id="local-file-label">Tên tệp</label>
+          <label for="local-target" id="local-file-label">{{ tr("File name") }}</label>
           <input id="local-target" maxlength="255" autocomplete="off" required>
-          <button type="submit">Xong</button><button type="button" id="local-file-cancel">Hủy</button>
+          <button type="submit">{{ tr("Done") }}</button><button type="button" id="local-file-cancel">{{ tr("Discard") }}</button>
           <p id="local-file-status" role="status"></p>
         </form>
         <div class="project-file-actions" id="local-file-actions" hidden>
@@ -65,7 +65,7 @@
         {% include "partials/workbench_explorer.html" %}
         {% endif %}
       </section>
-      <nav id="settings-nav" class="settings-nav" aria-label="Nhóm thiết lập" hidden>
+      <nav id="settings-nav" class="settings-nav" aria-label="{{ tr('Settings groups') }}" hidden>
         <h2>{{ tr("Settings") }}</h2>
         <button type="button" data-setting="appearance" aria-pressed="true">{{ tr("Appearance") }}</button>
         <button type="button" data-setting="language" aria-pressed="false">{{ tr("Language") }}</button>
@@ -77,7 +77,7 @@
     </aside>
   <main>
     {% if workbench_enabled %}<p id="local-status" class="muted" role="status"></p>{% endif %}
-    <section id="monitor" aria-label="Theo dõi dòng log"{% if workspace_view != "monitor" %} hidden{% endif %}>
+    <section id="monitor" aria-label="{{ tr('Log stream monitor') }}"{% if workspace_view != "monitor" %} hidden{% endif %}>
     <div class="monitor-top">
     <header class="workspace-bar monitor-bar">
       <div class="monitor-context">
@@ -86,19 +86,19 @@
       </div>
       <div class="monitor-actions">
         <span class="source-state" id="source-state"></span>
-        <button type="button" id="pause">Giữ màn hình</button>
+        <button type="button" id="pause">{{ tr("Pause view") }}</button>
         {% if not workbench_enabled %}<button type="button" id="open-project-file">{{ tr("Open project") }}</button>{% endif %}
       </div>
     </header>
       <details class="panel project-file" id="project-file" hidden>
-        <summary>Nguồn của dự án</summary>
-        <p class="folder-picker"{% if workbench_enabled %} hidden{% endif %}><label for="project-folder">Chọn thư mục</label>
+        <summary>{{ tr("Project source") }}</summary>
+        <p class="folder-picker"{% if workbench_enabled %} hidden{% endif %}><label for="project-folder">{{ tr("Choose folder") }}</label>
           <input id="project-folder" type="file" webkitdirectory>
         </p>
         <form id="import-form"{% if workbench_enabled %} hidden{% endif %}>
-          <label for="log-file">Tệp .log, .txt hoặc .jsonl · tối đa 1 MiB và 12.000 dòng</label>
+          <label for="log-file">{{ tr(".log, .txt or .jsonl file · up to 1 MiB and 12,000 lines") }}</label>
           <input id="log-file" type="file" accept=".log,.txt,.jsonl" required>
-          <button id="import-button" class="primary" type="submit">Mở log</button>
+          <button id="import-button" class="primary" type="submit">{{ tr("Open log") }}</button>
         </form>
         <p id="import-status" role="status"></p>
       </details>
@@ -107,9 +107,9 @@
       <div class="run-tools">
       <div class="scope">
         <select id="local-runs" aria-label="{{ tr("Run history") }}"><option value="">{{ tr("Run history") }}</option></select>
-        <span id="local-run-status" role="status"></span><button id="local-stop-run" type="button" hidden>Dừng lượt chạy</button>
+        <span id="local-run-status" role="status"></span><button id="local-stop-run" type="button" hidden>{{ tr("Stop run") }}</button>
       </div>
-      <button id="open-attach-run" type="button" aria-haspopup="dialog">Gắn lượt chạy</button>
+      <button id="open-attach-run" type="button" aria-haspopup="dialog">{{ tr("Attach run") }}</button>
       <button id="run-compare-toggle" type="button" aria-expanded="false" aria-controls="run-compare">{{ tr("Compare two runs") }}</button>
       </div>
       {% endif %}
@@ -129,27 +129,27 @@
           <button id="run-compare-close" type="button">{{ tr("Close") }}</button>
         </header>
         <form class="local-form">
-          <label>Lượt A <select name="left" required></select></label>
-          <label>Lượt B <select name="right" required></select></label>
-          <button type="submit">So sánh</button>
+          <label>{{ tr("Run A") }} <select name="left" required></select></label>
+          <label>{{ tr("Run B") }} <select name="right" required></select></label>
+          <button type="submit">{{ tr("Compare") }}</button>
         </form>
         <p id="run-compare-status" role="status"></p>
         <div id="run-compare-content" hidden>
           <div class="run-compare-scroll"><table>
-            <thead><tr><th scope="col">Thông tin</th><th scope="col">Lượt A</th><th scope="col">Lượt B</th></tr></thead>
+            <thead><tr><th scope="col">{{ tr("Field") }}</th><th scope="col">{{ tr("Run A") }}</th><th scope="col">{{ tr("Run B") }}</th></tr></thead>
             <tbody id="run-compare-rows"></tbody>
           </table></div>
           <div class="run-detail-charts">
-            <section><h3>Train loss theo epoch</h3><div id="compare-train-loss"></div></section>
-            <section><h3>Validation loss theo epoch</h3><div id="compare-validation-loss"></div></section>
+            <section><h3>{{ tr("Train loss by epoch") }}</h3><div id="compare-train-loss"></div></section>
+            <section><h3>{{ tr("Validation loss by epoch") }}</h3><div id="compare-validation-loss"></div></section>
           </div>
-          <p class="muted">Lượt A nét liền · Lượt B nét đứt. Loss chỉ so trực tiếp khi cùng dữ liệu và cách tính. Tải máy là đỉnh trong các mẫu đã ghi của cả máy.</p>
+          <p class="muted">{{ tr("Run A solid line · Run B dashed line. Loss is only directly comparable with the same data and calculation. Machine load is the peak of the recorded whole-machine samples.") }}</p>
         </div>
       </section>
       {% endif %}
       <div class="charts">
-        <section class="panel chart-panel" aria-label="Điều tra log">
-          <div class="pane-tabs" aria-label="Chế độ điều tra">
+        <section class="panel chart-panel" aria-label="{{ tr('Log investigation') }}">
+          <div class="pane-tabs" aria-label="{{ tr('Investigation mode') }}">
             <button type="button" data-panel="activity" aria-pressed="true" aria-controls="activity">{{ tr("Anomaly activity") }}</button>
             <button type="button" data-panel="results" aria-pressed="false" aria-controls="results">{{ tr("Results") }}</button>
             <span class="chart-state" id="activity-state" role="status"></span>
@@ -168,12 +168,12 @@
           <p id="activity-detail" hidden></p>
           </div>
           <div id="results" class="pane-content" hidden>
-            <header class="panel-header"><h2>Log cần xem</h2><div class="metric" id="volume-metric"></div></header>
+            <header class="panel-header"><h2>{{ tr("Logs to review") }}</h2><div class="metric" id="volume-metric"></div></header>
             <div id="result-list" class="chart-data result-list"></div>
           </div>
         </section>
-        <section class="panel chart-panel" aria-label="Chỉ số lượt chạy">
-          <div class="pane-tabs" aria-label="Loại chỉ số">
+        <section class="panel chart-panel" aria-label="{{ tr('Run metrics') }}">
+          <div class="pane-tabs" aria-label="{{ tr('Metric type') }}">
             <button type="button" data-panel="training" aria-pressed="true" aria-controls="training">{{ tr("Training metrics") }}</button>
             <button type="button" data-panel="machine" aria-pressed="false" aria-controls="machine">{{ tr("Machine load") }}</button>
             <span class="chart-state" id="training-state" role="status"></span>
@@ -182,7 +182,7 @@
           <div id="training" class="pane-content">
           <header class="panel-header">
             <h2>{{ tr("Loss by epoch") }}</h2>
-            <span class="data-kind">Mô phỏng</span>
+            <span class="data-kind">{{ tr("Simulated") }}</span>
           </header>
           <div id="training-chart" class="chart-data"></div>
           <p id="training-sync" class="training-sync" hidden></p>
@@ -227,36 +227,36 @@
 {% if workbench_enabled %}
       <section id="run-detail" class="panel run-detail" aria-labelledby="run-detail-title" hidden>
         <header class="panel-header">
-          <div><h2 id="run-detail-title">Chi tiết lượt train</h2><p id="run-detail-meta" class="muted"></p></div>
-          <button id="run-follow" type="button" aria-pressed="true">Theo mốc mới nhất</button>
+          <div><h2 id="run-detail-title">{{ tr("Training run details") }}</h2><p id="run-detail-meta" class="muted"></p></div>
+          <button id="run-follow" type="button" aria-pressed="true">{{ tr("Follow latest point") }}</button>
         </header>
         <details id="run-profile" class="run-profile">
-          <summary>Hồ sơ lượt chạy</summary>
+          <summary>{{ tr("Run profile") }}</summary>
           <div class="scope">
             <span id="run-profile-status" role="status"></span>
-            <button id="run-profile-refresh" type="button">Cập nhật hồ sơ</button>
+            <button id="run-profile-refresh" type="button">{{ tr("Refresh profile") }}</button>
           </div>
           <dl id="run-profile-metadata" class="settings-rows"></dl>
-          <h3>Tệp đầu ra</h3>
+          <h3>{{ tr("Output files") }}</h3>
           <ul id="run-profile-files"></ul>
         </details>
         <div class="run-detail-charts">
           <div><h3>Loss</h3><div id="run-loss"></div></div>
-          <div><h3>CPU, GPU và RAM (%)</h3><div id="run-machine"></div></div>
+          <div><h3>{{ tr("CPU, GPU and RAM (%)") }}</h3><div id="run-machine"></div></div>
         </div>
         <div class="run-cursor">
-          <label for="run-time">Mốc điều tra (UTC)</label>
+          <label for="run-time">{{ tr("Investigation point (UTC)") }}</label>
           <input id="run-time" type="range" min="0" max="0" value="0" disabled>
           <output id="run-time-value" for="run-time"></output>
         </div>
         <p id="run-coverage" class="muted"></p>
         <div class="run-evidence">
-          <section><h3>Checkpoint ghi trong log</h3><div id="run-checkpoints"></div></section>
+          <section><h3>{{ tr("Checkpoints recorded in log") }}</h3><div id="run-checkpoints"></div></section>
           <section>
-            <h3>Log tại mốc đã chọn</h3>
+            <h3>{{ tr("Log at selected point") }}</h3>
             <p id="run-log-note" class="muted" role="status"></p>
             <pre id="run-log-context" tabindex="0"></pre>
-            <div id="run-source-links" class="run-source-links" aria-label="Tệp và dòng trong lỗi hoặc test fail"></div>
+            <div id="run-source-links" class="run-source-links" aria-label="{{ tr('Files and lines in errors or failed tests') }}"></div>
           </section>
         </div>
       </section>
@@ -265,28 +265,28 @@
       <div id="monitor-terminal">
       <section id="terminal-dock" class="panel terminal" aria-labelledby="terminal-title">
         <header class="panel-header terminal-header">
-          <div class="terminal-title" id="terminal-title" aria-label="Công cụ dự án">
+          <div class="terminal-title" id="terminal-title" aria-label="{{ tr('Project tools') }}">
             {% if workbench_enabled %}
             <button type="button" data-dock-tab="terminal" aria-pressed="true" aria-controls="terminal-panes">Terminal</button>
-            <button type="button" data-dock-tab="problems" aria-pressed="false" aria-controls="dock-problems">Vấn đề <span id="dock-problem-count"></span></button>
-            <button type="button" data-dock-tab="output" aria-pressed="false" aria-controls="dock-output">Đầu ra</button>
-            <button type="button" data-dock-tab="ports" aria-pressed="false" aria-controls="dock-ports">Cổng</button>
-            <button type="button" data-dock-tab="debug" aria-pressed="false" aria-controls="dock-debug">Gỡ lỗi</button>
-            {% else %}<h2>Terminal</h2><span class="data-kind">Log cục bộ · Shell mẫu</span>{% endif %}
+            <button type="button" data-dock-tab="problems" aria-pressed="false" aria-controls="dock-problems">{{ tr("Problems") }} <span id="dock-problem-count"></span></button>
+            <button type="button" data-dock-tab="output" aria-pressed="false" aria-controls="dock-output">{{ tr("Output") }}</button>
+            <button type="button" data-dock-tab="ports" aria-pressed="false" aria-controls="dock-ports">{{ tr("Ports") }}</button>
+            <button type="button" data-dock-tab="debug" aria-pressed="false" aria-controls="dock-debug">{{ tr("Debug") }}</button>
+            {% else %}<h2>Terminal</h2><span class="data-kind">{{ tr("Local log · Sample shell") }}</span>{% endif %}
           </div>
           <div class="terminal-actions">
-            <select id="terminal-sessions" aria-label="Phiên terminal đang chọn"></select>
-            {% if workbench_enabled %}<select id="local-shell" aria-label="Loại shell"></select>{% endif %}
+            <select id="terminal-sessions" aria-label="{{ tr('Selected terminal session') }}"></select>
+            {% if workbench_enabled %}<select id="local-shell" aria-label="{{ tr('Shell type') }}"></select>{% endif %}
             <button type="button" data-terminal-action="new" title="{{ tr('New session') }}">+ {{ tr('New session') }}</button>
             <button type="button" data-terminal-action="log" aria-controls="terminal-log-content">{{ tr('Open log pane') }}</button>
-            <select id="terminal-split-menu" aria-label="Chia ô terminal">
+            <select id="terminal-split-menu" aria-label="{{ tr('Split terminal') }}">
               <option value="">{{ tr("Split pane") }}</option>
-              <option value="right">Trái / phải</option>
-              <option value="down">Trên / dưới</option>
+              <option value="right">{{ tr("Left / right") }}</option>
+              <option value="down">{{ tr("Top / bottom") }}</option>
             </select>
-            <select id="terminal-more-menu" aria-label="Thao tác với phiên terminal">
+            <select id="terminal-more-menu" aria-label="{{ tr('Terminal session actions') }}">
               <option value="">{{ tr("Actions") }}</option>
-              {% if not workbench_desktop %}<option value="detach">Tách cửa sổ</option>{% endif %}
+              {% if not workbench_desktop %}<option value="detach">{{ tr("Detach window") }}</option>{% endif %}
             </select>
             <button type="button" data-terminal-action="collapse" aria-expanded="true" aria-controls="terminal-panes">{{ tr("Collapse") }}</button>
           </div>
@@ -295,29 +295,29 @@
         <div id="terminal-panes"></div>
         {% if workbench_enabled %}
         <div id="terminal-tool-pool" hidden>
-          <section id="dock-problems" class="dock-panel" aria-label="Vấn đề">
-            <section id="dock-code-problems" aria-label="Kiểm tra Python" hidden>
+          <section id="dock-problems" class="dock-panel" aria-label="{{ tr('Problems') }}">
+            <section id="dock-code-problems" aria-label="{{ tr('Check Python') }}" hidden>
               <p id="dock-code-problems-status" role="status"></p>
               <ul id="dock-code-problem-rows"></ul>
             </section>
-            <p id="dock-problems-status">Chờ nguồn log.</p><ul id="dock-problem-rows"></ul>
+            <p id="dock-problems-status">{{ tr("Waiting for log source.") }}</p><ul id="dock-problem-rows"></ul>
           </section>
-          <section id="dock-output" class="dock-panel" aria-label="Đầu ra">
+          <section id="dock-output" class="dock-panel" aria-label="{{ tr('Output') }}">
             <div class="dock-tools" id="dock-output-run" hidden>
               <span id="dock-output-status" role="status"></span>
-              <button type="button" id="dock-output-stop" hidden>Dừng lượt chạy</button>
+              <button type="button" id="dock-output-stop" hidden>{{ tr("Stop run") }}</button>
             </div>
-            <pre id="dock-output-text" tabindex="0">Chờ đầu ra của tệp log hoặc lượt chạy.</pre>
+            <pre id="dock-output-text" tabindex="0">{{ tr("Waiting for output from a log file or run.") }}</pre>
           </section>
-          <section id="dock-ports" class="dock-panel" aria-label="Cổng TCP">
-            <div class="dock-tools"><span>Cổng TCP cục bộ · Ưu tiên cổng đang lắng nghe</span><button id="dock-ports-refresh" type="button">Làm mới</button></div>
+          <section id="dock-ports" class="dock-panel" aria-label="{{ tr('TCP ports') }}">
+            <div class="dock-tools"><span>{{ tr("Local TCP ports · Listening ports first") }}</span><button id="dock-ports-refresh" type="button">{{ tr("Refresh") }}</button></div>
             <p id="dock-ports-status" role="status"></p>
-            <table><thead><tr><th scope="col">Địa chỉ</th><th scope="col">Cổng</th><th scope="col">PID</th><th scope="col">Trạng thái</th></tr></thead><tbody id="dock-port-rows"></tbody></table>
+            <table><thead><tr><th scope="col">{{ tr("Address") }}</th><th scope="col">{{ tr("Port") }}</th><th scope="col">PID</th><th scope="col">{{ tr("Status") }}</th></tr></thead><tbody id="dock-port-rows"></tbody></table>
           </section>
-          <section id="dock-debug" class="dock-panel" aria-label="Gỡ lỗi Python">
-            <div class="dock-tools"><span id="dock-debug-status" role="status">Mở một tệp Python trong Code.</span>
-              <button id="dock-debug-start" type="button" disabled>Chạy với pdb</button>
-              <button id="dock-debug-stop" type="button" hidden>Dừng</button>
+          <section id="dock-debug" class="dock-panel" aria-label="{{ tr('Python debugger') }}">
+            <div class="dock-tools"><span id="dock-debug-status" role="status">{{ tr("Open a Python file in Code.") }}</span>
+              <button id="dock-debug-start" type="button" disabled>{{ tr("Run with pdb") }}</button>
+              <button id="dock-debug-stop" type="button" hidden>{{ tr("Stop") }}</button>
             </div>
             <div class="live-shell" id="dock-debug-shell" hidden></div>
           </section>
@@ -326,7 +326,7 @@
         <div id="terminal-log-pool" hidden>
           <div id="terminal-log-content" class="terminal-log-content">
             <div class="terminal-log-tools"><p id="terminal-scope"></p><button id="follow" type="button" aria-pressed="true">{{ tr("Follow tail") }}</button></div>
-            <div class="terminal-body" id="terminal-body" role="region" aria-label="Log gốc" tabindex="0"></div>
+            <div class="terminal-body" id="terminal-body" role="region" aria-label="{{ tr('Raw log') }}" tabindex="0"></div>
           </div>
         </div>
       </section>
@@ -339,47 +339,47 @@
       </header>
       <section class="panel editor-panel" aria-label="Code">
         <div id="editor-preview"{% if workbench_enabled %} hidden{% endif %}>
-          <div id="editor-tabs" class="editor-tabs" aria-label="Tệp đang mở"></div>
+          <div id="editor-tabs" class="editor-tabs" aria-label="{{ tr('Open files') }}"></div>
           <p id="editor-file-path" class="editor-file-path" role="status"></p>
-          <pre id="editor-code" class="editor-code" aria-label="Nội dung tệp" tabindex="0"></pre>
+          <pre id="editor-code" class="editor-code" aria-label="{{ tr('File contents') }}" tabindex="0"></pre>
         </div>
         {% if workbench_enabled %}
         <div id="local-editor">
           <div class="local-editor-tools">
             <span id="local-editor-status" role="status"></span>
-            <select id="code-interpreter" aria-label="Interpreter Python của Code" hidden></select>
-            <button id="local-save" type="button" aria-keyshortcuts="Control+S Meta+S" title="Ctrl+S / ⌘S" disabled>Lưu tệp</button>
-            <button id="local-check-code" type="button" hidden>Kiểm tra Python</button>
-            <button id="local-format-code" type="button" hidden>Định dạng</button>
-            <button id="local-run-code" type="button" hidden>Chạy tệp</button>
-            <button id="local-run-file" type="button" title="Chạy Python và lưu log, chỉ số, lịch sử" hidden>Theo dõi lượt chạy</button>
-            <button id="code-split" type="button" aria-pressed="false" aria-controls="code-right">Chia đôi</button>
+            <select id="code-interpreter" aria-label="{{ tr('Code Python interpreter') }}" hidden></select>
+            <button id="local-save" type="button" aria-keyshortcuts="Control+S Meta+S" title="Ctrl+S / ⌘S" disabled>{{ tr("Save file") }}</button>
+            <button id="local-check-code" type="button" hidden>{{ tr("Check Python") }}</button>
+            <button id="local-format-code" type="button" hidden>{{ tr("Format") }}</button>
+            <button id="local-run-code" type="button" hidden>{{ tr("Run file") }}</button>
+            <button id="local-run-file" type="button" title="{{ tr('Run Python and save logs, metrics and history') }}" hidden>{{ tr("Track run") }}</button>
+            <button id="code-split" type="button" aria-pressed="false" aria-controls="code-right">{{ tr("Split editor") }}</button>
           </div>
           <div id="code-panes">
-            {% for side, label in [('left', 'Ô trái'), ('right', 'Ô phải')] %}
+            {% for side, label in [('left', tr('Left pane')), ('right', tr('Right pane'))] %}
             {% set suffix = '' if side == 'left' else '-right' %}
             {% if side == 'right' %}
-            <div id="code-divider" role="separator" aria-label="Đổi chiều rộng hai ô" aria-orientation="vertical"
+            <div id="code-divider" role="separator" aria-label="{{ tr('Resize the two panes') }}" aria-orientation="vertical"
                  aria-valuemin="25" aria-valuemax="75" aria-valuenow="50" tabindex="0" hidden></div>
             {% endif %}
             <section class="code-pane" id="code-{{ side }}" data-side="{{ side }}"{% if side == 'right' %} hidden{% endif %}>
               <header class="code-pane-header">
                 <button class="code-tab" type="button" aria-pressed="{{ 'true' if side == 'left' else 'false' }}">{{ label }}</button>
-                <button class="code-close" type="button" aria-label="Đóng tệp ở {{ label|lower }}" hidden>×</button>
+                <button class="code-close" type="button" aria-label="{{ tr('Close file in {0}', label|lower) }}" hidden>×</button>
               </header>
-              <p class="code-empty">Chọn tệp mã hoặc PDF trong cây dự án.</p>
+              <p class="code-empty">{{ tr("Choose a code or PDF file in the project tree.") }}</p>
               <div class="local-editor-layer" hidden>
                 <pre class="editor-code code-highlight" aria-hidden="true"><code></code></pre>
-                <textarea id="local-code{{ suffix }}" class="editor-code code-input" aria-label="Mã nguồn · {{ label }}"
+                <textarea id="local-code{{ suffix }}" class="editor-code code-input" aria-label="{{ tr('Source code · {0}', label) }}"
                           spellcheck="false" wrap="off"></textarea>
               </div>
               <div class="pdf-preview" hidden>
                 <div class="pdf-tools">
-                  <button type="button" data-pdf="previous" aria-label="Trang trước">‹</button>
+                  <button type="button" data-pdf="previous" aria-label="{{ tr('Previous page') }}">‹</button>
                   <span class="pdf-page" aria-live="polite"></span>
-                  <button type="button" data-pdf="next" aria-label="Trang sau">›</button>
-                  <label>Thu phóng
-                    <select class="pdf-zoom" aria-label="Thu phóng PDF · {{ label }}">
+                  <button type="button" data-pdf="next" aria-label="{{ tr('Following page') }}">›</button>
+                  <label>{{ tr("Zoom") }}
+                    <select class="pdf-zoom" aria-label="{{ tr('PDF zoom · {0}', label) }}">
                       <option value="75">75%</option><option value="100" selected>100%</option>
                       <option value="150">150%</option><option value="200">200%</option>
                     </select>
@@ -395,18 +395,18 @@
       </section>
       <div id="editor-terminal"></div>
     </section>
-    <section id="settings" aria-label="Thiết lập ứng dụng"{% if workspace_view != "settings" %} hidden{% endif %}>
+    <section id="settings" aria-label="{{ tr('Application settings') }}"{% if workspace_view != "settings" %} hidden{% endif %}>
       <header class="workspace-bar">
         <div class="breadcrumb"><strong>{{ tr("Settings") }}</strong><span aria-hidden="true">/</span><span id="settings-path">{{ tr("Appearance") }}</span></div>
       </header>
       <section class="panel settings-panel" id="setting-appearance" aria-labelledby="appearance-title">
         <h1 id="appearance-title">{{ tr("Appearance") }}</h1>
-        <p class="appearance-note">Bảng màu dùng chung cho các tab. Cảnh báo và lỗi giữ màu riêng để dễ nhận biết.</p>
+        <p class="appearance-note">{{ tr("The color palette is shared across tabs. Warnings and errors keep their own colors so they stand out.") }}</p>
         <fieldset id="appearance-options">
           <legend>{{ tr("Color theme") }}</legend>
           <label class="theme-option"><input type="radio" name="appearance" value="graphite" checked>
             <span class="theme-swatch" data-swatch="graphite" aria-hidden="true"></span>
-            <span><strong>{{ tr("Graphite") }}</strong><small>Nền than, chữ xám sáng.</small></span>
+            <span><strong>{{ tr("Graphite") }}</strong><small>{{ tr("Charcoal background, light gray text.") }}</small></span>
           </label>
           <label class="theme-option"><input type="radio" name="appearance" value="glass">
             <span class="theme-swatch" data-swatch="glass" aria-hidden="true"></span>
@@ -426,15 +426,15 @@
           </label>
           <label class="theme-option"><input type="radio" name="appearance" value="paper">
             <span class="theme-swatch" data-swatch="paper" aria-hidden="true"></span>
-            <span><strong>{{ tr("Paper") }}</strong><small>Nền trắng ngà, chữ đen.</small></span>
+            <span><strong>{{ tr("Paper") }}</strong><small>{{ tr("Ivory background, black text.") }}</small></span>
           </label>
           <label class="theme-option"><input type="radio" name="appearance" value="mono">
             <span class="theme-swatch" data-swatch="mono" aria-hidden="true"></span>
-            <span><strong>{{ tr("Monochrome") }}</strong><small>Nền đen, chữ trắng rõ.</small></span>
+            <span><strong>{{ tr("Monochrome") }}</strong><small>{{ tr("Black background, crisp white text.") }}</small></span>
           </label>
           <label class="theme-option"><input type="radio" name="appearance" value="warm">
             <span class="theme-swatch" data-swatch="warm" aria-hidden="true"></span>
-            <span><strong>{{ tr("Warm gray") }}</strong><small>Nền xám ngả be, chữ than.</small></span>
+            <span><strong>{{ tr("Warm gray") }}</strong><small>{{ tr("Beige-gray background, charcoal text.") }}</small></span>
           </label>
         </fieldset>
         <div id="glass-controls">
@@ -455,68 +455,68 @@
       <section class="panel settings-panel" id="setting-remote" aria-labelledby="remote-title" hidden>
         <h1 id="remote-title">{{ tr("Remote machines") }}</h1>
         {% if workbench_enabled %}
-        <p class="muted">Mở SSH trong terminal. Host key của máy đích cần có trong known_hosts của OpenSSH.</p>
+        <p class="muted">{{ tr("Open SSH in the terminal. The target machine's host key must be in OpenSSH known_hosts.") }}</p>
         <form id="local-ssh" class="local-form">
-          <label>Máy chủ <input name="host" maxlength="253" required></label>
-          <label>Tài khoản <input name="user" maxlength="64" required></label>
-          <label>Cổng <input name="port" type="number" min="1" max="65535" value="22" required></label>
-          <button type="submit">Mở SSH</button>
+          <label>{{ tr("Host") }} <input name="host" maxlength="253" required></label>
+          <label>{{ tr("Account") }} <input name="user" maxlength="64" required></label>
+          <label>{{ tr("Port") }} <input name="port" type="number" min="1" max="65535" value="22" required></label>
+          <button type="submit">{{ tr("Open SSH") }}</button>
         </form>
-        {% else %}<p>Mở qua trình khởi chạy cục bộ để dùng SSH.</p>{% endif %}
+        {% else %}<p>{{ tr("Open through the local launcher to use SSH.") }}</p>{% endif %}
       </section>
       <section class="panel settings-panel" id="setting-environments" aria-labelledby="env-title" hidden>
         <h1 id="env-title">{{ tr("Python and packages") }}</h1>
         {% if workbench_enabled %}
         <div class="local-form">
-          <label>Interpreter Python <select id="local-interpreter"></select></label>
-          <button id="local-list-packages" type="button">Xem gói đã cài</button>
-          <label>Tham số chạy Python dạng JSON <input id="local-run-args" placeholder='["--epochs","8"]'></label>
-          <label>Tệp cấu hình cho lượt chạy <textarea id="local-run-config" rows="2" maxlength="8200"
+          <label>{{ tr("Python interpreter") }} <select id="local-interpreter"></select></label>
+          <button id="local-list-packages" type="button">{{ tr("View installed packages") }}</button>
+          <label>{{ tr("Python run arguments as JSON") }} <input id="local-run-args" placeholder='["--epochs","8"]'></label>
+          <label>{{ tr("Config files for the run") }} <textarea id="local-run-config" rows="2" maxlength="8200"
             placeholder="configs/train.yaml" aria-describedby="local-run-config-note"></textarea></label>
         </div>
-        <p id="local-run-config-note" class="muted">Tối đa 8 đường dẫn tương đối, mỗi dòng một tệp. Hồ sơ lưu SHA-256, không lưu nội dung.</p>
-        <pre id="local-package-list" class="editor-code">Chọn thư mục dự án để tìm Python và venv.</pre>
-        {% else %}<p>Mở qua trình khởi chạy cục bộ để chọn Python và kiểm tra thư viện.</p>{% endif %}
-        <dl class="settings-rows"><div><dt>Loại tệp trong dự án</dt><dd id="settings-file-types"></dd></div></dl>
+        <p id="local-run-config-note" class="muted">{{ tr("Up to 8 relative paths, one file per line. The profile stores SHA-256, not file contents.") }}</p>
+        <pre id="local-package-list" class="editor-code">{{ tr("Choose a project folder to find Python and venv.") }}</pre>
+        {% else %}<p>{{ tr("Open through the local launcher to choose Python and check packages.") }}</p>{% endif %}
+        <dl class="settings-rows"><div><dt>{{ tr("File types in project") }}</dt><dd id="settings-file-types"></dd></div></dl>
       </section>
       <section class="panel settings-panel" id="setting-data" aria-labelledby="data-title" hidden>
         <h1 id="data-title">{{ tr("Data") }}</h1>
         <dl class="settings-rows">
-          <div><dt>Dự án đang xem</dt><dd id="settings-project"></dd></div>
-          <div><dt>Tệp trong cây dự án</dt><dd id="settings-file-count"></dd></div>
-          <div><dt>Nguồn log đang mở</dt><dd id="settings-log-source"></dd></div>
-          <div><dt>Dataset và kết quả phân tích</dt><dd><a class="button" href="{{ url_for('dashboard', workspace='logs') if workspace_has_database else url_for('dashboard', source='demo') }}">Mở phân tích</a></dd></div>
-          <div><dt>Luồng log mẫu</dt><dd><button type="button" id="use-demo">Mở minh họa</button></dd></div>
+          <div><dt>{{ tr("Current project") }}</dt><dd id="settings-project"></dd></div>
+          <div><dt>{{ tr("Files in project tree") }}</dt><dd id="settings-file-count"></dd></div>
+          <div><dt>{{ tr("Active log source") }}</dt><dd id="settings-log-source"></dd></div>
+          <div><dt>{{ tr("Datasets and analysis results") }}</dt><dd><a class="button" href="{{ url_for('dashboard', workspace='logs') if workspace_has_database else url_for('dashboard', source='demo') }}">{{ tr("Open analysis") }}</a></dd></div>
+          <div><dt>{{ tr("Sample log stream") }}</dt><dd><button type="button" id="use-demo">{{ tr("Open demo") }}</button></dd></div>
         </dl>
       </section>
       <section class="panel settings-panel" id="setting-extensions" aria-labelledby="ext-title" hidden>
         <h1 id="ext-title">{{ tr("Extensions") }}</h1>
         {% if workbench_enabled %}
         <fieldset id="local-features" class="local-form">
-          <legend>Bật hoặc tắt tiện ích tích hợp</legend>
-          <label><input type="checkbox" name="gpu"> Thu GPU và VRAM NVIDIA</label>
-          <label><input type="checkbox" name="ssh"> Phiên SSH</label>
-          <label><input type="checkbox" name="external_parsers"> Parser tệp bên ngoài</label>
+          <legend>{{ tr("Turn built-in extensions on or off") }}</legend>
+          <label><input type="checkbox" name="gpu"> {{ tr("Collect NVIDIA GPU and VRAM") }}</label>
+          <label><input type="checkbox" name="ssh"> {{ tr("SSH sessions") }}</label>
+          <label><input type="checkbox" name="external_parsers"> {{ tr("External file parsers") }}</label>
         </fieldset>
-        {% else %}<p>Mở qua trình khởi chạy cục bộ để quản lý tiện ích.</p>{% endif %}
+        {% else %}<p>{{ tr("Open through the local launcher to manage extensions.") }}</p>{% endif %}
       </section>
     </section>
-    <noscript><p>Bật JavaScript để mở tệp và dùng các công cụ dự án.</p></noscript>
+    <noscript><p>{{ tr("Enable JavaScript to open files and use the project tools.") }}</p></noscript>
   </main>
   {% if workbench_enabled %}
   <dialog id="attach-run-dialog" class="panel" aria-labelledby="attach-run-title">
     <form id="attach-run-form">
-      <header class="panel-header"><h2 id="attach-run-title">Gắn lượt train đang chạy</h2></header>
-      <label>Nhận diện bằng <select id="attach-run-mode"><option value="pid">PID</option><option value="run_id">run_id</option></select></label>
+      <header class="panel-header"><h2 id="attach-run-title">{{ tr("Attach a running training run") }}</h2></header>
+      <label>{{ tr("Identify by") }} <select id="attach-run-mode"><option value="pid">PID</option><option value="run_id">run_id</option></select></label>
       <div id="attach-run-pid-fields">
         <label>PID <input name="pid" type="number" min="1" max="2147483647" step="1" required></label>
-        <label>Tệp log trong dự án <input name="log" maxlength="1024" placeholder="train.log"></label>
-        <label>Tệp loss trong dự án <input name="metrics" maxlength="1024" placeholder="metrics.csv"></label>
+        <label>{{ tr("Project log file") }} <input name="log" maxlength="1024" placeholder="train.log"></label>
+        <label>{{ tr("Project loss file") }} <input name="metrics" maxlength="1024" placeholder="metrics.csv"></label>
       </div>
       <label id="attach-run-id-field" hidden>run_id <input name="run_id" maxlength="64" disabled></label>
       <p id="attach-run-hint" class="muted"></p>
       <p id="attach-run-error" role="alert" hidden></p>
-      <footer><button type="button" id="attach-run-cancel">{{ tr("Cancel") }}</button><button type="submit">Theo dõi</button></footer>
+      <footer><button type="button" id="attach-run-cancel">{{ tr("Cancel") }}</button><button type="submit">{{ tr("Track") }}</button></footer>
     </form>
   </dialog>
   {% endif %}

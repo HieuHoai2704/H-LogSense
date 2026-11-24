@@ -1,6 +1,7 @@
 "use strict";
 
 (() => {
+  const tr = window.logsenseTranslate;
   const appName = document.title;
   const dock = document.getElementById("terminal-dock");
   const mount = document.getElementById("terminal-panes");
@@ -12,7 +13,7 @@
   const tools = toolPool ? [...toolPool.children] : [];
   const sessions = new Map();
   const empty = textNode("div", "", "terminal-empty");
-  empty.append(textNode("p", "Chưa có phiên. Bấm + Phiên để mở một ô mới.", "terminal-placeholder"));
+  empty.append(textNode("p", tr("No sessions yet. Click + New session to open a new pane."), "terminal-placeholder"));
   const emptyView = { element: empty, tool: null };
   let nextId = 1;
   let active;
@@ -38,8 +39,8 @@
   }
 
   const examples = {
-    shell: ["Shell", "Phiên mẫu", "Ô mô phỏng bố cục. Chưa kết nối shell trên máy."],
-    log: [tr("Monitored log"), "Log · Chỉ đọc", ""]
+    shell: ["Shell", tr("Sample session"), tr("Layout preview pane. Not connected to a shell on this machine.")],
+    log: [tr("Monitored log"), tr("Log · Read-only"), ""]
   };
 
   function selectPane(id) {
@@ -52,7 +53,7 @@
   function newPane(kind, profile) {
     const id = nextId++;
     const [name, metadata, sample] = profile
-      ? [profile.shell === "Run File" ? profile.path.split("/").at(-1) : profile.shell, profile.host || "Cục bộ", ""]
+      ? [profile.shell === "Run File" ? profile.path.split("/").at(-1) : profile.shell, profile.host || tr("Local"), ""]
       : examples[kind];
     const element = document.createElement("section");
     element.className = "terminal-pane";
@@ -77,7 +78,7 @@
     let live;
     if (kind === "log") element.append(log);
     else if (profile) {
-      const host = textNode("div", "Đang mở phiên…", "live-shell");
+      const host = textNode("div", tr("Opening session…"), "live-shell");
       element.append(host);
       live = new window.WorkbenchTerminal(host, profile, status);
     } else {
@@ -106,14 +107,14 @@
 
   function refreshSelection() {
     sessionSelect.replaceChildren(...[...sessions.values()].map((session) =>
-      new Option(String(session.id).padStart(2, "0") + " · " + session.name + (session.popup ? " · Cửa sổ riêng" : ""), session.id)));
+      new Option(String(session.id).padStart(2, "0") + " · " + session.name + (session.popup ? " · " + tr("Separate window") : ""), session.id)));
     sessionSelect.disabled = !sessions.size;
     sessionSelect.value = active ?? "";
     for (const session of sessions.values()) {
       const selected = session.id === active;
       session.element.dataset.active = String(selected);
       session.select.setAttribute("aria-pressed", String(selected));
-      session.zoom.textContent = session.id === maximized ? "Khôi phục" : tr("Maximize");
+      session.zoom.textContent = session.id === maximized ? tr("Restore") : tr("Maximize");
       session.zoom.setAttribute("aria-label", session.zoom.textContent + " " + session.name);
       session.zoom.hidden = Boolean(session.popup);
     }
@@ -143,7 +144,7 @@
   function showTool(name) {
     const view = sessions.get(active) ?? emptyView;
     if (view.popup && name !== "terminal") {
-      status("Gắn lại cửa sổ terminal để mở công cụ trong ô này.");
+      status(tr("Reattach the terminal window to open tools in this pane."));
       return false;
     }
     if (name !== "terminal") {
@@ -174,8 +175,8 @@
       if (!session.popup) return session.element;
       const placeholder = document.createElement("div");
       placeholder.className = "terminal-placeholder";
-      placeholder.append(textNode("p", session.name + " · Cửa sổ riêng"),
-        control("Gắn lại", () => attach(session)));
+      placeholder.append(textNode("p", session.name + " · " + tr("Separate window")),
+        control(tr("Reattach"), () => attach(session)));
       return placeholder;
     }
     const group = document.createElement("div");
@@ -186,7 +187,7 @@
     divider.className = "terminal-divider";
     divider.setAttribute("role", "separator");
     divider.setAttribute("aria-orientation", across ? "vertical" : "horizontal");
-    divider.setAttribute("aria-label", "Đổi kích thước hai ô");
+    divider.setAttribute("aria-label", tr("Resize the two terminal panes"));
     divider.setAttribute("aria-valuemin", "20");
     divider.setAttribute("aria-valuemax", "80");
     divider.tabIndex = 0;
@@ -225,7 +226,7 @@
 
   function addPane(kind, direction, profile, keepFocus = false) {
     if (sessions.size >= 6) {
-      status("Terminal hỗ trợ tối đa 6 ô cùng lúc.");
+      status(tr("Terminal supports up to 6 panes at once."));
       return;
     }
     emptyView.tool = null;
@@ -270,19 +271,19 @@
 
   function detach() {
     const session = sessions.get(active);
-    if (!session) return status("Mở một phiên trước khi tách cửa sổ.");
+    if (!session) return status(tr("Open a session before detaching a window."));
     if (session.popup && !session.popup.closed) {
       session.popup.focus();
       return;
     }
     const popup = window.open("about:blank", "_blank", "popup,width=780,height=510");
-    if (!popup) return status("Trình duyệt đang chặn cửa sổ mới.");
+    if (!popup) return status(tr("The browser is blocking new windows."));
     session.popup = popup;
     session.tool = null;
     if (maximized === active) maximized = null;
     const page = popup.document;
     page.title = appName + " · " + session.name;
-    page.documentElement.lang = "vi";
+    page.documentElement.lang = document.documentElement.lang;
     page.documentElement.dataset.theme = document.documentElement.dataset.theme;
     const workspaceStyles = document.querySelector('link[href$="/workspace/appearance.css"]');
     const projectStyles = document.querySelector('link[href$="/workspace/project.css"]');
@@ -296,7 +297,7 @@
     const frame = page.createElement("div");
     frame.className = "detached-shell";
     const header = page.createElement("header");
-    header.append(textNode("strong", page.title), control("Gắn lại", () => attach(session)));
+    header.append(textNode("strong", page.title), control(tr("Reattach"), () => attach(session)));
     frame.append(header, session.element);
     page.body.replaceChildren(frame);
     session.live?.attach();
@@ -315,7 +316,7 @@
   function openShell(direction, keepFocus = false) {
     if (!window.localWorkbench) return addPane("shell", direction);
     const shell = document.getElementById("local-shell").value;
-    if (!shell) return status("Mở app từ trình khởi chạy và chọn shell.");
+    if (!shell) return status(tr("Open the app from the launcher and choose a shell."));
     addPane("shell", direction, { shell, workspace: document.getElementById("editor").hidden ? "project" : "code" }, keepFocus);
   }
   document.addEventListener("workspace:ssh", (event) => addPane("shell", "right", event.detail));

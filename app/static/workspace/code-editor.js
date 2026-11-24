@@ -3,6 +3,7 @@
 const workbenchHighlightUrl = new URL("code-highlight-worker.js", document.currentScript.src);
 window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
   const $ = (id) => document.getElementById(id);
+  const tr = window.logsenseTranslate;
   const status = $("local-editor-status");
   const save = $("local-save");
   const run = $("local-run-file");
@@ -35,10 +36,10 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
   const dirty = (pane) => Boolean(pane.file?.kind === "text" && pane.editor.value !== pane.file.original);
   function canDiscard(candidates = panes) {
     if (candidates.some((pane) => pane.saving)) {
-      onStatus("Đợi lưu tệp xong rồi thử lại.");
+      onStatus(tr("Wait for the file to finish saving, then try again."));
       return false;
     }
-    return !candidates.some(dirty) || window.confirm("Bỏ thay đổi chưa lưu trong tệp đang mở?");
+    return !candidates.some(dirty) || window.confirm(tr("Discard unsaved changes in the open file?"));
   }
 
   function update(persist = true) {
@@ -55,7 +56,7 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
       pane.pdf.hidden = pane.file?.kind !== "pdf";
     }
     const path = active.file?.path;
-    status.textContent = path ? active.label + " · " + path + (dirty(active) ? " · Chưa lưu" : "") : active.label;
+    status.textContent = path ? active.label + " · " + path + (dirty(active) ? " · " + tr("Unsaved") : "") : active.label;
     status.title = status.textContent;
     save.disabled = active.saving || !dirty(active);
     const extension = path?.split(".").at(-1).toLowerCase();
@@ -144,14 +145,14 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
     const controller = new AbortController();
     pane.pdfRequest = controller;
     pane.previous.disabled = pane.next.disabled = true;
-    pane.pdfStatus.textContent = "Đang đọc trang PDF…";
+    pane.pdfStatus.textContent = tr("Reading PDF page…");
     try {
       const result = await api.call(api.query("/pdf", { path: file.path, page, zoom: pane.zoom.value }),
         "GET", undefined, false, controller.signal);
       if (controller.signal.aborted || pane.file !== file) return;
       clearImage(pane);
       pane.url = URL.createObjectURL(result.image);
-      pane.image.alt = file.path + " · Trang " + page;
+      pane.image.alt = file.path + " · " + tr("Page {0}", page);
       pane.image.src = pane.url;
       pane.image.hidden = false;
       file.page = page;
@@ -174,7 +175,7 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
     const pane = existing || target;
     const revision = ++pane.revision;
     if (!existing) {
-      if (pane.saving) return onStatus("Đợi lưu tệp xong rồi thử lại.");
+      if (pane.saving) return onStatus(tr("Wait for the file to finish saving, then try again."));
       const isPdf = /\.pdf$/i.test(path);
       const source = isPdf ? null : await api.call(api.query("/file", { path }));
       if (revision !== pane.revision || panes.some((other) => other !== pane && other.file?.path === path)) return;
@@ -203,14 +204,14 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
     editor.focus();
     if (!target?.line) return;
     const lines = editor.value.split("\n");
-    if (target.line > lines.length) return onStatus("Tệp hiện tại không còn dòng " + target.line + ".");
+    if (target.line > lines.length) return onStatus(tr("The current file no longer has line {0}.", target.line));
     const before = lines.slice(0, target.line - 1).reduce((length, line) => length + line.length + 1, 0);
     const length = lines[target.line - 1].length;
     const offset = target.column ? Math.min(length, target.column - 1) : 0;
     editor.setSelectionRange(before + offset, target.column ? before + offset : before + length);
     editor.scrollTop = Math.max(0, (target.line - 1) * parseFloat(getComputedStyle(editor).lineHeight) - editor.clientHeight / 3);
     syncScroll(pane);
-    status.textContent = pane.file.path + " · dòng " + target.line + (dirty(pane) ? " · Chưa lưu" : "");
+    status.textContent = pane.file.path + " · " + tr("line {0}", target.line) + (dirty(pane) ? " · " + tr("Unsaved") : "");
   }
 
   async function saveFile(pane) {
@@ -222,7 +223,7 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
     try {
       const result = await api.call("/file", "PUT", { path: file.path, revision: file.revision, text });
       if (pane.file === file) Object.assign(file, { original: text, revision: result.revision });
-      onStatus("Đã lưu " + file.path + ".");
+      onStatus(tr("Saved {0}.", file.path));
     } catch (error) { onStatus(error.message); }
     finally {
       pane.saving = false;
@@ -273,7 +274,7 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
     right.element.hidden = divider.hidden = !show;
     group.dataset.split = String(show);
     split.setAttribute("aria-pressed", String(show));
-    split.textContent = show ? "Một ô" : "Chia đôi";
+    split.textContent = show ? tr("Single pane") : tr("Split in two");
   }
 
   async function restore(layout) {
@@ -326,13 +327,13 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
     const pane = active;
     const file = pane.file;
     if (!file || checking) return;
-    if (dirty(pane) || pane.saving) return onStatus("Lưu tệp trước khi kiểm tra Python.");
+    if (dirty(pane) || pane.saving) return onStatus(tr("Save the file before checking Python."));
     const root = state.codeRoot;
     const { path, revision } = file;
     const scope = { path, root, revision };
     checking = true;
     update(false);
-    window.WorkbenchDock.updateCodeProblems(scope, { status: "Đang chạy Ruff và Pyright…" });
+    window.WorkbenchDock.updateCodeProblems(scope, { status: tr("Running Ruff and Pyright…") });
     window.WorkbenchDock.show("problems");
     const sameSnapshot = () => state.codeRoot === root && pane.file === file && file.revision === revision && !dirty(pane);
     try {
@@ -359,10 +360,10 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
       const result = await api.call("/code/format", "POST", { path, revision, text });
       if (state.codeRoot !== root || pane.file !== file || file.revision !== revision ||
           pane.editor.value !== text || pane.composing) return;
-      if (result.text === text) return onStatus("Tệp đã đúng định dạng của " + result.tool + ".");
+      if (result.text === text) return onStatus(tr("The file already matches {0} formatting.", result.tool));
       pane.editor.setRangeText(result.text, 0, text.length, "preserve");
       scheduleHighlight(pane);
-      onStatus("Đã định dạng bằng " + result.tool + ". Lưu để ghi thay đổi xuống tệp.");
+      onStatus(tr("Formatted with {0}. Save to write the changes to the file.", result.tool));
     } catch (error) { onStatus(error.message); }
     finally {
       formatting = false;
@@ -372,7 +373,7 @@ window.createWorkbenchEditor = ({ api, onStatus, onLayout }) => {
 
   runCode.addEventListener("click", () => {
     const file = active.file;
-    if (!file || dirty(active) || active.saving) return onStatus("Lưu tệp trước khi chạy.");
+    if (!file || dirty(active) || active.saving) return onStatus(tr("Save the file before running."));
     const { path, revision } = file;
     document.dispatchEvent(new CustomEvent("workspace:run-file", {
       detail: { shell: "Run File", workspace: "code", path, revision }

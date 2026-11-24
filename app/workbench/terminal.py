@@ -55,10 +55,10 @@ def ssh_command(host, user, port):
     if (not isinstance(host, str) or not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9.:-]{0,252}", host)
             or not isinstance(user, str) or not re.fullmatch(r"[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,63}", user)
             or type(port) is not int or not 1 <= port <= 65535):
-        raise WorkspaceError("Kiểm tra địa chỉ, người dùng và cổng SSH.")
+        raise WorkspaceError("Check the SSH host, user and port.")
     executable = shutil.which("ssh")
     if not executable:
-        raise WorkspaceError("Chưa cài OpenSSH client.", 503)
+        raise WorkspaceError("OpenSSH client is not installed.", 503)
     return [executable, "-F", "none", "-o", "StrictHostKeyChecking=yes", "-o", "ClearAllForwardings=yes",
             "-o", "ForwardAgent=no", "-o", "ForwardX11=no", "-o", "ConnectTimeout=10",
             "-tt", "-p", str(port), "-l", user, "--", host]
@@ -132,7 +132,7 @@ class Session:
             try:
                 from winpty import PtyProcess
             except ImportError:
-                raise WorkspaceError("Cài requirements-workbench.txt để bật ConPTY.", 503) from None
+                raise WorkspaceError("Install requirements-workbench.txt to enable ConPTY.", 503) from None
             self.process = PtyProcess.spawn(command, cwd=str(root), env=env)
         else:
             self.process = PosixTerminal(command, root, env)
@@ -171,7 +171,7 @@ class Session:
             if wait_ms and offset == self.offset:
                 self.lock.wait_for(lambda: self.offset != offset or self.finished or self.closed, wait_ms / 1000)
             if self.closed:
-                raise WorkspaceError("Phiên terminal không còn.", 404)
+                raise WorkspaceError("The terminal session no longer exists.", 404)
             oldest = self.offset - self.length
             reset = offset < oldest or offset > self.offset
             start = oldest if reset else offset
@@ -187,11 +187,11 @@ class Session:
     def write(self, value):
         with self.input_lock:
             if self.finished or self.closed:
-                raise WorkspaceError("Phiên terminal đã kết thúc.", 409)
+                raise WorkspaceError("The terminal session has ended.", 409)
             try:
                 self.process.write(value)
             except (EOFError, OSError, RuntimeError, ValueError):
-                raise WorkspaceError("Không gửi được dữ liệu đến phiên terminal.", 409) from None
+                raise WorkspaceError("Could not send data to the terminal session.", 409) from None
 
     def resize(self, rows, columns):
         with self.input_lock:
@@ -200,7 +200,7 @@ class Session:
             try:
                 self.process.setwinsize(rows, columns)
             except (OSError, RuntimeError, ValueError):
-                raise WorkspaceError("Không đổi được kích thước phiên terminal.", 409) from None
+                raise WorkspaceError("Could not resize the terminal session.", 409) from None
 
     def close(self):
         with self.input_lock:
@@ -226,7 +226,7 @@ class Terminals:
             for key in expired:
                 self.sessions.pop(key).close()
             if len(self.sessions) >= 6:
-                raise WorkspaceError("Đóng một phiên trước khi mở thêm. Tối đa 6 phiên.", 429)
+                raise WorkspaceError("Close a session before opening another. Up to 6 sessions.", 429)
             session_id = secrets.token_hex(16)
             self.sessions[session_id] = Session(command, root, interpreter)
             return session_id
@@ -235,7 +235,7 @@ class Terminals:
         with self.lock:
             session = self.sessions.get(session_id)
             if not session:
-                raise WorkspaceError("Phiên terminal không còn.", 404)
+                raise WorkspaceError("The terminal session no longer exists.", 404)
             session.touched = time.monotonic()
             return session
 
