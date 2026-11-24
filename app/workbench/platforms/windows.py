@@ -7,9 +7,10 @@ from pathlib import Path
 import sys
 
 from ..files import WorkspaceError
+from . import ICON_ICO
 
 APP_ID = "HieuHoai.HLogsen.Workbench"
-ICON = Path(__file__).resolve().parents[2] / "static" / "h-logsen.ico"
+ICON = ICON_ICO
 
 
 def identify_process():

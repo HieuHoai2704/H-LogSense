@@ -1,0 +1,164 @@
+/* Shared control system for the workbench (Project, Analysis, Code, Settings).
+   One height, radius, font and focus style on Windows (WebView2), macOS (WKWebView) and Linux (WebKitGTK):
+   native <select> rendering differs per OS, so selects draw their own chevron. Scoped to workbench shells. */
+:is(.project-shell, .analysis-shell, .detached-shell) {
+  --control-h: 32px;
+  --control-radius: 6px;
+  --control-font: 13px;
+  --control-bg: color-mix(in srgb, var(--text) 4%, var(--panel));
+  --control-bg-hover: color-mix(in srgb, var(--text) 9%, var(--panel));
+  --control-ring: color-mix(in srgb, var(--accent) 60%, transparent);
+  --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239a9a96' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+/* Native glass: controls and section cards use the glass surface so the window stays see-through
+   and follows the frame-transparency slider (opaque palette tokens would read as solid bars). */
+:root[data-theme|="glass"][data-native-glass] :is(.project-shell, .analysis-shell, .detached-shell) {
+  --control-bg: var(--glass-surface);
+  --control-bg-hover: color-mix(in srgb, var(--text) 10%, var(--glass-surface));
+}
+:root[data-theme|="glass"][data-native-glass] .analysis-shell :is(#external-preview, .coverage-status, #filters) {
+  background: var(--glass-surface);
+}
+
+:is(.project-shell, .analysis-shell, .detached-shell) select:not([multiple]) {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-inline-end: 28px;
+  background-image: var(--chevron);
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 14px 14px;
+  font-family: inherit;
+  text-overflow: ellipsis;
+}
+:is(.project-shell, .analysis-shell, .detached-shell) :is(button, select, input, summary):focus-visible {
+  outline: 2px solid var(--control-ring);
+  outline-offset: 1px;
+}
+
+/* ---------------------------------------------------------------- Project workspace toolbar */
+.project-shell .monitor-bar { min-height: 40px; padding: 6px 14px; }
+.project-shell .monitor-context { gap: 4px 10px; }
+.project-shell .monitor-context h1 { font-size: 13px; font-weight: 650; }
+.project-shell .monitor-context .breadcrumb strong { padding: 1px 7px; border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 8%, transparent); font-size: 12px; }
+.project-shell .monitor-actions .source-state { font-size: 12px; }
+.project-shell .monitor-controls { gap: 8px; padding: 0 14px 10px; align-items: center; }
+.project-shell .monitor-controls .run-tools { gap: 6px; }
+.project-shell .monitor-controls .scope { padding: 0; gap: 6px; }
+.project-shell .monitor-controls .scope label { gap: 8px; color: var(--muted); font-size: 12px; }
+.project-shell .monitor-controls :is(button, select),
+.project-shell .monitor-actions button {
+  min-height: var(--control-h);
+  height: var(--control-h);
+  padding-block: 0;
+  padding-inline-start: 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background-color: var(--control-bg);
+  color: var(--text);
+  font: 500 var(--control-font)/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.project-shell .monitor-controls button, .project-shell .monitor-actions button { padding-inline-end: 11px; }
+.project-shell .monitor-controls :is(button, select):hover,
+.project-shell .monitor-actions button:hover { border-color: var(--muted); background-color: var(--control-bg-hover); }
+.project-shell #local-runs { min-width: 168px; max-width: 280px; }
+.project-shell #bucket { min-width: 120px; }
+.project-shell #local-run-status:not(:empty) { color: var(--muted); font-size: 12px; }
+
+/* ---------------------------------------------------------------- Analysis: heading, notices */
+.analysis-shell .workspace-heading { align-items: baseline; gap: 6px 16px; flex-wrap: wrap; margin-bottom: 10px; }
+.analysis-shell .workspace-heading h1 { font-size: 19px; line-height: 26px; font-weight: 650; letter-spacing: -.2px; }
+.analysis-shell .workspace-heading > span { font-size: 12px; }
+.analysis-shell .demo-notice { align-items: center; gap: 10px; padding: 7px 12px; border: 1px solid var(--border);
+  border-left: 3px solid var(--accent); border-radius: var(--control-radius); background: var(--control-bg); font-size: 12.5px; }
+.analysis-shell .demo-notice strong { padding: 1px 7px; border-radius: 4px; background: var(--accent); color: var(--accent-on);
+  font-size: 11px; letter-spacing: .06em; }
+.analysis-shell #query-status { margin: 8px 2px; font-size: 12px; }
+
+/* Collapsible sections: "Analyze data files", "Data coverage", evaluation */
+.analysis-shell :is(#external-preview, .coverage-status) { border: 1px solid var(--border); border-radius: 8px;
+  background: transparent; margin: 0 0 10px; }
+.analysis-shell :is(#external-preview, .coverage-status) > summary {
+  display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px;
+  list-style: none; cursor: pointer; color: var(--text); font-size: 13px; font-weight: 600; border-radius: 8px;
+}
+.analysis-shell :is(#external-preview, .coverage-status) > summary::-webkit-details-marker { display: none; }
+.analysis-shell :is(#external-preview, .coverage-status) > summary::before {
+  content: ""; flex: 0 0 14px; height: 14px; background: var(--muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform .12s ease;
+}
+.analysis-shell :is(#external-preview, .coverage-status)[open] > summary::before { transform: rotate(90deg); }
+.analysis-shell :is(#external-preview, .coverage-status) > summary:hover { background: var(--control-bg); }
+.analysis-shell .coverage-status > summary { font-weight: 500; color: var(--muted); }
+.analysis-shell .coverage-status > summary strong { color: var(--text); font-weight: 600; }
+.analysis-shell .coverage-status > summary > span { margin-left: auto; font-size: 12px; }
+.analysis-shell #external-preview > :not(summary) { margin-inline: 12px; }
+.analysis-shell #external-preview[open] { padding-bottom: 12px; }
+
+/* ---------------------------------------------------------------- Analysis: filter card */
+.analysis-shell #filters { margin: 0 0 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: color-mix(in srgb, var(--text) 2%, transparent); }
+.analysis-shell #filters .source-controls {
+  display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)) minmax(0, 1.2fr); gap: 10px; align-items: end;
+}
+.analysis-shell :is(#filters .source-controls, #external-preview .source-controls) label { gap: 5px; color: var(--muted); font-size: 11px; font-weight: 600;
+  letter-spacing: .05em; text-transform: uppercase; }
+.analysis-shell #filters .source-note { align-self: center; justify-self: end; max-width: 100%; text-align: right;
+  font-size: 12px; line-height: 1.4; color: var(--muted); }
+.analysis-shell #filters .filter-controls { gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.analysis-shell :is(#filters, #external-preview) :is(select, input:not([type="checkbox"]):not([type="radio"]), button, .filter-picker > summary) {
+  min-height: var(--control-h); height: var(--control-h); padding-block: 0; padding-inline-start: 11px;
+  border: 1px solid var(--border); border-radius: var(--control-radius); background-color: var(--control-bg);
+  color: var(--text); font: 500 var(--control-font)/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+  text-transform: none; letter-spacing: 0;
+}
+.analysis-shell :is(#filters, #external-preview) button { padding-inline-end: 14px; }
+.analysis-shell :is(#filters, #external-preview) :is(select, input, button, .filter-picker > summary):hover { border-color: var(--muted); }
+.analysis-shell #external-preview .source-controls { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(140px, 1fr)) auto;
+  gap: 10px; align-items: end; margin-top: 2px; }
+.analysis-shell #external-preview .source-controls :is(input, select) { width: 100%; }
+.analysis-shell #external-preview .source-controls input::placeholder { color: var(--muted); }
+.analysis-shell #external-preview .source-controls button { justify-self: start; }
+.analysis-shell #external-preview > p { margin-top: 10px; color: var(--muted); font-size: 12px; }
+.analysis-shell #filters select { width: 100%; }
+.analysis-shell #filters .search-label { position: relative; min-width: 220px; }
+.analysis-shell #filters .search-label::before {
+  content: ""; position: absolute; left: 11px; top: 50%; width: 14px; height: 14px; margin-top: -7px; pointer-events: none;
+  background: var(--muted); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.analysis-shell #filters .search-label input:not([type="checkbox"]):not([type="radio"]) { padding-inline: 32px 11px; font-weight: 400; }
+.analysis-shell #filters .search-label input::placeholder { color: var(--muted); }
+.analysis-shell #filters .filter-picker { min-width: 0; }
+.analysis-shell #filters .filter-picker > summary { gap: 8px; padding-inline-end: 9px; justify-content: flex-start; }
+.analysis-shell #filters .filter-picker > summary::after {
+  content: ""; flex: 0 0 14px; height: 14px; background: var(--muted);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.analysis-shell #filters .filter-picker > summary span { margin-left: 2px; padding: 1px 6px; border-radius: 4px;
+  background: color-mix(in srgb, var(--text) 9%, transparent); color: var(--muted); font-size: 11px; line-height: 16px; }
+.analysis-shell #filters .filter-popover { top: calc(var(--control-h) + 6px); border-radius: 8px; }
+.analysis-shell #filters .filter-controls button.primary:not(:disabled) { border-color: var(--accent); background: var(--accent); color: var(--accent-on); font-weight: 600; }
+.analysis-shell #filters .filter-controls button.primary:not(:disabled):hover { background: color-mix(in srgb, var(--accent) 86%, var(--panel)); }
+.analysis-shell #filters .text-action { display: inline-flex; align-items: center; height: var(--control-h); padding: 0 6px;
+  color: var(--muted); font-size: 12.5px; text-decoration: none; }
+.analysis-shell #filters .text-action:hover { color: var(--text); text-decoration: underline; }
+.analysis-shell #filters .custom-range { margin-top: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .analysis-shell :is(#external-preview, .coverage-status) > summary::before { transition: none; }
+}
+@media (max-width: 1250px) {
+  /* Search gets its own row; facets, Apply and Clear stay together on the next one. */
+  .analysis-shell #filters .search-label { flex: 1 1 100%; }
+}
+@media (max-width: 1100px) {
+  .analysis-shell #filters .source-controls { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .analysis-shell #external-preview .source-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .analysis-shell #filters .source-note { grid-column: 1 / -1; justify-self: start; text-align: left; }
+}
+@media (max-width: 700px) {
+  .analysis-shell :is(#filters, #external-preview) .source-controls { grid-template-columns: minmax(0, 1fr); }
+  .analysis-shell #filters .search-label { flex-basis: 100%; }
+}

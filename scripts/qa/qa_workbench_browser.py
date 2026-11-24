@@ -404,7 +404,7 @@ class WorkbenchBrowserTest(unittest.TestCase):
 
         choose(new_root)
         expect(feedback).to_have_text("Đã đổi thư mục.")
-        expect(page.locator("#local-root-name")).to_have_text("Đang mở · " + new_root.name)
+        expect(page.locator("#local-root-name")).to_have_text(new_root.name)
         expect(active_root).to_have_text(str(new_root))
         expect(page.locator('button[data-path="unique.log"]')).to_be_visible()
         expect(page.locator('button[data-path="train.py"]')).to_have_count(0)

@@ -39,7 +39,8 @@ def main():
                 if rows is not None:
                     expect(page.locator('[data-row-id]')).to_have_count(rows)
 
-            def start(query=''):
+            def start(query='?source=demo'):
+                # "/" without arguments is the Project workspace; the investigation needs a query.
                 page.goto(base+'/'+query, wait_until='networkidle')
                 ready()
 

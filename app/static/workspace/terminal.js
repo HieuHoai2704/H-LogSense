@@ -287,8 +287,9 @@
     page.documentElement.dataset.theme = document.documentElement.dataset.theme;
     const workspaceStyles = document.querySelector('link[href$="/workspace/appearance.css"]');
     const projectStyles = document.querySelector('link[href$="/workspace/project.css"]');
+    const controlStyles = document.querySelector('link[href$="/workspace/controls.css"]');
     const terminalStyles = document.querySelector('link[href$="/vendor/xterm/xterm.css"]');
-    for (const { href } of [workspaceStyles, projectStyles, terminalStyles].filter(Boolean)) {
+    for (const { href } of [workspaceStyles, projectStyles, controlStyles, terminalStyles].filter(Boolean)) {
       const stylesheet = page.createElement("link");
       stylesheet.rel = "stylesheet";
       stylesheet.href = href;

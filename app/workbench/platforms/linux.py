@@ -8,11 +8,12 @@ import re
 import subprocess
 import sys
 
+from . import ICON_PNG
 from .posix import close_terminal, open_terminal, shell_profiles  # noqa: F401  (backend interface)
 
 APP_ID = "h-logsen"
 DESKTOP_MARKER = "X-H-logsen-Launcher=true"
-ICON = Path(__file__).resolve().parents[2] / "static" / "h-logsen.png"
+ICON = ICON_PNG
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 
 
@@ -33,6 +34,60 @@ def desktop_options():
 
 def set_window_glass(window, enabled):
     return bool(window and window.transparent and enabled)
+
+
+HEX_COLOR = re.compile(r"#[0-9a-fA-F]{6}")
+DEFAULT_TITLE_BAR = (True, "#1c1c1c", "#ededeb")  # Graphite, the default palette
+_title_bar_css = []
+
+
+def title_bar_css(background, foreground):
+    if not (HEX_COLOR.fullmatch(background) and HEX_COLOR.fullmatch(foreground)):
+        raise ValueError("Title bar colours must be #rrggbb.")
+    return f"""
+headerbar, .titlebar, headerbar:backdrop, .titlebar:backdrop {{
+    background: {background}; background-image: none; color: {foreground};
+    border-color: {background}; box-shadow: none;
+}}
+headerbar .title, .titlebar .title, headerbar button, .titlebar button.titlebutton {{ color: {foreground}; }}
+headerbar:backdrop .title, .titlebar:backdrop .title {{ color: alpha({foreground}, 0.6); }}
+"""
+
+
+def set_window_theme(window, dark, background, foreground):
+    """Paint the GTK client-side title bar with the workspace palette (GTK3 ignores GNOME's dark style)."""
+    if type(dark) is not bool or not isinstance(background, str) or not isinstance(foreground, str):
+        return False
+    try:
+        css = title_bar_css(background, foreground).encode()
+        import gi
+
+        gi.require_version("Gdk", "3.0")  # pin before import; Gdk 4 would otherwise be loaded first
+        gi.require_version("Gtk", "3.0")
+        from gi.repository import Gdk, GLib, Gtk
+    except (ImportError, ValueError):
+        return False
+
+    def apply():
+        settings = Gtk.Settings.get_default()
+        if settings is not None:
+            settings.set_property("gtk-application-prefer-dark-theme", dark)
+        screen = Gdk.Screen.get_default()
+        if screen is not None:
+            if not _title_bar_css:
+                provider = Gtk.CssProvider()
+                Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+                _title_bar_css.append(provider)
+            _title_bar_css[0].load_from_data(css)
+        return False
+
+    GLib.idle_add(apply)  # GTK may only be touched from its main loop
+    return True
+
+
+def attach_window(window):
+    """Use the default palette before the page loads, so the title bar never flashes white."""
+    window.events.before_show += lambda: set_window_theme(window, *DEFAULT_TITLE_BAR)
 
 
 def canonical(name):
@@ -120,6 +175,24 @@ def applications_directory():
     return base / "applications"
 
 
+def install_icon(data_home):
+    """Copy the H artwork into the user's hicolor theme so the menu and dock keep it even if the
+    install folder moves or sits on an unmounted drive. Returns the icon name, or None."""
+    target = data_home / "icons" / "hicolor" / "256x256" / "apps" / f"{APP_ID}.png"
+    try:
+        from PIL import Image
+
+        target.parent.mkdir(parents=True, exist_ok=True)
+        temporary = target.with_name(f".{target.name}.tmp")
+        with Image.open(ICON) as image:
+            image.convert("RGBA").resize((256, 256), Image.LANCZOS).save(temporary, "PNG")
+        temporary.chmod(0o644)
+        os.replace(temporary, target)
+    except (ImportError, OSError):
+        return None
+    return APP_ID
+
+
 def install_launcher(python=None, working_directory=None, directory=None):
     """Write the per-user menu entry. Never replace a file this installer did not create."""
     python = Path(python or sys.executable).absolute()
@@ -132,8 +205,9 @@ def install_launcher(python=None, working_directory=None, directory=None):
         print(f"Skipped existing launcher: {path}")
         return None
     directory.mkdir(parents=True, exist_ok=True)
+    icon = install_icon(directory.parent) or ICON
     temporary = path.with_name(f".{path.name}.tmp")
-    temporary.write_text(desktop_entry(python, working_directory), encoding="utf-8")
+    temporary.write_text(desktop_entry(python, working_directory, icon), encoding="utf-8")
     temporary.chmod(0o644)
     os.replace(temporary, path)
     print(f"H-logsen launcher: {path}")

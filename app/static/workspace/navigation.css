@@ -66,6 +66,9 @@
   transition: opacity .12s ease, transform .12s ease;
 }
 .workspace-nav nav a:is(:hover, :focus-visible)::after { opacity: 1; transform: translate(-50%, 0); transition-delay: .25s; }
+/* The last icon can sit at the window edge (narrow layouts): open its tooltip leftwards. */
+.workspace-nav nav a:last-child::after { left: auto; right: 0; transform: translate(0, -3px); }
+.workspace-nav nav a:last-child:is(:hover, :focus-visible)::after { transform: translate(0, 0); }
 
 /* Content scrolls under the sticky bar; blur it so glass stays readable. */
 :root[data-theme|="glass"][data-native-glass] .workspace-nav {

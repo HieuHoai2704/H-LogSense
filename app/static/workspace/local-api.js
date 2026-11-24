@@ -31,11 +31,40 @@
         }
       });
     }
-    window.addEventListener("pywebviewready", syncWindowGlass);
-    window.addEventListener("pageshow", syncWindowGlass);
-    document.addEventListener("workspace:theme", syncWindowGlass);
+    // Native title bar colours follow the palette (used by Linux/GTK; other platforms ignore it).
+    let latestChrome = "";
+    function hexColor(value) {
+      const probe = document.createElement("span");
+      probe.style.color = value;
+      document.body.append(probe);
+      const rgb = getComputedStyle(probe).color.match(/\d+(\.\d+)?/g)?.slice(0, 3).map(Number);
+      probe.remove();
+      return rgb ? { hex: "#" + rgb.map((part) => Math.round(part).toString(16).padStart(2, "0")).join(""), rgb } : null;
+    }
+    function syncWindowTheme() {
+      const api = window.pywebview?.api;
+      const host = document.querySelector(".workspace-nav") || document.body;
+      if (!api?.set_window_theme || !host) return;
+      const style = getComputedStyle(host);
+      const background = hexColor(style.getPropertyValue("--panel").trim() || style.backgroundColor);
+      const foreground = hexColor(style.getPropertyValue("--text").trim() || style.color);
+      if (!background || !foreground) return;
+      const [r, g, b] = background.rgb;
+      const dark = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 < 0.5;
+      const key = [dark, background.hex, foreground.hex].join();
+      if (key === latestChrome) return;
+      latestChrome = key;
+      api.set_window_theme(token, dark, background.hex, foreground.hex).catch(() => { latestChrome = ""; });
+    }
+    function syncWindowChrome() {
+      syncWindowGlass();
+      syncWindowTheme();
+    }
+    window.addEventListener("pywebviewready", syncWindowChrome);
+    window.addEventListener("pageshow", syncWindowChrome);
+    document.addEventListener("workspace:theme", syncWindowChrome);
     reduced.addEventListener("change", syncWindowGlass);
-    syncWindowGlass();
+    syncWindowChrome();
   }
 
   // Resolved at call time; logs.html loads this file without i18n.js, so keep the English key there.

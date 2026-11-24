@@ -11,7 +11,13 @@ Everything else in app/workbench is shared by all platforms. One-line portabilit
 """
 
 import importlib
+from pathlib import Path
 import sys
+
+# One artwork for every platform: a white pixel "H" on a black rounded square.
+STATIC = Path(__file__).resolve().parents[2] / "static"
+ICON_PNG = STATIC / "h-logsen.png"  # Linux window/menu, macOS Dock, web favicon
+ICON_ICO = STATIC / "h-logsen.ico"  # Windows window, taskbar and shortcuts (16-256 px)
 
 _BACKENDS = {"win32": "windows", "darwin": "macos"}
 

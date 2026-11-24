@@ -97,7 +97,11 @@ class LauncherTest(unittest.TestCase):
         self.assertEqual(fields["Type"], "Application")
         self.assertEqual(fields["StartupWMClass"], linux.APP_ID)
         self.assertEqual(fields["Path"], str(self.install))
-        self.assertTrue(Path(fields["Icon"]).is_file())
+        self.assertEqual(fields["Icon"], linux.APP_ID)  # themed name, independent of the install folder
+        icon = self.folder / "icons" / "hicolor" / "256x256" / "apps" / "h-logsen.png"
+        from PIL import Image
+        with Image.open(icon) as image:
+            self.assertEqual(image.size, (256, 256))
         # A literal $ is \$ for Exec quoting and \\$ after the string escape in the file.
         self.assertEqual(self.exec_arguments(fields["Exec"]),
                          [str(self.python), "-I", "-m", "app.workbench", "--desktop"])
@@ -120,6 +124,56 @@ class LauncherTest(unittest.TestCase):
     def test_percent_is_escaped_for_field_codes(self):
         self.assertEqual(linux._exec_argument("50%"), '"50%%"')
 
+
+class TitleBarThemeTest(unittest.TestCase):
+    def test_css_uses_only_validated_hex_colours(self):
+        css = linux.title_bar_css("#1c1c1c", "#ededeb")
+        self.assertIn("background: #1c1c1c", css)
+        self.assertIn("color: #ededeb", css)
+        for bad in ("red", "#fff", "#1c1c1c; } * { color: red", "rgb(0,0,0)"):
+            with self.assertRaises(ValueError):
+                linux.title_bar_css(bad, "#ededeb")
+
+    def test_invalid_requests_are_refused_without_touching_gtk(self):
+        self.assertFalse(linux.set_window_theme(None, "yes", "#000000", "#ffffff"))
+        self.assertFalse(linux.set_window_theme(None, True, "#000", "#ffffff"))
+        self.assertFalse(linux.set_window_theme(None, True, None, "#ffffff"))
+
+    def test_valid_request_works_in_a_fresh_process_with_gtk3(self):
+        # Without pinning Gdk 3, a new interpreter loads Gdk 4 first and the theme silently fails.
+        import subprocess
+        import sys
+
+        probe = ("import gi; gi.require_version('Gtk', '3.0'); from gi.repository import Gtk")
+        if subprocess.run([sys.executable, "-c", probe], capture_output=True).returncode:
+            self.skipTest("GTK 3 bindings are not available")
+        code = ("from app.workbench.platforms import linux; "
+                "print(linux.set_window_theme(None, True, '#000000', '#ffffff'))")
+        result = subprocess.run([sys.executable, "-W", "ignore", "-c", code], capture_output=True, text=True)
+        self.assertEqual(result.stdout.strip(), "True", result.stderr)
+
+    def test_bridge_requires_the_launch_token(self):
+        from app.workbench.desktop import DesktopBridge
+
+        bridge = DesktopBridge("secret", store=None, folder_dialog=None)
+        with patch("app.workbench.desktop.platform_backend") as backend:
+            self.assertFalse(bridge.set_window_theme("wrong", True, "#000000", "#ffffff"))
+            backend.set_window_theme.assert_not_called()
+            backend.set_window_theme.return_value = True
+            self.assertTrue(bridge.set_window_theme("secret", True, "#000000", "#ffffff"))
+
+class AppIconTest(unittest.TestCase):
+    def test_every_platform_uses_the_shared_h_artwork(self):
+        from PIL import Image
+
+        from app.workbench.platforms import ICON_ICO, ICON_PNG
+
+        self.assertIs(linux.ICON, ICON_PNG)
+        with Image.open(ICON_PNG) as png:
+            self.assertEqual(png.size[0], png.size[1])
+            self.assertGreaterEqual(png.size[0], 512)  # sharp in the macOS Dock and GNOME
+        with Image.open(ICON_ICO) as ico:
+            self.assertTrue({(16, 16), (32, 32), (256, 256)} <= ico.info["sizes"])  # Windows taskbar sizes
 
 if __name__ == "__main__":
     unittest.main()
