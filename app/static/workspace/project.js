@@ -575,7 +575,7 @@ function renderTerminal() {
   if (!lines.length) fragment.append(tr("No logs in this range"));
   panel.replaceChildren(fragment);
   const scope = chosen?.label ?? tr("Full range");
-  terminalScope.textContent = tr("{0} · {1} lines", scope, number.format(lines.length) +
+  terminalScope.textContent = window.logsenseTranslatePlural(lines.length, "{0} · {1} line", "{0} · {1} lines", scope, number.format(lines.length) +
     (visible.length > lines.length ? "/" + number.format(visible.length) : ""));
   terminalFollow.setAttribute("aria-pressed", String(state.follow && !machineContext));
   panel.scrollTop = machineContext ? 0 : state.follow ? panel.scrollHeight : oldScroll;
@@ -745,7 +745,7 @@ async function openLog(file, folder = null) {
     if (state.folder !== folder || state.demo) clearPreview();
     Object.assign(state, { source: file.name, demo: false, playing: false, buckets, terminalBuckets: buckets,
       selected: null, logSelection: null, follow: true, folder, activeFile: file });
-    importStatus(tr("Opened {0} lines.", number.format(entries.length)));
+    importStatus(window.logsenseTranslatePlural(entries.length, "Opened {0} line.", "Opened {0} lines.", number.format(entries.length)));
     renderProject();
     render();
     $("project-file").open = false;

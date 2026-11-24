@@ -1,6 +1,7 @@
 "use strict";
 (() => {
   const t = window.logsenseTranslate;
+  const tn = window.logsenseTranslatePlural;
   const form = document.getElementById("log-filters"),
     status = document.getElementById("logs-status"),
     investigationNav = document.getElementById("log-investigation-nav"),
@@ -179,7 +180,7 @@
         b.className = "heat " + (cell.event_count ? "volume-3" : "priority-0");
         b.textContent = cell.event_count || "·";
         b.title =
-          t("{0} — {1} · {2} events · coverage unknown", (cell.start), cell.end, cell.event_count);
+          tn(cell.event_count, "{0} — {1} · {2} event · coverage unknown", "{0} — {1} · {2} events · coverage unknown", cell.start, cell.end, cell.event_count);
         b.setAttribute("aria-label", b.title);
         b.onclick = () => {
           form.elements.start_time.value = cell.start.replace("Z", "");

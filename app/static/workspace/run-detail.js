@@ -207,7 +207,7 @@
       addProfileRow("Interpreter", interpreter.executable);
       addProfileRow(tr("Script SHA-256"), script.sha256 || fingerprintLabel(script.status));
       const parameters = profile.parameters.map(({ name, value }) => name + "=" + value).join(" · ");
-      addProfileRow(tr("Run parameters"), tr("{0} arguments", profile.argument_count) + (parameters ? " · " + parameters : ""));
+      addProfileRow(tr("Run parameters"), window.logsenseTranslatePlural(profile.argument_count, "{0} argument", "{0} arguments", profile.argument_count) + (parameters ? " · " + parameters : ""));
       addProfileRow(tr("GPU sampling"), profile.gpu_sampling ? tr("On") : tr("Off"));
       for (const file of profile.config_files) {
         addProfileRow(file.path, file.sha256 || fingerprintLabel(file.status));
@@ -318,7 +318,7 @@
     model = { loss, machine, logTimes, times, markers };
     byId("run-detail-meta").textContent = result.run.script + " · " + result.run.status + " · " + runId;
     const unsynced = result.training.length - loss.length;
-    const missing = unsynced ? " " + tr("{0} loss points lack a reliable timestamp and are still shown in the epoch chart.", unsynced) : "";
+    const missing = unsynced ? " " + window.logsenseTranslatePlural(unsynced, "{0} loss point lacks a reliable timestamp and is still shown in the epoch chart.", "{0} loss points lack a reliable timestamp and are still shown in the epoch chart.", unsynced) : "";
     const scope = result.run.source === "attached" ? tr("PID {0} · CPU/RAM for the process", result.run.pid) + " · " : "";
     byId("run-coverage").textContent = scope + tr("UTC · Up to the latest 64 KiB of log and 120 points per metric type.") + missing;
     panel.hidden = false;

@@ -22,7 +22,7 @@
 {% if workbench_enabled %}{% include "partials/workbench_external.html" %}{% endif %}
     <div class="demo-notice"><strong>{{ 'MYSQL · ' ~ view.dataset_mode|upper if view.is_database else 'DEMO' }}</strong><span>{{ tr('Persisted anomaly outputs and actual supporting logs. Native scores are not probabilities; coverage may be unknown.') if view.is_database else tr('Synthetic events, scores and evidence. No dataset imported or model executed.') }}</span></div>
     <div id="request-error" class="request-error" role="alert" hidden><span id="error-message"></span><button id="retry-button">{{ tr("Retry") }}</button><button id="revert-button">{{ tr("Revert filters") }}</button></div>
-    <p id="query-status" role="status">{{ tr("Query ready ·") }} {{ tr('MySQL, selected completed runs') if view.is_database else tr('synthetic fixture') }}</p>
+    <p id="query-status" role="status">{{ tr("Query ready · MySQL, selected completed runs") if view.is_database else tr("Query ready · synthetic fixture") }}</p>
     <div id="workspace-results" aria-busy="false">{% include 'partials/workspace.html' %}</div>
     <noscript><p>{{ tr("Filters and timeline cell links work without JavaScript. Interactive brush, zoom and evidence require JavaScript.") }}</p></noscript>
   </main>

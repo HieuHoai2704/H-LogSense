@@ -2,6 +2,7 @@
 // Evidence is read from explicit contracts; no prose or importance is generated.
 window.EvidenceDrawer = (() => {
   const t = window.logsenseTranslate;
+  const tn = window.logsenseTranslatePlural;
   const panel = document.getElementById("detail-panel");
   const byId = id => document.getElementById(id);
   let current = null, currentId = null, opener = null, originScroll = 0;
@@ -71,10 +72,11 @@ window.EvidenceDrawer = (() => {
   }
   function renderRaw(page) {
     raw = page; rawOffset = page.offset; byId("raw-retry").hidden = true; rawHighlight(page.text);
-    byId("raw-position").textContent = page.total_chars ? t("{0}–{1} / {2} characters", page.offset+1, page.offset+page.text.length, page.total_chars) : t("Empty raw text");
+    byId("raw-position").textContent = page.total_chars ? tn(page.total_chars, "{0}–{1} / {2} character", "{0}–{1} / {2} characters", page.offset+1, page.offset+page.text.length, page.total_chars) : t("Empty raw text");
     byId("raw-previous").disabled = page.offset === 0;
     byId("raw-next").disabled = !page.has_more;
-    byId("raw-note").textContent = t("{0} Redaction applied.{1}", current?.mode === "database" ? t("Imported source evidence (a sample for window units).") : t("Synthetic text; original log unavailable."), page.has_more ? t(" More text available in chunks.") : "");
+    byId("raw-note").textContent = (page.has_more ? (text) => t("{0} Redaction applied. More text available in chunks.", text) : (text) => t("{0} Redaction applied.", text))(
+      current?.mode === "database" ? t("Imported source evidence (a sample for window units).") : t("Synthetic text; original log unavailable."));
     byId("raw-redaction-note").textContent = page.redaction_note;
   }
   function renderRelated(data) {
@@ -89,7 +91,7 @@ window.EvidenceDrawer = (() => {
       row.append(button, meta, reason); container.append(row);
     }
     if (!data.items.length) container.textContent = current?.mode === "database" ? t("No related anomalies match this explicit context.") : t("No related fixture records match this relationship and context interval.");
-    byId("related-status").textContent = t("{0} records on this page · {1} – {2} · {3}", data.items.length, data.interval.start, data.interval.end, current?.mode === "database" ? t("related anomaly references; parsed context available in Log Explorer") : t("original raw context logs unavailable"));
+    byId("related-status").textContent = tn(data.items.length, "{0} record on this page · {1} – {2} · {3}", "{0} records on this page · {1} – {2} · {3}", data.items.length, data.interval.start, data.interval.end, current?.mode === "database" ? t("related anomaly references; parsed context available in Log Explorer") : t("original raw context logs unavailable"));
     byId("related-previous").disabled = !cursorHistory.length;
     byId("related-next").disabled = !data.has_more;
     byId("related-retry").hidden = true;

@@ -1,5 +1,6 @@
 "use strict";
 const t = window.logsenseTranslate;
+const tn = window.logsenseTranslatePlural;
 // Applied state belongs to the last successful, atomic server response.
 const initial = JSON.parse(document.getElementById("initial-state").textContent);
 let applied = initial.state;
@@ -135,7 +136,10 @@ async function load(url, historyMode = "push") {
     const canonical = stateURL();
     if (historyMode === "push" && canonical.href !== location.href) history.pushState({}, "", canonical);
     if (historyMode === "replace") history.replaceState({}, "", canonical);
-    status.textContent = t("Query ready · {0} results · {1} ms · {2}{3}", data.result_count, data.query_ms, data.mode === "database" ? "MYSQL" : "DEMO", dirty ? t(" · Unapplied filter changes") : "");
+    const backend = data.mode === "database" ? "MYSQL" : "DEMO";
+    status.textContent = dirty
+      ? tn(data.result_count, "Query ready · {0} result · {1} ms · {2} · Unapplied filter changes", "Query ready · {0} results · {1} ms · {2} · Unapplied filter changes", data.result_count, data.query_ms, backend)
+      : tn(data.result_count, "Query ready · {0} result · {1} ms · {2}", "Query ready · {0} results · {1} ms · {2}", data.result_count, data.query_ms, backend);
     restoreFocus(focus);
   } catch (error) {
     if ((error.name !== "AbortError" || timedOut) && ticket === sequence) {
@@ -178,7 +182,10 @@ function selectRange(first, last) {
 function inspectCell(cell) {
   const severity = JSON.parse(cell.dataset.breakdown);
   const name = cell.dataset.detector ? document.querySelector(`[name="detector"][value="${CSS.escape(cell.dataset.detector)}"]`)?.parentElement.querySelector("span")?.textContent : "Overall";
-  document.getElementById("bin-inspector").textContent = t("{0} · {1} · {2} anomalies · C {3}, H {4}, M {5}, L {6} · {7} {8} coverage{9}", name, cell.dataset.label, cell.dataset.count, severity.Critical, severity.High, severity.Medium, severity.Low, cell.dataset.coverage, applied.source.startsWith('db-') ? t("data") : t("fixture"), cell.dataset.coverage !== "complete" ? t(" — observed count may be incomplete") : "");
+  const values = [name, cell.dataset.label, cell.dataset.count, severity.Critical, severity.High, severity.Medium, severity.Low, cell.dataset.coverage, applied.source.startsWith('db-') ? t("data") : t("fixture")];
+  document.getElementById("bin-inspector").textContent = cell.dataset.coverage === "complete"
+    ? tn(cell.dataset.count, "{0} · {1} · {2} anomaly · C {3}, H {4}, M {5}, L {6} · {7} {8} coverage", "{0} · {1} · {2} anomalies · C {3}, H {4}, M {5}, L {6} · {7} {8} coverage", ...values)
+    : tn(cell.dataset.count, "{0} · {1} · {2} anomaly · C {3}, H {4}, M {5}, L {6} · {7} {8} coverage — observed count may be incomplete", "{0} · {1} · {2} anomalies · C {3}, H {4}, M {5}, L {6} · {7} {8} coverage — observed count may be incomplete", ...values);
 }
 function previewRange(start, end) {
   mount.querySelectorAll("[data-cell]").forEach(c => c.classList.toggle("brush-preview", c.dataset.start < end && c.dataset.end > start));
@@ -215,7 +222,8 @@ async function exportCSV(link) {
     const file = URL.createObjectURL(await response.blob());
     const download = document.createElement("a"); download.href = file; download.download = "synthetic-investigation-results.csv"; download.click();
     setTimeout(() => URL.revokeObjectURL(file), 1000);
-    notify(t("Exported {0} anomalies from the applied scope.", response.headers.get("X-Result-Count")));
+    const exported = response.headers.get("X-Result-Count");
+    notify(tn(exported, "Exported {0} anomaly from the applied scope.", "Exported {0} anomalies from the applied scope.", exported));
   } catch (error) { notify(error.message); }
   finally { if (link.isConnected) link.textContent = t("Export scoped CSV"); delete link.dataset.exporting; }
 }

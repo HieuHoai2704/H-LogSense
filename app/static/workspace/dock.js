@@ -108,7 +108,7 @@
       const parts = [];
       if (result.completed.length) {
         const count = result.total > result.issues.length ? result.issues.length + "/" + result.total : result.total;
-        parts.push(result.completed.join(" + ") + " · " + tr("{0} items", count));
+        parts.push(result.completed.join(" + ") + " · " + window.logsenseTranslatePlural(result.total, "{0} item", "{0} items", count));
       }
       parts.push(...Object.values(result.unavailable));
       status.textContent = parts.join(" · ");

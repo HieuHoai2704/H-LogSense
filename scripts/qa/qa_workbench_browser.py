@@ -193,7 +193,11 @@ class WorkbenchBrowserTest(unittest.TestCase):
         form = page.locator("#external-preview form")
         status = page.locator("#external-status")
         sample = page.locator("#external-sample")
-        for kind, expected in (("csv", "1 trùng"), ("jsonl", "1 lỗi"), ("parquet", "2/2")):
+        for kind, expected in (
+            ("csv", "trùng lặp: 1"),
+            ("jsonl", "lỗi định dạng: 1"),
+            ("parquet", "đọc: 2/2"),
+        ):
             form.locator('[name="path"]').fill("data." + kind)
             form.locator('[name="format"]').select_option(kind)
             form.get_by_role("button", name="Phân tích tệp").click()

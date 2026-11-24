@@ -4,6 +4,7 @@ from functools import lru_cache
 import json
 from pathlib import Path
 import re
+from typing import Any, cast
 from urllib.parse import urlsplit
 
 from flask import (
@@ -49,24 +50,19 @@ def current_language() -> str:
 
 
 @lru_cache(maxsize=len(LANGUAGES))
-def catalog(language: str) -> dict[str, str]:
+def catalog(language: str) -> dict[str, Any]:
+    """English message -> translation. A value is a string, or a dict of CLDR plural categories
+    ("one", "few", "many", "other") for messages the browser formats with a count (see i18n.js)."""
     if language == "en":
         return {}
-    path = Path(__file__).with_name("locales")
-    messages = json.loads((path / f"{language}.json").read_text(encoding="utf-8"))
-    workspace = workspace_labels()
-    return {**messages, **dict(zip(workspace["en"], workspace[language], strict=True))}
-
-
-@lru_cache(maxsize=1)
-def workspace_labels() -> dict[str, list[str]]:
-    return json.loads(
-        Path(__file__).with_name("locales").joinpath("workspace.json").read_text(encoding="utf-8")
-    )
+    path = Path(__file__).with_name("locales") / f"{language}.json"
+    return cast(dict[str, Any], json.loads(path.read_text(encoding="utf-8")))
 
 
 def translate(message: str, *values: object) -> str:
     result = catalog(current_language()).get(message, message)
+    if not isinstance(result, str):  # plural forms are chosen in the browser
+        result = result.get("other", message)
     if not values:
         return result
     return re.sub(

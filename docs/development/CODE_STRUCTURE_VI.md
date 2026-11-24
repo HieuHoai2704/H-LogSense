@@ -21,7 +21,7 @@ Việc nặng (nhập log, chạy detector, gửi email) chạy trong **hai work
 | Ứng dụng (backend) | `app/*.py`, `app/api`, `app/services`, `app/parsers` | 48 | 7 800 |
 | Workbench desktop | `app/workbench`, `app/workbench/platforms` | 19 | 3 150 |
 | Giao diện | `app/templates`, `app/static` (không tính `vendor/`) | 50 | 9 000 |
-| Bản dịch | `app/locales` (14 ngôn ngữ + `workspace.json`) | 15 | 16 000 |
+| Bản dịch | `app/locales` (14 ngôn ngữ, mỗi ngôn ngữ một file) | 14 | 16 000 |
 | Schema DB | `migrations` | 9 | 1 130 |
 | Lệnh vận hành, QA, ML, đóng gói | `scripts` | 38 | 7 750 |
 | Kiểm thử | `tests` | 27 | 6 000 |
@@ -174,7 +174,8 @@ app/
 │   └── h-logsen.ico, h-logsen.png  (icon chữ H)
 │
 └── locales/             vi, de, fr, es, it, pt, nl, ru, ja, ko, zh-Hans, th, id, tr
-                         (khóa là câu tiếng Anh) + workspace.json (nhãn workbench, ưu tiên hơn)
+                         (khóa là câu tiếng Anh; câu có số đếm lưu dạng CLDR one/few/many/other,
+                          trình duyệt chọn bằng Intl.PluralRules qua tn() trong js/i18n.js)
 ```
 
 ### `migrations/` — schema MySQL (Alembic)

@@ -126,7 +126,7 @@
       ["ram_percent", "RAM", "%"], ["vram_used_mib", "VRAM", " MiB"]]) {
       const peak = (run) => {
         const measure = run.machine[key];
-        return measure.samples ? numeric(measure.peak, unit) + " · " + tr("{0} samples", measure.samples) : null;
+        return measure.samples ? numeric(measure.peak, unit) + " · " + window.logsenseTranslatePlural(measure.samples, "{0} sample", "{0} samples", measure.samples) : null;
       };
       add(tr("Peak {0}", label), peak(first), peak(second));
     }

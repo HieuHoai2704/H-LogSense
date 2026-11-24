@@ -60,9 +60,10 @@ class InterfaceLanguages(unittest.TestCase):
                 self.assertEqual(options.codes, list(LANGUAGES))
                 self.assertEqual(self.client.get("/").status_code, 200)
                 for source, value in messages.items():
-                    self.assertEqual(
-                        sorted(placeholders.findall(source)), sorted(placeholders.findall(value))
-                    )
+                    for form in value.values() if isinstance(value, dict) else [value]:  # plural forms
+                        self.assertEqual(
+                            sorted(placeholders.findall(source)), sorted(placeholders.findall(form))
+                        )
 
     def test_partial_render_keeps_data_and_translates_labels(self):
         path = "/api/v1/investigation?source=demo"
@@ -116,3 +117,29 @@ class ScriptLocaleTest(unittest.TestCase):
             if pattern.search(line)
         ]
         self.assertEqual(offenders, [])
+
+
+class CatalogShapeTest(unittest.TestCase):
+    """Every catalog is whole messages with matching placeholders; plural forms use CLDR categories."""
+
+    CATEGORIES = {"zero", "one", "two", "few", "many", "other"}
+
+    def test_catalogs(self):
+        from collections import Counter
+        import json
+
+        def placeholders(text):
+            return Counter(re.findall(r"\{\d+\}", text))
+
+        locales = Path(__file__).resolve().parents[1] / "app" / "locales"
+        for path in sorted(locales.glob("*.json")):
+            catalog = json.loads(path.read_text("utf-8"))
+            for message, translation in catalog.items():
+                with self.subTest(language=path.stem, message=message):
+                    # A message that starts with a space or a separator was meant to be glued onto another.
+                    self.assertFalse(message[:1].isspace() or message.startswith(("·", "—")))
+                    forms = translation if isinstance(translation, dict) else {"other": translation}
+                    self.assertIn("other", forms)
+                    self.assertLessEqual(set(forms), self.CATEGORIES)
+                    for text in forms.values():
+                        self.assertEqual(placeholders(text), placeholders(message))

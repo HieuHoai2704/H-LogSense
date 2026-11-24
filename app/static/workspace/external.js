@@ -71,7 +71,7 @@
     if (columns.length) header.append(row("th", columns.map((item) => item.name)));
     body.append(...report.preview.map((item) => row("td", item)));
     sample.replaceChildren(header, body);
-    status.textContent = tr("{0} rows read · {1} valid · {2} malformed · {3} duplicates",
+    status.textContent = tr("Rows read: {0} · valid: {1} · malformed: {2} · duplicates: {3}",
       number.format(report.scanned_rows) + (report.total_rows === null ? "" : "/" + number.format(report.total_rows)),
       number.format(report.valid_rows), number.format(report.malformed_rows), number.format(report.duplicate_rows)) +
       (report.sampled ? " · " + tr("Statistics cover only the rows read.") : "");

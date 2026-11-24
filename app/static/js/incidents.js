@@ -1,6 +1,7 @@
 "use strict";
 (() => {
   const t = window.logsenseTranslate;
+  const tn = window.logsenseTranslatePlural;
   const form = document.getElementById("log-filters"),
     panel = document.getElementById("incident-workspace"),
     status = document.getElementById("incident-status");
@@ -79,7 +80,9 @@
       const observedEnd = form.elements.dataset_id.selectedOptions[0]?.dataset.end;
       const compatible = validatedModel && observedEnd && Date.parse(observedEnd) > Date.parse(validatedModel.inference_start_utc);
       validatedButton.disabled = role === "viewer" || !compatible;
-      document.getElementById("validated-if-note").textContent = validatedModel ? t("{0} · scores closed windows after {1}{2}", (validatedModel.name), validatedModel.inference_start_utc, compatible ? t(" · frozen validation threshold; no retraining on this dataset.") : t(" · selected data is earlier/empty; this profile is unavailable.")) : t("Validated model artifact unavailable. Existing baseline jobs remain available.");
+      document.getElementById("validated-if-note").textContent = validatedModel ? (compatible
+        ? t("{0} · scores closed windows after {1} · frozen validation threshold; no retraining on this dataset.", validatedModel.name, validatedModel.inference_start_utc)
+        : t("{0} · scores closed windows after {1} · selected data is earlier/empty; this profile is unavailable.", validatedModel.name, validatedModel.inference_start_utc)) : t("Validated model artifact unavailable. Existing baseline jobs remain available.");
       for (const element of document.getElementById("alert-rule-form").elements)
         element.disabled = !["manager", "admin"].includes(role);
       status.textContent =
@@ -179,7 +182,7 @@
     try {
       const data = await request("/api/v1/detection/jobs/" + job);
       status.textContent =
-        t("Job {0} · {1} · {2} units · {3}", job, data.state, data.processed_count, JSON.stringify(data.result));
+        tn(data.processed_count, "Job {0} · {1} · {2} unit · {3}", "Job {0} · {1} · {2} units · {3}", job, data.state, data.processed_count, JSON.stringify(data.result));
     } catch (e) {
       status.textContent = e.message;
     }
