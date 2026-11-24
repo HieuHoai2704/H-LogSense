@@ -28,6 +28,11 @@ from app.models import (
     SourceArtifact,
 )
 
+# Account host of the application user; "%" when MySQL runs in a container (see scripts.qa.verify_mysql).
+GRANT_HOST = os.environ.get("MYSQL_GRANT_HOST", "localhost")
+if not re.fullmatch(r"[A-Za-z0-9_.%-]+", GRANT_HOST):
+    raise RuntimeError("MYSQL_GRANT_HOST must be a plain host name, address or %.")
+
 
 @unittest.skipUnless(
     os.environ.get("LOGSENSE_RUN_MYSQL_TESTS") == "1",
@@ -53,7 +58,7 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
             with admin.begin() as connection:
                 for table in ("datasets", "user_datasets"):
                     connection.execute(
-                        text(f"GRANT DELETE ON `{url.database}`.`{table}` TO '{url.username}'@'localhost'")
+                        text(f"GRANT DELETE ON `{url.database}`.`{table}` TO '{url.username}'@'{GRANT_HOST}'")
                     )
         finally:
             admin.dispose()

@@ -29,6 +29,11 @@ def main():
         raise ValueError("Admin/application server mismatch.")
     if not re.fullmatch(r"[a-zA-Z0-9_]+", app_url.username or ""):
         raise ValueError("Use a simple existing application user name.")
+    # The account host the grants go to. A server in a container sees host connections from its
+    # bridge address, so such a setup uses an existing 'user'@'%' account (MYSQL_GRANT_HOST=%).
+    grant_host = os.environ.get("MYSQL_GRANT_HOST", "localhost")
+    if not re.fullmatch(r"[A-Za-z0-9_.%-]+", grant_host):
+        raise ValueError("MYSQL_GRANT_HOST must be a plain host name, address or %.")
     token = secrets.token_hex(32)
     schema_names = []
     engine = create_engine(admin_url, hide_parameters=True)
@@ -51,7 +56,7 @@ def main():
             )
             connection.execute(
                 text(
-                    f"GRANT SELECT,INSERT,UPDATE,CREATE,ALTER,INDEX,REFERENCES ON `{schema}`.* TO '{app_url.username}'@'localhost'"
+                    f"GRANT SELECT,INSERT,UPDATE,CREATE,ALTER,INDEX,REFERENCES ON `{schema}`.* TO '{app_url.username}'@'{grant_host}'"
                 )
             )
             schema_names.append(schema)

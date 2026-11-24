@@ -372,7 +372,7 @@ def build(state: InvestigationState) -> dict[str, Any]:
         fq = base(state, excluded=key).with_only_columns(column, func.count()).group_by(column)
         values = db.session.execute(fq.order_by(func.count().desc()).limit(100)).all()
         labels: dict[int, str] = (
-            dict(db.session.execute(select(D.id, D.detector_key)).tuples()) if key == "detector" else {}
+            dict(db.session.execute(select(D.id, D.detector_key)).tuples().all()) if key == "detector" else {}
         )
         facets[key] = [
             dict(
