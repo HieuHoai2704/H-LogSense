@@ -30,8 +30,8 @@ published .md5: matched before extraction
 Run from the repository root. For a **new** runtime directory only:
 
 ```text
-python -m scripts.mysql_runtime --root .local/mysql-foundation init --basedir NATIVE_MYSQL_BASE_DIRECTORY --port 13306
-python -m scripts.mysql_runtime status
+python -m scripts.run.mysql_runtime --root .local/mysql-foundation init --basedir NATIVE_MYSQL_BASE_DIRECTORY --port 13306
+python -m scripts.run.mysql_runtime status
 ```
 
 `status` is expected to fail until `start` below. `init` refuses an existing
@@ -49,10 +49,10 @@ first startup. Passwords never appear in command arguments or printed output.
 ## Start, inspect and stop
 
 ```text
-python -m scripts.mysql_runtime start
-python -m scripts.mysql_runtime status
-python -m scripts.mysql_runtime stop
-python -m scripts.mysql_runtime start
+python -m scripts.run.mysql_runtime start
+python -m scripts.run.mysql_runtime status
+python -m scripts.run.mysql_runtime stop
+python -m scripts.run.mysql_runtime start
 ```
 
 `start` passes one correctly quoted defaults-file argument to the native binary,
@@ -86,13 +86,13 @@ The wrapper constructs DATABASE_URL inside a child process so no real URL is
 copied into source, terminal history or `.env`:
 
 ```text
-python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
-python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db current
-python -m scripts.mysql_runtime grant-dataset-crud --schema logsense_dev
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database register-bgl --key bgl-v1
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database create-user --username investigator --role admin --dataset DATASET_ID
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
-python -m scripts.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
+python -m scripts.run.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
+python -m scripts.run.mysql_runtime exec --role migrate -- -m flask --app app db current
+python -m scripts.run.mysql_runtime grant-dataset-crud --schema logsense_dev
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database register-bgl --key bgl-v1
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database create-user --username investigator --role admin --dataset DATASET_ID
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
+python -m scripts.run.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
 ```
 
 The default UI continues to show synthetic fixtures. Health is
@@ -125,8 +125,8 @@ Both signed Flask-WTF form CSRF and session/header CSRF apply. Uploads are store
 under private ignored `.local/uploads`; original bytes are not served by HTTP.
 
 ```text
-python -m scripts.mysql_runtime exec --role app -- -m scripts.ingestion_worker
-python -m scripts.mysql_runtime exec --role app -- -m scripts.worker
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.ingestion_worker
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.worker
 ```
 
 Run the processes separately. The first consumes upload jobs; the second runs
@@ -143,8 +143,8 @@ correctly return no eligible ground truth and null metrics.
 Choose a **new output filename** per backup (existing files are never overwritten):
 
 ```text
-python -m scripts.mysql_runtime backup --schema logsense_dev --output .local/mysql-foundation/backup-RUN_ID.sql
-python -m scripts.mysql_runtime restore --input .local/mysql-foundation/backup-RUN_ID.sql
+python -m scripts.run.mysql_runtime backup --schema logsense_dev --output .local/mysql-foundation/backup-RUN_ID.sql
+python -m scripts.run.mysql_runtime restore --input .local/mysql-foundation/backup-RUN_ID.sql
 ```
 
 Backup uses an InnoDB single-transaction logical dump, hex BLOBs, no DROP TABLE,

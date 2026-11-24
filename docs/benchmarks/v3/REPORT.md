@@ -86,7 +86,7 @@ browser or database allocations. [Python tracemalloc](https://docs.python.org/3/
 ## Reproduce the executed baseline
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/benchmark_investigation_v3.py --repetitions 60 --browser
+.\.venv\Scripts\python.exe scripts/bench/benchmark_investigation_v3.py --repetitions 60 --browser
 ```
 
 Flask/tzdata are existing runtime dependencies; Playwright and installed Edge are

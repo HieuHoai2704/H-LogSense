@@ -23,8 +23,8 @@ Set `DATABASE_URL` to the dedicated migration user's URL in the child process.
 For the private ZIP runtime, use the credential-safe wrapper:
 
 ```text
-python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
-python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db current
+python -m scripts.run.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
+python -m scripts.run.mysql_runtime exec --role migrate -- -m flask --app app db current
 ```
 
 No database connection means no migration CLI is registered; configure it first.

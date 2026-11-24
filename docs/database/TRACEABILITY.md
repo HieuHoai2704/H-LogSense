@@ -1,7 +1,7 @@
 # Eight-week and Advanced Python traceability
 
 For the current evidence/requirement distinction and acceptance checklist, read
-[the course source audit](../course/COURSE_ACCEPTANCE_AUDIT.md). It identifies the
+[the course source audit](../../academic/course/COURSE_ACCEPTANCE_AUDIT.md). It identifies the
 explicit Flask-WTF project-plan requirement separately from the unverified
 lecturer criteria. No official course rubric has been found in the searched
 workspace/conversation attachments.

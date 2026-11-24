@@ -36,8 +36,8 @@ evaluated-unit counts do not equal materialized unit or anomaly row counts.
 Restart/resume of detector execution itself is not implemented; use a new run.
 
 ```text
-python -m scripts.database detect --dataset DATASET_ID --kind rule
-python -m scripts.database detect --dataset DATASET_ID --kind isolation_forest --train-size 10000
+python -m scripts.run.database detect --dataset DATASET_ID --kind rule
+python -m scripts.run.database detect --dataset DATASET_ID --kind isolation_forest --train-size 10000
 ```
 
 Evidence stores actual feature values, comparison and threshold. Rule evidence
@@ -50,7 +50,7 @@ The existing Drawer UI now requests the same contract through a MySQL adapter fo
 their original synthetic API behavior. Window raw evidence is an actual recorded
 sample and is labeled as a sample, not the entire detection unit.
 
-`scripts.verify_detectors` evaluates completed runs using original BGL labels,
+`scripts.qa.verify_detectors` evaluates completed runs using original BGL labels,
 event-level TP/FP/FN/TN, no point adjustment. For ML it excludes the precise
 training boundary. Undefined precision/recall is null, not invented zero/100%.
 Metrics on a contiguous 100K prefix are a case study, not a comparable published

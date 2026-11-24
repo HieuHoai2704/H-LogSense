@@ -2,7 +2,7 @@
 
 Status: **Historical design proposal**, reviewed on 2026-11-03.
 The subsequent implementation request is recorded in
-[Investigation V2 implementation report](../INVESTIGATION_V2_IMPLEMENTATION.md).
+[Investigation V2 implementation report](../history/INVESTIGATION_V2_IMPLEMENTATION.md).
 Actual application screenshots are in `implementation-v2/`; images below are
 the original static design sheets. Their verification reports describe the
 design-stage snapshot, before application implementation.

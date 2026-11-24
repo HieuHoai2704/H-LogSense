@@ -1,0 +1,22 @@
+[
+  {
+    "paper_path": "academic/literature/02_classical_statistical/2009_Xu_Mining_Console_Logs.pdf",
+    "legacy_path": "data/research/papers/P02_hdfs_origin.pdf",
+    "sha256": "bfcc18133e9f0a20d5fd87f65c04ff061e30dead1cf989f937f55cf70206a3ad"
+  },
+  {
+    "paper_path": "academic/literature/04_deep_learning/2017_Du_DeepLog.pdf",
+    "legacy_path": "data/research/papers/P04_deeplog.pdf",
+    "sha256": "82169785bf8363f13e543a295e46a5c433493277fa6d31b6040208f5f856e999"
+  },
+  {
+    "paper_path": "academic/literature/09_datasets_benchmarks/2023_Zhu_Loghub.pdf",
+    "legacy_path": "data/research/papers/P01_loghub.pdf",
+    "sha256": "a0d116b2f43e7eb46f9f6f98ac174e2f683c6844febc62607dedc13b33910b25"
+  },
+  {
+    "paper_path": "academic/literature/09_datasets_benchmarks/2024_Landauer_Dataset_Critical_Review.pdf",
+    "legacy_path": "data/research/papers/P08_critical_review.pdf",
+    "sha256": "708a8bbe45d9991ea57e2a5f0d56655c05d35475580733cf86f701117f48209a"
+  }
+]

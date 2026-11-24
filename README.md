@@ -5,6 +5,21 @@ investigation. The desktop launcher supports Windows, macOS and Linux, with an
 optional local browser mode. The authenticated MySQL investigation
 and the synthetic demo are separate data sources.
 
+## Project map
+
+| Path | What it is | Start here |
+| --- | --- | --- |
+| `app/` | The product: Flask application, workbench, templates, static assets, locales | `app/__init__.py` |
+| `migrations/` | MySQL schema history (Alembic) | |
+| `tests/` | Product test suite: `python -B -m unittest discover -s tests` | |
+| `scripts/` | Operator and developer commands, `python -m scripts.<group>.<command>` | [scripts/README.md](scripts/README.md) |
+| `packaging/` | Installers and guides shipped in the Windows / macOS / Linux ZIPs | [packaging/README.md](packaging/README.md) |
+| `docs/` | Product documentation | [docs/README.md](docs/README.md) |
+| `academic/` | Papers, research notes, experiments and coursework (not shipped) | [academic/README.md](academic/README.md) |
+| `sandbox/`, `data/`, `dist/`, `.local/` | Scratch space, datasets, builds and local runtime state (ignored by Git) | |
+
+Dependencies: `requirements.txt` (product), `requirements-workbench.txt` (adds the desktop workbench extras).
+
 The University MVP documents record the earlier academic baseline.
 Dataset metadata CRUD/RBAC, safe empty-dataset deletion, bounded queued uploads
 and real Flask-WTF forms are implemented and passed the expanded MySQL/API and
@@ -100,7 +115,7 @@ Use 64-bit Python 3.10–3.13 on Windows and macOS. Linux uses the system Python
 | --- | --- | --- |
 | Windows x64 | `Install-H-logsen.cmd`, then the H-logsen shortcut or `Open-H-logsen.cmd` | Microsoft Edge WebView2 Runtime |
 | macOS 14+ | `sh Install-H-logsen.sh`, then `sh Open-H-logsen.sh` | Python from python.org and system WKWebView. The macOS ZIP also contains Finder `.command` launchers. |
-| Ubuntu 24.04 / 26.04 x64 | `sh Install-H-logsen.sh`, then **H-logsen** in the application menu or `sh Open-H-logsen.sh` | A Wayland or X11 session, system Python and WebKitGTK. See [installation instructions](CAI_DAT_MAC_LINUX.txt) for apt packages. |
+| Ubuntu 24.04 / 26.04 x64 | `sh Install-H-logsen.sh`, then **H-logsen** in the application menu or `sh Open-H-logsen.sh` | A Wayland or X11 session, system Python and WebKitGTK. See [installation instructions](packaging/posix/CAI_DAT_MAC_LINUX.txt) for apt packages. |
 
 Extract the Windows release ZIP into a writable folder. Double-click
 **Install-H-logsen.cmd** once, then double-click **Open-H-logsen.cmd**.
@@ -118,7 +133,7 @@ Open-H-logsen.cmd
 ~~~
 
 The platform installers also accept a source checkout. Use `--browser` with
-either launch script for local browser mode. Run `python -m scripts.package_workbench`
+either launch script for local browser mode. Run `python -m scripts.release.package_workbench`
 to build three platform ZIPs, a source ZIP and their SHA-256 file into an empty directory.
 The [portfolio verification guide](docs/releases/PORTFOLIO_VERIFICATION.md)
 covers clean installation, platform support and the publication checklist.
@@ -130,7 +145,7 @@ browser with filesystem access, editing, training runs and a real terminal:
 
 ```text
 python -m pip install -r requirements-workbench.txt
-python -m scripts.workbench --browser
+python -m scripts.run.workbench --browser
 ```
 
 The launcher creates a temporary capability. **Dự án → Mở thư mục** opens
@@ -266,7 +281,7 @@ The regular Flask entry point has no local filesystem or terminal API.
   OpenStack VM IDs or event IDs as applicable. The preview does not train a
   detector or import into the MySQL BGL pipeline. The separate full HDFS_v1
   CLI evaluates two baselines on complete block sessions. See
-  [HDFS block baseline](docs/research/HDFS_BLOCK_BASELINE_VI.md).
+  [HDFS block baseline](academic/notes/HDFS_BLOCK_BASELINE_VI.md).
 - For local tracebacks and test failures, select a source reference in a
   run's log or in the monitored log pane to open the file in **Soạn thảo**.
   A pytest summary without a line number opens the file only. Live local
@@ -285,7 +300,7 @@ If using MySQL through the operator runtime, start the launcher under the
 same database configuration:
 
 ```text
-python -m scripts.mysql_runtime exec --role app -- -m scripts.workbench
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.workbench
 ```
 
 ## MySQL and real BGL
@@ -297,13 +312,13 @@ passes DATABASE_URL/FLASK_SECRET_KEY into child processes without printing them.
 It refuses reinitialization over an existing runtime. No default login exists.
 
 ```text
-python -m scripts.mysql_runtime start
-python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
-python -m scripts.mysql_runtime grant-dataset-crud --schema logsense_dev
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database register-bgl --key bgl-research-v1
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database create-user --username investigator --role admin --dataset DATASET_ID
-python -m scripts.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
+python -m scripts.run.mysql_runtime start
+python -m scripts.run.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
+python -m scripts.run.mysql_runtime grant-dataset-crud --schema logsense_dev
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database register-bgl --key bgl-research-v1
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database create-user --username investigator --role admin --dataset DATASET_ID
+python -m scripts.run.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
 ```
 
 Replace DATASET_ID with the actual registration result. Account creation prompts
@@ -321,7 +336,7 @@ the selected MySQL dataset. Open `/?source=demo` for synthetic fixtures. Run the
 analysis worker separately:
 
 ```text
-python -m scripts.mysql_runtime exec --role app -- -m scripts.worker
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.worker
 ```
 
 For HTTP import, use the inline dataset/upload panels in Log Explorer. A
@@ -330,7 +345,7 @@ its grant can stage a compatible TXT/LOG or `raw_line` CSV. A viewer cannot
 submit imports. Run the separate ingestion worker to consume queued uploads:
 
 ```text
-python -m scripts.mysql_runtime exec --role app -- -m scripts.ingestion_worker
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.ingestion_worker
 ```
 
 The analysis worker does not consume upload jobs. A 202 response means queued,
@@ -343,7 +358,7 @@ Jobs are submitted from the inline analysis controls or authenticated REST API.
 A queued job is not a completed detection. Use the inline Alerts panel to create
 rules (manager permission), acknowledge/assign incidents and inspect actual
 anomaly evidence. SMTP is disabled by default; configure it privately and invoke
-`python -m scripts.database notify` outside HTTP requests. Tests use mocks;
+`python -m scripts.run.database notify` outside HTTP requests. Tests use mocks;
 external SMTP delivery was not exercised.
 
 ## Verification and measurements
@@ -356,7 +371,7 @@ python -m pip check
 
 The default suite explicitly skips real-MySQL tests. For actual integration,
 privately configure MYSQL_ADMIN_URL and DATABASE_URL and run
-`python -m scripts.verify_mysql`; it creates new token-marked test schemas, never
+`python -m scripts.qa.verify_mysql`; it creates new token-marked test schemas, never
 drops existing databases, and runs migrations plus integration/API/security tests.
 See [testing](docs/database/TESTING.md) for browser tools and reproducible data
 benchmarks. The final report distinguishes PASS, FAIL and NOT RUN.
@@ -368,7 +383,7 @@ covers fresh dependencies, migrations, an account without dataset grants
 and the real-BGL browser workflow.
 
 The [real-BGL E2E demo instructions](docs/database/DEMO_SCRIPT.md) use
-`scripts.verify_university_e2e` with a new owned MySQL runtime on **13307**, kept
+`scripts.qa.verify_university_e2e` with a new owned MySQL runtime on **13307**, kept
 separate from existing **13306** data. Its stages cover fresh migrations,
 1K→10K→100K source import, parsing/provenance, actual worker detection, stored
 anomalies, Timeline, Evidence Drawer, scoped CSV and a controlled restart with
@@ -379,9 +394,9 @@ The single-use setup refuses an existing private context instead of resetting it
 
 - [University MVP v1.0 closure/release checklist](docs/releases/UNIVERSITY_MVP_V1_PLAN.md)
 - [Post-MVP enterprise and research backlog](docs/releases/BACKLOG.md)
-- [Current course requirements matrix](docs/course/COURSE_REQUIREMENTS_MATRIX_VI.md)
-- [Historical course source audit](docs/course/COURSE_ACCEPTANCE_AUDIT.md)
-- [Vietnamese technical report](docs/course/BAO_CAO_LOGSENSE_AI_VI.md) and [submission verification checklist](docs/releases/UNIVERSITY_HANDOFF_CHECKLIST_VI.md)
+- [Current course requirements matrix](academic/course/COURSE_REQUIREMENTS_MATRIX_VI.md)
+- [Historical course source audit](academic/course/COURSE_ACCEPTANCE_AUDIT.md)
+- [Vietnamese technical report](academic/course/BAO_CAO_LOGSENSE_AI_VI.md) and [submission verification checklist](docs/releases/UNIVERSITY_HANDOFF_CHECKLIST_VI.md)
 - [Dataset CRUD/RBAC and minimal SQL privileges](docs/database/DATASET_CRUD.md)
 - [HTTP uploads and queued ingestion](docs/database/UPLOADS.md)
 - [Current dataset/upload/form/model QA](docs/releases/DATASET_UPLOAD_RELEASE_QA.md)
@@ -393,14 +408,14 @@ The single-use setup refuses an existing private context instead of resetting it
 - [Detector/evaluation semantics](docs/database/DETECTORS.md)
 - [Demo script](docs/database/DEMO_SCRIPT.md)
 - [Architecture proposal V3](docs/architecture/README.md)
-- [Research and dataset sources](docs/research/README.md)
+- [Research and dataset sources](academic/notes/README.md)
 
 ## Limits and privacy
 
 Native macOS execution, real external SMTP, screen-reader certification,
 production deployment/TLS, full BGL archive detection, supervised baseline
 and production user administration are outside the verified MVP scope.
-The Tkinter companion runs with `python -m scripts.desktop`. The white UI follows the user's design constraint; no dark
+The Tkinter companion runs with `python -m scripts.run.desktop`. The white UI follows the user's design constraint; no dark
 mode was added. The supplied roadmap is not proof of an official lecturer rubric.
 
 Raw datasets, MySQL files, dumps, model artifacts, private credentials and actual

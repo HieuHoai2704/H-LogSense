@@ -109,7 +109,7 @@ New pure tests: 7/7 PASS for fresh chronological bounds, out-of-order merge/exac
 
 ### Actual BGL-to-DB inference proof
 
-`scripts/verify_validated_if_bgl.py` created a separate owned QA schema and
+`scripts/qa/verify_validated_if_bgl.py` created a separate owned QA schema and
 ingested exact original source bytes for 20 complete singleton windows already
 flagged by the frozen model. These are deliberately selected functional examples,
 **not an unbiased dataset or another accuracy evaluation**. Selection used the
@@ -138,9 +138,9 @@ dataset behavior.
 ## Evidence and reproduction
 
 ```text
-python -m scripts.audit_if_holdout --stage prepare
-python -m scripts.audit_if_holdout --stage validate
-python -m scripts.audit_if_holdout --stage test
+python -m scripts.ml.audit_if_holdout --stage prepare
+python -m scripts.ml.audit_if_holdout --stage validate
+python -m scripts.ml.audit_if_holdout --stage test
 ```
 
 This recorded study is single-use and retained. Do not delete its markers or create a new study ID to retune against the exposed July test. Source/cache/model/prediction binaries remain ignored under .local; public reports contain metadata and measurements only. Use a genuinely new period for another selection experiment.

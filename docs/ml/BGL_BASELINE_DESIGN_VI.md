@@ -9,7 +9,7 @@ Trạng thái **thiết kế**, ngày 08/11/2026. Chưa có mô hình mới ho�
 | Sedláček et al., CNSM 2025, Bảng VII–VIII | Trong cấu hình 40 dòng hoặc 60 giây, trung vị F1 của SVM giảm 0,917 → 0,570 khi đổi từ xáo trộn sang tuần tự. | Giữ thứ tự thời gian và đánh giá riêng từng giai đoạn. [Proceedings](https://dl.ifip.org/db/conf/cnsm/cnsm2025/1571164872.pdf) |
 | Xiao et al., 2026, Bảng V–VI | Semantic XGBoost đạt AP 0,676 ± 0,086 và F1 0,492 ± 0,165 với cửa sổ 100 dòng theo thời gian. Đổi parser làm AP thay đổi. | Đưa Count/XGB vào nhóm đối chứng. Thử Semantic/XGB nếu tái lập được encoder, parser và quyền truy cập corpus của tác giả. [Toàn văn](https://arxiv.org/html/2610.05807v1) |
 
-Báo cáo [đối chiếu toàn văn và số liệu tháng 7](../../papers/reports/BGL_LOW_FPR_FULLTEXT_RESULTS_VI.md) lưu kết quả theo đúng giao thức từng bài. Thử nghiệm 5 phút theo host giữ riêng với thí nghiệm tái lập giao thức gốc. Các mô hình chạy lại ở 5 phút là bản chuyển thể, cần ghi cấu hình và mọi sai khác.
+Báo cáo [đối chiếu toàn văn và số liệu tháng 7](../../academic/literature/reports/BGL_LOW_FPR_FULLTEXT_RESULTS_VI.md) lưu kết quả theo đúng giao thức từng bài. Thử nghiệm 5 phút theo host giữ riêng với thí nghiệm tái lập giao thức gốc. Các mô hình chạy lại ở 5 phút là bản chuyển thể, cần ghi cấu hình và mọi sai khác.
 
 ## Baseline ứng viên
 
@@ -32,6 +32,6 @@ Cấu hình dự kiến L2, C nhận một trong ba giá trị 0,1 / 1 / 10, see
 
 ## Mốc nội bộ
 
-Isolation Forest trên 21–28/07/2005 đạt **22,52% precision, 55,43% recall, F1 0,3203, AP 0,2656 và FPR 0,203661%**, với 102 TP, 351 FP, 82 FN. Mốc này hơi vượt trần nghiêm ngặt 0,20% đề xuất cho lần mới. Mức 99,46% recall là quét lại điểm trên test đã mở, dùng để phân tích độ nhạy. [Báo cáo IF](IF_JULY_HOLDOUT.md) · [Phân tích hậu kiểm](../../papers/reports/BGL_LOW_FPR_FULLTEXT_RESULTS_VI.md)
+Isolation Forest trên 21–28/07/2005 đạt **22,52% precision, 55,43% recall, F1 0,3203, AP 0,2656 và FPR 0,203661%**, với 102 TP, 351 FP, 82 FN. Mốc này hơi vượt trần nghiêm ngặt 0,20% đề xuất cho lần mới. Mức 99,46% recall là quét lại điểm trên test đã mở, dùng để phân tích độ nhạy. [Báo cáo IF](IF_JULY_HOLDOUT.md) · [Phân tích hậu kiểm](../../academic/literature/reports/BGL_LOW_FPR_FULLTEXT_RESULTS_VI.md)
 
 Triển khai nghiên cứu theo thứ tự kiểm kê độ phơi nhiễm test, dựng Count/LR, thêm ablation và đối chứng mạnh, sau đó khóa giao thức và chạy. Đóng góp dự kiến cần kiểm chứng là khả năng tìm thêm bất thường trong cùng ngân sách báo nhầm trên cửa sổ ngắn có thể truy ra log gốc.

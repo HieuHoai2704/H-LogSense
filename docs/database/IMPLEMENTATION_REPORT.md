@@ -39,7 +39,7 @@ Raw epoch is authoritative UTC; printed timestamp, original bytes, Node/NodeRepe
 - `app/extensions.py`, `database.py`, `models.py`, `domain.py`: MySQL/ORM/domain foundation.
 - `app/parsers/bgl.py`, `services/bgl_ingestion.py`: bounded actual BGL parsing and checkpoints.
 - `security.py`, `api/logs.py`, `services/log_queries.py`: roles/dataset ACL, snapshots and log reads.
-- `services/window_detection.py`, `api/jobs.py`, `scripts/worker.py`: independent temporal training/scoring/evaluation jobs.
+- `services/window_detection.py`, `api/jobs.py`, `scripts/run/worker.py`: independent temporal training/scoring/evaluation jobs.
 - `services/mysql_investigation.py`, `mysql_evidence.py`, existing API/template adapters: actual Investigation/Evidence with the same stylesheet/layout.
 - `api/alerts.py`, `services/alerts.py`, inline `incidents.js`: scoped incidents/audit/cooldown/outbox.
 - Four frozen migrations; unit/integration/browser/benchmark/lifecycle scripts and documentation.

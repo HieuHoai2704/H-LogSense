@@ -1,0 +1,31 @@
+H-logsen — Cài và mở trên Windows
+
+Yêu cầu Python 3.10–3.13 x64, Microsoft Edge WebView2 Runtime và Internet khi cài thư viện lần đầu.
+
+1. Giải nén toàn bộ ZIP ra một thư mục có quyền ghi.
+2. Bấm đúp Install-H-logsen.cmd và chờ thông báo cài xong.
+3. Bấm đúp Open-H-logsen.cmd. H-logsen mở trong cửa sổ desktop riêng.
+4. CMD tự mở ở thư mục dự án đã lưu hoặc thư mục người dùng. Chọn PowerShell
+   và bấm + Thêm phiên nếu cần một shell khác. Bấm Xem log để mở ô log chỉ đọc.
+   Mỗi phiên giữ thư mục làm việc và biến môi trường riêng.
+5. Trong Code, chọn Python của dự án trên thanh công cụ. Mở phiên terminal mới sau khi đổi Python.
+6. Chọn Thiết lập → Giao diện → Kính đen để thử nền kính của Windows 11.
+   Chữ và số liệu giữ độ đậm, còn biểu đồ và log có nền đặc. Chọn bảng màu khác để tắt kính.
+
+Cài thủ công bằng CMD, ví dụ với Python 3.10 và wheel bản 0.4.13
+
+    py -3.10 -m venv .venv
+    .venv\Scripts\python.exe -m pip install .\h_logsen-0.4.13-py3-none-any.whl
+    Open-H-logsen.cmd
+
+Bộ cài tạo hoặc cập nhật shortcut H-logsen trong Desktop và Start.
+Shortcut và Open-H-logsen.cmd mở app qua pythonw.exe của môi trường Python đã cài.
+Nếu đã ghim icon bản cũ, bỏ ghim rồi ghim H-logsen từ Start một lần.
+Nút Mở thư mục trong app desktop mở hộp thoại chọn thư mục của Windows.
+Để mở trong trình duyệt, dùng Open-H-logsen.cmd --browser.
+Chế độ desktop hỗ trợ chia ô terminal trong cùng cửa sổ. Tách riêng cửa sổ terminal có trong chế độ trình duyệt.
+Gói cài qua wheel trong ZIP. H-logsen chưa phát hành gói này trên PyPI.
+
+Dự án, terminal và phân tích tệp cục bộ chạy được ngay.
+MySQL là cấu hình riêng dành cho phân tích dữ liệu BGL đã nhập.
+Dữ liệu Workbench của tài khoản Windows lưu mặc định trong %USERPROFILE%\.h-logsen.

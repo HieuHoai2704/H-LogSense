@@ -43,7 +43,7 @@ Audit locations:
   constrained validation threshold sweep.
 - `app/services/window_features.py`: bounded train-only template frequencies and
   host moments, frozen unknown-template/unknown-host handling.
-- `scripts/audit_isolation_forest.py`: preregistration, independent stage gates,
+- `scripts/ml/audit_isolation_forest.py`: preregistration, independent stage gates,
   validation selection and one-time test access.
 - `app/services/window_deployment.py`: trusted local artifact verification and
   opt-in MySQL persistence; `app/api/jobs.py`: validated job configuration.
@@ -186,9 +186,9 @@ repository root with `.venv\\Scripts\\python.exe` on Windows or
 `.venv/bin/python` on macOS/Linux. The portable command form is:
 
 ```sh
-python -m scripts.audit_isolation_forest --stage prepare --dataset-id DATASET_ID --study-id NEW_32_HEX_ID
-python -m scripts.audit_isolation_forest --stage validate --study-id NEW_32_HEX_ID
-python -m scripts.audit_isolation_forest --stage test --study-id NEW_32_HEX_ID
+python -m scripts.ml.audit_isolation_forest --stage prepare --dataset-id DATASET_ID --study-id NEW_32_HEX_ID
+python -m scripts.ml.audit_isolation_forest --stage validate --study-id NEW_32_HEX_ID
+python -m scripts.ml.audit_isolation_forest --stage test --study-id NEW_32_HEX_ID
 ```
 
 Inspect validation and the frozen selection **before** the final command. If
@@ -214,7 +214,7 @@ To persist the already frozen profile via the existing authenticated jobs API:
 ```
 
 POST to `/api/v1/detection/jobs` with an authorized analyst/manager/admin session
-and CSRF header, then run the existing `python -m scripts.worker --once` outside
+and CSRF header, then run the existing `python -m scripts.run.worker --once` outside
 Flask requests. Do not add seed/time/window overrides to a frozen-study job.
 The worker verifies dataset identity, revision, max event ID, model SHA, feature
 SHA, exact feature schema and scope. It persists native scores/predictions in

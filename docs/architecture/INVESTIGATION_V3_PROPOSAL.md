@@ -27,7 +27,7 @@ Companion documents:
 | Snapshot | Static revision; evidence cursor key generated at app creation | No real input/analysis snapshot; cursor keys would differ across separately created worker apps |
 | Frontend | Jinja fragments, finite HTML cells, mode switch, brush/zoom, AbortController and sequence guards | Existing Investigation UX is reusable; no React/Vue rewrite is needed |
 | Payload | Composite returns escaped HTML plus timeline/facet/event JSON | Duplicate representations and per-cell links can grow independently of raw log count |
-| Import | `scripts/download_research.py` downloads/checksums archives | Acquisition is not streaming import, parsing, DB inserts or anomaly detection |
+| Import | `academic/tools/download_research.py` downloads/checksums archives | Acquisition is not streaming import, parsing, DB inserts or anomaly detection |
 | Tests | Existing fixture correctness, API, security-policy and browser reports | Useful regressions; not SQL, DB-size, concurrent load or million-event evidence |
 | Working tree | `git status` reports no Git repository | No uncommitted status available; application/data files remain unchanged by this architecture task |
 

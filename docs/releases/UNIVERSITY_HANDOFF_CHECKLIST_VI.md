@@ -9,7 +9,7 @@ Bản ZIP chứa source kỹ thuật, migrations, tests và tài liệu cài đ�
 - [ ] Theo [hướng dẫn cài sạch](UNIVERSITY_REPRODUCTION_VI.md) để mở DEMO, tạo MySQL runtime mới, áp dụng migration đến head `0004` và tạo manager chưa được cấp dataset. Không trỏ bài kiểm tra ghi dữ liệu tới schema đã có dữ liệu.
 - [ ] Kiểm tra login/logout, dataset CRUD theo vai trò, nhập BGL, ingestion worker, hai detector, Log Explorer, Timeline, Evidence và CSV. Sau restart runtime thử nghiệm, so lại counts.
 - [ ] Chạy `python -m unittest discover -s tests -q`. Đọc [hướng dẫn tích hợp](../database/TESTING.md) để chạy nhóm MySQL có guard. Ghi riêng kết quả của từng suite.
-- [ ] Đọc [ma trận môn học](../course/COURSE_REQUIREMENTS_MATRIX_VI.md) và [bài nộp mạng](../course/NETWORK_SUBMISSION_VI.md) để xác định phần cần API key hoặc giảng viên xác nhận.
+- [ ] Đọc [ma trận môn học](../../academic/course/COURSE_REQUIREMENTS_MATRIX_VI.md) và [bài nộp mạng](../../academic/course/NETWORK_SUBMISSION_VI.md) để xác định phần cần API key hoặc giảng viên xác nhận.
 
 Tên bản ZIP đánh dấu phạm vi bàn giao cục bộ. Việc gắn tag hoặc phát hành Git cần duyệt riêng.
 

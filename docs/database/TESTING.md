@@ -21,7 +21,7 @@ and frozen-model artifact contracts.
 ## Actual MySQL integration
 
 Privately inject MYSQL_ADMIN_URL and DATABASE_URL for the same owned server,
-then run `python -m scripts.verify_mysql`. Neither URL is a command argument.
+then run `python -m scripts.qa.verify_mysql`. Neither URL is a command argument.
 The application username must already exist at localhost. This harness creates
 two **new** `logsense_test_<12 hex>` schemas and token-hash ownership markers,
 grants only schema-scoped permissions and sets TEST_DATABASE_URL for its process.
@@ -57,13 +57,13 @@ never made deletable just to demonstrate CRUD.
 Use a new migrated `logsense_bench_*` schema. Run separate processes:
 
 ```text
-python -m scripts.benchmark_bgl --archive data/raw/BGL.zip --lines 1000 --output .local/bgl-1k.json
-python -m scripts.benchmark_bgl --archive data/raw/BGL.zip --lines 10000 --output .local/bgl-10k.json
-python -m scripts.benchmark_bgl --archive data/raw/BGL.zip --lines 100000 --output .local/bgl-100k.json
-python -m scripts.benchmark_bgl --archive data/raw/BGL.zip --lines 1000000 --output .local/bgl-1m.json
-python -m scripts.benchmark_bgl --archive data/raw/BGL.zip --lines 100000 --resume --output .local/bgl-resume.json
-python -m scripts.verify_import_restart --archive data/raw/BGL.zip
-python -m scripts.verify_detectors --dataset DATASET_ID
+python -m scripts.bench.benchmark_bgl --archive data/raw/BGL.zip --lines 1000 --output .local/bgl-1k.json
+python -m scripts.bench.benchmark_bgl --archive data/raw/BGL.zip --lines 10000 --output .local/bgl-10k.json
+python -m scripts.bench.benchmark_bgl --archive data/raw/BGL.zip --lines 100000 --output .local/bgl-100k.json
+python -m scripts.bench.benchmark_bgl --archive data/raw/BGL.zip --lines 1000000 --output .local/bgl-1m.json
+python -m scripts.bench.benchmark_bgl --archive data/raw/BGL.zip --lines 100000 --resume --output .local/bgl-resume.json
+python -m scripts.qa.verify_import_restart --archive data/raw/BGL.zip
+python -m scripts.qa.verify_detectors --dataset DATASET_ID
 ```
 
 The benchmark refuses a development schema and creates new datasets. Elapsed
@@ -84,12 +84,12 @@ Install Playwright separately as a QA tool. Set LOGSENSE_QA_OUTPUT to a new
 private directory for each script, then run:
 
 ```text
-python -B scripts/qa_investigation_v2.py
-python -B scripts/qa_evidence_drawer.py
+python -B scripts/qa/qa_investigation_v2.py
+python -B scripts/qa/qa_evidence_drawer.py
 ```
 
 Windows defaults to Edge, macOS to the installed Playwright Chromium channel.
-These two legacy scripts verify Demo Mode. `python -m scripts.qa_platform` adds login, real Log Explorer, MySQL Investigation/Evidence Drawer and incident E2E using private QA credentials. `python -m scripts.qa_accessibility` runs the pinned local axe-core scan; it is not screen-reader certification.
+These two legacy scripts verify Demo Mode. `python -m scripts.qa.qa_platform` adds login, real Log Explorer, MySQL Investigation/Evidence Drawer and incident E2E using private QA credentials. `python -m scripts.qa.qa_accessibility` runs the pinned local axe-core scan; it is not screen-reader certification.
 
 For the current inline dataset/form/upload workflow, inject private DATABASE_URL,
 FLASK_SECRET_KEY, QA_USERNAME/QA_PASSWORD (admin QA actor), a fresh QA_OUTPUT and
@@ -99,7 +99,7 @@ QA_UPLOAD_FILE pointing to an actual compatible local BGL TXT/LOG/CSV fixture
 to exercise the real upload/worker path. Then run:
 
 ```text
-python -m scripts.qa_dataset_crud
+python -m scripts.qa.qa_dataset_crud
 ```
 
 This script creates its own empty metadata fixture for rename/delete, and a
@@ -111,7 +111,7 @@ actual external ingestion worker, validates original SHA/provenance and refuses
 physical deletion after data arrives.
 
 For read-only regression against existing real BGL/results, use
-`python -m scripts.qa_university_e2e_browser` with private DATABASE_URL,
+`python -m scripts.qa.qa_university_e2e_browser` with private DATABASE_URL,
 FLASK_SECRET_KEY, QA_USERNAME/QA_PASSWORD, QA_DATASET_ID and
 QA_OTHER_DATASET_ID (ungranted), a fresh QA_OUTPUT and QA_PHASE=before. It checks
 logs, actual SQL anomaly counts, timeline/table/Evidence/CSV scope, role/dataset
@@ -153,7 +153,7 @@ Exercise initialize/start/stop in a new directory/unused port. Compare all-table
 checksums across a graceful restart, logical backup and new-schema restore.
 Check the app's base development grant is SELECT/INSERT/UPDATE and migration DDL
 is separate. After migration the explicit operator command
-`python -m scripts.mysql_runtime grant-dataset-crud --schema ACTUAL_SCHEMA`
+`python -m scripts.run.mysql_runtime grant-dataset-crud --schema ACTUAL_SCHEMA`
 adds DELETE on only datasets and user_datasets. Verify DELETE on logs remains
 denied; neither app startup nor migrations silently broaden privileges.
 Scan prospective Git content against actual private credential values,

@@ -31,7 +31,7 @@ Nếu phiên web cũ đang dùng cổng 5000, dừng phiên đó trước khi m�
 ```cmd
 cd /d "D:\1)_KHUTAOSONG\2)Project\14)LogSense_AI"
 .venv\Scripts\python.exe -m pip install -r requirements-workbench.txt
-.venv\Scripts\python.exe -m scripts.mysql_runtime --root .local/university-e2e-mysql start
+.venv\Scripts\python.exe -m scripts.run.mysql_runtime --root .local/university-e2e-mysql start
 .venv\Scripts\python.exe .local\run-logsense.py web
 ```
 
@@ -89,7 +89,7 @@ Web và companion dùng chung tài khoản và quyền dataset. Khi cần tài k
 
 ```cmd
 .venv\Scripts\python.exe .local\run-logsense.py create-user --username hieu_course --dataset 12
-.venv\Scripts\python.exe -m scripts.desktop
+.venv\Scripts\python.exe -m scripts.run.desktop
 ```
 
 - Trong desktop, đăng nhập rồi chọn dataset, bấm **Read logs** để đọc từ API. **New**, **Rename** và **Delete empty** sử dụng quyền của tài khoản. Tab **Import progress** theo dõi job của file vừa upload khi ingestion worker chạy.
@@ -100,9 +100,9 @@ Web và companion dùng chung tài khoản và quyền dataset. Khi cần tài k
 Xuất log thật bằng Python client, sau đó chạy các bài HTTP và lưu kết quả vào thư mục mới.
 
 ```cmd
-.venv\Scripts\python.exe -m scripts.logsense_client --username hieu_course --dataset 12 --csv .local\course-logs.csv
-.venv\Scripts\python.exe -m scripts.network_lab --username hieu_course --dataset 12 --output .local\course-network-results
-.venv\Scripts\python.exe -m scripts.mysql_course_lab --source-csv .local\course-logs.csv --output .local\course-mysql-results
+.venv\Scripts\python.exe -m scripts.run.logsense_client --username hieu_course --dataset 12 --csv .local\course-logs.csv
+.venv\Scripts\python.exe -m academic.course.network_lab --username hieu_course --dataset 12 --output .local\course-network-results
+.venv\Scripts\python.exe -m academic.course.mysql_course_lab --source-csv .local\course-logs.csv --output .local\course-mysql-results
 ```
 
 Các bài mạng đọc HTTP/JSON thật, tải ảnh từ trang Python và xuất CSV. Bài 7 gọi YouTube theo đề khi có biến môi trường `YOUTUBE_API_KEY`. Khi chưa cấu hình khóa YouTube, script lấy các bản ghi APOD thật từ NASA qua khóa công khai của API.

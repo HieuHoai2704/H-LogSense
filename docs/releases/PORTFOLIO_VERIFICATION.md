@@ -11,8 +11,8 @@ Ubuntu 26.04. Use an empty output
 directory for each build.
 
 ```text
-python -m scripts.package_workbench --output dist/portfolio
-python -m scripts.qa_portfolio_install dist/portfolio --desktop --report dist/portfolio/install.json
+python -m scripts.release.package_workbench --output dist/portfolio
+python -m scripts.release.qa_portfolio_install dist/portfolio --desktop --report dist/portfolio/install.json
 ```
 
 The verification checks the source and platform ZIP hashes, installs the wheel

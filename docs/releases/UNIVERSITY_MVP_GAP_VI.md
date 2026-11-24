@@ -10,5 +10,5 @@ Mốc rà soát 05/11/2026. Thang điểm nội bộ lấy từ bản audit 85/1
 | Báo cáo và demo | 15/20 | Báo cáo tiếng Việt, outline 11 slide, kịch bản 8:30 và 20 đáp án | Thiếu slide sẵn dùng. README còn kết quả cũ, ghi sai Tkinter. Chưa có buổi diễn tập có bấm giờ. | P1 | Deck 10–12 trang, số đo được gắn phạm vi, hướng dẫn nguồn thật/DEMO, kịch bản và Q&A dùng được. Ghi rõ phần diễn tập chưa chạy nếu chưa có người trình bày. |
 | Nộp và tái lập | 7/10 | Workspace Windows chạy, Git HEAD chỉ mở được DEMO bằng venv sẵn có | Chưa cài candidate trong venv mới và chạy migration trên MySQL sạch. Candidate chưa đóng băng. | P1 | Cài từ danh sách source có thể phát hành vào thư mục mới, venv mới, MySQL datadir mới. Smoke từ DEMO đến nhập BGL và detector. Kiểm tra ignore/secret và giữ danh sách file để duyệt. |
 
-Tài liệu đối chiếu gồm [checklist tám tuần](UNIVERSITY_MVP_V1_PLAN.md), [ma trận học phần](../course/COURSE_REQUIREMENTS_MATRIX_VI.md), [QA trước sửa](V1_RC1_RETEST.md) và [README](../../README.md).
+Tài liệu đối chiếu gồm [checklist tám tuần](UNIVERSITY_MVP_V1_PLAN.md), [ma trận học phần](../../academic/course/COURSE_REQUIREMENTS_MATRIX_VI.md), [QA trước sửa](V1_RC1_RETEST.md) và [README](../../README.md).
 

@@ -56,8 +56,8 @@ Cài XGBoost vào môi trường nghiên cứu hoặc dùng thư mục package r
 
 ```text
 python -m pip install xgboost==3.2.0
-python -m scripts.bgl_window_baseline --out .local/bgl-reproduction --stage fit
-python -m scripts.bgl_window_baseline --out .local/bgl-reproduction --stage test
+python -m scripts.ml.bgl_window_baseline --out .local/bgl-reproduction --stage fit
+python -m scripts.ml.bgl_window_baseline --out .local/bgl-reproduction --stage test
 python -m unittest tests.test_bgl_window_baseline tests.test_detector_calibration tests.test_bgl_parser
 ```
 

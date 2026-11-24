@@ -124,17 +124,17 @@ No claim of exhaustive secret/PII detection or filesystem encryption is made.
 Run from the project root through the private runtime wrapper:
 
 ```text
-python -m scripts.mysql_runtime exec --role app -- -m scripts.ingestion_worker
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.ingestion_worker
 ```
 
 For one queued upload:
 
 ```text
-python -m scripts.mysql_runtime exec --role app -- -m scripts.ingestion_worker --once
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.ingestion_worker --once
 ```
 
-The existing `scripts.worker` continues processing detector analysis jobs;
-`scripts.ingestion_worker` processes upload jobs. Starting the analysis worker
+The existing `scripts.run.worker` continues processing detector analysis jobs;
+`scripts.run.ingestion_worker` processes upload jobs. Starting the analysis worker
 alone does not import queued files. The upload endpoint never starts a daemon
 or imports the database inside a Flask request.
 
@@ -175,7 +175,7 @@ python -m unittest tests.test_upload_staging -v
 Guarded API/worker tests:
 
 ```text
-python -m scripts.verify_mysql
+python -m scripts.qa.verify_mysql
 ```
 
 Use private MYSQL_ADMIN_URL/DATABASE_URL environment values and the isolated

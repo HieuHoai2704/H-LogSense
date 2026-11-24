@@ -1,1 +1,7 @@
+# Installer line endings are part of the product: cmd.exe needs CRLF, POSIX shells need LF.
 *.sh text eol=lf
+*.command text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+packaging/windows/** text eol=crlf
+packaging/posix/** text eol=lf

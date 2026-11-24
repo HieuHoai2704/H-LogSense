@@ -14,9 +14,9 @@ Baseline: clean `feature/mysql-database-foundation`, HEAD `675c718`. MySQL persi
 | P1 | Interrupted jobs needed ownership and recovery | [app/services/bgl_ingestion.py:45](../../app/services/bgl_ingestion.py#L45) | Connection-owned leases, checkpoints and retry that blocks active workers | Actual os._exit(77) import proof and job-lease cases |
 | P1 | Page/bin/CSV scopes could disagree after append | [app/services/log_queries.py:39](../../app/services/log_queries.py#L39) | Signed scope, event watermark and keyset cursor shared by all reads | Append-exclusion, literal search, scope and CSV tests |
 | P1 | Replay/source switching could retain stale runs | [app/services/mysql_investigation.py:143](../../app/services/mysql_investigation.py#L143) | One completed run per logical detector; explicit/empty snapshots and source reset | Repeated-run and browser dataset-switch cases |
-| P1 | First metric query repeated correlated EXISTS scans | [scripts/verify_detectors.py:77](../../scripts/verify_detectors.py#L77) | Use distinct prediction IDs and one join; stopped only the owned read query | Stored confusion/evidence results verified; no data erased |
+| P1 | First metric query repeated correlated EXISTS scans | [scripts/qa/verify_detectors.py:77](../../scripts/qa/verify_detectors.py#L77) | Use distinct prediction IDs and one join; stopped only the owned read query | Stored confusion/evidence results verified; no data erased |
 | P1 | Alert retries could release a suppressed backlog | [app/services/alerts.py:16](../../app/services/alerts.py#L16) | Durable created/cooldown decision ledger plus scoped anomaly/run FKs | Idempotency, incident/audit and SMTP mock tests |
-| P1 | Dev application did not need DDL permission | [scripts/mysql_runtime.py:330](../../scripts/mysql_runtime.py#L330) | Separate migrator, dev app SELECT/INSERT/UPDATE only | SHOW GRANTS and isolated backup/restore proof |
+| P1 | Dev application did not need DDL permission | [scripts/run/mysql_runtime.py:330](../../scripts/run/mysql_runtime.py#L330) | Separate migrator, dev app SELECT/INSERT/UPDATE only | SHOW GRANTS and isolated backup/restore proof |
 
 ## Remaining gaps and readiness
 

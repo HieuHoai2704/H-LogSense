@@ -4,7 +4,7 @@ from pathlib import Path
 import unittest
 from unittest.mock import MagicMock, patch
 
-from scripts.mysql_runtime import grant_dataset_crud
+from scripts.run.mysql_runtime import grant_dataset_crud
 
 
 class DatasetPrivilegeTests(unittest.TestCase):
@@ -13,10 +13,10 @@ class DatasetPrivilegeTests(unittest.TestCase):
         cursor.fetchall.return_value = tables
         connection = MagicMock()
         connection.cursor.return_value.__enter__.return_value = cursor
-        with patch("scripts.mysql_runtime.owned_root", return_value=Path("owned")) as owned, \
-             patch("scripts.mysql_runtime.status", return_value={"port": port}) as status, \
-             patch("scripts.mysql_runtime.load", return_value={"port": 13307}) as load, \
-             patch("scripts.mysql_runtime.connect") as connect:
+        with patch("scripts.run.mysql_runtime.owned_root", return_value=Path("owned")) as owned, \
+             patch("scripts.run.mysql_runtime.status", return_value={"port": port}) as status, \
+             patch("scripts.run.mysql_runtime.load", return_value={"port": 13307}) as load, \
+             patch("scripts.run.mysql_runtime.connect") as connect:
             connect.return_value.__enter__.return_value = connection
             result = grant_dataset_crud(".local/owned", "logsense_test_0123456789ab")
         return result, cursor, owned, status, load, connect
@@ -42,9 +42,9 @@ class DatasetPrivilegeTests(unittest.TestCase):
         for schema in ("", "x" * 65, "db`.* TO 'other'@'%'", "db.name", "db-name",
                        "db\nname", " db", None, 123, "école"):
             with self.subTest(schema=schema), \
-                 patch("scripts.mysql_runtime.load") as load, \
-                 patch("scripts.mysql_runtime.status") as status, \
-                 patch("scripts.mysql_runtime.connect") as connect:
+                 patch("scripts.run.mysql_runtime.load") as load, \
+                 patch("scripts.run.mysql_runtime.status") as status, \
+                 patch("scripts.run.mysql_runtime.connect") as connect:
                 with self.assertRaises(ValueError):
                     grant_dataset_crud(".local/owned", schema)
                 load.assert_not_called()
@@ -56,10 +56,10 @@ class DatasetPrivilegeTests(unittest.TestCase):
         cursor.fetchall.return_value = [("datasets",)]
         connection = MagicMock()
         connection.cursor.return_value.__enter__.return_value = cursor
-        with patch("scripts.mysql_runtime.owned_root", return_value=Path("owned")), \
-             patch("scripts.mysql_runtime.status", return_value={"port": 13307}), \
-             patch("scripts.mysql_runtime.load", return_value={"port": 13307}), \
-             patch("scripts.mysql_runtime.connect") as connect:
+        with patch("scripts.run.mysql_runtime.owned_root", return_value=Path("owned")), \
+             patch("scripts.run.mysql_runtime.status", return_value={"port": 13307}), \
+             patch("scripts.run.mysql_runtime.load", return_value={"port": 13307}), \
+             patch("scripts.run.mysql_runtime.connect") as connect:
             connect.return_value.__enter__.return_value = connection
             with self.assertRaisesRegex(ValueError, "migrations"):
                 grant_dataset_crud(".local/owned", "logsense_dev")
@@ -67,19 +67,19 @@ class DatasetPrivilegeTests(unittest.TestCase):
         self.assertNotIn("GRANT", cursor.execute.call_args.args[0])
 
     def test_port_mismatch_never_grants(self):
-        with patch("scripts.mysql_runtime.owned_root", return_value=Path("owned")), \
-             patch("scripts.mysql_runtime.status", return_value={"port": 13306}), \
-             patch("scripts.mysql_runtime.load", return_value={"port": 13307}), \
-             patch("scripts.mysql_runtime.connect") as connect:
+        with patch("scripts.run.mysql_runtime.owned_root", return_value=Path("owned")), \
+             patch("scripts.run.mysql_runtime.status", return_value={"port": 13306}), \
+             patch("scripts.run.mysql_runtime.load", return_value={"port": 13307}), \
+             patch("scripts.run.mysql_runtime.connect") as connect:
             with self.assertRaisesRegex(ValueError, "port"):
                 grant_dataset_crud(".local/owned", "logsense_dev")
             connect.assert_not_called()
 
     def test_ownership_failure_never_opens_grant_connection(self):
-        with patch("scripts.mysql_runtime.owned_root", return_value=Path("owned")), \
-             patch("scripts.mysql_runtime.status", side_effect=ValueError("Ownership mismatch")), \
-             patch("scripts.mysql_runtime.load") as load, \
-             patch("scripts.mysql_runtime.connect") as connect:
+        with patch("scripts.run.mysql_runtime.owned_root", return_value=Path("owned")), \
+             patch("scripts.run.mysql_runtime.status", side_effect=ValueError("Ownership mismatch")), \
+             patch("scripts.run.mysql_runtime.load") as load, \
+             patch("scripts.run.mysql_runtime.connect") as connect:
             with self.assertRaisesRegex(ValueError, "Ownership"):
                 grant_dataset_crud(".local/owned", "logsense_dev")
             load.assert_not_called()

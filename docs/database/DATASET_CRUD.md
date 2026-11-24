@@ -102,13 +102,13 @@ After migrations have created both tables, an operator of the existing owned
 native runtime can run:
 
 ```text
-python -m scripts.mysql_runtime grant-dataset-crud --schema logsense_dev
+python -m scripts.run.mysql_runtime grant-dataset-crud --schema logsense_dev
 ```
 
 For a separate owned QA runtime and its actual generated schema:
 
 ```text
-python -m scripts.mysql_runtime --root .local/university-e2e-mysql grant-dataset-crud --schema ACTUAL_GENERATED_SCHEMA
+python -m scripts.run.mysql_runtime --root .local/university-e2e-mysql grant-dataset-crud --schema ACTUAL_GENERATED_SCHEMA
 ```
 
 Replace the schema placeholder with the intended existing application schema.
@@ -156,7 +156,7 @@ missing. They are mock tests, not proof that an actual MySQL grant was applied.
 Use the existing isolated MySQL verifier for the CRUD/API/RBAC integration suite:
 
 ```text
-python -m scripts.verify_mysql
+python -m scripts.qa.verify_mysql
 ```
 
 MYSQL_ADMIN_URL and DATABASE_URL must be injected privately as described in

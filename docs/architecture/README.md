@@ -24,6 +24,6 @@ Start with [V3 proposal](INVESTIGATION_V3_PROPOSAL.md). Supporting documents cov
 
 Benchmark prerequisites are recorded in
 [environment.json](../benchmarks/v3/environment.json).
-The [read-only baseline script](../../scripts/benchmark_investigation_v3.py)
+The [read-only baseline script](../../scripts/bench/benchmark_investigation_v3.py)
 does not create/connect to any DB. The 10K/100K/1M parsed-event MySQL matrix remains
 unexecuted because no approved running isolated database is available.

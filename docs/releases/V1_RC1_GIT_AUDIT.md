@@ -25,7 +25,7 @@ Kiểm tra ignore thực tế trên `.env`, `.local`, `.venv`, BGL archive, stor
 | P0 | Chưa phát hiện P0 trong phạm vi thử. | Đợt review cuối không có secret thật, cross-dataset leak, migration gãy hoặc mất dữ liệu. |
 | P1 | **Đã tái hiện.** Admin chưa có dataset grant đăng nhập 200 và `/api/v1/logs/datasets` trả 403 và UI giữ form đăng nhập. API quản lý metadata và trang `/manage/datasets` trả 200 trong session. | Cho người đã đăng nhập thấy trạng thái chưa có dataset và mở luồng đăng ký dataset theo role, giữ 403 cho log riêng. Test browser từ admin không grant qua tạo dataset đầu tiên và test viewer không grant. |
 | P1 | Cài bản phát hành từ thư mục sạch chưa thử trong đợt này. Dev Windows đang dùng venv và runtime local có sẵn. | Làm đúng README trên Windows mới, kiểm tra head 0004, bootstrapping người dùng/dataset và hai worker với schema mới. Ghi rõ macOS SKIP cho đến khi chạy trên Mac. |
-| P1 học phần | Bảy bài mạng có yêu cầu nộp. Một số minh chứng đồ án dùng nguồn khác. Workbench GUI và rubric riêng chưa xác minh. | Chốt bộ bài nộp và cách xử lý nguồn cũ/API key, theo [ma trận học phần](../course/COURSE_REQUIREMENTS_MATRIX_VI.md). |
+| P1 học phần | Bảy bài mạng có yêu cầu nộp. Một số minh chứng đồ án dùng nguồn khác. Workbench GUI và rubric riêng chưa xác minh. | Chốt bộ bài nộp và cách xử lý nguồn cũ/API key, theo [ma trận học phần](../../academic/course/COURSE_REQUIREMENTS_MATRIX_VI.md). |
 | P2 / backlog | SMTP thật, screen reader, tải đồng thời và 1M anomaly outputs. | Tách thành đợt kiểm thử riêng theo điều kiện thực tế. |
 
 ## Trình tự release candidate

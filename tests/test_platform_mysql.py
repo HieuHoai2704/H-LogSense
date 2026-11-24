@@ -479,7 +479,7 @@ class PlatformMySQLTests(unittest.TestCase):
             ).status_code,
             409,
         )
-        from scripts.worker import run_once
+        from scripts.run.worker import run_once
 
         self.assertTrue(run_once(self.engine))
         status = self.client.get("/api/v1/detection/jobs/" + str(first.json["job_id"]))

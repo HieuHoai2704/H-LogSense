@@ -25,7 +25,7 @@
 | Restart QA sạch | **PASS** | Tắt/mở đúng runtime mới 13308. Head `0004`, 100.000 events, 158.218 predictions và 158 outputs giống nhau trước/sau. |
 | Browser hồi quy BGL giữ từ trước | **12/12 nhóm PASS** | Edge, bộ BGL 100K trên 13307. Có scope bin và CSV 4 dòng, Evidence, 403 và DEMO riêng. 6,72 giây. |
 | Tkinter và MySQL Connector | **PASS** | Tk 8.6.12 đăng nhập qua Flask, lấy 25 dòng trong 100.000. Lab connector thực hiện CRUD trong schema học tập riêng. Workbench GUI NOT RUN. |
-| Bài mạng | **PASS 1–5, FAIL 6 live, SKIP 7** | Bài 6 HTTP 404 trên endpoint đề, mẫu trang 17 trả 630 giây. Thiếu YouTube API key. Xem [bài nộp](../course/NETWORK_SUBMISSION_VI.md). |
+| Bài mạng | **PASS 1–5, FAIL 6 live, SKIP 7** | Bài 6 HTTP 404 trên endpoint đề, mẫu trang 17 trả 630 giây. Thiếu YouTube API key. Xem [bài nộp](../../academic/course/NETWORK_SUBMISSION_VI.md). |
 | Bảo vệ, rubric, macOS, SMTP thật | **NOT RUN / chưa xác nhận** | Có bộ slide và kịch bản. Chưa có diễn tập người trình bày, rubric chính thức, chạy macOS hay gửi thư bên ngoài. |
 
 Số lượng test giữa các bộ có phần trùng và được báo cáo riêng. Số đo từ bản cài sạch cho luồng chức năng. Nhãn upload là nhãn do người dùng cung cấp. Chất lượng mô hình được đo độc lập trong [thí nghiệm July](../ml/IF_JULY_HOLDOUT.md). Profile IF được chọn có precision 22,52%, recall 55,43%, F1 0,3203, 351 báo nhầm và 82 bỏ sót. Dữ liệu nguồn và runtime cũ được giữ. Các thao tác ghi, rollback và restart được thực hiện trên schema hoặc runtime kiểm thử tương ứng.
@@ -35,12 +35,12 @@ Số lượng test giữa các bộ có phần trùng và được báo cáo ri�
 | Đường dẫn | Lý do |
 |---|---|
 | `app/__init__.py`, `app/templates/logs.html`, `app/templates/dashboard.html`, `app/static/js/logs.js` | Trang gốc dùng workspace MySQL khi đã cấu hình. Liên kết từ Explorer mở Investigation theo dataset hiện tại và đường trở về giữ dataset. |
-| `app/api/logs.py`, `app/static/js/logs.js`, `scripts/database.py` | Cho tài khoản đã xác thực xem danh sách rỗng, giữ quyền trên truy vấn dữ liệu riêng, hỗ trợ bootstrap có chủ đích với `--no-dataset`. |
+| `app/api/logs.py`, `app/static/js/logs.js`, `scripts/run/database.py` | Cho tài khoản đã xác thực xem danh sách rỗng, giữ quyền trên truy vấn dữ liệu riêng, hỗ trợ bootstrap có chủ đích với `--no-dataset`. |
 | `app/templates/partials/language_picker.html`, `app/static/css/language.css` | Gỡ nút xác nhận ngôn ngữ. JS có sẵn tự gửi lựa chọn. |
 | `tests/test_dataset_crud_mysql.py`, `tests/test_i18n.py` | Thêm kiểm tra viewer không grant, manager tạo dataset đầu, route mặc định và DEMO riêng. |
-| `scripts/course_network_submission.py`, `scripts/network_lab.py`, `docs/course/NETWORK_SUBMISSION_VI.md`, `docs/course/COURSE_REQUIREMENTS_MATRIX_VI.md` | Tách bảy bài mạng đúng đề, giới hạn origin tải ảnh MDN, ghi trạng thái từng bài và cập nhật ma trận môn. |
+| `academic/course/course_network_submission.py`, `academic/course/network_lab.py`, `academic/course/NETWORK_SUBMISSION_VI.md`, `academic/course/COURSE_REQUIREMENTS_MATRIX_VI.md` | Tách bảy bài mạng đúng đề, giới hạn origin tải ảnh MDN, ghi trạng thái từng bài và cập nhật ma trận môn. |
 | `README.md`, `docs/architecture/README.md`, `docs/database/API.md`, `docs/database/ERD.md`, `docs/releases/UNIVERSITY_REPRODUCTION_VI.md` | Tài liệu bám theo source, cài sạch và quyền của tài khoản mới. Migration schema giữ head 0004. |
-| `docs/course/BAO_CAO_LOGSENSE_AI_VI.md`, `docs/course/BAO_VE_LOGSENSE_AI_VI.md`, `docs/course/LogSense_AI_BaoVe.pptx` | Báo cáo tiếng Việt, kịch bản 8:30, 25 câu phản biện và PowerPoint 11 slide đã render. |
+| `academic/course/BAO_CAO_LOGSENSE_AI_VI.md`, `academic/course/BAO_VE_LOGSENSE_AI_VI.md`, `academic/course/LogSense_AI_BaoVe.pptx` | Báo cáo tiếng Việt, kịch bản 8:30, 25 câu phản biện và PowerPoint 11 slide đã render. |
 | `docs/releases/UNIVERSITY_MVP_GAP_VI.md`, `docs/releases/UNIVERSITY_MVP_V1_PLAN.md`, `docs/releases/UNIVERSITY_MVP_READINESS_VI.md` | Tiêu chuẩn nghiệm thu, kết quả, điểm và việc cần chốt. |
 
 ## Kiểm tra bản nộp

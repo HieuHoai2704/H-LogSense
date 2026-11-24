@@ -20,7 +20,7 @@ The authoritative project planning sources are the supplied Master Prompt,
 section 21 (eight-week deliverables, lines 1066-1165) and section 22 (MVP
 acceptance, lines 1167-1186). The plan explicitly calls itself a planning baseline.
 The original lecturer rubric and scoring weights remain unavailable; see the
-[course audit](../course/COURSE_ACCEPTANCE_AUDIT.md). Requirements of the project
+[course audit](../../academic/course/COURSE_ACCEPTANCE_AUDIT.md). Requirements of the project
 and unknown requirements of the course must remain separate.
 
 This plan uses P0 for a release-blocking functional/safety/evidence issue in the
@@ -42,7 +42,7 @@ not invented lecturer grading weights.
 | 8: finalization | Responsive UI, themes, performance, docs/README/repo/demo/presentation/final tests | Existing 1366/1440/1920 browser checks, benchmark reports, ERD/API/runbooks/tests | PARTIAL: presentation deck, native macOS run and external deployment are not verified. White-only UI follows the later user instruction and is not a dark-theme blocker |
 
 Source locations include `app/security.py`, `app/api/`, `app/parsers/bgl.py`,
-`app/services/`, `migrations/versions/`, `scripts/database.py`, `scripts/worker.py`
+`app/services/`, `migrations/versions/`, `scripts/run/database.py`, `scripts/run/worker.py`
 and the existing `tests/`. Detailed course concepts and limitations are in
 [traceability](../database/TRACEABILITY.md).
 
@@ -74,7 +74,7 @@ format, marks and mandatory content remain unverified without lecturer material.
 |---|---|---|---|
 | P0-01 PASS | Dataset metadata CRUD with explicit RBAC/grants and safe physical deletion | Software acceptance complete; retain source review/freeze as P0-06 | 23 CRUD MySQL tests and current browser checks PASS, including roles, protected populated datasets, concurrency, rollback and narrow DELETE privileges; see [dataset contract](../database/DATASET_CRUD.md) and [current QA](DATASET_UPLOAD_RELEASE_QA.md) |
 | P0-02 PASS | Validated upload and queued ingestion | Actual 100K upload reached verified Explorer without duplicate rows or lost provenance | Upload MySQL/API/worker and pure staging/security tests PASS; current dataset/upload browser 11/11 PASS, 100,000 parsed and zero malformed. [Current QA](DATASET_UPLOAD_RELEASE_QA.md) records the exact workload and bounds |
-| P0-03 PASS | Actual Flask-WTF dataset/upload forms with dual CSRF | Valid/invalid forms and existing JSON mutations verified without disabling CSRF | Declared dependencies, pure form validation, guarded form/API tests and current browser checks PASS; [course evidence](../course/COURSE_ACCEPTANCE_AUDIT.md) |
+| P0-03 PASS | Actual Flask-WTF dataset/upload forms with dual CSRF | Valid/invalid forms and existing JSON mutations verified without disabling CSRF | Declared dependencies, pure form validation, guarded form/API tests and current browser checks PASS; [course evidence](../../academic/course/COURSE_ACCEPTANCE_AUDIT.md) |
 | P0-04 DONE | Whole-chain evidence must be reproducible after restart | Measured real-BGL 100K E2E, 42 filter cases and real browser before/after restart passed; all 24 table checksums and CSV bytes match | [Readable E2E report](E2E_REAL_BGL.md), [structured evidence](measurements/university-mvp-v1/e2e.json), retained private raw/model artifacts |
 | P0-05 DOCS UPDATED | README/demo must describe the exact current behavior | README/plan now distinguish CLI and uploaded BGL, supplied labels, legacy IF, V2 replay and reusable July inference; manual defense rehearsal remains open | [Current QA](DATASET_UPLOAD_RELEASE_QA.md), [upload contract](../database/UPLOADS.md), [July IF](../ml/IF_JULY_HOLDOUT.md), [demo](../database/DEMO_SCRIPT.md); historical reports remain unchanged |
 | P0-06 | Release source snapshot is not reviewed/frozen | Review existing uncommitted changes, inspect diff/secret/data exclusions, freeze the accepted implementation and scope | Reproducible source hash/commit recorded after review. No push/merge/tag before approval |
@@ -169,16 +169,16 @@ The new E2E harness may use its own dedicated runtime/schema; its report records
 the exact test environment separately from these operator commands.
 
 ```text
-python -m scripts.mysql_runtime start
-python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
-python -m scripts.mysql_runtime exec --role migrate -- -m flask --app app db current
-python -m scripts.mysql_runtime grant-dataset-crud --schema logsense_dev
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database register-bgl --key university-demo-UNIQUE
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database create-user --username investigator --role admin --dataset DATASET_ID
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 10000
-python -m scripts.mysql_runtime exec --role app -- -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 100000
-python -m scripts.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
+python -m scripts.run.mysql_runtime start
+python -m scripts.run.mysql_runtime exec --role migrate -- -m flask --app app db upgrade
+python -m scripts.run.mysql_runtime exec --role migrate -- -m flask --app app db current
+python -m scripts.run.mysql_runtime grant-dataset-crud --schema logsense_dev
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database register-bgl --key university-demo-UNIQUE
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database create-user --username investigator --role admin --dataset DATASET_ID
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 10000
+python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 100000
+python -m scripts.run.mysql_runtime exec --role app -- -m flask --app app run --host 127.0.0.1
 ```
 
 The demonstration reaches the first 100,000 BGL source lines so that its window
@@ -190,7 +190,7 @@ synthetic windows as real BGL evidence just to make IF produce results.
 idempotency rather than an additional N rows. These commands demonstrate the
 operator CLI path. For HTTP import, create an empty dataset in the inline panel,
 submit a compatible TXT/LOG or raw_line CSV with an authorized account, and run
-`python -m scripts.mysql_runtime exec --role app -- -m scripts.ingestion_worker`
+`python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.ingestion_worker`
 in a separate terminal. Show queued/running/completed state and committed row
 counts; do not describe a successful upload request as a completed import.
 
@@ -199,7 +199,7 @@ counts; do not describe a successful upload request as a completed import.
 2. Open raw evidence; compare source line/byte, original timestamp, Unix UTC,
    supplied Node and ground-truth label with the actual source.
 3. Expand **Alerts and analysis jobs**, select **Queue window rule**, then run
-   `python -m scripts.mysql_runtime exec --role app -- -m scripts.worker --once`
+   `python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.worker --once`
    in another terminal. Check completion. Repeat **Queue Isolation Forest** with
    the same separate-worker command; neither training runs in Flask requests.
 4. Open `/?source=db-DATASET_ID`. Show actual completed run IDs, native score

@@ -5,7 +5,7 @@ from zipfile import ZipFile
 
 import numpy as np
 
-from scripts.bgl_window_baseline import calibrate, collect, epoch, fit_representation, transform
+from scripts.ml.bgl_window_baseline import calibrate, collect, epoch, fit_representation, transform
 
 
 class BGLWindowBaselineTest(unittest.TestCase):

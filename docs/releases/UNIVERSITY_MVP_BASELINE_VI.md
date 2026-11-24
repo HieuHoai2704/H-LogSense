@@ -11,5 +11,5 @@ Ngày đối chiếu 05/11/2026. **TESTED BASELINE**, phạm vi Windows, bản g
 
 Đợt này đối chiếu file và bằng chứng của lượt chạy từ ZIP trước đó. Khi so với workspace trước các bổ sung tài liệu mới, file trong manifest có khác biệt duy nhất là `docs/releases/BACKLOG.md`. Backlog tiếp tục được cập nhật độc lập sau khi đóng gói. Baseline được giữ bằng checksum của ZIP. [Biên bản nghiệm thu theo checksum](UNIVERSITY_HANDOFF_RESULT_VI.md) · [Checklist bàn giao](UNIVERSITY_HANDOFF_CHECKLIST_VI.md)
 
-ISS dùng phương án dự báo có dữ liệu quỹ đạo thật để bổ sung bài học. Sự chấp nhận của giảng viên còn mở. YouTube cần API key hợp lệ. Workbench GUI cần máy có bản cài và bằng chứng thao tác trực tiếp. [Bổ sung minh chứng học phần](../course/EXTERNAL_REQUIREMENTS_EVIDENCE_VI.md)
+ISS dùng phương án dự báo có dữ liệu quỹ đạo thật để bổ sung bài học. Sự chấp nhận của giảng viên còn mở. YouTube cần API key hợp lệ. Workbench GUI cần máy có bản cài và bằng chứng thao tác trực tiếp. [Bổ sung minh chứng học phần](../../academic/course/EXTERNAL_REQUIREMENTS_EVIDENCE_VI.md)
 

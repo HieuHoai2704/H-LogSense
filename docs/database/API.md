@@ -104,7 +104,7 @@ Log Explorer. A window's raw sample is labeled as a sample, not all evidence.
 | GET `/api/v1/alerts/{id}` | State, assignment, acknowledgement actor, last 100 audit entries, actual anomaly/run evidence link. |
 | PATCH `/api/v1/alerts/{id}` | analyst+: status/assigned_to/note (<=2000); role, transition and assignee dataset grant checked. |
 
-Run `python -m scripts.worker` outside Flask. No training or batch import is
+Run `python -m scripts.run.worker` outside Flask. No training or batch import is
 executed inside an HTTP request. Jobs use connection-owned MySQL leases, atomic
 prediction batches and unique run/unit identity for retry. The minimal worker
 does not implement a distributed scheduler or automatic heartbeat recovery.
@@ -115,7 +115,7 @@ suppressed backlog. Cooldown is **per rule**, not per host when host is omitted.
 Alert/anomaly/run references are database-scoped FKs. Audit history is append-only
 through the application; it is not an independently tamper-proof audit service.
 
-Email is queued in an outbox. Run `python -m scripts.database notify` explicitly.
+Email is queued in an outbox. Run `python -m scripts.run.database notify` explicitly.
 SMTP_ENABLED must be 1; STARTTLS with certificate validation is mandatory. Raw
 logs and credentials are not mailed. Attempts are bounded to three with backoff;
 stable Message-ID helps receivers deduplicate. Delivery is at-least-once, not an

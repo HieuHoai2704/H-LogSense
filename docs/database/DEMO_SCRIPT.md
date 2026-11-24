@@ -25,17 +25,17 @@ running. This is separate from the retained application runtime on port 13306.
 No OS service or global MySQL configuration is installed.
 
 ```text
-python -m scripts.mysql_runtime --root .local/university-e2e-mysql init --basedir "OS_NATIVE_BASEDIR" --port 13307
-python -m scripts.mysql_runtime --root .local/university-e2e-mysql start
-python -m scripts.verify_university_e2e --stage setup --archive data/raw/BGL.zip --lines 100000
-python -m scripts.verify_university_e2e --stage detect --kind rule
-python -m scripts.verify_university_e2e --stage detect --kind isolation_forest
-python -m scripts.verify_university_e2e --stage verify --phase before
-python -m scripts.verify_university_e2e --stage browser --phase before
-python -m scripts.verify_university_e2e --stage restart
-python -m scripts.verify_university_e2e --stage verify --phase after
-python -m scripts.verify_university_e2e --stage browser --phase after
-python -m scripts.verify_university_filters
+python -m scripts.run.mysql_runtime --root .local/university-e2e-mysql init --basedir "OS_NATIVE_BASEDIR" --port 13307
+python -m scripts.run.mysql_runtime --root .local/university-e2e-mysql start
+python -m scripts.qa.verify_university_e2e --stage setup --archive data/raw/BGL.zip --lines 100000
+python -m scripts.qa.verify_university_e2e --stage detect --kind rule
+python -m scripts.qa.verify_university_e2e --stage detect --kind isolation_forest
+python -m scripts.qa.verify_university_e2e --stage verify --phase before
+python -m scripts.qa.verify_university_e2e --stage browser --phase before
+python -m scripts.qa.verify_university_e2e --stage restart
+python -m scripts.qa.verify_university_e2e --stage verify --phase after
+python -m scripts.qa.verify_university_e2e --stage browser --phase after
+python -m scripts.qa.verify_university_filters
 ```
 
 Execute in order and stop at any failed stage. `setup` provisions a uniquely
@@ -81,7 +81,7 @@ use an explicit new `--report-name NAME.json` for a later authorized verificatio
 Default unit tests and guarded MySQL tests are separate commands in TESTING.md;
 the E2E stages do not silently execute them. After their reports and the DEMO
 browser reports are captured for the same source, the optional
-`python -m scripts.verify_university_e2e --stage summary` aggregates these local
+`python -m scripts.qa.verify_university_e2e --stage summary` aggregates these local
 evidence files. Read the source/date/workload in each report; aggregation is not
 a replacement for executing a test.
 
@@ -89,7 +89,7 @@ After all stages and evidence are captured, the owned test runtime can be stoppe
 without deleting its data:
 
 ```text
-python -m scripts.mysql_runtime --root .local/university-e2e-mysql stop
+python -m scripts.run.mysql_runtime --root .local/university-e2e-mysql stop
 ```
 
 ## Interactive defense walkthrough
@@ -104,7 +104,7 @@ The operator commands are also listed in the
    role, register a BGL dataset and create a granted investigator account. Password
    entry is private; no default/demo password exists.
    After migration, explicitly run
-   `python -m scripts.mysql_runtime grant-dataset-crud --schema logsense_dev`
+   `python -m scripts.run.mysql_runtime grant-dataset-crud --schema logsense_dev`
    for the actual intended schema. This grants DELETE on only datasets and
    user_datasets, not imported logs. It is not an automatic app-start privilege.
 2. Run import with absolute limits 1000, 10000 and 100000. Show committed progress,
@@ -117,7 +117,7 @@ The operator commands are also listed in the
 4. Open a log's raw drawer. Show original timestamp string, authoritative Unix UTC,
    supplied Node, original label, file/line/byte provenance and redacted source
    text. Close with Escape and demonstrate preserved filters/focus.
-5. Start `python -m scripts.worker` through the private environment wrapper. Queue
+5. Start `python -m scripts.run.worker` through the private environment wrapper. Queue
    a rule job, then IF. Explain temporal splits, template policy, features and
    thresholds before showing test metrics. Labels are not model features.
 6. Open `/?source=db-DATASET_ID`. Show selected completed runs, Severity/Volume,
@@ -174,10 +174,10 @@ datasets intact. No additional page/menu or frontend framework is needed.
 4. Show queued state, then start the separate worker outside Flask:
 
    ```text
-   python -m scripts.mysql_runtime exec --role app -- -m scripts.ingestion_worker
+   python -m scripts.run.mysql_runtime exec --role app -- -m scripts.run.ingestion_worker
    ```
 
-   The analysis `scripts.worker` process does not consume upload jobs. Show
+   The analysis `scripts.run.worker` process does not consume upload jobs. Show
    committed progress, completed state and parsed/malformed counts, then open
    the imported dataset in Explorer. Do not describe 202 queued as completion.
 5. Inspect raw provenance: original SHA-256 and text-line reference or explicit

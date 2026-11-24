@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
 
-import scripts.audit_if_holdout as study
+import scripts.ml.audit_if_holdout as study
 from app.services.window_detection import aggregate_windows
 
 

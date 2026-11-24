@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from scripts import audit_isolation_forest as study
+from scripts.ml import audit_isolation_forest as study
 
 
 class IsolationStudyTests(unittest.TestCase):

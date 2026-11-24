@@ -34,7 +34,7 @@ Ngày 05/11/2026. Bản kiểm tra áp dụng cho ZIP source cục bộ với SH
 - Labs 1–4 đã đối chiếu widgets, layout, menu/tab, callback, biến Tk và OOP với companion. Các ví dụ độc lập của Lab 3 về một số hộp thoại và callback Spinbox, phần `global` của Lab 4 và yêu cầu nộp riêng vẫn được ghi rõ trong ma trận. Không đánh đồng demo chức năng tương đương với việc chạy đúng từng ví dụ.
 - Lab 5 đã chạy connector CRUD và có worksheet SQL. Cần mở worksheet bằng Workbench để có minh chứng GUI nếu giảng viên yêu cầu.
 - Bài mạng 1–5 đều PASS từ bản ZIP. MDN tải 5 ảnh, bài truyện tạo 17 dòng CSV. Bài 6 HTTP 404 ở URL gốc, ba dịch vụ thay thế trả 403. Kết quả 630 giây là trích đúng mẫu trong tài liệu. Cần giảng viên chấp thuận mẫu hoặc chỉ định dịch vụ khác. [Thông báo ngừng API của Open Notify](https://open-notify.org/Open-Notify-API/ISS-Pass-Times/).
-- Bài 7 SKIP vì không có `YOUTUBE_API_KEY` hợp lệ. Hướng dẫn đặt key trong phiên PowerShell cục bộ có trong [bài nộp mạng](../course/NETWORK_SUBMISSION_VI.md). Phần Flask 1–7 đối chiếu bằng factory, Blueprint, Jinja, Flask-WTF, ORM, PRG/flash, outbox và test. Xem [ma trận đầy đủ](../course/COURSE_REQUIREMENTS_MATRIX_VI.md).
+- Bài 7 SKIP vì không có `YOUTUBE_API_KEY` hợp lệ. Hướng dẫn đặt key trong phiên PowerShell cục bộ có trong [bài nộp mạng](../../academic/course/NETWORK_SUBMISSION_VI.md). Phần Flask 1–7 đối chiếu bằng factory, Blueprint, Jinja, Flask-WTF, ORM, PRG/flash, outbox và test. Xem [ma trận đầy đủ](../../academic/course/COURSE_REQUIREMENTS_MATRIX_VI.md).
 - Chưa có rubric chính thức cho yêu cầu lab nộp riêng, Workbench và SMTP thật. Bản cài sạch kiểm tra trên một máy Windows với thư mục và runtime mới. Xác minh độc lập trên máy người nhận chưa chạy.
 
 ## Source, an toàn và bàn giao
@@ -43,7 +43,7 @@ Ngày 05/11/2026. Bản kiểm tra áp dụng cho ZIP source cục bộ với SH
 
 - `README.md` trỏ đến báo cáo kỹ thuật và checklist giao nộp.
 - `docs/releases/UNIVERSITY_HANDOFF_CHECKLIST_VI.md` hướng dẫn cài đúng constraints, xác minh checksum và chạy lại.
-- `docs/course/COURSE_REQUIREMENTS_MATRIX_VI.md` và `docs/course/NETWORK_SUBMISSION_VI.md` cập nhật ISS, kết quả theo đề và cấu hình YouTube key.
+- `academic/course/COURSE_REQUIREMENTS_MATRIX_VI.md` và `academic/course/NETWORK_SUBMISSION_VI.md` cập nhật ISS, kết quả theo đề và cấu hình YouTube key.
 - `docs/releases/UNIVERSITY_HANDOFF_RESULT_VI.md` là biên bản kiểm thử bên ngoài ZIP. ZIP đã thử được giữ nguyên theo checksum.
 
 **Kết luận bàn giao**. ZIP đạt cổng kỹ thuật Windows với phạm vi đã thử và sẵn sàng để người nhận kiểm tra. Còn các điều kiện học phần trên để chốt 100/100 kỹ thuật. Chưa gắn tag hoặc tạo Git release. Báo cáo chạy thô và manifest lưu ở `.local/university-handoff/`.

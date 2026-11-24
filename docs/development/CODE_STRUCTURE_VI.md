@@ -1,5 +1,7 @@
 # Khung code LogSense AI hiện tại
 
+> **Lưu ý (2026-11-24):** cây thư mục đã được sắp xếp lại (`scripts/<nhóm>/`, `packaging/`, `academic/`, `docs/history/`). Xem bản đồ hiện tại ở phần *Project map* trong [README](../../README.md). Nội dung dưới đây là bản kiểm kê ngày 2026-11-05.
+
 Kiểm đếm trực tiếp ngày 2026-11-05 (Asia/Saigon), tại `D:\1)_KHUTAOSONG\2)Project\14)LogSense_AI`.
 
 **272 file thuộc phần dự án**, gồm file đang được Git quản lý và file mới chưa commit, theo quy tắc Git ignore. Đây không phải 272 file code chạy ứng dụng.
@@ -22,7 +24,7 @@ Không tính `.git`, `.venv`, `.local`, cache và các dataset/archive lớn b�
 - Backend: `app/api`, `app/services`, `app/parsers`, models/domain/security.
 - Frontend: `app/templates` là HTML/Jinja; `app/static/css` là giao diện; `app/static/js` là tương tác.
 - Database: models/domain mô tả ORM; migrations lưu thay đổi schema.
-- Workers: scripts/ingestion_worker.py và scripts/worker.py chạy ngoài HTTP request.
+- Workers: scripts/run/ingestion_worker.py và scripts/run/worker.py chạy ngoài HTTP request.
 
 Đây là Flask modular monolith: các module cùng một ứng dụng, không có hai app frontend/backend độc lập và không dùng React/Vue.
 

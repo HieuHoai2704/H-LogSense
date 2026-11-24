@@ -36,10 +36,10 @@ are different byte domains and are named as such in evidence and reports.
 Register an empty dataset, then import through the app's MySQL engine:
 
 ```text
-python -m scripts.database register-bgl --key bgl-research-v1
-python -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
-python -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 10000
-python -m scripts.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 100000
+python -m scripts.run.database register-bgl --key bgl-research-v1
+python -m scripts.run.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 1000
+python -m scripts.run.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 10000
+python -m scripts.run.database ingest-bgl --dataset DATASET_ID --archive data/raw/BGL.zip --limit 100000
 ```
 
 `--limit` is an **absolute physical-line target**, not an additional row count.
@@ -62,8 +62,8 @@ ZIP seeking may decompress earlier bytes during resume; it is memory-bounded,
 but not O(1). Full-archive hashing also has a fixed I/O cost. No pre-extracted
 file, parallel importer, background queue or cache is claimed.
 
-For reproducible proofs, run `scripts.benchmark_bgl` and
-`scripts.verify_import_restart` in a newly provisioned `logsense_bench_*` schema.
+For reproducible proofs, run `scripts.bench.benchmark_bgl` and
+`scripts.qa.verify_import_restart` in a newly provisioned `logsense_bench_*` schema.
 The latter abruptly exits an owned worker before the 50,000th-line batch commits.
 Verification compares **every imported raw byte string**, physical line number,
 offset, prefix SHA-256, counters, labels and retry results. It does not assume

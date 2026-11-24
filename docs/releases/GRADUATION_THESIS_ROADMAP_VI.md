@@ -23,5 +23,5 @@
 | Báo cáo | 7 | 10 | Bảng kết quả có nguồn, sai số, trường hợp thất bại và phạm vi kết luận |
 | **Tổng** | **71** | **100** | Điểm 90–100 chỉ xét khi có kết quả, kiểm toán và minh chứng đạt các tiêu chí |
 
-Chi tiết thí nghiệm nằm trong [protocol dự thảo](../../papers/00_research_protocol/PROTOCOL_VI.md). Chưa mở holdout mới hoặc chạy huấn luyện trong đợt này.
+Chi tiết thí nghiệm nằm trong [protocol dự thảo](../../academic/literature/00_research_protocol/PROTOCOL_VI.md). Chưa mở holdout mới hoặc chạy huấn luyện trong đợt này.
 

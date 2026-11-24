@@ -88,11 +88,11 @@ The reusable profile rejects pre-calibration June data and accepts only closed w
 
 ```text
 python -m unittest discover -s tests -q
-python -m scripts.verify_mysql
-python -m scripts.qa_dataset_crud
-python -m scripts.qa_investigation_v2
-python -m scripts.qa_evidence_drawer
-python -m scripts.qa_university_e2e_browser
+python -m scripts.qa.verify_mysql
+python -m scripts.qa.qa_dataset_crud
+python -m scripts.qa.qa_investigation_v2
+python -m scripts.qa.qa_evidence_drawer
+python -m scripts.qa.qa_university_e2e_browser
 python -m pip check
 ```
 
@@ -100,6 +100,6 @@ Inject MySQL/admin/QA credentials privately as described in [TESTING.md](../data
 
 Structured evidence: [environment](measurements/dataset-upload-v1/environment.json), [unit](measurements/dataset-upload-v1/unit-tests.json), [MySQL](measurements/dataset-upload-v1/mysql-tests.json), [upload/CRUD browser](measurements/dataset-upload-v1/dataset-upload-browser.json), [DEMO timeline](measurements/dataset-upload-v1/demo-timeline.json), [DEMO drawer](measurements/dataset-upload-v1/demo-evidence.json), [real browser/latencies](measurements/dataset-upload-v1/real-browser.json), [security](measurements/dataset-upload-v1/security.json).
 
-Actual screenshots, credentials, model/cache binaries, original logs and full failed/passed execution logs stay under ignored `.local`; they are not added to Git. Feature contracts: [CRUD](../database/DATASET_CRUD.md), [uploads](../database/UPLOADS.md), [course audit](../course/COURSE_ACCEPTANCE_AUDIT.md).
+Actual screenshots, credentials, model/cache binaries, original logs and full failed/passed execution logs stay under ignored `.local`; they are not added to Git. Feature contracts: [CRUD](../database/DATASET_CRUD.md), [uploads](../database/UPLOADS.md), [course audit](../../academic/course/COURSE_ACCEPTANCE_AUDIT.md).
 
 Remaining gates: review/freeze current uncommitted source; actual lecturer requirements; native macOS smoke; user-authorized external SMTP if required; manual screen-reader/defense rehearsal. Enterprise scaling, automated retention and new research comparisons stay in the backlog. No push/merge is authorized by this report.

@@ -18,6 +18,7 @@ dist/
 /env/
 
 # Local state, backups, browser profiles and caches
+/sandbox/
 /.local/
 /backups/
 /tmp/
@@ -55,9 +56,8 @@ instance/
 /data/processed/
 /data/interim/
 /data/imports/
-/research/papers/
-/research/text/
-/papers/**/*.pdf
+/data/research/
+/academic/literature/**/*.pdf
 
 # Model binaries; Python model/ORM source directories remain trackable.
 /model_artifacts/
