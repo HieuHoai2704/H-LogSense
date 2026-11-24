@@ -12,10 +12,10 @@ Yêu cầu Python 3.10–3.13 x64, Microsoft Edge WebView2 Runtime và Internet 
 6. Chọn Thiết lập → Giao diện → Kính đen để thử nền kính của Windows 11.
    Chữ và số liệu giữ độ đậm, còn biểu đồ và log có nền đặc. Chọn bảng màu khác để tắt kính.
 
-Cài thủ công bằng CMD, ví dụ với Python 3.10 và wheel bản 0.4.8
+Cài thủ công bằng CMD, ví dụ với Python 3.10 và wheel bản 0.4.13
 
     py -3.10 -m venv .venv
-    .venv\Scripts\python.exe -m pip install .\h_logsen-0.4.8-py3-none-any.whl
+    .venv\Scripts\python.exe -m pip install .\h_logsen-0.4.13-py3-none-any.whl
     Open-H-logsen.cmd
 
 Bộ cài tạo hoặc cập nhật shortcut H-logsen trong Desktop và Start.

@@ -6,7 +6,8 @@
 | macOS Apple silicon and Intel | WKWebView | macOS ZIP install, native window smoke, Chromium workbench scenarios |
 | Ubuntu 24.04 x64 | WebKitGTK | Linux ZIP install with system Python, native window smoke under Xvfb, Chromium workbench scenarios |
 
-Run from a clean checkout with Python 3.10–3.13. Use an empty output
+Run from a clean checkout with Python 3.10–3.13, or the system Python 3.14 on
+Ubuntu 26.04. Use an empty output
 directory for each build.
 
 ```text

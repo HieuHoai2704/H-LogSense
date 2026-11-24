@@ -93,13 +93,14 @@ copy a Windows venv or MySQL executable to macOS.
 
 Choose the ZIP for your system in [GitHub Releases](https://github.com/HieuHoai2704/H-LogSense/releases)
 when a release is available. Extract it on the machine where H-logsen will run.
-Use Python 3.10–3.13 (64-bit) and an internet connection for the first install.
+Use 64-bit Python 3.10–3.13 on Windows and macOS. Linux uses the system Python
+(3.12 on Ubuntu 24.04, 3.14 on Ubuntu 26.04). The first install needs an internet connection.
 
 | System | Install and open | Desktop requirements |
 | --- | --- | --- |
 | Windows x64 | `Install-H-logsen.cmd`, then the H-logsen shortcut or `Open-H-logsen.cmd` | Microsoft Edge WebView2 Runtime |
 | macOS 14+ | `sh Install-H-logsen.sh`, then `sh Open-H-logsen.sh` | Python from python.org and system WKWebView. The macOS ZIP also contains Finder `.command` launchers. |
-| Ubuntu 24.04 x64 | `sh Install-H-logsen.sh`, then `sh Open-H-logsen.sh` | A graphical session, system Python and WebKitGTK. See [installation instructions](CAI_DAT_MAC_LINUX.txt) for apt packages. |
+| Ubuntu 24.04 / 26.04 x64 | `sh Install-H-logsen.sh`, then **H-logsen** in the application menu or `sh Open-H-logsen.sh` | A Wayland or X11 session, system Python and WebKitGTK. See [installation instructions](CAI_DAT_MAC_LINUX.txt) for apt packages. |
 
 Extract the Windows release ZIP into a writable folder. Double-click
 **Install-H-logsen.cmd** once, then double-click **Open-H-logsen.cmd**.
@@ -112,7 +113,7 @@ To install manually, use CMD in the extracted folder.
 
 ~~~cmd
 py -3.10 -m venv .venv
-.venv\Scripts\python.exe -m pip install .\h_logsen-0.4.8-py3-none-any.whl
+.venv\Scripts\python.exe -m pip install .\h_logsen-0.4.13-py3-none-any.whl
 Open-H-logsen.cmd
 ~~~
 

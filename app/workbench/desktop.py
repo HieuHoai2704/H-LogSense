@@ -77,7 +77,18 @@ def desktop_window(url, token, store):
     elif gui == "cocoa":
         window_options.update(transparent=True, vibrancy=True)
     elif gui == "gtk":
-        start_options["icon"] = str(Path(__file__).resolve().parents[1] / "static" / "h-logsen.png")
+        from .linux import APP_ID, ICON
+
+        try:
+            from gi.repository import GLib
+
+            # The Wayland app_id and X11 WM_CLASS come from the program name. Match the
+            # installed h-logsen.desktop so the dock shows the H-logsen icon, not "python3".
+            GLib.set_prgname(APP_ID)
+            GLib.set_application_name("H-logsen")
+        except ImportError:
+            pass
+        start_options["icon"] = str(ICON)
 
     bridge = DesktopBridge(token, store, webview.FileDialog.FOLDER)
     window = webview.create_window("H-logsen", url, width=1440, height=900, min_size=(900, 620),

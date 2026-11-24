@@ -6,7 +6,7 @@ from contextvars import ContextVar
 import hashlib
 import json
 import os
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 import stat
 from tempfile import NamedTemporaryFile
 import time
@@ -72,8 +72,18 @@ def component(name):
         and not any(char in name for char in ':\\/<>"|?*' )
         and not any(ord(char) < 32 for char in name)
         and not name.endswith((" ", "."))
-        and not PureWindowsPath(name).is_reserved()
+        and not windows_reserved(name)
     )
+
+
+# Device names Windows reserves in every folder, with or without an extension.
+WINDOWS_RESERVED = {"CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$",
+                    *(f"{device}{number}" for device in ("COM", "LPT") for number in "123456789¹²³")}
+
+
+def windows_reserved(name):
+    # Same rule as PurePath.is_reserved(), which is deprecated and removed in Python 3.15.
+    return name.partition(".")[0].rstrip(" ").upper() in WINDOWS_RESERVED
 
 
 def project_path(root, name, *, missing=False):

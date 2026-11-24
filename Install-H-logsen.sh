@@ -2,9 +2,11 @@
 set -eu
 CDPATH= cd "$(dirname "$0")"
 
+# Linux must use the distribution Python that provides GTK/WebKitGTK bindings,
+# which is Python 3.14 on Ubuntu 26.04. macOS keeps the verified 3.13 limit.
 case "$(uname -s)" in
-    Darwin) extra='' ;;
-    Linux) extra='[desktop]' ;;
+    Darwin) extra='' newest=13 ;;
+    Linux) extra='[desktop]' newest=14 ;;
     *) echo 'Use Install-H-logsen.cmd on Windows.' >&2; exit 1 ;;
 esac
 
@@ -26,8 +28,8 @@ if [ ! -x .venv/bin/python ]; then
         python=${H_LOGSEN_PYTHON:-python3}
         set --
     fi
-    if ! "$python" -c 'import sys; sys.exit(not ((3, 10) <= sys.version_info[:2] < (3, 14) and sys.maxsize > 2**32))'; then
-        echo 'Install Python 3.10–3.13 (64-bit), or set H_LOGSEN_PYTHON to its executable.' >&2
+    if ! "$python" -c "import sys; sys.exit(not ((3, 10) <= sys.version_info[:2] <= (3, $newest) and sys.maxsize > 2**32))"; then
+        echo "Install Python 3.10–3.$newest (64-bit), or set H_LOGSEN_PYTHON to its executable." >&2
         exit 1
     fi
     "$python" -m venv "$@" .venv
@@ -37,6 +39,15 @@ if [ -n "$extra" ] && ! .venv/bin/python -I -c "import cairo, gi; gi.require_ver
     exit 1
 fi
 .venv/bin/python -m pip --isolated install --prefer-binary "$package$extra"
-.venv/bin/python -m pip check
+if [ -n "$extra" ]; then
+    # The venv also sees system packages; only H-logsen's own dependency tree must be consistent.
+    .venv/bin/python -I -m app.workbench.linux check
+else
+    .venv/bin/python -m pip check
+fi
 .venv/bin/python -I -m app.workbench --help >/dev/null
+if [ -n "$extra" ] && [ "${H_LOGSEN_NO_LAUNCHER:-}" != 1 ]; then
+    .venv/bin/python -I -m app.workbench.linux launcher ||
+        echo 'Could not add H-logsen to the application menu. Open-H-logsen.sh is still available.' >&2
+fi
 echo 'H-logsen is installed. Run sh Open-H-logsen.sh to open the desktop workspace.'

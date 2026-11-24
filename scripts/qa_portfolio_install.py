@@ -74,10 +74,19 @@ def verify(directory, desktop=False):
             (wheel,) = install.glob("h_logsen-*.whl")
             subprocess.run([python, "-I", "-m", "pip", "--isolated", "install", wheel], cwd=work, check=True)
         else:
-            installer_env = {**os.environ, "H_LOGSEN_PYTHON": sys.executable}
+            # Keep the Linux application-menu launcher inside the temporary directory.
+            installer_env = {**os.environ, "H_LOGSEN_PYTHON": sys.executable, "XDG_DATA_HOME": str(work / "xdg-data")}
             subprocess.run(["sh", install / "Install-H-logsen.sh"], cwd=work, env=installer_env, check=True)
             subprocess.run(["sh", install / "Open-H-logsen.sh", "--help"], cwd=work, check=True)
-        subprocess.run([python, "-I", "-m", "pip", "check"], cwd=work, check=True)
+            if sys.platform == "linux":
+                launcher = work / "xdg-data" / "applications" / "h-logsen.desktop"
+                if str(python.absolute()) not in launcher.read_text("utf-8"):
+                    raise ValueError("The Linux launcher does not start the installed environment.")
+        if sys.platform == "linux":
+            # The Linux venv uses --system-site-packages; distribution packages are out of scope.
+            subprocess.run([python, "-I", "-m", "app.workbench.linux", "check"], cwd=work, check=True)
+        else:
+            subprocess.run([python, "-I", "-m", "pip", "check"], cwd=work, check=True)
         subprocess.run([python, "-I", "-m", "app.workbench", "--help"], cwd=work, check=True)
         version = subprocess.check_output([python, "-I", "-c", SMOKE], cwd=work, text=True).strip()
         subprocess.run([python, "-m", "unittest", "discover", "-s", "tests"], cwd=source, check=True)
