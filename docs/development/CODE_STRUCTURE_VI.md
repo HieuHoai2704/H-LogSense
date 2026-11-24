@@ -40,7 +40,7 @@ Trình duyệt / cửa sổ desktop
   │  HTML (Jinja, tr() dịch)       JSON (/api/v1/…, /api/local/v1/…)
   ▼
 app/__init__.py ── security.py (session, RBAC, CSRF, CSP nonce, error handler)
-  ├── app/api/*            REST cho Investigation, logs, upload, job, cảnh báo
+  ├── app/api/*            REST: Investigation (qua sources.py), log, upload, job, cảnh báo
   ├── web_datasets.py      trang quản lý dataset (server-rendered)
   └── workbench/api.py     API loopback của desktop (file, terminal, run, preview)
         │
@@ -99,13 +99,14 @@ app/
 │
 ├── api/                 REST /api/v1
 │   ├── alerts.py        (incident, luật cảnh báo, lịch sử audit chỉ ghi thêm)
-│   ├── anomalies.py     (Investigation: timeline, danh sách, evidence; demo và MySQL)
+│   ├── anomalies.py     (route Investigation: timeline, danh sách, evidence, xuất CSV)
 │   ├── database.py      (API kết quả MySQL riêng, phải bật rõ)
 │   ├── datasets.py      (CRUD metadata dataset có RBAC)
 │   ├── forms.py         (form multipart cho workspace)
 │   ├── jobs.py          (gửi job phân tích, trạng thái, retry, model card)
 │   ├── logs.py          (lọc, phân trang, biểu đồ volume, raw, CSV log đã parse)
-│   ├── mysql_export.py  (xuất CSV anomaly theo đúng phạm vi lọc)
+│   ├── sources.py       (một interface, hai backend: DemoSource cho fixture, DatabaseSource cho
+│   │                     dataset đã lưu; route chỉ gọi source_for(args))
 │   └── uploads.py       (nhận upload, kiểm tra và đưa vào hàng đợi; không nhập trong request)
 │
 ├── parsers/             parser streaming, có version, không phụ thuộc Flask
@@ -116,14 +117,14 @@ app/
 │   ├── alerts.py               (quyết định cảnh báo idempotent; outbox SMTP claim → gửi → ghi)
 │   ├── bgl_ingestion.py        (nhập ZIP BGL có giới hạn; dữ liệu + checkpoint commit nguyên tử)
 │   ├── csv_safety.py           (chặn công thức trong ô CSV)
-│   ├── database_evidence.py    (evidence từ dòng đã lưu; giới hạn và che dữ liệu nhạy cảm)
+│   ├── database_evidence.py    (evidence cho dataset đã lưu: load_evidence và Evidence Drawer;
+│   │                            bỏ qua mẫu raw quá 256 KiB)
 │   ├── dataset_management.py   (vòng đời dataset; cấp quyền rõ ràng; xóa thận trọng)
 │   ├── detection.py            (detector baseline theo event; không dùng nhãn làm đặc trưng)
 │   ├── detector_calibration.py (lấy mẫu tất định, hiệu chỉnh ngưỡng chỉ trên tập validation)
-│   ├── evidence.py             (hợp đồng evidence trên dữ liệu demo)
+│   ├── evidence.py             (Evidence Drawer trên fixture demo)
 │   ├── investigation.py        (hợp đồng truy vấn UTC, tổng hợp phía server)
 │   ├── log_queries.py          (một hợp đồng lọc/snapshot cho trang log, volume và CSV)
-│   ├── mysql_evidence.py       (Evidence Drawer trên MySQL; bỏ qua mẫu raw quá 256 KiB)
 │   ├── mysql_investigation.py  (Investigation V2 trên MySQL; cache state theo request)
 │   ├── redaction.py            (che dữ liệu khi hiển thị demo)
 │   ├── uploads.py              (staging upload bất biến; từ chối tên file có ký tự điều khiển)

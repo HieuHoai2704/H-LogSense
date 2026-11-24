@@ -14,7 +14,6 @@ from app.contracts import (
     anomaly_identity,
     dataset_id_of,
     dataset_source,
-    is_dataset_source,
 )
 from app.extensions import db
 from app.models import (
@@ -48,10 +47,6 @@ FIELDS = {
     "detector": D.id,
 }
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
-
-
-def is_mysql(args: Mapping[str, Any]) -> bool:
-    return is_dataset_source(args.get("source", ""))
 
 
 def state(args: MultiDict[str, str]) -> InvestigationState:

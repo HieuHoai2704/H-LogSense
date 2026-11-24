@@ -119,7 +119,8 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 # typed: fully annotated; new code in these modules must stay that way.
 module = [
-    "app.contracts", "app.paths", "app.permissions", "app.i18n", "app.parsers.*",
+    "app.contracts", "app.paths", "app.permissions", "app.i18n", "app.parsers.*", "app.api.anomalies",
+    "app.api.sources",
     "app.services.investigation", "app.services.mysql_investigation", "app.services.csv_safety",
     "app.services.redaction", "scripts.run.supervision",
 ]

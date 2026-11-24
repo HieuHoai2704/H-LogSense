@@ -5,11 +5,12 @@ import secrets
 
 from flask import Flask, jsonify, render_template, request
 
-from app.access import AccessDenied, authorize_source
+from app.access import AccessDenied
 from app.api.anomalies import api
+from app.api.sources import source_for
 from app.i18n import translate
 from app.presentation import context, payload
-from app.services.investigation import QueryError, build, query
+from app.services.investigation import QueryError
 from config import APP_NAME, PROFILES
 
 
@@ -72,17 +73,8 @@ def create_app(config_overrides=None):
             not request.args or (len(request.args) == 1 and project_view in {"editor", "settings"})
         ):
             return render_template("project_workspace.html", workspace_view=project_view or "monitor")
-        from app.services.mysql_investigation import build as mysql_build, is_mysql, state as mysql_state
-
-        if is_mysql(request.args):
-            try:
-                view = mysql_build(mysql_state(request.args))
-            except QueryError as error:
-                return render_template("query_error.html", message=str(error)), 400
-            return render_template("dashboard.html", **context(view))
         try:
-            authorize_source(request.args.get("source", "demo"))
-            view = build(query(request.args))
+            view = source_for(request.args).view(request.args)
         except QueryError as error:
             if request.headers.get("X-Workspace-Fragment") == "1":
                 return jsonify(error={"code": "invalid_query", "message": translate(str(error))}), 400
