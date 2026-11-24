@@ -11,10 +11,11 @@ from flask import Blueprint, current_app, g, jsonify, request, session
 from sqlalchemy import select
 from werkzeug.security import check_password_hash
 
+from app.contracts import is_dataset_source
 from app.extensions import db
 
 security_api = Blueprint("security", __name__)
-attempts = defaultdict(deque)
+attempts: defaultdict[str, deque[float]] = defaultdict(deque)  # by client address hash
 
 
 def identity():
@@ -222,7 +223,7 @@ def initialize_security(app):
         response.headers["Referrer-Policy"] = "same-origin"
         response.headers["X-Frame-Options"] = "DENY"
         if request.path.startswith("/api/") or (
-            request.path == "/" and request.args.get("source", "").startswith("db-")
+            request.path == "/" and is_dataset_source(request.args.get("source", ""))
         ):
             # Private MySQL-backed pages and API data are never cached.
             response.headers["Cache-Control"] = "no-store"

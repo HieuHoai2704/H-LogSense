@@ -1,9 +1,10 @@
 """Shared loop for the analysis and ingestion workers: logging, database backoff, crash recovery."""
 
+from collections.abc import Callable
 import logging
 import time
 
-from sqlalchemy import select
+from sqlalchemy import Engine, select
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -11,11 +12,13 @@ log = logging.getLogger("h_logsen.worker")
 RECLAIM_INTERVAL = 60.0
 
 
-def configure_logging(level=logging.INFO):
+def configure_logging(level: int = logging.INFO) -> None:
     logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 
-def reclaim_interrupted(engine, kind, lease_prefix, error_code="worker_interrupted"):
+def reclaim_interrupted(
+    engine: Engine, kind: str, lease_prefix: str, error_code: str = "worker_interrupted"
+) -> list[int]:
     """Fail jobs left 'running' by a worker that died: a live worker always holds the job's lease.
 
     The job becomes retryable through its API instead of staying 'running' forever.
@@ -30,7 +33,7 @@ def reclaim_interrupted(engine, kind, lease_prefix, error_code="worker_interrupt
             .order_by(ProcessingJob.id)
             .limit(100)
         ).all()
-    reclaimed = []
+    reclaimed: list[int] = []
     for job_id in running:
         try:
             with import_lease(engine, lease_prefix + str(job_id)):
@@ -55,8 +58,15 @@ def reclaim_interrupted(engine, kind, lease_prefix, error_code="worker_interrupt
 
 
 def serve(
-    step, *, once=False, reclaim=None, idle=1.0, max_backoff=60.0, sleep=time.sleep, clock=time.monotonic
-):
+    step: Callable[[], bool],
+    *,
+    once: bool = False,
+    reclaim: Callable[[], object] | None = None,
+    idle: float = 1.0,
+    max_backoff: float = 60.0,
+    sleep: Callable[[float], object] = time.sleep,
+    clock: Callable[[], float] = time.monotonic,
+) -> bool:
     """Run ``step()`` until stopped. Database outages back off exponentially instead of killing
     the worker; ``reclaim()`` runs at start and then at most once per RECLAIM_INTERVAL."""
     failures = 0

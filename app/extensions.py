@@ -1,5 +1,7 @@
 """Shared extensions; the demonstration application needs no database server."""
 
+from typing import TYPE_CHECKING
+
 from flask_bootstrap import Bootstrap5
 from flask_mail import Mail
 from flask_migrate import Migrate
@@ -22,6 +24,12 @@ class Base(DeclarativeBase):
 
 
 db = SQLAlchemy(model_class=Base)
+# Models subclass this. Flask-SQLAlchemy builds db.Model from Base at runtime, which type checkers cannot
+# follow; they see Base, which has the same mapped-column behavior.
+if TYPE_CHECKING:
+    Model = Base
+else:
+    Model = db.Model
 migrate = Migrate()
 bootstrap = Bootstrap5()
 moment = Moment()

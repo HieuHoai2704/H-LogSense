@@ -9,13 +9,15 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import re
+from typing import Any
 from uuid import uuid4
 
 import joblib
-from sqlalchemy import case, func, select, text
+from sqlalchemy import Engine, case, func, select, text
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.orm import Session
 
+from app.contracts import JobConfiguration
 from app.models import Dataset, Detector, DetectorRun, DetectorVersion, LogEvent
 from app.paths import IF_HOLDOUT_DIR, VALIDATED_IF_INPUTS_DIR
 from app.services.bgl_ingestion import fingerprint, import_lease
@@ -192,7 +194,9 @@ def _unit_count(session, predicates):
     return session.scalar(select(func.count()).select_from(groups))
 
 
-def run_validated(engine, dataset_id, job_key, configuration):
+def run_validated(
+    engine: Engine, dataset_id: int, job_key: str, configuration: JobConfiguration
+) -> dict[str, Any]:
     if set(configuration) != {"detector", "model_id"} or configuration.get("detector") != "isolation_forest":
         raise ValueError("Validated inference accepts only detector and frozen model_id.")
     lease = "validated-if-" + str(dataset_id) + "-" + hashlib.sha256(job_key.encode()).hexdigest()[:24]

@@ -72,9 +72,7 @@ def create_app(config_overrides=None):
             not request.args or (len(request.args) == 1 and project_view in {"editor", "settings"})
         ):
             return render_template("project_workspace.html", workspace_view=project_view or "monitor")
-        from app.services.mysql_investigation import build as mysql_build
-        from app.services.mysql_investigation import is_mysql
-        from app.services.mysql_investigation import state as mysql_state
+        from app.services.mysql_investigation import build as mysql_build, is_mysql, state as mysql_state
 
         if is_mysql(request.args):
             try:

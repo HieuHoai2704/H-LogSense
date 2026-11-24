@@ -18,7 +18,7 @@ Việc nặng (nhập log, chạy detector, gửi email) chạy trong **hai work
 
 | Lớp | Thư mục | Số file | Số dòng (xấp xỉ) |
 |---|---|---:|---:|
-| Ứng dụng (backend) | `app/*.py`, `app/api`, `app/services`, `app/parsers` | 47 | 7 800 |
+| Ứng dụng (backend) | `app/*.py`, `app/api`, `app/services`, `app/parsers` | 48 | 7 800 |
 | Workbench desktop | `app/workbench`, `app/workbench/platforms` | 19 | 3 150 |
 | Giao diện | `app/templates`, `app/static` (không tính `vendor/`) | 50 | 9 000 |
 | Bản dịch | `app/locales` (14 ngôn ngữ + `workspace.json`) | 15 | 16 000 |
@@ -59,7 +59,9 @@ scripts/run/worker.py, ingestion_worker.py ── supervision.py ─────
 .
 ├── README.md                 (giới thiệu, cài đặt, bản đồ dự án)
 ├── THIRD_PARTY_NOTICES.md    (giấy phép thư viện bên thứ ba)
-├── pyproject.toml            (nguồn duy nhất cho dependencies; extras: desktop, qa, ml, course)
+├── pyproject.toml            (dependencies; extras: desktop, qa, dev, ml, course; cấu hình ruff, mypy)
+├── .pre-commit-config.yaml   (ruff + mypy trước mỗi commit)
+├── .git-blame-ignore-revs    (commit chỉ format, git blame bỏ qua)
 ├── requirements.txt          (chỉ cài dự án: -e .)
 ├── config.py                 (cấu hình Flask mặc định)
 ├── .env.example              (mẫu biến môi trường: DATABASE_URL, FLASK_SECRET_KEY, SMTP…)
@@ -76,6 +78,8 @@ scripts/run/worker.py, ingestion_worker.py ── supervision.py ─────
 app/
 ├── __init__.py          (create_app: cấu hình, đăng ký blueprint, route trang chính)
 ├── access.py            (chính sách nguồn demo công khai; dữ liệu riêng không kết nối mặc định)
+├── contracts.py         (kiểu dùng chung giữa các tầng: InvestigationState, JobConfiguration,
+│                         QueryError, mã nguồn "db-<id>" và mã anomaly "DB-<id>")
 ├── database.py          (nối MySQL tùy chọn; timeout kết nối/đọc/ghi; không tự tạo DDL)
 ├── demo.py              (fixture minh họa, không phải kết quả detector)
 ├── domain.py            (bảng user, quyền dataset, đánh giá, luật/quyết định cảnh báo, incident,

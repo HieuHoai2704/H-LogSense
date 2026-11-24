@@ -14,7 +14,7 @@ from pathlib import Path
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 
 
-def local_dir():
+def local_dir() -> Path:
     configured = os.environ.get("LOGSENSE_LOCAL_DIR")
     if configured:
         path = Path(configured).expanduser()

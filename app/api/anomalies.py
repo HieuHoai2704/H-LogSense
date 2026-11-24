@@ -128,8 +128,7 @@ def export_evidence(anomaly_id):
 @api.get("/investigation")
 def investigation():
     started = time.perf_counter()
-    from app.services.mysql_investigation import build as real_build
-    from app.services.mysql_investigation import is_mysql, state
+    from app.services.mysql_investigation import build as real_build, is_mysql, state
 
     result = (
         payload(real_build(state(request.args)))
@@ -142,8 +141,7 @@ def investigation():
 
 @api.get("/anomalies/timeline")
 def timeline():
-    from app.services.mysql_investigation import build as real_build
-    from app.services.mysql_investigation import is_mysql, state
+    from app.services.mysql_investigation import build as real_build, is_mysql, state
 
     view = real_build(state(request.args)) if is_mysql(request.args) else build(query(request.args))
     return jsonify(
@@ -166,8 +164,7 @@ def timeline():
 
 @api.get("/anomalies")
 def anomalies():
-    from app.services.mysql_investigation import build as real_build
-    from app.services.mysql_investigation import is_mysql, state
+    from app.services.mysql_investigation import build as real_build, is_mysql, state
 
     view = real_build(state(request.args)) if is_mysql(request.args) else build(query(request.args))
     return jsonify(

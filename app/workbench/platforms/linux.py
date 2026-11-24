@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+from typing import Any
 
 from . import ICON_PNG
 from .posix import close_terminal, open_terminal, shell_profiles  # noqa: F401  (backend interface)
@@ -80,7 +81,7 @@ def set_window_glass(window, enabled):
 
 HEX_COLOR = re.compile(r"#[0-9a-fA-F]{6}")
 DEFAULT_TITLE_BAR = (True, "#1c1c1c", "#ededeb")  # Graphite, the default palette
-_title_bar_css = []
+_title_bar_css: list[Any] = []  # the one Gtk.CssProvider, once created
 
 
 def title_bar_css(background, foreground):

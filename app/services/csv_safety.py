@@ -3,7 +3,7 @@
 import math
 
 
-def safe_cell(value):
+def safe_cell(value: object) -> int | float | str:
     if isinstance(value, (int, float)) and not isinstance(value, bool):
         if not math.isfinite(value):
             raise ValueError("Non-finite numeric CSV value.")

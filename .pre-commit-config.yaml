@@ -14,3 +14,10 @@ repos:
         entry: ruff format
         language: system
         types: [python]
+      # Whole-project check (configured in [tool.mypy]); a single file cannot be checked in isolation.
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        types: [python]
+        pass_filenames: false

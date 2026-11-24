@@ -17,7 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.mysql import DOUBLE
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.extensions import db
+from app.extensions import Model
 from app.models import Identity, Scoped, UTCDateTime, options, scoped_fk
 
 
@@ -25,7 +25,7 @@ def now():
     return datetime.now(timezone.utc)
 
 
-class User(Identity, db.Model):
+class User(Identity, Model):
     __tablename__ = "users"
     __table_args__ = (
         UniqueConstraint("username"),
@@ -39,14 +39,14 @@ class User(Identity, db.Model):
     auth_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
 
 
-class UserDataset(Identity, db.Model):
+class UserDataset(Identity, Model):
     __tablename__ = "user_datasets"
     __table_args__ = (UniqueConstraint("user_id", "dataset_id"), options())
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     dataset_id: Mapped[int] = mapped_column(ForeignKey("datasets.id"), nullable=False)
 
 
-class DetectionPrediction(Scoped, db.Model):
+class DetectionPrediction(Scoped, Model):
     __tablename__ = "detection_predictions"
     __table_args__ = (
         UniqueConstraint("dataset_id", "run_id", "unit_id"),
@@ -61,7 +61,7 @@ class DetectionPrediction(Scoped, db.Model):
     features: Mapped[dict] = mapped_column(JSON, nullable=False)
 
 
-class EvaluationReport(Scoped, db.Model):
+class EvaluationReport(Scoped, Model):
     __tablename__ = "evaluation_reports"
     __table_args__ = (
         UniqueConstraint("dataset_id", "run_id"),
@@ -72,7 +72,7 @@ class EvaluationReport(Scoped, db.Model):
     metrics: Mapped[dict] = mapped_column(JSON, nullable=False)
 
 
-class AlertRule(Scoped, db.Model):
+class AlertRule(Scoped, Model):
     __tablename__ = "alert_rules"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
@@ -89,7 +89,7 @@ class AlertRule(Scoped, db.Model):
     last_alert_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
 
 
-class Alert(Scoped, db.Model):
+class Alert(Scoped, Model):
     __tablename__ = "alerts"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
@@ -119,7 +119,7 @@ class Alert(Scoped, db.Model):
     created_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False, default=now)
 
 
-class AlertAudit(Scoped, db.Model):
+class AlertAudit(Scoped, Model):
     __tablename__ = "alert_audit"
     __table_args__ = (scoped_fk("alert_id", "alerts", "fk_audit_alert"), options())
     alert_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
@@ -129,7 +129,7 @@ class AlertAudit(Scoped, db.Model):
     timestamp: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False, default=now)
 
 
-class Notification(Scoped, db.Model):
+class Notification(Scoped, Model):
     __tablename__ = "notification_outbox"
     __table_args__ = (
         UniqueConstraint("dataset_id", "alert_id"),
@@ -146,7 +146,7 @@ class Notification(Scoped, db.Model):
     error_code: Mapped[str | None] = mapped_column(String(32))
 
 
-class AlertDecision(Scoped, db.Model):
+class AlertDecision(Scoped, Model):
     __tablename__ = "alert_decisions"
     __table_args__ = (
         UniqueConstraint("dataset_id", "rule_id", "anomaly_id"),

@@ -19,7 +19,7 @@ from sqlalchemy.dialects.mysql import DATETIME, DOUBLE, LONGBLOB, LONGTEXT
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship, validates
 from sqlalchemy.types import TypeDecorator
 
-from app.extensions import db
+from app.extensions import Model
 
 
 class UTCDateTime(TypeDecorator):
@@ -64,7 +64,7 @@ class Scoped(Identity):
         return mapped_column(BigInteger, ForeignKey("datasets.id", ondelete="RESTRICT"), nullable=False)
 
 
-class DataSource(Identity, db.Model):
+class DataSource(Identity, Model):
     __tablename__ = "data_sources"
     __table_args__ = (UniqueConstraint("source_key"), options())
     source_key: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -72,7 +72,7 @@ class DataSource(Identity, db.Model):
     datasets = relationship("Dataset", back_populates="source")
 
 
-class Dataset(Identity, db.Model):
+class Dataset(Identity, Model):
     __tablename__ = "datasets"
     __table_args__ = (
         UniqueConstraint("source_id", "dataset_key"),
@@ -92,7 +92,7 @@ class Dataset(Identity, db.Model):
     source = relationship("DataSource", back_populates="datasets")
 
 
-class SourceArtifact(Scoped, db.Model):
+class SourceArtifact(Scoped, Model):
     __tablename__ = "source_artifacts"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
@@ -113,7 +113,7 @@ class SourceArtifact(Scoped, db.Model):
     malformed_count: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
 
 
-class RawLogRecord(Scoped, db.Model):
+class RawLogRecord(Scoped, Model):
     __tablename__ = "raw_log_records"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
@@ -130,7 +130,7 @@ class RawLogRecord(Scoped, db.Model):
     parse_error: Mapped[str | None] = mapped_column(String(64))
 
 
-class LogEvent(Scoped, db.Model):
+class LogEvent(Scoped, Model):
     __tablename__ = "log_events"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
@@ -152,7 +152,7 @@ class LogEvent(Scoped, db.Model):
     attributes: Mapped[dict] = mapped_column(JSON, nullable=False)
 
 
-class DetectionUnit(Scoped, db.Model):
+class DetectionUnit(Scoped, Model):
     __tablename__ = "detection_units"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
@@ -173,7 +173,7 @@ class DetectionUnit(Scoped, db.Model):
     definition: Mapped[dict | None] = mapped_column(JSON)
 
 
-class UnitEvent(Scoped, db.Model):
+class UnitEvent(Scoped, Model):
     __tablename__ = "unit_events"
     __table_args__ = (
         UniqueConstraint("dataset_id", "unit_id", "event_id"),
@@ -185,7 +185,7 @@ class UnitEvent(Scoped, db.Model):
     event_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
 
 
-class GroundTruthLabel(Scoped, db.Model):
+class GroundTruthLabel(Scoped, Model):
     __tablename__ = "ground_truth_labels"
     __table_args__ = (
         scoped_fk("event_id", "log_events", "fk_label_event_scope"),
@@ -202,14 +202,14 @@ class GroundTruthLabel(Scoped, db.Model):
     label: Mapped[str] = mapped_column(String(128), nullable=False)
 
 
-class Detector(Identity, db.Model):
+class Detector(Identity, Model):
     __tablename__ = "detectors"
     __table_args__ = (UniqueConstraint("detector_key"), options())
     detector_key: Mapped[str] = mapped_column(String(100), nullable=False)
     family: Mapped[str] = mapped_column(String(32), nullable=False)
 
 
-class DetectorVersion(Identity, db.Model):
+class DetectorVersion(Identity, Model):
     __tablename__ = "detector_versions"
     __table_args__ = (
         UniqueConstraint("detector_id", "id"),
@@ -223,7 +223,7 @@ class DetectorVersion(Identity, db.Model):
     score_direction: Mapped[str | None] = mapped_column(String(32))
 
 
-class DetectorRun(Scoped, db.Model):
+class DetectorRun(Scoped, Model):
     __tablename__ = "detector_runs"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
@@ -245,7 +245,7 @@ class DetectorRun(Scoped, db.Model):
     configuration: Mapped[dict] = mapped_column(JSON, nullable=False)
 
 
-class AnomalyOutput(Scoped, db.Model):
+class AnomalyOutput(Scoped, Model):
     __tablename__ = "anomaly_outputs"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id", "run_id"),
@@ -276,7 +276,7 @@ class AnomalyOutput(Scoped, db.Model):
         return value
 
 
-class ProcessingJob(Scoped, db.Model):
+class ProcessingJob(Scoped, Model):
     __tablename__ = "processing_jobs"
     __table_args__ = (
         UniqueConstraint("dataset_id", "id"),
@@ -301,7 +301,7 @@ class ProcessingJob(Scoped, db.Model):
     )
 
 
-class CoverageInterval(Scoped, db.Model):
+class CoverageInterval(Scoped, Model):
     __tablename__ = "coverage_intervals"
     __table_args__ = (
         scoped_fk("run_id", "detector_runs", "fk_coverage_run_scope"),

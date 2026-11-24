@@ -5,12 +5,24 @@ repository must implement source authorization, revision snapshots and run cover
 """
 
 from collections import Counter
+from collections.abc import Iterator, Mapping
 from datetime import datetime, timedelta, timezone
 from math import ceil, expm1, floor, log1p
+from typing import Any, cast
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from app.contracts import (
+    ChartMode,
+    DetectorSort,
+    InvestigationState,
+    QueryError,  # re-exported: callers import it from here
+    TimeRange,
+    ZoneKey,
+)
 from app.demo import ANOMALIES, PRIORITIES
 from app.services.redaction import redact
+
+Record = dict[str, Any]  # one anomaly record (fixture or persisted), as served to the client
 
 UTC = timezone.utc
 START = datetime(2026, 11, 3, 6, 50, tzinfo=UTC)
@@ -32,15 +44,11 @@ DURATIONS = [60, 120, 300, 600, 900, 1800, 3600, 7200, 21600, 43200, 86400, 1728
 ZONES = {"local": "Asia/Ho_Chi_Minh", "utc": "UTC", "America/New_York": "America/New_York"}
 
 
-class QueryError(ValueError):
-    """A query the client must correct, rather than a backend outage."""
-
-
-def iso(value):
+def iso(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
-def instant(value):
+def instant(value: str) -> datetime:
     try:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
         if parsed.tzinfo is None:
@@ -50,11 +58,11 @@ def instant(value):
         raise QueryError("Timestamps must be ISO 8601 with an explicit UTC offset.") from exc
 
 
-def integer(value, lower, upper, name):
+def integer(value: object, lower: int, upper: int, name: str) -> int:
     try:
         if isinstance(value, (bool, float)):
             raise ValueError()  # JSON true/1.9 must not silently become 1
-        number = int(value)
+        number = int(value)  # type: ignore[call-overload]  # any input; failures become QueryError
         if not lower <= number <= upper:
             raise ValueError()
         return number
@@ -62,7 +70,7 @@ def integer(value, lower, upper, name):
         raise QueryError(f"{name} must be between {lower} and {upper}.") from exc
 
 
-def iter_records(source):
+def iter_records(source: str) -> Iterator[Record]:
     """Adapt existing presentation records; no new detector evidence is invented."""
     if source in {"empty", "unprocessed"}:
         return
@@ -74,11 +82,11 @@ def iter_records(source):
         yield redact(item)
 
 
-def records(source):
+def records(source: str) -> list[Record]:
     return list(iter_records(source))
 
 
-def query(args):
+def query(args: Mapping[str, Any]) -> InvestigationState:
     """Validate repeated query keys; AND dimensions, OR values within a dimension."""
     source = args.get("source", "demo")
     if source not in SOURCES:
@@ -123,20 +131,17 @@ def query(args):
     search = args.get("q", "").strip()
     if len(search) > 200:
         raise QueryError("Search is limited to 200 characters.")
-    vocabulary = {
+    vocabulary: dict[str, list[str]] = {
         "host": sorted({e["host"] for e in ANOMALIES}),
         "service": sorted({e["service"] for e in ANOMALIES}),
         "severity": list(PRIORITIES),
         "detector": list(DETECTORS),
     }
-    state = dict(
-        source=source, range=preset, start_time=iso(start), end_time=iso(end), timezone=zone, q=search
-    )
     base_start = instant(args.get("base_start_time") or iso(start))
     base_end = instant(args.get("base_end_time") or iso(end))
     if base_start >= base_end or base_end - base_start > timedelta(days=366):
         raise QueryError("Invalid reset-zoom range.")
-    state.update(base_start_time=iso(base_start), base_end_time=iso(base_end))
+    facets: dict[str, list[str]] = {}
     for key, choices in vocabulary.items():
         values = args.getlist(key) if hasattr(args, "getlist") else args.get(key, [])
         if isinstance(values, str):
@@ -147,43 +152,58 @@ def query(args):
         values = sorted({v for v in values if v and v != "all"})
         if len(values) > 100 or any(v not in choices for v in values):
             raise QueryError(f"Unknown {key} value.")
-        state[key] = values
+        facets[key] = values
     s0, s1 = args.get("selection_start"), args.get("selection_end")
     if bool(s0) != bool(s1):
         raise QueryError("Both timeline selection boundaries are required.")
-    if s0:
+    if s0 and s1:
         a, b = instant(s0), instant(s1)
         if not start <= a < b <= end:
             raise QueryError("Timeline selection must be inside the query range.")
-        state.update(selection_start=iso(a), selection_end=iso(b))
+        selection = (iso(a), iso(b))
     else:
-        state.update(selection_start="", selection_end="")
+        selection = ("", "")
     selected_detector = args.get("selection_detector", "")
     if selected_detector and (
         selected_detector not in DETECTORS
         or not s0
-        or (state["detector"] and selected_detector not in state["detector"])
+        or (facets["detector"] and selected_detector not in facets["detector"])
     ):
         raise QueryError("Invalid selected detector.")
-    state["selection_detector"] = selected_detector
-    state["width"] = integer(args.get("width", 1000), 240, 4000, "Chart width")
-    state["page"] = integer(args.get("page", 1), 1, 100000, "Page")
-    state["limit"] = integer(args.get("limit", 50), 1, 100, "Page size")
-    state["row_page"] = integer(args.get("row_page", 1), 1, 100000, "Detector page")
-    state["sort"] = args.get("sort", "priority")
-    if state["sort"] not in {"priority", "count", "recent"}:
+    sort = args.get("sort", "priority")
+    if sort not in {"priority", "count", "recent"}:
         raise QueryError("Invalid detector sort.")
-    state["mode"] = args.get("mode", "severity")
-    if state["mode"] not in {"severity", "volume"}:
+    mode = args.get("mode", "severity")
+    if mode not in {"severity", "volume"}:
         raise QueryError("Invalid visualization mode.")
     requested = args.get("resolution", "auto")
-    if requested != "auto":
-        requested = integer(requested, 60, 604800, "Resolution")
-    state["resolution"] = requested
-    return state
+    return InvestigationState(
+        source=source,
+        range=cast(TimeRange, preset),
+        start_time=iso(start),
+        end_time=iso(end),
+        base_start_time=iso(base_start),
+        base_end_time=iso(base_end),
+        timezone=cast(ZoneKey, zone),
+        q=search,
+        host=facets["host"],
+        service=facets["service"],
+        severity=facets["severity"],
+        detector=facets["detector"],
+        selection_start=selection[0],
+        selection_end=selection[1],
+        selection_detector=selected_detector,
+        width=integer(args.get("width", 1000), 240, 4000, "Chart width"),
+        page=integer(args.get("page", 1), 1, 100000, "Page"),
+        limit=integer(args.get("limit", 50), 1, 100, "Page size"),
+        row_page=integer(args.get("row_page", 1), 1, 100000, "Detector page"),
+        sort=cast(DetectorSort, sort),
+        mode=cast(ChartMode, mode),
+        resolution="auto" if requested == "auto" else integer(requested, 60, 604800, "Resolution"),
+    )
 
 
-def matches(event, state, excluded=None):
+def matches(event: Record, state: InvestigationState, excluded: str | None = None) -> bool:
     stamp = instant(event["timestamp"])
     if not instant(state["start_time"]) <= stamp < instant(state["end_time"]):
         return False
@@ -193,31 +213,33 @@ def matches(event, state, excluded=None):
         ("severity", "severity"),
         ("detector", "detector_id"),
     ]:
-        if key != excluded and state[key] and event.get(field) not in state[key]:
+        values = cast(Mapping[str, list[str]], state)[key]
+        if key != excluded and values and event.get(field) not in values:
             return False
     return not state["q"] or state["q"].casefold() in " ".join(str(v) for v in event.values()).casefold()
 
 
-def selected(event, state):
+def selected(event: Record, state: InvestigationState) -> bool:
     return not state["selection_start"] or (
         instant(state["selection_start"]) <= instant(event["timestamp"]) < instant(state["selection_end"])
         and (not state["selection_detector"] or state["selection_detector"] == event["detector_id"])
     )
 
 
-def resolution(state):
+def resolution(state: InvestigationState) -> int:
     a, b = instant(state["start_time"]).timestamp(), instant(state["end_time"]).timestamp()
     budget = min(120, max(8, state["width"] // 28))
-    duration = state["resolution"]
-    if duration == "auto":
-        # Five minutes is the fixture's meaningful minimum; no sub-minute accuracy claim.
+    requested = state["resolution"]
+    if isinstance(requested, int):
+        duration = requested
+    else:  # "auto". Five minutes is the fixture's meaningful minimum; no sub-minute accuracy claim.
         duration = next((d for d in DURATIONS if d >= 300 and ceil(b / d) - floor(a / d) <= budget), 604800)
     if ceil(b / duration) - floor(a / duration) > 120:
         raise QueryError("Resolution produces more than 120 bins. Choose Auto or a coarser interval.")
     return duration
 
 
-def coverage(a, b, source):
+def coverage(a: datetime, b: datetime, source: str) -> str:
     if source == "unprocessed":
         return "unprocessed"
     if source == "empty":
@@ -230,12 +252,12 @@ def coverage(a, b, source):
     return "complete"
 
 
-def display_time(stamp, zone, include_date=False):
+def display_time(stamp: str, zone: str, include_date: bool = False) -> str:
     date = instant(stamp).astimezone(ZoneInfo(ZONES[zone]))
     return date.strftime("%d %b %Y %H:%M:%S %z" if include_date else "%H:%M")
 
 
-def summary(event, state):
+def summary(event: Record, state: InvestigationState) -> Record:
     """Result rows carry identity and summary only; raw evidence loads on demand."""
     return {
         key: event.get(key)
@@ -254,7 +276,7 @@ def summary(event, state):
     } | {"display_time": display_time(event["timestamp"], state["timezone"], True), "synthetic": True}
 
 
-def build(state):
+def build(state: InvestigationState) -> dict[str, Any]:
     source_rows = records(state["source"])
     scope = [e for e in source_rows if matches(e, state)]
     results = sorted(
@@ -263,7 +285,7 @@ def build(state):
     duration = resolution(state)
     start, end = instant(state["start_time"]), instant(state["end_time"])
     zone = state["timezone"]
-    bins = []
+    bins: list[Record] = []
     lower = floor(start.timestamp() / duration) * duration
     while lower < end.timestamp():
         a = max(start, datetime.fromtimestamp(lower, UTC))
@@ -279,11 +301,13 @@ def build(state):
             )
         )
         lower += duration
-    by_detector = {
+    by_detector: dict[str, list[Record]] = {
         did: [dict(meta, count=0, severity=dict.fromkeys(PRIORITIES, 0), priority=0) for meta in bins]
         for did in DETECTORS
     }
-    overall = [dict(meta, count=0, severity=dict.fromkeys(PRIORITIES, 0), priority=0) for meta in bins]
+    overall: list[Record] = [
+        dict(meta, count=0, severity=dict.fromkeys(PRIORITIES, 0), priority=0) for meta in bins
+    ]
     origin = floor(start.timestamp() / duration) * duration
     for event in scope:
         index = floor((instant(event["timestamp"]).timestamp() - origin) / duration)
@@ -292,7 +316,7 @@ def build(state):
             cell["severity"][event["severity"]] += 1
             cell["priority"] = max(cell["priority"], PRIORITIES[event["severity"]])
     maximum = max((c["count"] for c in overall), default=0)
-    volume_scale = []
+    volume_scale: list[Record] = []
     previous = 0
     for band in range(1, 5):
         upper = maximum if band == 4 else floor(expm1(log1p(maximum) * band / 4))
@@ -310,7 +334,7 @@ def build(state):
                 and instant(cell["start"]) < instant(state["selection_end"])
                 and instant(cell["end"]) > instant(state["selection_start"])
             )
-    lanes = [
+    lanes: list[Record] = [
         dict(
             id=did,
             name=name,
@@ -330,7 +354,8 @@ def build(state):
     row_count = len(lanes)
     row_page = min(state["row_page"], max(1, ceil(row_count / 12)))
     lanes = lanes[(row_page - 1) * 12 : row_page * 12]
-    facets = {}
+    facets: dict[str, list[Record]] = {}
+    chosen = cast(Mapping[str, list[str]], state)  # the four facet keys
     fields = {"host": "host", "service": "service", "severity": "severity", "detector": "detector_id"}
     for key, field in fields.items():
         counts = Counter(e[field] for e in source_rows if matches(e, state, excluded=key))
@@ -346,12 +371,13 @@ def build(state):
                 value=v,
                 label=DETECTORS[v][0] if key == "detector" else v,
                 count=counts[v],
-                selected=v in state[key],
+                selected=v in chosen[key],
             )
             for v in values
         ]
     page = min(state["page"], max(1, ceil(len(results) / state["limit"])))
-    state = dict(state, page=page, row_page=row_page)
+    state = state.copy()  # the returned scope reports the clamped pages
+    state["page"], state["row_page"] = page, row_page
     first = (page - 1) * state["limit"]
     query_coverage = coverage(start, end, state["source"])
     if state["source"] == "unprocessed":
@@ -402,7 +428,7 @@ def build(state):
     )
 
 
-def detail(anomaly_id, source="demo"):
+def detail(anomaly_id: str, source: str = "demo") -> dict[str, Any] | None:
     rows = records(source)
     event = next((e for e in rows if e["id"] == anomaly_id), None)
     if not event:
@@ -426,7 +452,7 @@ def detail(anomaly_id, source="demo"):
     )
 
 
-def export_rows(state):
+def export_rows(state: InvestigationState) -> list[Record]:
     return sorted(
         (e for e in records(state["source"]) if matches(e, state) and selected(e, state)),
         key=lambda e: (e["timestamp"], e["id"]),

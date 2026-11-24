@@ -9,28 +9,17 @@ from itsdangerous import BadData, URLSafeTimedSerializer
 from sqlalchemy import and_, func, or_, select
 from werkzeug.exceptions import NotFound
 
+from app.contracts import anomaly_id_of, anomaly_identity, dataset_id_of
 from app.extensions import db
 from app.models import (
     AnomalyOutput as A,
-)
-from app.models import (
     Dataset,
-    UnitEvent,
-)
-from app.models import (
     DetectionUnit as U,
-)
-from app.models import (
     Detector as D,
-)
-from app.models import (
     DetectorRun as R,
-)
-from app.models import (
     DetectorVersion as V,
-)
-from app.models import (
     LogEvent as E,
+    UnitEvent,
 )
 from app.services.database_evidence import load_evidence
 from app.services.investigation import QueryError, instant, integer, iso
@@ -39,11 +28,9 @@ from app.services.redaction import redact
 
 
 def evidence(identity, args):
-    if not identity.startswith("DB-"):
-        raise QueryError("Invalid database anomaly ID.")
-    anomaly_id = integer(identity[3:], 1, 2**63 - 1, "Anomaly")
+    anomaly_id = anomaly_id_of(identity)
     scope = state(args)
-    dataset_id = int(scope["source"][3:])
+    dataset_id = dataset_id_of(scope["source"])
     row = db.session.execute(
         select(A, U, E, D, R, V)
         .join(U, (U.id == A.unit_id) & (U.dataset_id == A.dataset_id))
@@ -339,8 +326,8 @@ def evidence(identity, args):
             },
             related_events=related,
             navigation={
-                "previous_id": "DB-" + str(previous) if previous else None,
-                "next_id": "DB-" + str(following) if following else None,
+                "previous_id": anomaly_identity(previous) if previous else None,
+                "next_id": anomaly_identity(following) if following else None,
                 "in_result_scope": in_scope,
                 "note": "Persisted results in the current scope; related records may be outside filters.",
             },

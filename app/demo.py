@@ -1,6 +1,8 @@
 """Synthetic presentation fixtures, never detector output."""
 
-ANOMALIES = [
+from typing import Any
+
+ANOMALIES: list[dict[str, Any]] = [
     dict(
         id="LS-1042",
         time="14:32:08",

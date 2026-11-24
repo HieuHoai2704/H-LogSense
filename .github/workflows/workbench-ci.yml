@@ -18,9 +18,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - run: python -m pip install "ruff==0.17.6"
+      # The project itself is installed so mypy sees Flask and SQLAlchemy types; versions come from pyproject.
+      - run: python -m pip install -e ".[dev]"
       - run: ruff check --output-format github .
       - run: ruff format --check .
+      - run: mypy
 
   package:
     runs-on: ubuntu-24.04

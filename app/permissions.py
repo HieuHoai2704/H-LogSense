@@ -8,6 +8,7 @@ ACLs (uploads apply them with icacls), so mode bits are not checked there.
 
 import os
 from pathlib import Path
+from typing import BinaryIO
 import warnings
 
 
@@ -15,14 +16,14 @@ class InsecurePermissions(PermissionError):
     """A private path is readable or writable by other accounts."""
 
 
-_warned = set()
+_warned: set[str] = set()
 
 
-def strict():
+def strict() -> bool:
     return os.environ.get("LOGSENSE_STRICT_PERMISSIONS") == "1"
 
 
-def check_private(path):
+def check_private(path: str | os.PathLike[str]) -> bool:
     """Return True when only the owner can access ``path``; warn once per folder (or raise in strict mode)."""
     path = Path(path)
     if os.name == "nt" or not path.stat().st_mode & 0o077:
@@ -41,7 +42,7 @@ def check_private(path):
     return False
 
 
-def make_private_dir(path, *, exist_ok=True):
+def make_private_dir(path: str | os.PathLike[str], *, exist_ok: bool = True) -> Path:
     """Create (or tighten) an owner-only directory and verify the result."""
     path = Path(path)
     path.mkdir(parents=True, exist_ok=exist_ok, mode=0o700)
@@ -51,7 +52,7 @@ def make_private_dir(path, *, exist_ok=True):
     return path
 
 
-def write_private(path, data):
+def write_private(path: str | os.PathLike[str], data: str | bytes) -> Path:
     """Atomically replace ``path`` with owner-only content (text is written as UTF-8)."""
     path = Path(path)
     payload = data.encode("utf-8") if isinstance(data, str) else bytes(data)
@@ -72,7 +73,7 @@ def write_private(path, data):
     return path
 
 
-def open_private(path):
+def open_private(path: str | os.PathLike[str]) -> BinaryIO:
     """Create a new owner-only file for streaming output; refuses to overwrite an existing file."""
     path = Path(path)
     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_BINARY", 0), 0o600)

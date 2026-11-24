@@ -1,6 +1,7 @@
 """Conservative display redaction for demo payloads; not a production DLP engine."""
 
 import re
+from typing import Any
 
 KEY_VALUE = re.compile(
     r"""(?i)\b(password|passwd|secret|api[_-]?key|access[_-]?token|refresh[_-]?token|token|authorization)\b(["']?\s*[:=]\s*)(?:"[^"\n]*"|'[^'\n]*'|[^\s,;]+)"""
@@ -18,7 +19,7 @@ SENSITIVE_KEY = re.compile(
 )
 
 
-def redact(value):
+def redact(value: Any) -> Any:
     """Redact before preview slicing so a token cannot leak across page edges."""
     if isinstance(value, dict):
         return {

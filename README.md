@@ -371,13 +371,15 @@ python -B -m compileall -q app scripts tests migrations
 python -m pip check
 ```
 
-Code style is enforced by ruff (lint and format, configured in `pyproject.toml`) in CI and, optionally,
-as a git hook:
+Code style is enforced by ruff (lint and format) and types by mypy, both configured in `pyproject.toml`,
+in CI and, optionally, as a git hook. Shared shapes (the investigation scope, job configuration, source and
+anomaly identities) live in `app/contracts.py`; modules listed as typed in `[tool.mypy]` must annotate
+every function.
 
 ```text
 python -m pip install -e ".[dev]"
-pre-commit install            # ruff check --fix and ruff format on every commit
-ruff check . && ruff format --check .
+pre-commit install            # ruff check --fix, ruff format and mypy on every commit
+ruff check . && ruff format --check . && mypy
 ```
 
 The default suite explicitly skips real-MySQL tests. For actual integration,

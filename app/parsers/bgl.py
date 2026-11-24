@@ -28,7 +28,7 @@ class BGLRecord:
     label: str | None = None
     host: str | None = None
     message: str | None = None
-    attributes: dict | None = None
+    attributes: dict[str, str] | None = None
     error: str | None = None
 
 
@@ -37,21 +37,24 @@ def parse_line(raw: bytes, line_number: int, byte_offset: int, version: str = VE
         raise ValueError("Invalid provenance.")
     if version not in VERSIONS:
         raise ValueError("Unsupported BGL parser version.")
-    base = dict(line_number=line_number, byte_offset=byte_offset, raw=raw)
+
+    def failed(error: str) -> BGLRecord:
+        return BGLRecord(line_number, byte_offset, raw, error=error)
+
     if len(raw) > MAX_LINE_BYTES:
         raise ValueError("BGL line exceeds the configured byte limit.")
     try:
         text = raw.decode("utf-8", errors="strict").rstrip("\r\n")
     except UnicodeDecodeError:
-        return BGLRecord(**base, error="invalid_utf8")
+        return failed("invalid_utf8")
     if version != LEGACY_VERSION and "\r" in text:
-        return BGLRecord(**base, error="invalid_line_break")
+        return failed("invalid_line_break")
     # Label, epoch, date, Node, printed time, NodeRepeat, type, component, level, content.
     fields = text.split(maxsplit=9)
     if len(fields) == 9 and version != LEGACY_VERSION:
         fields.append("")  # empty content is a real BGL row, not a malformed one
     if len(fields) != 10:
-        return BGLRecord(**base, error="invalid_field_count")
+        return failed("invalid_field_count")
     (
         label,
         epoch,
@@ -75,11 +78,13 @@ def parse_line(raw: bytes, line_number: int, byte_offset: int, version: str = VE
         ):
             raise ValueError()  # e.g. epoch 0 or year 9999 with a 2005 date
     except (ValueError, OverflowError):
-        return BGLRecord(**base, error="invalid_timestamp")
+        return failed("invalid_timestamp")
     if any(len(x) > limit for x, limit in ((label, 128), (node, 128), (component, 128), (level, 32))):
-        return BGLRecord(**base, error="field_too_long")
+        return failed("field_too_long")
     return BGLRecord(
-        **base,
+        line_number,
+        byte_offset,
+        raw,
         timestamp=timestamp,
         label=label,
         host=None if node == "-" else node,
@@ -98,7 +103,9 @@ def parse_line(raw: bytes, line_number: int, byte_offset: int, version: str = VE
     )
 
 
-def iter_records(stream: BinaryIO, *, first_line=1, byte_offset=0, version=VERSION) -> Iterator[BGLRecord]:
+def iter_records(
+    stream: BinaryIO, *, first_line: int = 1, byte_offset: int = 0, version: str = VERSION
+) -> Iterator[BGLRecord]:
     """Read bounded physical lines. Offset is relative to the uncompressed member.
 
     Oversized lines abort without advancing a persistent checkpoint. They are not

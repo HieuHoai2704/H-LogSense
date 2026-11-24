@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import re
+from typing import Any
 from uuid import uuid4
 
 import joblib
@@ -13,9 +14,10 @@ import numpy as np
 import sklearn
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import average_precision_score
-from sqlalchemy import case, func, select, text
+from sqlalchemy import Engine, case, func, select, text
 from sqlalchemy.orm import Session
 
+from app.contracts import JobConfiguration
 from app.domain import DetectionPrediction, EvaluationReport
 from app.models import (
     AnomalyOutput,
@@ -101,10 +103,12 @@ def aggregate_windows(rows, seconds=300, include_templates=False):
         yield from emit()
 
 
-def run_windows(engine, dataset_id, job_key, configuration):
+def run_windows(
+    engine: Engine, dataset_id: int, job_key: str, configuration: JobConfiguration
+) -> dict[str, Any]:
     """Run a window detector. Temporary files never outlive the call: the feature cache is always
     removed, and a model file is kept only when a new run references it (provenance)."""
-    files = {}
+    files: dict[str, Any] = {}  # "features"/"model" paths and whether the model is "model_referenced"
     try:
         return _run_windows(engine, dataset_id, job_key, configuration, files)
     finally:

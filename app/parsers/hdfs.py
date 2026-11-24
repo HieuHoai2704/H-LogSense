@@ -1,9 +1,11 @@
 """Loghub HDFS_v1 records. The source wall clock has no supplied time zone."""
 
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from functools import lru_cache
 import re
+from typing import BinaryIO
 
 BLOCK = re.compile(r"\bblk_-?[0-9]+\b", re.ASCII)
 HEADER = re.compile(r"([0-9]{6})\s+([0-9]{6})\s+([0-9]+)\s+(\w+)\s+([^:]+):\s*(.*)", re.ASCII)
@@ -12,12 +14,12 @@ MAX_LINE = 256 * 1024
 
 
 @lru_cache(maxsize=16384)
-def wall_seconds(date, time):
+def wall_seconds(date: str, time: str) -> int:
     value = datetime.strptime(date + time, "%y%m%d%H%M%S")
     return (value - EPOCH) // timedelta(seconds=1)
 
 
-def wall_iso(seconds):
+def wall_iso(seconds: int) -> str:
     return (EPOCH + timedelta(seconds=seconds)).isoformat()
 
 
@@ -32,7 +34,7 @@ class Record:
     block_ids: tuple[str, ...]
 
 
-def parse_hdfs(line):
+def parse_hdfs(line: str) -> Record:
     match = HEADER.fullmatch(line)
     if not match:
         raise ValueError("Invalid HDFS header.")
@@ -48,7 +50,7 @@ def parse_hdfs(line):
     )
 
 
-def physical_lines(stream):
+def physical_lines(stream: BinaryIO) -> Iterator[tuple[int, bytes | None]]:
     """Yield (physical line number, bytes or None) without buffering oversized lines."""
     line_number = 0
     while raw := stream.readline(MAX_LINE + 1):

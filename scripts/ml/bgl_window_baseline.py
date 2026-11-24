@@ -26,8 +26,10 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from threadpoolctl import threadpool_limits
 
-from app.parsers.bgl import LEGACY_VERSION as PARSER_VERSION  # documented results use bgl-1.0.0
-from app.parsers.bgl import parse_line
+from app.parsers.bgl import (
+    LEGACY_VERSION as PARSER_VERSION,  # documented results use bgl-1.0.0
+    parse_line,
+)
 from app.services.detector_calibration import binary_metrics
 from app.services.window_detection import SEVERE
 

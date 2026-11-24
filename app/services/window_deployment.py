@@ -10,11 +10,13 @@ import hashlib
 import json
 import math
 import re
+from typing import Any
 
 import joblib
-from sqlalchemy import func, select
+from sqlalchemy import Engine, func, select
 from sqlalchemy.orm import Session
 
+from app.contracts import JobConfiguration
 from app.models import Dataset, Detector, DetectorRun, DetectorVersion, LogEvent
 from app.paths import IF_STUDIES_DIR
 
@@ -92,7 +94,9 @@ def inspect_study(study_id, dataset_id):
     return manifest, selection, paths
 
 
-def run_study(engine, dataset_id, job_key, configuration):
+def run_study(
+    engine: Engine, dataset_id: int, job_key: str, configuration: JobConfiguration
+) -> dict[str, Any]:
     """Score only the frozen test scope; never fit or calibrate in a worker."""
     from app.services.investigation import iso
     from app.services.window_detection import EPOCH, evaluate_windows, persist_predictions
@@ -275,9 +279,9 @@ def run_study(engine, dataset_id, job_key, configuration):
             )
         evaluate_windows(engine, dataset_id, run_id)
         with Session(engine) as session, session.begin():
-            session.get(DetectorRun, run_id).state = "completed"
+            session.get_one(DetectorRun, run_id).state = "completed"
     except Exception:
         with Session(engine) as session, session.begin():
-            session.get(DetectorRun, run_id).state = "failed"
+            session.get_one(DetectorRun, run_id).state = "failed"
         raise
     return {"run_id": run_id, "state": "completed", "evaluated_units": count}

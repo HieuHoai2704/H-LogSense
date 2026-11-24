@@ -6,7 +6,18 @@ from pathlib import Path
 import re
 from urllib.parse import urlsplit
 
-from flask import Blueprint, abort, current_app, has_request_context, redirect, request, url_for
+from flask import (
+    Blueprint,
+    Flask,
+    Response,
+    abort,
+    current_app,
+    has_request_context,
+    redirect,
+    request,
+    url_for,
+)
+from werkzeug.wrappers import Response as WerkzeugResponse
 
 LANGUAGES = {
     "en": "English",
@@ -29,7 +40,7 @@ COOKIE = "logsense_language"
 locale_pages = Blueprint("locale_pages", __name__)
 
 
-def current_language():
+def current_language() -> str:
     if not has_request_context():
         return "en"
     default = current_app.config.get("DEFAULT_INTERFACE_LANGUAGE", "en")
@@ -38,7 +49,7 @@ def current_language():
 
 
 @lru_cache(maxsize=len(LANGUAGES))
-def catalog(language):
+def catalog(language: str) -> dict[str, str]:
     if language == "en":
         return {}
     path = Path(__file__).with_name("locales")
@@ -48,13 +59,13 @@ def catalog(language):
 
 
 @lru_cache(maxsize=1)
-def workspace_labels():
+def workspace_labels() -> dict[str, list[str]]:
     return json.loads(
         Path(__file__).with_name("locales").joinpath("workspace.json").read_text(encoding="utf-8")
     )
 
 
-def translate(message, *values):
+def translate(message: str, *values: object) -> str:
     result = catalog(current_language()).get(message, message)
     if not values:
         return result
@@ -66,7 +77,7 @@ def translate(message, *values):
 
 
 @locale_pages.post("/preferences/language")
-def select_language():
+def select_language() -> WerkzeugResponse:
     # Only this site may change the preference (the form posts same-origin; no token needed).
     site = request.headers.get("Sec-Fetch-Site")
     origin = request.headers.get("Origin")
@@ -103,11 +114,11 @@ def select_language():
     return response
 
 
-def initialize_i18n(app):
+def initialize_i18n(app: Flask) -> None:
     app.register_blueprint(locale_pages)
 
     @app.context_processor
-    def interface_language():
+    def interface_language() -> dict[str, object]:
         language = current_language()
         return {
             "tr": translate,
@@ -117,7 +128,7 @@ def initialize_i18n(app):
         }
 
     @app.after_request
-    def language_headers(response):
+    def language_headers(response: Response) -> Response:
         if response.mimetype == "text/html" or request.endpoint == "anomalies.investigation":
             response.headers["Content-Language"] = current_language()
             response.vary.add("Cookie")

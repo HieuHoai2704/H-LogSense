@@ -17,11 +17,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.extensions import db
-from app.models import AnomalyOutput as A
-from app.models import DetectionUnit as U
-from app.models import Detector as D
-from app.models import DetectorRun as R
-from app.models import LogEvent as E
+from app.models import AnomalyOutput as A, DetectionUnit as U, Detector as D, DetectorRun as R, LogEvent as E
 from scripts.qa.verify_university_e2e import PRIVATE, REPORT, app_for, login, read, save
 from scripts.run.mysql_runtime import owned_root, status
 

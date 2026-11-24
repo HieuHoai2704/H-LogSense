@@ -1,33 +1,30 @@
 """Investigation V2 adapter backed by bounded MySQL queries, never raw fixtures."""
 
+from collections.abc import Mapping
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from math import ceil, expm1, floor, log1p
+from typing import Any, cast
 
-from sqlalchemy import func, or_, select, text
+from sqlalchemy import Row, Select, func, or_, select, text
 from werkzeug.datastructures import MultiDict
 
+from app.contracts import (
+    InvestigationState,
+    anomaly_identity,
+    dataset_id_of,
+    dataset_source,
+    is_dataset_source,
+)
 from app.extensions import db
 from app.models import (
     AnomalyOutput as A,
-)
-from app.models import (
     CoverageInterval,
     Dataset,
-)
-from app.models import (
     DetectionUnit as U,
-)
-from app.models import (
     Detector as D,
-)
-from app.models import (
     DetectorRun as R,
-)
-from app.models import (
     DetectorVersion as V,
-)
-from app.models import (
     LogEvent as E,
 )
 from app.security import authorized_datasets, require_dataset
@@ -53,26 +50,26 @@ FIELDS = {
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
 
-def is_mysql(args):
-    return args.get("source", "").startswith("db-")
+def is_mysql(args: Mapping[str, Any]) -> bool:
+    return is_dataset_source(args.get("source", ""))
 
 
-def state(args):
+def state(args: MultiDict[str, str]) -> InvestigationState:
     """Validated scope for a MySQL investigation request. The API validates it in before_request and
     again in each view; within one request the result is reused instead of re-running its scans."""
     from flask import g, has_request_context, request
 
     if has_request_context() and args is request.args:
-        cached = g.get("_mysql_investigation_state")
+        cached: InvestigationState | None = g.get("_mysql_investigation_state")
         if cached is None:
             cached = g._mysql_investigation_state = _state(args)
         return deepcopy(cached)
     return _state(args)
 
 
-def _state(args):
+def _state(args: MultiDict[str, str]) -> InvestigationState:
     source = args.get("source", "")
-    dataset_id = integer(source[3:], 1, 2**63 - 1, "Dataset")
+    dataset_id = dataset_id_of(source)
     require_dataset(dataset_id)
     from flask import current_app
 
@@ -183,8 +180,8 @@ def _state(args):
     return result
 
 
-def base(state, *, excluded=None, selection=False):
-    dataset_id = int(state["source"][3:])
+def base(state: InvestigationState, *, excluded: str | None = None, selection: bool = False) -> Select[Any]:
+    dataset_id = dataset_id_of(state["source"])
     q = (
         select(A, U, E, D, R, V)
         .join(U, (U.dataset_id == A.dataset_id) & (U.id == A.unit_id))
@@ -202,9 +199,10 @@ def base(state, *, excluded=None, selection=False):
         A.anchor_time >= instant(state["start_time"]),
         A.anchor_time < instant(state["end_time"]),
     )
+    chosen = cast(Mapping[str, list[str]], state)  # the facet keys of FIELDS
     for key, column in FIELDS.items():
-        if key != excluded and state[key]:
-            q = q.where(column.in_([int(v) for v in state[key]] if key == "detector" else state[key]))
+        if key != excluded and chosen[key]:
+            q = q.where(column.in_([int(v) for v in chosen[key]] if key == "detector" else chosen[key]))
     if state["q"]:
         q = q.where(
             or_(
@@ -223,14 +221,14 @@ def base(state, *, excluded=None, selection=False):
     return q
 
 
-def count(q):
-    return db.session.scalar(select(func.count()).select_from(q.subquery()))
+def count(q: Select[Any]) -> int:
+    return db.session.scalar(select(func.count()).select_from(q.subquery())) or 0
 
 
-def row_summary(row, state):
+def row_summary(row: Row[Any], state: InvestigationState) -> dict[str, Any]:
     anomaly, unit, event, detector, run, version = row
     return dict(
-        id="DB-" + str(anomaly.id),
+        id=anomaly_identity(anomaly.id),
         timestamp=iso(anomaly.anchor_time),
         display_time=display_time(iso(anomaly.anchor_time), state["timezone"], True),
         host=redact(unit.host or (event.host if event else None)),
@@ -257,16 +255,16 @@ def row_summary(row, state):
     )
 
 
-def epoch_us(moment):
+def epoch_us(moment: datetime) -> int:
     """Exact integer microseconds since the Unix epoch (the SQL bucket arithmetic uses the same unit)."""
     return (moment - EPOCH) // timedelta(microseconds=1)
 
 
-def build(state):
+def build(state: InvestigationState) -> dict[str, Any]:
     start, end = instant(state["start_time"]), instant(state["end_time"])
     duration = resolution(state)
     origin = epoch_us(start) // (duration * 1000000) * (duration * 1000000)
-    cells = []
+    cells: list[dict[str, Any]] = []
     lower = origin
     while lower < epoch_us(end):
         a = max(start, EPOCH + timedelta(microseconds=lower))
@@ -301,12 +299,12 @@ def build(state):
         ).group_by(D.id, D.detector_key, D.family, bucket, A.priority)
     ).all()
     overall = deepcopy(cells)
-    lanes = {}
+    lanes: dict[str, dict[str, Any]] = {}
     for did, name, family in db.session.execute(
         select(D.id, D.detector_key, D.family)
         .join(R, R.detector_id == D.id)
         .where(
-            R.dataset_id == int(state["source"][3:]),
+            R.dataset_id == dataset_id_of(state["source"]),
             R.id.in_([int(x) for x in state["run_id"]]),
         )
     ):
@@ -346,7 +344,7 @@ def build(state):
         db.session.scalars(
             select(CoverageInterval)
             .where(
-                CoverageInterval.dataset_id == int(state["source"][3:]),
+                CoverageInterval.dataset_id == dataset_id_of(state["source"]),
                 CoverageInterval.start_time < end,
                 CoverageInterval.end_time > start,
             )
@@ -355,7 +353,7 @@ def build(state):
         )
     )
 
-    def coverage(cell, did):
+    def coverage(cell: dict[str, Any], did: str) -> str:
         a, b = instant(cell["start"]), instant(cell["end"])
         run_ids = [int(x) for x in state["run_id"]]
         proofs = [
@@ -385,17 +383,20 @@ def build(state):
                 and instant(cell["start"]) < instant(state["selection_end"])
                 and instant(cell["end"]) > instant(state["selection_start"])
             )
-    facets = {}
+    facets: dict[str, list[dict[str, Any]]] = {}
+    chosen = cast(Mapping[str, list[str]], state)
     for key, column in FIELDS.items():
         fq = base(state, excluded=key).with_only_columns(column, func.count()).group_by(column)
         values = db.session.execute(fq.order_by(func.count().desc()).limit(100)).all()
-        labels = dict(db.session.execute(select(D.id, D.detector_key)).all()) if key == "detector" else {}
+        labels: dict[int, str] = (
+            dict(db.session.execute(select(D.id, D.detector_key)).tuples()) if key == "detector" else {}
+        )
         facets[key] = [
             dict(
                 value=str(v),
                 label=labels.get(v, str(v)),
                 count=n,
-                selected=str(v) in state[key],
+                selected=str(v) in chosen[key],
             )
             for v, n in values
             if v is not None
@@ -408,13 +409,13 @@ def build(state):
                 count=0,
                 selected=True,
             )
-            for v in state[key]
+            for v in chosen[key]
             if v not in present
         ]
         if key == "detector":
             known = {f["value"] for f in facets[key]}
             facets[key] += [
-                dict(value=k, label=v["name"], count=0, selected=k in state[key])
+                dict(value=k, label=v["name"], count=0, selected=k in chosen[key])
                 for k, v in lanes.items()
                 if k not in known
             ]
@@ -440,7 +441,9 @@ def build(state):
         .offset((page - 1) * state["limit"])
         .limit(state["limit"])
     ).all()
-    dataset = db.session.get(Dataset, int(state["source"][3:]))
+    dataset = db.session.get(Dataset, dataset_id_of(state["source"]))
+    if dataset is None:  # deleted after the scope was validated
+        raise QueryError("Dataset not found.")
     from app.domain import EvaluationReport
 
     evaluations = []
@@ -460,10 +463,10 @@ def build(state):
                 }
             )
     sources = {
-        f"db-{d.id}": d.name + " · MySQL"
+        dataset_source(d.id): d.name + " · MySQL"
         for d in db.session.scalars(select(Dataset).where(Dataset.id.in_(authorized_datasets())))
     }
-    scale = []
+    scale: list[dict[str, int]] = []
     previous = 0
     for band in range(1, 5):
         upper = maximum if band == 4 else floor(expm1(log1p(maximum) * band / 4))

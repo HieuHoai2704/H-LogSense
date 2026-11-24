@@ -1,6 +1,17 @@
 """Windows integration: ConPTY terminals, DWM glass, taskbar identity and shortcuts."""
 
-from ctypes import POINTER, Structure, WinDLL, byref, c_int, c_void_p, sizeof, windll, wintypes
+# WinDLL and windll exist only on Windows; type checking runs on Linux.
+from ctypes import (  # type: ignore[attr-defined]
+    POINTER,
+    Structure,
+    WinDLL,
+    byref,
+    c_int,
+    c_void_p,
+    sizeof,
+    windll,
+    wintypes,
+)
 import os
 from pathlib import Path
 import sys
