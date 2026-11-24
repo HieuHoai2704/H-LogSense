@@ -199,6 +199,7 @@ html.auth-root, .auth-body {
 .auth-field:has(.auth-error) .auth-icon { top: 1.25rem; }
 
 .auth-button {
+  display: block;
   width: 100%;
   height: 2.75rem;
   margin-top: 0.5rem;
@@ -210,14 +211,15 @@ html.auth-root, .auth-body {
   font-weight: 700;
   letter-spacing: 0.03em;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  z-index: 0;
-  transition: color 0.35s;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
 }
-.auth-button::before { content: ""; position: absolute; inset: 0; background: var(--card); transform: translateY(100%); transition: transform 0.35s ease; z-index: -1; }
-.auth-button:hover { color: var(--text); }
-.auth-button:hover::before { transform: translateY(0); }
+/* Hover inverts the button in place (no sliding layer that could show as a line under it). */
+.auth-button:hover { background: transparent; color: var(--text); }
+
+/* The button never travels sideways: it fades and un-blurs in place while the fields slide. */
+@keyframes auth-fade { from { opacity: 0; filter: blur(6px); } }
+.auth-card .auth-button.animation { transform: none !important; transition-property: opacity, filter; transition-duration: 0.45s; }
+.auth-card.intro .auth-button.animation { animation-name: auth-fade !important; }
 
 .auth-switch { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; margin: 1rem 0 0; font-size: 0.85rem; color: var(--field-muted); text-align: center; }
 .auth-switch a { color: var(--text); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
