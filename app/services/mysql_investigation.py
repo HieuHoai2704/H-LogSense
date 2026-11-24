@@ -443,15 +443,18 @@ def build(state):
     dataset = db.session.get(Dataset, int(state["source"][3:]))
     from app.domain import EvaluationReport
 
-    evaluations = [
-        {"run_id": r.run_id, "metrics": r.metrics}
-        for r in db.session.scalars(
-            select(EvaluationReport).where(
-                EvaluationReport.dataset_id == dataset.id,
-                EvaluationReport.run_id.in_([int(i) for i in state["run_id"]]),
-            )
+    evaluations = []
+    for r in db.session.scalars(
+        select(EvaluationReport).where(
+            EvaluationReport.dataset_id == dataset.id,
+            EvaluationReport.run_id.in_([int(i) for i in state["run_id"]]),
         )
-    ]
+    ):
+        evaluations.append({"run_id": r.run_id, "metrics": r.metrics})
+        if isinstance(r.metrics.get("supplied_labels"), dict):
+            # Uploaded datasets: a separate, explicitly unverified row (never the trusted metrics).
+            evaluations.append({"run_id": f"{r.run_id} · supplied labels (unverified)",
+                                "metrics": r.metrics["supplied_labels"]})
     sources = {
         f"db-{d.id}": d.name + " · MySQL"
         for d in db.session.scalars(

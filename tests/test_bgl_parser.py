@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from io import BytesIO
 import unittest
 
-from app.parsers.bgl import parse_line, iter_records, MAX_LINE_BYTES
+from app.parsers.bgl import parse_line, iter_records, LEGACY_VERSION, MAX_LINE_BYTES, VERSION
 from app.services.detection import features
 
 LINE = b"- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.363779 R02-M1-N0-C:J12-U11 RAS KERNEL INFO test message\n"
@@ -83,3 +83,29 @@ class BGLParserTests(unittest.TestCase):
     def test_invalid_provenance(self):
         with self.assertRaises(ValueError):
             parse_line(LINE, 0, 0)
+
+
+EMPTY_CONTENT = b"- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.675872 R02-M1-N0-C:J12-U11 RAS KERNEL FATAL\n"
+
+
+class ParserVersionTests(unittest.TestCase):
+    def test_empty_content_row_is_valid_since_1_1(self):
+        record = parse_line(EMPTY_CONTENT, 1, 0)
+        self.assertIsNone(record.error)
+        self.assertEqual(record.message, "")
+        self.assertEqual(record.attributes["level"], "FATAL")
+        self.assertEqual(VERSION, "bgl-1.1.0")
+
+    def test_legacy_version_keeps_the_frozen_behaviour(self):
+        self.assertEqual(parse_line(EMPTY_CONTENT, 1, 0, LEGACY_VERSION).error, "invalid_field_count")
+        self.assertIsNone(parse_line(LINE.replace(b"\n", b"\rx\n"), 1, 0, LEGACY_VERSION).error)
+
+    def test_carriage_return_inside_a_line_is_rejected(self):
+        self.assertEqual(parse_line(LINE.replace(b" test", b"\r test"), 1, 0).error, "invalid_line_break")
+        self.assertIsNone(parse_line(LINE.replace(b"\n", b"\r\n"), 1, 0).error)
+
+    def test_iterator_and_unknown_version(self):
+        records = list(iter_records(BytesIO(EMPTY_CONTENT), version=LEGACY_VERSION))
+        self.assertEqual(records[0].error, "invalid_field_count")
+        with self.assertRaises(ValueError):
+            parse_line(LINE, 1, 0, "bgl-9")

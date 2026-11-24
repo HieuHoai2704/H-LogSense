@@ -131,6 +131,14 @@ class UploadStagingTests(unittest.TestCase):
             with self.subTest(content=content[:20]):
                 self.assert_rejected(content)
 
+    def test_carriage_return_only_files_are_rejected_precisely(self):
+        # Classic Mac line endings: three rows used to collapse into one "valid" event.
+        self.assert_rejected(LINE.replace(b'\n', b'\r') * 3, code='invalid_line_break')
+        # Over the per-line limit the error must still name the line endings, not the size.
+        self.assert_rejected(LINE.replace(b'\n', b'\r') * 3000, code='invalid_line_break')
+        bundle = self.stage(LINE.replace(b'\n', b'\r\n') * 2)
+        self.assertEqual(bundle['manifest']['valid_lines'], 2)
+
     def test_csv_schema_columns_and_embedded_line_break_are_rejected(self):
         for content in (b'timestamp,message\n1,hello\n', b'raw_line,raw_line\nx,y\n',
                         b'raw_line\nx,y\n', b'raw_line\n"abc\nnot one line"\n'):

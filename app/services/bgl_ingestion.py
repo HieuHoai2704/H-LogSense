@@ -17,7 +17,7 @@ from app.models import (
     GroundTruthLabel,
     ProcessingJob,
 )
-from app.parsers.bgl import iter_records, VERSION
+from app.parsers.bgl import iter_records, VERSION, VERSIONS
 
 
 class ImportBusyError(RuntimeError):
@@ -157,12 +157,12 @@ def _ingest_bgl(
                 )
                 session.add(artifact)
                 session.flush()
-            elif (artifact.sha256, artifact.byte_length, artifact.parser_version) != (
-                checksum,
-                info.file_size,
-                VERSION,
+            elif (artifact.sha256, artifact.byte_length) != (checksum, info.file_size) or (
+                artifact.parser_version not in VERSIONS
             ):
                 raise ValueError("Artifact or parser changed; register a new dataset.")
+            # Resume with the version the artifact started with, so one dataset never mixes versions.
+            parser_version = artifact.parser_version
             artifact_id = artifact.id
             # Holding the exclusive lease proves no earlier import worker is alive.
             session.execute(
@@ -209,6 +209,7 @@ def _ingest_bgl(
                             stream,
                             first_line=artifact.checkpoint_line + 1,
                             byte_offset=artifact.checkpoint_byte,
+                            version=parser_version,
                         )
                         for record in islice(iterator, remaining):
                             if (
@@ -254,7 +255,7 @@ def _ingest_bgl(
                                     dict(
                                         dataset_id=dataset_id,
                                         raw_id=raw_ids[r.line_number],
-                                        parser_version=VERSION,
+                                        parser_version=parser_version,
                                         emit_index=0,
                                         timestamp=r.timestamp,
                                         raw_timestamp=r.attributes["printed_timestamp"],

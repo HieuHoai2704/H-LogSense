@@ -72,3 +72,18 @@ matching row counts alone prove correctness.
 Current error reporting is structured per malformed raw row plus job error code
 and summary counts. An HTTP upload/progress UI, parser-upgrade replay, file
 replacement and distributed job scheduling remain outside this task.
+
+## Parser versions
+
+| Version | Behaviour |
+| --- | --- |
+| `bgl-1.1.0` (current) | A row with empty content (exactly 9 fields, e.g. `... RAS KERNEL FATAL`) is a valid event with message `""`. A carriage return inside a line is `invalid_line_break`. The full Loghub BGL archive has 34,470 empty-content rows (0.72%) that `bgl-1.0.0` dropped, and no embedded CR. |
+| `bgl-1.0.0` | Empty-content rows were stored as `invalid_field_count` and produced no event or label. |
+
+New datasets and uploads use the current version. An artifact keeps the version it started with,
+so resuming an import registered under `bgl-1.0.0` continues with `bgl-1.0.0` and a dataset never
+mixes versions. To include the previously dropped rows, register a new dataset. The frozen
+Isolation Forest studies (`scripts/ml/audit_if_holdout.py`) and the documented BGL window baseline
+pin `bgl-1.0.0` so their recorded results stay reproducible; models trained on `bgl-1.0.0` should
+be re-validated before scoring datasets imported with `bgl-1.1.0`. HTTP uploads reject files with
+carriage-return-only line endings (`invalid_line_break`).

@@ -353,10 +353,12 @@ def run_windows(engine, dataset_id, job_key, configuration):
                     reference,
                     seconds,
                 )
+        # Evaluate first: the timeline and evidence read completed runs only, so a run whose
+        # evaluation fails is never shown and then withdrawn.
+        evaluate_windows(engine, dataset_id, run_id)
         with Session(engine) as session, session.begin():
             run = session.get(DetectorRun, run_id)
             run.state = "completed"
-        evaluate_windows(engine, dataset_id, run_id)
     except Exception:
         with Session(engine) as session, session.begin():
             session.get(DetectorRun, run_id).state = "failed"
@@ -477,7 +479,41 @@ def persist_predictions(
                 job.result = {"run_id": run.id, "evaluated_units": run.evaluated_units}
 
 
+TRUSTED_LABELS = ("loghub-bgl", "original")
+SUPPLIED_LABELS = ("uploaded-bgl", "supplied")
+
+
+def window_metrics(truth, predictions, ranks, skipped, label_source, label_policy):
+    tp = sum(t and p for t, p in zip(truth, predictions))
+    fp = sum(not t and p for t, p in zip(truth, predictions))
+    fn = sum(t and not p for t, p in zip(truth, predictions))
+    tn = sum(not t and not p for t, p in zip(truth, predictions))
+    return {
+        "unit": "observed host-window",
+        "label_policy": label_policy,
+        "label_source": label_source,
+        "scope": "chronological test split only",
+        "eligible_units": len(truth),
+        "unlabeled_units": skipped,
+        "tp": int(tp),
+        "fp": int(fp),
+        "fn": int(fn),
+        "tn": int(tn),
+        "precision": tp / (tp + fp) if tp + fp else None,
+        "recall": tp / (tp + fn) if tp + fn else None,
+        "f1": 2 * tp / (2 * tp + fp + fn) if 2 * tp + fp + fn else None,
+        "fpr": fp / (fp + tn) if fp + tn else None,
+        "auprc_average_precision": float(average_precision_score(truth, ranks))
+        if len(set(truth)) == 2
+        else None,
+        "no_event_level_comparison": True,
+        "source_time_completeness": "unknown; imported observations only",
+    }
+
+
 def evaluate_windows(engine, dataset_id, run_id):
+    """Trusted metrics use original Loghub labels only. Uploaded datasets carry user-supplied labels:
+    those are scored separately under ``supplied_labels`` and marked unverified, never mixed in."""
     with Session(engine) as session, session.begin():
         run = session.get(DetectorRun, run_id)
         config = run.configuration
@@ -489,32 +525,31 @@ def evaluate_windows(engine, dataset_id, run_id):
         bucket = micros.op("DIV", precedence=100)(divisor) - case(
             ((micros < 0) & (func.mod(micros, divisor) != 0), 1), else_=0
         )
-        labels = session.execute(
-            select(
-                LogEvent.host,
-                bucket,
-                func.count(),
-                func.max(case((GroundTruthLabel.label != "-", 1), else_=0)),
-            )
-            .join(
-                GroundTruthLabel,
-                (GroundTruthLabel.dataset_id == LogEvent.dataset_id)
-                & (GroundTruthLabel.event_id == LogEvent.id),
-            )
-            .where(
-                LogEvent.dataset_id == dataset_id,
-                LogEvent.id <= config["maximum_event_id"],
-                GroundTruthLabel.source == "loghub-bgl",
-                GroundTruthLabel.version == "original",
-            )
-            .group_by(LogEvent.host, bucket)
-        ).all()
-        known = {(r[0], int(r[1])): (r[2], r[3]) for r in labels}
-        truth = []
-        predictions = []
-        ranks = []
-        skipped = 0
-        for prediction, unit in session.execute(
+
+        def window_labels(source, version):
+            rows = session.execute(
+                select(
+                    LogEvent.host,
+                    bucket,
+                    func.count(),
+                    func.max(case((GroundTruthLabel.label != "-", 1), else_=0)),
+                )
+                .join(
+                    GroundTruthLabel,
+                    (GroundTruthLabel.dataset_id == LogEvent.dataset_id)
+                    & (GroundTruthLabel.event_id == LogEvent.id),
+                )
+                .where(
+                    LogEvent.dataset_id == dataset_id,
+                    LogEvent.id <= config["maximum_event_id"],
+                    GroundTruthLabel.source == source,
+                    GroundTruthLabel.version == version,
+                )
+                .group_by(LogEvent.host, bucket)
+            ).all()
+            return {(r[0], int(r[1])): (r[2], r[3]) for r in rows}
+
+        rows = session.execute(
             select(DetectionPrediction, DetectionUnit)
             .join(
                 DetectionUnit,
@@ -525,43 +560,33 @@ def evaluate_windows(engine, dataset_id, run_id):
                 DetectionPrediction.dataset_id == dataset_id,
                 DetectionPrediction.run_id == run_id,
             )
-        ):
-            label = known.get((unit.host, second(unit.start_time) // seconds))
-            if label is None or label[0] != unit.definition["observed_event_count"]:
-                skipped += 1
-                continue
-            truth.append(int(label[1]))
-            predictions.append(prediction.predicted)
-            ranks.append(
-                prediction.score
-                if config["score_direction"] == "higher"
-                else -prediction.score
+        ).all()
+
+        def score(known):
+            truth, predictions, ranks, skipped = [], [], [], 0
+            for prediction, unit in rows:
+                label = known.get((unit.host, second(unit.start_time) // seconds))
+                if label is None or label[0] != unit.definition["observed_event_count"]:
+                    skipped += 1
+                    continue
+                truth.append(int(label[1]))
+                predictions.append(prediction.predicted)
+                ranks.append(
+                    prediction.score
+                    if config["score_direction"] == "higher"
+                    else -prediction.score
+                )
+            return truth, predictions, ranks, skipped
+
+        metrics = window_metrics(*score(window_labels(*TRUSTED_LABELS)), "loghub-bgl original",
+                                 "any original BGL alert among ALL observed events in this window")
+        supplied = window_labels(*SUPPLIED_LABELS)
+        if supplied:
+            metrics["supplied_labels"] = dict(
+                window_metrics(*score(supplied), "uploaded-bgl supplied (user-provided, not verified)",
+                               "any supplied alert label among ALL observed events in this window"),
+                trusted=False,
             )
-        tp = sum(t and p for t, p in zip(truth, predictions))
-        fp = sum(not t and p for t, p in zip(truth, predictions))
-        fn = sum(t and not p for t, p in zip(truth, predictions))
-        tn = sum(not t and not p for t, p in zip(truth, predictions))
-        metrics = {
-            "unit": "observed host-window",
-            "label_policy": "any original BGL alert among ALL observed events in this window",
-            "label_source": "loghub-bgl original",
-            "scope": "chronological test split only",
-            "eligible_units": len(truth),
-            "unlabeled_units": skipped,
-            "tp": int(tp),
-            "fp": int(fp),
-            "fn": int(fn),
-            "tn": int(tn),
-            "precision": tp / (tp + fp) if tp + fp else None,
-            "recall": tp / (tp + fn) if tp + fn else None,
-            "f1": 2 * tp / (2 * tp + fp + fn) if 2 * tp + fp + fn else None,
-            "fpr": fp / (fp + tn) if fp + tn else None,
-            "auprc_average_precision": float(average_precision_score(truth, ranks))
-            if len(set(truth)) == 2
-            else None,
-            "no_event_level_comparison": True,
-            "source_time_completeness": "unknown; imported observations only",
-        }
         report = session.scalar(
             select(EvaluationReport).where(
                 EvaluationReport.dataset_id == dataset_id,

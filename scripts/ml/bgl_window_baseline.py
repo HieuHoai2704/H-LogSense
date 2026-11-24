@@ -26,7 +26,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from threadpoolctl import threadpool_limits
 
-from app.parsers.bgl import VERSION as PARSER_VERSION, parse_line
+from app.parsers.bgl import LEGACY_VERSION as PARSER_VERSION, parse_line  # documented results use bgl-1.0.0
 from app.services.detector_calibration import binary_metrics
 from app.services.window_detection import FEATURE_NAMES, SEVERE
 
@@ -140,7 +140,7 @@ def collect(archive, date_range):
                 break
             seen += 1
             source.update(line)
-            row = parse_line(line, line_number, offset)
+            row = parse_line(line, line_number, offset, PARSER_VERSION)
             if row.error or not row.host:
                 dropped[row.error or "missing_host"] += 1
                 continue

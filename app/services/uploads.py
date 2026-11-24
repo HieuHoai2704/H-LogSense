@@ -137,6 +137,11 @@ def _raw_lines(original):
             raw = stream.readline(MAX_LINE_BYTES + 1)
             if not raw:
                 return
+            # readline() only splits on LF: a CR-only (classic Mac) file would otherwise collapse into
+            # one row, or be reported as too long. Check before the size limit for a precise error.
+            if b'\r' in (raw[:-1] if raw.endswith(b'\n') else raw).rstrip(b'\r'):
+                raise UploadError('invalid_line_break',
+                                  'Use LF or CRLF line endings; carriage-return-only files are not supported.')
             if number > MAX_ROWS or len(raw) > MAX_LINE_BYTES:
                 raise UploadError('upload_limit', 'Uploaded rows exceed bounded line or row limits.')
             if number == 1 and raw.startswith(b'\xef\xbb\xbf'):

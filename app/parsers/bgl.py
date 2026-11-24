@@ -4,7 +4,15 @@ from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 from typing import BinaryIO, Iterator
 
-VERSION = "bgl-1.0.0"
+# Every stored event records the parser version that produced it; a dataset keeps one version.
+# bgl-1.1.0: a row with empty content (9 fields, e.g. "... RAS KERNEL FATAL") is valid with message "",
+#            and a carriage return inside a line (CR-only line endings) is invalid_line_break.
+#            The full Loghub BGL archive has 34,470 such empty-content rows and no embedded CR.
+# bgl-1.0.0: rejected empty-content rows as invalid_field_count. Kept so datasets imported with it can
+#            be resumed unchanged and frozen studies stay reproducible.
+VERSION = "bgl-1.1.0"
+LEGACY_VERSION = "bgl-1.0.0"
+VERSIONS = frozenset({LEGACY_VERSION, VERSION})
 MAX_LINE_BYTES = 262144
 
 
@@ -21,9 +29,11 @@ class BGLRecord:
     error: str | None = None
 
 
-def parse_line(raw: bytes, line_number: int, byte_offset: int) -> BGLRecord:
+def parse_line(raw: bytes, line_number: int, byte_offset: int, version: str = VERSION) -> BGLRecord:
     if line_number < 1 or byte_offset < 0:
         raise ValueError("Invalid provenance.")
+    if version not in VERSIONS:
+        raise ValueError("Unsupported BGL parser version.")
     base = dict(line_number=line_number, byte_offset=byte_offset, raw=raw)
     if len(raw) > MAX_LINE_BYTES:
         raise ValueError("BGL line exceeds the configured byte limit.")
@@ -31,8 +41,12 @@ def parse_line(raw: bytes, line_number: int, byte_offset: int) -> BGLRecord:
         text = raw.decode("utf-8", errors="strict").rstrip("\r\n")
     except UnicodeDecodeError:
         return BGLRecord(**base, error="invalid_utf8")
+    if version != LEGACY_VERSION and "\r" in text:
+        return BGLRecord(**base, error="invalid_line_break")
     # Label, epoch, date, Node, printed time, NodeRepeat, type, component, level, content.
     fields = text.split(maxsplit=9)
+    if len(fields) == 9 and version != LEGACY_VERSION:
+        fields.append("")  # empty content is a real BGL row, not a malformed one
     if len(fields) != 10:
         return BGLRecord(**base, error="invalid_field_count")
     (
@@ -83,7 +97,7 @@ def parse_line(raw: bytes, line_number: int, byte_offset: int) -> BGLRecord:
 
 
 def iter_records(
-    stream: BinaryIO, *, first_line=1, byte_offset=0
+    stream: BinaryIO, *, first_line=1, byte_offset=0, version=VERSION
 ) -> Iterator[BGLRecord]:
     """Read bounded physical lines. Offset is relative to the uncompressed member.
 
@@ -96,6 +110,6 @@ def iter_records(
         raw = stream.readline(MAX_LINE_BYTES + 1)
         if not raw:
             return
-        yield parse_line(raw, line, offset)
+        yield parse_line(raw, line, offset, version)
         offset += len(raw)
         line += 1

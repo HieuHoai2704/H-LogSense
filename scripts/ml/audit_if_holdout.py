@@ -27,7 +27,7 @@ import sklearn
 from sklearn.ensemble import IsolationForest
 
 from app.paths import IF_HOLDOUT_DIR
-from app.parsers.bgl import parse_line
+from app.parsers.bgl import LEGACY_VERSION, parse_line
 from app.services.detector_calibration import reservoir_sample, choose_threshold, binary_metrics
 from app.services.window_detection import aggregate_windows, EPOCH, FEATURE_NAMES
 from app.services.window_features import TrainReference
@@ -159,7 +159,7 @@ def external_chunks(archive, directory, registration):
             phase = None if stamp is None else phase_for(stamp, registration['splits'])
             if phase is not None:
                 selected_source.update(raw)
-                parsed = parse_line(raw, physical_lines, offset)
+                parsed = parse_line(raw, physical_lines, offset, LEGACY_VERSION)  # frozen study protocol
                 if parsed.error:
                     malformed += 1
                 elif parsed.host is None:
@@ -263,7 +263,7 @@ def labels_for(archive, manifest, phase, path):
         for line, raw in enumerate(stream, 1):
             stamp = raw_epoch(raw)
             if stamp is not None and phase_for(stamp, manifest['splits']) == phase:
-                parsed = parse_line(raw, line, offset)
+                parsed = parse_line(raw, line, offset, LEGACY_VERSION)  # frozen study protocol
                 if not parsed.error and parsed.host is not None:
                     key = parsed.host, stamp // manifest['seconds']
                     old_count, old_label = known.get(key, (0, 0))
