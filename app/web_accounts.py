@@ -143,17 +143,30 @@ def landing(user, portal):
     return url_for("dashboard")
 
 
+def portal_form(portal):
+    """The sign-in form of one portal; the administrator form carries a prefix (both share one page)."""
+    return LoginForm(
+        prefix="admin" if portal == "admin" else "", portal=portal, next=request.args.get("next", "")
+    )
+
+
 def auth_page(portal, login_form=None, status=200):
-    login_form = login_form or LoginForm(portal=portal, next=request.args.get("next", ""))
+    forms = {name: portal_form(name) for name in ("staff", "admin") if name != portal or login_form is None}
+    if login_form is not None:
+        forms[portal] = login_form
     return render_template(
-        "account/auth.html", portal=portal, login_form=localized(login_form), accounts_ready=auth_available()
+        "account/auth.html",
+        portal=portal,
+        staff_form=localized(forms["staff"]),
+        admin_form=localized(forms["admin"]),
+        accounts_ready=auth_available(),
     ), status
 
 
 def sign_in(portal):
     if identity() is not None and request.method == "GET":
         return redirect(url_for("dashboard"))
-    form = LoginForm(portal=portal, next=request.args.get("next", ""))
+    form = portal_form(portal)
     if request.method == "POST":
         if not auth_available():
             flash("Accounts need the MySQL database. Start the demo environment first.", "danger")

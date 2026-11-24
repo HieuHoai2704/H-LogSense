@@ -60,10 +60,16 @@ class AccountMySQLTests(unittest.TestCase):
         attempts.clear()
         client = client or self.client
         path = "/account/admin" if portal == "admin" else "/account/login"
+        prefix = "admin-" if portal == "admin" else ""
         page = client.get(path + (f"?next={next_path}" if next_path else "")).get_data(as_text=True)
-        data = {"csrf_token": csrf(page), "username": username, "password": password, "portal": portal}
+        data = {
+            prefix + "csrf_token": csrf(page, prefix.rstrip("-")),
+            prefix + "username": username,
+            prefix + "password": password,
+            prefix + "portal": portal,
+        }
         if next_path:
-            data["next"] = next_path
+            data[prefix + "next"] = next_path
         return client.post(path, data=data)
 
     def page(self, path, client=None):

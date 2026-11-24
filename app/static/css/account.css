@@ -1,5 +1,5 @@
-/* Sign-in and password pages: a black and white card with a diagonal panel. The administrator portal
-   inverts the palette so the two sign-in modes are never confused. */
+/* Sign-in and password pages: a black and white card with a diagonal panel. Switching to the
+   administrator portal sweeps the panel to the other side and inverts the palette. */
 :root {
   --ink: #0b0b0c;
   --ink-2: #151517;
@@ -14,6 +14,7 @@
 * { box-sizing: border-box; }
 
 html.auth-root, .auth-body {
+  color-scheme: dark;
   margin: 0;
   min-height: 100%;
   background: radial-gradient(circle at 20% 0%, #222 0, var(--ink) 55%) fixed, var(--ink);
@@ -44,7 +45,21 @@ html.auth-root, .auth-body {
 .auth-tabs a[aria-current="page"] { background: var(--paper); color: var(--ink); }
 .auth-tabs a:focus-visible, .auth-switch a:focus-visible, .auth-button:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
 .auth-nav .language-picker { margin: 0; color: var(--muted); font-size: 0.85rem; }
-.auth-nav .language-picker select { background: var(--ink-2); color: var(--paper); border: 1px solid rgba(244, 244, 242, 0.25); border-radius: 8px; }
+.auth-nav .language-picker select {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 9.5rem;
+  padding: 0.35rem 2rem 0.35rem 0.75rem;
+  border: 1px solid rgba(244, 244, 242, 0.25);
+  border-radius: 8px;
+  color: var(--paper);
+  background: var(--ink-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f4f4f2' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0.65rem center;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.auth-nav .language-picker select:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+.auth-nav .language-picker option { color: var(--paper); background: var(--ink-2); }
 
 .auth-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 2rem 1rem; }
 .auth-footer { text-align: center; color: var(--muted); font-size: 0.8rem; padding: 1rem; }
@@ -54,6 +69,17 @@ html.auth-root, .auth-body {
 .auth-flash-success { border-color: var(--paper); }
 
 /* ---- the card ---- */
+/* Registered colours interpolate, so switching portal fades the palette while the panel sweeps across.
+   Browsers without @property simply switch the colours. */
+@property --card { syntax: "<color>"; inherits: true; initial-value: #0b0b0c; }
+@property --panel { syntax: "<color>"; inherits: true; initial-value: #f4f4f2; }
+@property --panel-soft { syntax: "<color>"; inherits: true; initial-value: #7d7d7d; }
+@property --text { syntax: "<color>"; inherits: true; initial-value: #f4f4f2; }
+@property --panel-text { syntax: "<color>"; inherits: true; initial-value: #0b0b0c; }
+@property --field-line { syntax: "<color>"; inherits: true; initial-value: rgba(244, 244, 242, 0.55); }
+@property --field-muted { syntax: "<color>"; inherits: true; initial-value: #a6a6a6; }
+@property --field-danger { syntax: "<color>"; inherits: true; initial-value: #ff8a80; }
+
 .auth-card {
   position: relative;
   width: min(780px, 100%);
@@ -61,38 +87,44 @@ html.auth-root, .auth-body {
   overflow: hidden;
   border: 2px solid var(--paper);
   border-radius: 14px;
-  background: var(--ink);
+  color: var(--text);
+  background: var(--card);
   box-shadow: 0 0 28px var(--glow), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-  --card: var(--ink);
-  --panel: var(--paper);
-  --text: var(--paper);
-  --panel-text: var(--ink);
+  --card: #0b0b0c;
+  --panel: #f4f4f2;
   --panel-soft: #7d7d7d;
+  --text: #f4f4f2;
+  --panel-text: #0b0b0c;
+  --field-line: rgba(244, 244, 242, 0.55);
+  --field-muted: #a6a6a6;
+  --field-danger: #ff8a80;
+  transition: --card 0.9s var(--ease) 0.25s, --panel 0.9s var(--ease) 0.25s, --panel-soft 0.9s var(--ease) 0.25s,
+    --text 0.9s var(--ease) 0.25s, --panel-text 0.9s var(--ease) 0.25s, --field-line 0.9s var(--ease) 0.25s,
+    --field-muted 0.9s var(--ease) 0.25s, --field-danger 0.9s var(--ease) 0.25s;
 }
+/* Administrator portal: the palette inverts and the panel moves to the left. */
 .auth-card.admin {
-  background: var(--paper);
-  color: var(--ink);
-  border-color: var(--ink);
-  box-shadow: 0 0 28px var(--glow), 0 0 0 1px var(--paper);
-  --card: var(--paper);
-  --panel: var(--ink);
-  --text: var(--ink);
-  --panel-text: var(--paper);
+  --card: #f4f4f2;
+  --panel: #0b0b0c;
   --panel-soft: #4a4a4a;
-  --line: rgba(11, 11, 12, 0.5);
-  --muted: #555;
-  --danger: #b3261e;
+  --text: #0b0b0c;
+  --panel-text: #f4f4f2;
+  --field-line: rgba(11, 11, 12, 0.5);
+  --field-muted: #555555;
+  --field-danger: #b3261e;
 }
 
-/* Diagonal panel behind the welcome text. */
+/* Diagonal panel behind the welcome text. Both positions are four-point polygons, so the browser
+   interpolates them and the panel sweeps from one side to the other. */
 .auth-panel-shape {
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, var(--panel-soft) 0%, var(--panel) 58%);
   clip-path: polygon(40% 0, 100% 0, 100% 100%, 76% 100%);
+  transition: clip-path 0.9s var(--ease) 0.25s;
 }
+.auth-card.admin .auth-panel-shape { clip-path: polygon(0 0, 60% 0, 24% 100%, 0 100%); }
 .auth-card::after {
-  /* a thin rim that follows the panel edge */
   content: "";
   position: absolute;
   inset: 0;
@@ -102,22 +134,45 @@ html.auth-root, .auth-body {
 }
 
 .form-box, .info-content { position: absolute; top: 0; height: 100%; width: 50%; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
-/* The welcome text has no controls; it must never cover a form while it is hidden. */
-.info-content { pointer-events: none; }
-.form-box.login { left: 0; padding: 0 40px; }
-.info-content.login { right: 0; padding: 0 40px 40px 130px; text-align: right; color: var(--panel-text); }
+/* The welcome text has no controls, and a hidden form never takes a click. */
+.info-content { pointer-events: none; color: var(--panel-text); }
+.auth-card.admin .form-box.staff, .auth-card:not(.admin) .form-box.admin { pointer-events: none; }
+.form-box.staff { left: 0; padding: 0 40px; }
+.form-box.admin { right: 0; padding: 0 44px; }
+.info-content.staff { right: 0; padding: 0 40px 40px 130px; text-align: right; }
+.info-content.admin { left: 0; padding: 0 150px 40px 40px; }
 
 .form-box h1 { margin: 0 0 0.75rem; font-size: 2rem; text-align: center; letter-spacing: 0.02em; }
 .info-content h2 { margin: 0.25rem 0 0.5rem; font-size: 2.1rem; line-height: 1.1; letter-spacing: 0.04em; }
 .info-content p { margin: 0; font-size: 0.95rem; }
 .info-badge { display: inline-flex; align-items: center; gap: 0.35rem; align-self: flex-start; padding: 0.15rem 0.65rem; border: 1.5px solid currentColor; border-radius: 999px; font-size: 0.75rem !important; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-.info-content.login .info-badge { align-self: flex-end; }
+.info-content.staff .info-badge { align-self: flex-end; }
 
-/* Staggered slide-in with blur on load: each element waits --d steps. */
+/* Staggered slide with blur. The leaving side goes out first; the arriving side follows the panel. */
+.animation { transition: transform 0.7s ease, opacity 0.7s ease, filter 0.7s ease; }
+.form-box.staff .animation, .info-content.staff .animation,
+.auth-card.admin .form-box.admin .animation, .auth-card.admin .info-content.admin .animation {
+  transform: translateX(0);
+  opacity: 1;
+  filter: blur(0);
+  transition-delay: calc(0.6s + 0.08s * var(--d, 0));
+}
+.auth-card.admin .form-box.staff .animation, .form-box.admin .animation { transform: translateX(-120%); opacity: 0; filter: blur(10px); transition-delay: calc(0.06s * var(--d, 0)); }
+.auth-card.admin .info-content.staff .animation, .info-content.admin .animation { transform: translateX(120%); opacity: 0; filter: blur(10px); transition-delay: calc(0.06s * var(--d, 0)); }
+.form-box.admin .animation { transform: translateX(120%); }
+.info-content.admin .animation { transform: translateX(-120%); }
+.auth-card.admin .form-box.admin .animation, .auth-card.admin .info-content.admin .animation { transform: translateX(0); }
+
+/* First paint: the visible side slides in once; switching then uses the transitions above. */
 @keyframes auth-in { from { transform: translateX(-40px); opacity: 0; filter: blur(8px); } }
-.form-box .animation, .info-content .animation { animation: auth-in 0.7s ease both; animation-delay: calc(0.08s * var(--d, 0)); }
-.info-content .animation { animation-name: auth-in-right; }
 @keyframes auth-in-right { from { transform: translateX(40px); opacity: 0; filter: blur(8px); } }
+.auth-card.intro:not(.admin) .staff .animation, .auth-card.intro.admin .admin .animation {
+  animation: auth-in 0.7s ease backwards;
+  animation-delay: calc(0.08s * var(--d, 0));
+  transition: none;
+}
+.auth-card.intro:not(.admin) .info-content.staff .animation, .auth-card.intro.admin .form-box.admin .animation { animation-name: auth-in-right; }
+.auth-card.intro, .auth-card.intro .auth-panel-shape { transition: none; }
 
 /* ---- fields: underline inputs with a floating label and an icon ---- */
 .auth-field { position: relative; margin: 0.9rem 0 1.1rem; }
@@ -127,20 +182,20 @@ html.auth-root, .auth-body {
   padding: 0.9rem 1.8rem 0.2rem 0;
   background: transparent;
   border: 0;
-  border-bottom: 2px solid var(--line);
+  border-bottom: 2px solid var(--field-line);
   color: var(--text);
   font: inherit;
   font-weight: 500;
   outline: none;
   transition: border-color 0.3s;
 }
-.auth-field label { position: absolute; left: 0; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.95rem; pointer-events: none; transition: 0.25s ease; }
+.auth-field label { position: absolute; left: 0; top: 50%; transform: translateY(-50%); color: var(--field-muted); font-size: 0.95rem; pointer-events: none; transition: 0.25s ease; }
 .auth-field input:focus, .auth-field input:not(:placeholder-shown) { border-bottom-color: var(--text); }
 .auth-field input:focus ~ label, .auth-field input:not(:placeholder-shown) ~ label { top: -0.1rem; font-size: 0.75rem; color: var(--text); transform: none; }
-.auth-field .auth-icon { position: absolute; right: 0; top: 1.25rem; transform: translateY(-50%); color: var(--muted); }
+.auth-field .auth-icon { position: absolute; right: 0; top: 1.25rem; transform: translateY(-50%); color: var(--field-muted); }
 .auth-field input:focus ~ .auth-icon { color: var(--text); }
-.auth-field.has-error input { border-bottom-color: var(--danger); }
-.auth-error { display: block; margin-top: 0.3rem; color: var(--danger); font-size: 0.78rem; }
+.auth-field.has-error input { border-bottom-color: var(--field-danger); }
+.auth-error { display: block; margin-top: 0.3rem; color: var(--field-danger); font-size: 0.78rem; }
 .auth-field:has(.auth-error) .auth-icon { top: 1.25rem; }
 
 .auth-button {
@@ -164,7 +219,7 @@ html.auth-root, .auth-body {
 .auth-button:hover { color: var(--text); }
 .auth-button:hover::before { transform: translateY(0); }
 
-.auth-switch { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; margin: 1rem 0 0; font-size: 0.85rem; color: var(--muted); text-align: center; }
+.auth-switch { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; margin: 1rem 0 0; font-size: 0.85rem; color: var(--field-muted); text-align: center; }
 .auth-switch a { color: var(--text); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 
 /* ---- single-panel pages (forgot / reset) ---- */
@@ -180,9 +235,10 @@ html.auth-root, .auth-body {
   .auth-card { height: auto; min-height: 520px; }
   .auth-panel-shape, .info-content { display: none; }
   .form-box { position: relative; width: 100%; padding: 2rem 1.5rem !important; }
-  .auth-card .animation { animation: none; }
+  .auth-card .animation { animation: none !important; transform: none !important; opacity: 1 !important; filter: none !important; transition: none; }
+  .auth-card.admin .form-box.staff, .auth-card:not(.admin) .form-box.admin { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth-card .animation { animation: none; }
+  .auth-card, .auth-card * { transition-duration: 0.01s !important; transition-delay: 0s !important; animation: none !important; }
 }

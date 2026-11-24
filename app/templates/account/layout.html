@@ -17,8 +17,8 @@
     <span>{{ app_name }}</span>
   </a>
   <nav class="auth-tabs" aria-label="{{ tr('Sign-in options') }}">
-    <a href="{{ url_for('accounts.login') }}"{% if portal == "staff" %} aria-current="page"{% endif %}>{{ tr("Staff sign-in") }}</a>
-    <a href="{{ url_for('accounts.admin_login') }}"{% if portal == "admin" %} aria-current="page"{% endif %}>{{ tr("Administrator sign-in") }}</a>
+    <a href="{{ url_for('accounts.login') }}" data-auth-switch="staff"{% if portal == "staff" %} aria-current="page"{% endif %}>{{ tr("Staff sign-in") }}</a>
+    <a href="{{ url_for('accounts.admin_login') }}" data-auth-switch="admin"{% if portal == "admin" %} aria-current="page"{% endif %}>{{ tr("Administrator sign-in") }}</a>
   </nav>
   {% include "partials/language_picker.html" %}
 </header>

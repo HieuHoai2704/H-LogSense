@@ -95,8 +95,15 @@ class SignInGateTests(unittest.TestCase):
                 self.assertIn('href="/account/admin"', body)
                 self.assertIn('name="csrf_token"', body)
                 self.assertEqual(response.headers["Cache-Control"], "no-store")
+        # Both portals share one card; the administrator URL opens it on the administrator side.
+        staff = self.client.get("/account/login").get_data(as_text=True)
         admin = self.client.get("/account/admin").get_data(as_text=True)
-        self.assertIn('class="auth-card admin"', admin)
+        for page in (staff, admin):
+            self.assertIn('name="username"', page)
+            self.assertIn('name="admin-username"', page)
+            self.assertIn('name="admin-portal" type="hidden" value="admin"', page)
+        self.assertIn('class="auth-card intro"', staff)
+        self.assertIn('class="auth-card intro admin"', admin)
 
     def test_there_is_no_self_registration(self):
         # Only an administrator creates accounts (user management).
