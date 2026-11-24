@@ -118,16 +118,36 @@ jobs:
           path: dist/install.json
           if-no-files-found: error
 
-  release-assets:
-    needs: verify
+  release:
+    # Pushing a version tag (v0.4.13) publishes the packages, after they installed and opened on every
+    # platform above, as a GitHub Release with one download per operating system.
+    needs: [lint, mysql, verify]
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@v5
         with:
           name: h-logsen-candidate
-          path: dist/ci
-      - uses: actions/upload-artifact@v4
-        with:
-          name: h-logsen-verified-release-assets
-          path: dist/ci/
-          if-no-files-found: error
+          path: dist/release
+      - name: Check that the tag matches the package version
+        run: |
+          version=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version $version in pyproject.toml"
+            exit 1
+          fi
+          test -f "docs/releases/notes/$GITHUB_REF_NAME.md"
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME" dist/release/*
+          --repo "$GITHUB_REPOSITORY"
+          --title "H-logsen ${GITHUB_REF_NAME#v}"
+          --notes-file "docs/releases/notes/$GITHUB_REF_NAME.md"
+          --verify-tag

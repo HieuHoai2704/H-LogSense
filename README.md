@@ -18,6 +18,14 @@ and investigating anomalies in large system logs with full provenance from every
 ![Types](https://img.shields.io/badge/types-mypy-2A6DB2)
 ![Lint](https://img.shields.io/badge/lint-ruff-D7FF64?labelColor=333333)
 
+<p>
+  <a href="https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-Windows.zip"><img alt="Download for Windows" src="https://img.shields.io/badge/Download-Windows%20x64-0078D4?style=for-the-badge&logo=windows&logoColor=white"></a>
+  <a href="https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-macOS.zip"><img alt="Download for macOS" src="https://img.shields.io/badge/Download-macOS%2014%2B-111111?style=for-the-badge&logo=apple&logoColor=white"></a>
+  <a href="https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-Linux.zip"><img alt="Download for Linux" src="https://img.shields.io/badge/Download-Ubuntu%20x64-E95420?style=for-the-badge&logo=ubuntu&logoColor=white"></a>
+</p>
+
+<sub>Version 0.4.13 · <a href="https://github.com/HieuHoai2704/H-LogSense/releases">All releases and checksums</a></sub>
+
 [Overview](#overview) ·
 [Screenshots](#screenshots) ·
 [Architecture](#architecture) ·
@@ -195,21 +203,27 @@ flowchart LR
 
 ### Install the desktop application
 
-Each platform ZIP contains an installer that creates a private virtual environment, installs the bundled
-wheel and registers a launcher. Build the ZIPs from a checkout with:
+Download the package for your system from the [latest release](https://github.com/HieuHoai2704/H-LogSense/releases/latest).
+Each ZIP contains an installer that creates a private virtual environment, installs the application and
+registers a launcher.
+
+| System | Download | Install | Open |
+| --- | --- | --- | --- |
+| Windows | [H-logsen-0.4.13-Windows.zip](https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-Windows.zip) | `Install-H-logsen.cmd` | `Open-H-logsen.cmd` or the H-logsen shortcut |
+| macOS | [H-logsen-0.4.13-macOS.zip](https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-macOS.zip) | `sh Install-H-logsen.sh` (or `Install-H-logsen.command` in Finder) | `sh Open-H-logsen.sh` |
+| Linux | [H-logsen-0.4.13-Linux.zip](https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-Linux.zip) | `sh Install-H-logsen.sh` | **H-logsen** in the application menu, or `sh Open-H-logsen.sh` |
+
+Verify a download against [H-logsen-0.4.13-SHA256.txt](https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-SHA256.txt):
+`Get-FileHash -Algorithm SHA256 H-logsen-0.4.13-Windows.zip` in PowerShell, or
+`shasum -a 256 H-logsen-0.4.13-macOS.zip` on macOS and Linux. Add `--browser` to either launcher to use a
+local browser instead of the native window. Platform details are in [packaging/](packaging/README.md).
+
+Releases are built by CI: pushing a version tag packages the application, installs and opens it on Windows,
+macOS and Ubuntu, and only then publishes the release. To build the same packages locally:
 
 ```bash
 python -m scripts.release.package_workbench --output dist/release
 ```
-
-| System | Install | Open |
-| --- | --- | --- |
-| Windows | `Install-H-logsen.cmd` | `Open-H-logsen.cmd` or the H-logsen shortcut |
-| macOS | `sh Install-H-logsen.sh` (or `Install-H-logsen.command` in Finder) | `sh Open-H-logsen.sh` |
-| Linux | `sh Install-H-logsen.sh` | **H-logsen** in the application menu, or `sh Open-H-logsen.sh` |
-
-Add `--browser` to either launcher to use a local browser instead of the native window. Platform details
-are in [packaging/](packaging/README.md).
 
 ### Run from source
 
