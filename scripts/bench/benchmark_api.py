@@ -1,12 +1,22 @@
 """Measured loopback HTTP/SQL latency on real imported BGL prefixes."""
 
 from datetime import datetime
-import http.cookiejar, json, logging, math, os, statistics, threading, time, urllib.parse, urllib.request
+import http.cookiejar
+import json
+import logging
+import math
+import os
 from pathlib import Path
+import statistics
+import threading
+import time
+import urllib.parse
+import urllib.request
 
 import psutil
 from sqlalchemy import event, text
 from werkzeug.serving import make_server
+
 from app import create_app
 from app.extensions import db
 

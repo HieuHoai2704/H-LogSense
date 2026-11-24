@@ -2,7 +2,7 @@
 
 from flask import current_app
 
-from app.services.investigation import QueryError, SOURCES
+from app.services.investigation import SOURCES, QueryError
 
 
 class AccessDenied(Exception):

@@ -1,8 +1,9 @@
 """Loghub BGL parser. Epoch is authoritative; printed local time is preserved."""
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import datetime, timezone, timedelta
-from typing import BinaryIO, Iterator
+from datetime import datetime, timedelta, timezone
+from typing import BinaryIO
 
 # Every stored event records the parser version that produced it; a dataset keeps one version.
 # bgl-1.1.0: a row with empty content (9 fields, e.g. "... RAS KERNEL FATAL") is valid with message "",

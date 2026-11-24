@@ -144,7 +144,7 @@ def query(args):
         if key == "detector":
             aliases = {name: did for did, (name, _) in DETECTORS.items()}
             values = [aliases.get(v, v) for v in values]
-        values = sorted(set(v for v in values if v and v != "all"))
+        values = sorted({v for v in values if v and v != "all"})
         if len(values) > 100 or any(v not in choices for v in values):
             raise QueryError(f"Unknown {key} value.")
         state[key] = values
@@ -280,10 +280,10 @@ def build(state):
         )
         lower += duration
     by_detector = {
-        did: [dict(meta, count=0, severity={level: 0 for level in PRIORITIES}, priority=0) for meta in bins]
+        did: [dict(meta, count=0, severity=dict.fromkeys(PRIORITIES, 0), priority=0) for meta in bins]
         for did in DETECTORS
     }
-    overall = [dict(meta, count=0, severity={level: 0 for level in PRIORITIES}, priority=0) for meta in bins]
+    overall = [dict(meta, count=0, severity=dict.fromkeys(PRIORITIES, 0), priority=0) for meta in bins]
     origin = floor(start.timestamp() / duration) * duration
     for event in scope:
         index = floor((instant(event["timestamp"]).timestamp() - origin) / duration)

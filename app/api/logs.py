@@ -1,29 +1,29 @@
 """Authorized, bounded parsed-log API. Raw log levels are not anomaly priorities."""
 
-from werkzeug.exceptions import NotFound
-
-import csv, io
+import csv
 from datetime import timedelta
+import io
 
 from flask import (
     Blueprint,
+    Response,
+    current_app,
     jsonify,
     request,
-    Response,
     stream_with_context,
-    current_app,
 )
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
+from werkzeug.exceptions import NotFound
 
 from app.extensions import db
-from app.models import Dataset, LogEvent, RawLogRecord, SourceArtifact, GroundTruthLabel
-from app.security import authorized_datasets, Forbidden, identity
-from app.services.investigation import QueryError, integer, iso
-from app.services.log_queries import parse_scope, page, predicates, timeline
-from app.services.redaction import redact
-from app.services.csv_safety import safe_cell
 from app.i18n import translate
+from app.models import Dataset, GroundTruthLabel, LogEvent, RawLogRecord, SourceArtifact
+from app.security import Forbidden, authorized_datasets, identity
+from app.services.csv_safety import safe_cell
+from app.services.investigation import QueryError, integer, iso
+from app.services.log_queries import page, parse_scope, predicates, timeline
+from app.services.redaction import redact
 
 logs_api = Blueprint("logs", __name__)
 

@@ -8,8 +8,8 @@ import unittest
 from unittest.mock import patch
 from zipfile import ZipFile
 
-import scripts.ml.audit_if_holdout as study
 from app.services.window_detection import aggregate_windows
+import scripts.ml.audit_if_holdout as study
 
 
 class LaterBGLHoldoutTests(unittest.TestCase):

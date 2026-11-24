@@ -5,6 +5,7 @@ from functools import partial
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+
 from app import create_app
 from app.extensions import db
 from app.models import ProcessingJob

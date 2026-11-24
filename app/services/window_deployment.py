@@ -15,9 +15,8 @@ import joblib
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.models import Dataset, Detector, DetectorRun, DetectorVersion, LogEvent
 from app.paths import IF_STUDIES_DIR
-from app.models import Dataset, Detector, DetectorVersion, DetectorRun, LogEvent
-
 
 STUDY_ROOT = IF_STUDIES_DIR
 
@@ -96,7 +95,7 @@ def inspect_study(study_id, dataset_id):
 def run_study(engine, dataset_id, job_key, configuration):
     """Score only the frozen test scope; never fit or calibrate in a worker."""
     from app.services.investigation import iso
-    from app.services.window_detection import EPOCH, persist_predictions, evaluate_windows
+    from app.services.window_detection import EPOCH, evaluate_windows, persist_predictions
 
     if set(configuration) != {"detector", "study_id"} or configuration.get("detector") != "isolation_forest":
         raise ValueError("Frozen study configuration cannot override its model or scope.")

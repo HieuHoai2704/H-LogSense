@@ -17,8 +17,8 @@ from zipfile import ZipFile
 import joblib
 import numpy as np
 import psutil
-import sklearn
 from scipy.sparse import csr_matrix, hstack
+import sklearn
 from sklearn.decomposition import TruncatedSVD
 from sklearn.ensemble import IsolationForest
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -26,7 +26,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from threadpoolctl import threadpool_limits
 
-from app.parsers.bgl import LEGACY_VERSION as PARSER_VERSION, parse_line  # documented results use bgl-1.0.0
+from app.parsers.bgl import LEGACY_VERSION as PARSER_VERSION  # documented results use bgl-1.0.0
+from app.parsers.bgl import parse_line
 from app.services.detector_calibration import binary_metrics
 from app.services.window_detection import SEVERE
 
@@ -221,7 +222,7 @@ def fit_representation(train):
     reducer = TruncatedSVD(n_components=24, n_iter=7, random_state=SEED).fit(vectors)
     return {
         "top": {catalog[i]: j for j, i in enumerate(top)},
-        "template_df": dict(zip(catalog, presence.tolist())),
+        "template_df": dict(zip(catalog, presence.tolist(), strict=True)),
         "train_windows": train["counts"].shape[0],
         "vectorizer": vectorizer,
         "reducer": reducer,

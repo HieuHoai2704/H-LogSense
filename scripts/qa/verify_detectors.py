@@ -7,20 +7,20 @@ from pathlib import Path
 import secrets
 import time
 
-from sqlalchemy import select, func, case, and_, or_
+from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.orm import Session
 
 from app import create_app
 from app.extensions import db
 from app.models import (
-    Dataset,
-    LogEvent,
-    GroundTruthLabel,
-    DetectionUnit,
     AnomalyOutput,
+    Dataset,
+    DetectionUnit,
+    Detector,
     DetectorRun,
     DetectorVersion,
-    Detector,
+    GroundTruthLabel,
+    LogEvent,
 )
 from app.services.detection import detect
 

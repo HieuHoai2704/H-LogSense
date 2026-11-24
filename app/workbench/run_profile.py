@@ -94,7 +94,7 @@ def interpreter_snapshot(executable, identifier, root):
         )
         values = json.loads(result.stdout)
         if isinstance(values, list) and len(values) == 3 and all(isinstance(value, str) for value in values):
-            data.update(zip(("version", "platform", "architecture"), values))
+            data.update(zip(("version", "platform", "architecture"), values, strict=True))
     except (OSError, ValueError, subprocess.SubprocessError):
         pass
     return data

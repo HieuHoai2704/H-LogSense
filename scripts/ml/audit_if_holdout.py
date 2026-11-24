@@ -24,12 +24,12 @@ import psutil
 import sklearn
 from sklearn.ensemble import IsolationForest
 
-from app.paths import IF_HOLDOUT_DIR
 from app.parsers.bgl import LEGACY_VERSION, parse_line
-from app.services.detector_calibration import reservoir_sample, choose_threshold, binary_metrics
-from app.services.window_detection import aggregate_windows, FEATURE_NAMES
+from app.paths import IF_HOLDOUT_DIR
+from app.services.detector_calibration import binary_metrics, choose_threshold, reservoir_sample
+from app.services.window_detection import FEATURE_NAMES, aggregate_windows
 from app.services.window_features import TrainReference
-from scripts.ml.audit_isolation_forest import digest, write_json, read_json, records
+from scripts.ml.audit_isolation_forest import digest, read_json, records, write_json
 
 # Repository root: paths below do not depend on the current working directory.
 REPO_ROOT = Path(__file__).resolve().parents[2]

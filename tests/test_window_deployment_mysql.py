@@ -15,13 +15,13 @@ import numpy as np
 from sklearn.ensemble import IsolationForest
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+import test_mysql_integration as baseline
+import test_platform_mysql as platform
 
 from app.domain import DetectionPrediction, EvaluationReport
 from app.models import AnomalyOutput, Dataset, DetectorRun, GroundTruthLabel
-from app.services.window_detection import FEATURE_NAMES, aggregate_windows, run_windows, second
 from app.services.window_deployment import digest, inspect_study
-import test_mysql_integration as baseline
-import test_platform_mysql as platform
+from app.services.window_detection import FEATURE_NAMES, aggregate_windows, run_windows, second
 
 
 def make_study(root, dataset_id, maximum=1, revision=0, records=()):

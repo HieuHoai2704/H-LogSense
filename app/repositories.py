@@ -1,8 +1,10 @@
 """Dataset-scoped, bounded read repositories. Callers own the transaction."""
 
 from datetime import datetime
-from sqlalchemy import select, or_, and_
-from app.models import LogEvent, AnomalyOutput, Dataset
+
+from sqlalchemy import and_, or_, select
+
+from app.models import AnomalyOutput, Dataset, LogEvent
 
 
 def page_events(

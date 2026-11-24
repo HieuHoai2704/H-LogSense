@@ -36,7 +36,7 @@ def predict(output):
     times, events = satellite.find_events(observer, start, stop, altitude_degrees=0.0)
     rise = None
     passes = []
-    for instant, event in zip(times, events):
+    for instant, event in zip(times, events, strict=True):
         if event == 0:
             rise = instant
         elif event == 2 and rise is not None:

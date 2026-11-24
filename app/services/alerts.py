@@ -1,21 +1,20 @@
 """Idempotent alert decisions and a bounded, opt-in SMTP outbox."""
 
 from contextlib import nullcontext, suppress
-import logging
 from datetime import datetime, timedelta, timezone
+import logging
 import os
 import smtplib
 import ssl
 
 from flask import Flask, current_app, has_app_context, render_template
 from flask_mail import Connection, Message
-
-from sqlalchemy import select, exists
+from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
-from app.models import AnomalyOutput, DetectorRun, DetectionUnit, LogEvent
-from app.domain import AlertRule, Alert, AlertDecision, AlertAudit, Notification
+from app.domain import Alert, AlertAudit, AlertDecision, AlertRule, Notification
 from app.extensions import mail
+from app.models import AnomalyOutput, DetectionUnit, DetectorRun, LogEvent
 from config import APP_NAME
 
 log = logging.getLogger("h_logsen.alerts")
@@ -39,7 +38,7 @@ def generate_alerts(engine, dataset_id, run_id):
             raise ValueError("Completed scoped run required.")
         rules = list(
             session.scalars(
-                select(AlertRule.id).where(AlertRule.dataset_id == dataset_id, AlertRule.enabled == True)
+                select(AlertRule.id).where(AlertRule.dataset_id == dataset_id, AlertRule.enabled.is_(True))
             )
         )
     for rule_id in rules:
@@ -66,7 +65,7 @@ def generate_alerts(engine, dataset_id, run_id):
                         .outerjoin(LogEvent, LogEvent.id == DetectionUnit.event_id)
                         .where(
                             (DetectionUnit.host == rule.host)
-                            | ((DetectionUnit.host == None) & (LogEvent.host == rule.host))
+                            | (DetectionUnit.host.is_(None) & (LogEvent.host == rule.host))
                         )
                     )
                 outputs = list(session.scalars(query.order_by(AnomalyOutput.id).limit(500)))

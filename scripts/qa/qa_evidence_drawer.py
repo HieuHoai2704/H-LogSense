@@ -9,10 +9,11 @@ import threading
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from playwright.sync_api import expect, sync_playwright
+from werkzeug.serving import make_server
+
 from app import create_app
 from app.demo import ANOMALIES
-from playwright.sync_api import sync_playwright, expect
-from werkzeug.serving import make_server
 
 
 def main():

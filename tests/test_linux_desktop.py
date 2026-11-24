@@ -5,8 +5,8 @@ from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
 
-from app.workbench.platforms import linux
 from app.workbench.files import component, windows_reserved
+from app.workbench.platforms import linux
 
 
 class ReservedNameTest(unittest.TestCase):

@@ -7,7 +7,6 @@ import signal
 import subprocess
 import sys
 
-
 SHELL_DIRECTORIES = ("/bin", "/usr/bin", "/usr/local/bin", "/opt/homebrew/bin")
 
 

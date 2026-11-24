@@ -4,8 +4,8 @@ Only newly created fixture metadata is deleted. Imported records, source rows
 and all existing user datasets are retained. DELETE privileges are table scoped.
 """
 
-from datetime import timedelta
 from concurrent.futures import ThreadPoolExecutor
+from datetime import timedelta
 import os
 import re
 from threading import Barrier
@@ -16,14 +16,14 @@ from sqlalchemy import create_engine, delete, event, func, select, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
+import test_mysql_integration as baseline
 from werkzeug.security import generate_password_hash
 
-import test_mysql_integration as baseline
 from app.domain import User, UserDataset
 from app.models import (
     CoverageInterval,
-    DataSource,
     Dataset,
+    DataSource,
     ProcessingJob,
     SourceArtifact,
 )
@@ -512,9 +512,8 @@ class DatasetCRUDMySQLTests(unittest.TestCase):
         self.assertNotIn("owned rollback injection", str(result.json))
 
     def test_19_table_delete_privileges_do_not_allow_raw_log_deletion(self):
-        with self.assertRaises(OperationalError):
-            with self.engine.begin() as connection:
-                connection.execute(text("DELETE FROM log_events WHERE id=-1"))
+        with self.assertRaises(OperationalError), self.engine.begin() as connection:
+            connection.execute(text("DELETE FROM log_events WHERE id=-1"))
 
     def test_20_existing_log_explorer_metadata_stays_compatible(self):
         self.login("manager")

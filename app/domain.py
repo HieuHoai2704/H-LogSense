@@ -1,20 +1,22 @@
 """Authentication, evaluation and incident domain tables."""
 
 from datetime import datetime, timezone
+
 from sqlalchemy import (
-    String,
-    BigInteger,
-    Integer,
-    Boolean,
     JSON,
+    BigInteger,
+    Boolean,
+    CheckConstraint,
     ForeignKey,
     ForeignKeyConstraint,
-    UniqueConstraint,
-    CheckConstraint,
     Index,
+    Integer,
+    String,
+    UniqueConstraint,
 )
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.mysql import DOUBLE
+from sqlalchemy.orm import Mapped, mapped_column
+
 from app.extensions import db
 from app.models import Identity, Scoped, UTCDateTime, options, scoped_fk
 

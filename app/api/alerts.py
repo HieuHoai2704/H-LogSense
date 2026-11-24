@@ -1,14 +1,15 @@
 """Scoped incidents with append-only application audit history and role checks."""
 
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, g, jsonify, request
 from sqlalchemy import select
+
+from app.domain import Alert, AlertAudit, AlertRule, User, UserDataset
 from app.extensions import db
-from app.models import Detector
-from app.domain import AlertRule, Alert, AlertAudit, User, UserDataset
-from app.security import roles, require_dataset, Forbidden
-from app.services.investigation import integer, QueryError
-from app.services.redaction import redact
 from app.i18n import translate
+from app.models import Detector
+from app.security import Forbidden, require_dataset, roles
+from app.services.investigation import QueryError, integer
+from app.services.redaction import redact
 
 alerts_api = Blueprint("alerts", __name__)
 

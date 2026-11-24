@@ -6,7 +6,7 @@ Stages run in separate processes; restart only the dedicated QA runtime.
 
 import argparse
 import csv
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 import hashlib
 import io
@@ -21,33 +21,33 @@ import threading
 import time
 from unittest.mock import patch
 
-import psutil
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
 from flask_migrate import upgrade
-from sqlalchemy import create_engine, select, text, func, event
+import psutil
+from sqlalchemy import create_engine, event, func, select, text
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import Session
 from werkzeug.security import generate_password_hash
 
 from app import create_app
+from app.domain import DetectionPrediction, EvaluationReport, User, UserDataset
 from app.extensions import db
 from app.models import (
+    AnomalyOutput,
     Dataset,
     DataSource,
-    SourceArtifact,
-    RawLogRecord,
-    LogEvent,
-    GroundTruthLabel,
     DetectionUnit,
     DetectorRun,
-    AnomalyOutput,
+    GroundTruthLabel,
+    LogEvent,
     ProcessingJob,
+    RawLogRecord,
+    SourceArtifact,
 )
-from app.domain import User, UserDataset, DetectionPrediction, EvaluationReport
 from app.services.bgl_ingestion import ingest_bgl
 from scripts.bench.benchmark_bgl import verify_provenance
-from scripts.run.mysql_runtime import owned_root, load, status, stop, start, private_write
+from scripts.run.mysql_runtime import load, owned_root, private_write, start, status, stop
 
 # Repository root: paths below do not depend on the current working directory.
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -194,7 +194,7 @@ def setup(root, archive, lines):
             )
         assert checkpoint == raw_count == 1000
         for target in (10000, lines):
-            result, elapsed = timed(lambda: ingest_bgl(db.engine, main, archive, limit=target))
+            result, elapsed = timed(lambda target=target: ingest_bgl(db.engine, main, archive, limit=target))
             stages.append({"target": target, "seconds": elapsed, "result": result})
         proof, proof_seconds = timed(lambda: verify_provenance(db.engine, main, archive))
         again, repeat_seconds = timed(lambda: ingest_bgl(db.engine, main, archive, limit=lines))
@@ -261,8 +261,8 @@ def login(app, context):
 def detect(root, kind):
     context = read(PRIVATE / "context.json")
     app = app_for(root, context)
-    from scripts.run.worker import run_once
     import app.services.window_detection as wd
+    from scripts.run.worker import run_once
 
     counters = {
         "feature_stream_seconds": 0.0,

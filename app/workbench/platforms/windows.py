@@ -1,7 +1,6 @@
 """Windows integration: ConPTY terminals, DWM glass, taskbar identity and shortcuts."""
 
-from ctypes import POINTER, Structure, WinDLL, byref, c_int, c_void_p, sizeof, windll
-from ctypes import wintypes
+from ctypes import POINTER, Structure, WinDLL, byref, c_int, c_void_p, sizeof, windll, wintypes
 import os
 from pathlib import Path
 import sys
@@ -66,7 +65,8 @@ def desktop_options():
 
 
 def shell_profiles():
-    system = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32"
+    # Environment names are case-insensitive on Windows.
+    system = Path(os.environ.get("SYSTEMROOT", r"C:\Windows")) / "System32"
     return {
         "PowerShell": [str(system / "WindowsPowerShell/v1.0/powershell.exe"), "-NoLogo", "-NoProfile"],
         "CMD": [str(system / "cmd.exe"), "/D"],

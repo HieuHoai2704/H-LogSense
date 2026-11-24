@@ -10,8 +10,8 @@ from pathlib import Path
 import re
 import stat
 from tempfile import NamedTemporaryFile, gettempdir
-import time
 from threading import RLock
+import time
 
 MAX_TEXT = 1024 * 1024
 TAIL_BYTES = 64 * 1024

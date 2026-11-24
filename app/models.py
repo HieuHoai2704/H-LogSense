@@ -4,19 +4,19 @@ from datetime import datetime, timezone
 import math
 
 from sqlalchemy import (
-    BigInteger,
-    String,
     JSON,
-    Integer,
-    ForeignKey,
-    ForeignKeyConstraint,
-    UniqueConstraint,
+    BigInteger,
     CheckConstraint,
     Computed,
+    ForeignKey,
+    ForeignKeyConstraint,
     Index,
+    Integer,
+    String,
+    UniqueConstraint,
 )
-from sqlalchemy.dialects.mysql import DATETIME, LONGTEXT, LONGBLOB, DOUBLE
-from sqlalchemy.orm import Mapped, mapped_column, declared_attr, relationship, validates
+from sqlalchemy.dialects.mysql import DATETIME, DOUBLE, LONGBLOB, LONGTEXT
+from sqlalchemy.orm import Mapped, declared_attr, mapped_column, relationship, validates
 from sqlalchemy.types import TypeDecorator
 
 from app.extensions import db

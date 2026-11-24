@@ -1,11 +1,17 @@
 """Authenticated real-data browser QA. Credentials come only from environment."""
 
-import csv, io, json, logging, os, threading
+import csv
+import io
+import json
+import logging
+import os
 from pathlib import Path
 import sys
+import threading
 
-from playwright.sync_api import sync_playwright, expect
+from playwright.sync_api import expect, sync_playwright
 from werkzeug.serving import make_server
+
 from app import create_app
 
 # Repository root: paths below do not depend on the current working directory.

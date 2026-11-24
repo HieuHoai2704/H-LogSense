@@ -1,17 +1,17 @@
 """One UTC filter/snapshot contract for log pages, volume bins and CSV."""
 
-from werkzeug.exceptions import NotFound
-
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import hashlib, json
+import hashlib
+import json
 
-from itsdangerous import URLSafeTimedSerializer, BadData
-from sqlalchemy import select, func, or_, and_, text
 from flask import current_app
+from itsdangerous import BadData, URLSafeTimedSerializer
+from sqlalchemy import and_, func, or_, select, text
+from werkzeug.exceptions import NotFound
 
 from app.models import Dataset, LogEvent
-from app.services.investigation import instant, integer, iso, QueryError
+from app.services.investigation import QueryError, instant, integer, iso
 
 
 @dataclass

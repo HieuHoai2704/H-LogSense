@@ -1,24 +1,24 @@
 """Bounded BGL ZIP import. Data, counters and checkpoint commit atomically."""
 
-import hashlib
 from contextlib import contextmanager
+import hashlib
 from itertools import islice
 from pathlib import Path, PurePosixPath
 from zipfile import ZipFile
 
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import insert, select, text, update
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.models import (
     Dataset,
-    SourceArtifact,
-    RawLogRecord,
-    LogEvent,
     GroundTruthLabel,
+    LogEvent,
     ProcessingJob,
+    RawLogRecord,
+    SourceArtifact,
 )
-from app.parsers.bgl import iter_records, VERSION, VERSIONS
+from app.parsers.bgl import VERSION, VERSIONS, iter_records
 
 
 class ImportBusyError(RuntimeError):

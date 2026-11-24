@@ -214,7 +214,7 @@
       }
     }
     if (data.artifact_directory) addProfileRow(tr("Output folder"), data.artifact_directory);
-    const number = new Intl.NumberFormat("vi");
+    const number = new Intl.NumberFormat(document.documentElement.lang);
     const kinds = { log: "Log", machine: tr("Machine measurements"), training: tr("Training metrics"), artifact: tr("Results") };
     for (const file of [...streams, ...artifacts]) {
       const item = document.createElement("li");

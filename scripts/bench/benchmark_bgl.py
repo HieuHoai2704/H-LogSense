@@ -1,6 +1,7 @@
 """Real BGL prefix import benchmark; new datasets only, no deletion or reset."""
 
 import argparse
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 from pathlib import Path
@@ -8,25 +9,24 @@ import platform
 import statistics
 import threading
 import time
-from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 from zipfile import ZipFile
 
 import psutil
-from sqlalchemy import select, text, func
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
 from app import create_app
 from app.extensions import db
 from app.models import (
-    DataSource,
     Dataset,
-    SourceArtifact,
-    RawLogRecord,
-    LogEvent,
+    DataSource,
     GroundTruthLabel,
+    LogEvent,
+    RawLogRecord,
+    SourceArtifact,
 )
-from app.services.bgl_ingestion import ingest_bgl, fingerprint
+from app.services.bgl_ingestion import fingerprint, ingest_bgl
 
 
 def verify_provenance(engine, dataset_id, archive):

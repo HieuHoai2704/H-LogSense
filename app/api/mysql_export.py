@@ -1,11 +1,14 @@
 """Streaming export shares the exact Investigation filter/run/selection scope."""
 
-import csv, io
-from flask import request, jsonify, Response, stream_with_context
+import csv
+import io
+
+from flask import Response, jsonify, request, stream_with_context
+
 from app.extensions import db
 from app.models import AnomalyOutput as A
-from app.services.mysql_investigation import state, base, count, row_summary
 from app.services.csv_safety import safe_cell
+from app.services.mysql_investigation import base, count, row_summary, state
 
 
 def export_actual():

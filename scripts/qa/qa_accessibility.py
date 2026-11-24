@@ -1,9 +1,14 @@
 """Automated axe-core scan, not accessibility or screen-reader certification."""
 
-import json, logging, os, threading
+import json
+import logging
+import os
 from pathlib import Path
+import threading
+
 from playwright.sync_api import sync_playwright
 from werkzeug.serving import make_server
+
 from app import create_app
 
 # Repository root: paths below do not depend on the current working directory.

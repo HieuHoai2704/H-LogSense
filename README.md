@@ -371,6 +371,15 @@ python -B -m compileall -q app scripts tests migrations
 python -m pip check
 ```
 
+Code style is enforced by ruff (lint and format, configured in `pyproject.toml`) in CI and, optionally,
+as a git hook:
+
+```text
+python -m pip install -e ".[dev]"
+pre-commit install            # ruff check --fix and ruff format on every commit
+ruff check . && ruff format --check .
+```
+
 The default suite explicitly skips real-MySQL tests. For actual integration,
 privately configure MYSQL_ADMIN_URL and DATABASE_URL and run
 `python -m scripts.qa.verify_mysql`; it creates new token-marked test schemas, never

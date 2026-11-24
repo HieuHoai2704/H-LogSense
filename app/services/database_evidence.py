@@ -1,9 +1,9 @@
 """Evidence from persisted rows; bounded and redacted before serialization."""
 
-import hashlib
 from datetime import timedelta
+import hashlib
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 from app.models import (
     AnomalyOutput,
@@ -14,8 +14,8 @@ from app.models import (
     RawLogRecord,
     SourceArtifact,
 )
-from app.services.redaction import redact
 from app.services.evidence import bounded_fields
+from app.services.redaction import redact
 
 
 def load_evidence(session, dataset_id, anomaly_id, *, raw_offset=0, raw_limit=2048):

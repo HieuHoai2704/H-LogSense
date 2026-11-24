@@ -1,24 +1,27 @@
 """Actual MySQL platform/API/auth/incident/window-model integration tests."""
 
 from datetime import datetime, timedelta, timezone
-import json, os, smtplib, unittest
+import json
+import os
+import smtplib
 from types import SimpleNamespace
-from unittest.mock import patch, MagicMock
+import unittest
+from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+import test_mysql_integration as baseline
 from werkzeug.security import generate_password_hash
 
-import test_mysql_integration as baseline
-
-LINE, NOW = baseline.LINE, baseline.NOW
-from app.models import AnomalyOutput, ProcessingJob, DetectorRun
-from app.domain import User, UserDataset, AlertRule, Notification, DetectionPrediction, EvaluationReport
+from app.domain import AlertRule, DetectionPrediction, EvaluationReport, Notification, User, UserDataset
+from app.models import AnomalyOutput, DetectorRun, ProcessingJob
+from app.services.alerts import deliver_notifications, generate_alerts
 from app.services.bgl_ingestion import ingest_bgl
 from app.services.detection import detect
-from app.services.window_detection import aggregate_windows, template, run_windows
-from app.services.alerts import generate_alerts, deliver_notifications
+from app.services.window_detection import aggregate_windows, run_windows, template
+
+LINE, NOW = baseline.LINE, baseline.NOW
 
 
 @unittest.skipUnless(
@@ -145,7 +148,7 @@ class PlatformMySQLTests(unittest.TestCase):
             url + "&scope_token=" + first["scope_token"] + "&cursor=" + first["next_cursor"]
         ).json
         self.assertEqual(second["count"], 4)
-        self.assertFalse(set(r["id"] for r in first["items"]) & set(r["id"] for r in second["items"]))
+        self.assertFalse({r["id"] for r in first["items"]} & {r["id"] for r in second["items"]})
         self.assertEqual(self.client.get(url).json["count"], 5)
         self.assertEqual(
             self.client.get(url + "&host=other&scope_token=" + first["scope_token"]).status_code,
@@ -193,8 +196,9 @@ class PlatformMySQLTests(unittest.TestCase):
         self.assertEqual(data["scope_count"], 3)
         self.assertEqual(len(data["events"]), 1)
         self.assertEqual(sum(c["count"] for c in data["timeline"]["overall"]), 3)
-        from werkzeug.datastructures import MultiDict
         from urllib.parse import urlencode
+
+        from werkzeug.datastructures import MultiDict
 
         params = MultiDict()
         for k, v in data["state"].items():
@@ -565,7 +569,10 @@ class PlatformMySQLTests(unittest.TestCase):
         result = self.client.get(f"/api/v1/investigation?source=db-{self.dataset_id}&range=6h")
         self.assertEqual(result.status_code, 200)
         state = result.json["state"]
-        parse = lambda value: datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+        def parse(value):
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
         self.assertEqual(parse(state["end_time"]) - parse(state["start_time"]), timedelta(hours=6))
         self.assertEqual(state["range"], "6h")
         self.assertEqual(

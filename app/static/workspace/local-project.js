@@ -559,7 +559,7 @@
     $("local-metric-status").textContent = metrics.warnings.join(" ");
     const selected = run || "";
     runList.replaceChildren(new Option(tr("Run history"), ""), ...recent.runs.map((item) =>
-      new Option(item.script + " · " + item.status + " · " + new Date(item.started_at).toLocaleString("vi"), item.id)));
+      new Option(item.script + " · " + item.status + " · " + new Date(item.started_at).toLocaleString(document.documentElement.lang), item.id)));
     runList.value = selected;
     compare.setRuns(recent.runs.filter((item) => item.source !== "attached"), selected);
     if (visibleScope() === projectScope) await explorer.refresh();

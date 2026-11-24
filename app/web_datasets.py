@@ -23,7 +23,6 @@ from app.services.dataset_management import (
 )
 from app.services.investigation import QueryError
 
-
 dataset_pages = Blueprint("dataset_pages", __name__, url_prefix="/manage/datasets")
 
 

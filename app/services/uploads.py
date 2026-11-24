@@ -16,20 +16,20 @@ import re
 import subprocess
 import unicodedata
 from uuid import uuid4
-from zipfile import ZipFile, ZipInfo, ZIP_STORED
+from zipfile import ZIP_STORED, ZipFile, ZipInfo
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from werkzeug.exceptions import NotFound
 
+from app.domain import UserDataset
 from app.models import Dataset, ProcessingJob, SourceArtifact
+from app.parsers.bgl import MAX_LINE_BYTES, parse_line
 from app.paths import LOCAL_DIR, UPLOADS_DIR
 from app.permissions import InsecurePermissions, check_private
-from app.domain import UserDataset
-from app.parsers.bgl import parse_line, MAX_LINE_BYTES
-from app.services.bgl_ingestion import fingerprint, ingest_bgl, import_lease, ImportBusyError
-from app.services.redaction import redact
 from app.security import Forbidden
+from app.services.bgl_ingestion import ImportBusyError, fingerprint, import_lease, ingest_bgl
+from app.services.redaction import redact
 
 log = logging.getLogger("h_logsen.uploads")
 UPLOAD_ROOT = UPLOADS_DIR

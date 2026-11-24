@@ -9,12 +9,12 @@ import sys
 import time
 from uuid import uuid4
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import create_app
 from app.extensions import db
-from app.models import DataSource, Dataset, SourceArtifact, ProcessingJob
+from app.models import Dataset, DataSource, ProcessingJob, SourceArtifact
 from app.services.bgl_ingestion import ingest_bgl
 from scripts.bench.benchmark_bgl import verify_provenance
 

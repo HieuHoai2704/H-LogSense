@@ -11,7 +11,7 @@
   const status = document.getElementById("external-status");
   const data = document.getElementById("external-data");
   const column = document.getElementById("external-column");
-  const number = new Intl.NumberFormat("vi", { maximumSignificantDigits: 8 });
+  const number = new Intl.NumberFormat(document.documentElement.lang, { maximumSignificantDigits: 8 });
   let columns = [];
   const element = (tag, text) => {
     const node = document.createElement(tag);

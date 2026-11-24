@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from io import BytesIO
 import unittest
 
-from app.parsers.bgl import parse_line, iter_records, LEGACY_VERSION, MAX_LINE_BYTES, VERSION
+from app.parsers.bgl import LEGACY_VERSION, MAX_LINE_BYTES, VERSION, iter_records, parse_line
 from app.services.detection import features
 
 LINE = b"- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.363779 R02-M1-N0-C:J12-U11 RAS KERNEL INFO test message\n"

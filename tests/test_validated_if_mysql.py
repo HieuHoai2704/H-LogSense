@@ -14,12 +14,12 @@ import numpy as np
 from sklearn.ensemble import IsolationForest
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-
 import test_mysql_integration as baseline
-from app.models import Dataset, DetectorRun, DetectorVersion, DetectionUnit, UnitEvent, AnomalyOutput
+
 from app.domain import DetectionPrediction, EvaluationReport
-import app.services.validated_if as validated
+from app.models import AnomalyOutput, Dataset, DetectionUnit, DetectorRun, DetectorVersion, UnitEvent
 from app.services.bgl_ingestion import fingerprint
+import app.services.validated_if as validated
 from app.services.window_detection import second
 
 
@@ -178,7 +178,7 @@ class ValidatedIFMySQLTests(unittest.TestCase):
             self.assertEqual(len(rows), 2)
             bundle, card = validated.load_frozen_model(self.model_id)
             scores = bundle["model"].score_samples(np.asarray([r.features["values"] for r in rows]))
-            for row, score in zip(rows, scores):
+            for row, score in zip(rows, scores, strict=True):
                 self.assertEqual(row.score, score)
                 self.assertEqual(row.predicted, bool(score < card["threshold"]))
             membership = set(

@@ -199,7 +199,7 @@ def predictions(path, rows, scores, threshold):
                 "event_count",
             )
         )
-        for row, score in zip(rows, scores):
+        for row, score in zip(rows, scores, strict=True):
             block, label, first, last, event_count, *_ = row
             writer.writerow(
                 (block, label, int(score > threshold), format(score, ".17g"), first, last, event_count)

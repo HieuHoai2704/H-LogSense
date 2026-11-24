@@ -12,7 +12,6 @@ from tempfile import TemporaryDirectory
 import venv
 from zipfile import ZipFile
 
-
 SMOKE = """
 from importlib.metadata import version
 from pathlib import Path

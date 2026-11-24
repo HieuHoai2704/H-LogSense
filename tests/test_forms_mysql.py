@@ -12,10 +12,10 @@ from uuid import uuid4
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
+import test_dataset_crud_mysql as crud
 from werkzeug.datastructures import MultiDict
 from werkzeug.security import generate_password_hash
 
-import test_dataset_crud_mysql as crud
 from app.domain import User, UserDataset
 from app.models import Dataset, DataSource, SourceArtifact
 

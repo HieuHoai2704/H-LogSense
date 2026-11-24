@@ -1,10 +1,10 @@
 """Download cataloged public artifacts and verify provider dataset checksums."""
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import json
-import subprocess
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "academic/notes/datasets.json"

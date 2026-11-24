@@ -12,20 +12,20 @@ import re
 from uuid import uuid4
 
 import joblib
-from sqlalchemy import select, func, case, text
+from sqlalchemy import case, func, select, text
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.orm import Session
 
+from app.models import Dataset, Detector, DetectorRun, DetectorVersion, LogEvent
 from app.paths import IF_HOLDOUT_DIR, VALIDATED_IF_INPUTS_DIR
-from app.models import Dataset, LogEvent, Detector, DetectorVersion, DetectorRun
-from app.services.bgl_ingestion import import_lease, fingerprint
+from app.services.bgl_ingestion import fingerprint, import_lease
 from app.services.window_detection import (
     EPOCH,
     FEATURE_NAMES,
     aggregate_windows,
-    second,
-    persist_predictions,
     evaluate_windows,
+    persist_predictions,
+    second,
 )
 from app.services.window_features import FEATURE_NAMES as CONTEXT_FEATURE_NAMES
 

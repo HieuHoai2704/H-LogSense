@@ -9,8 +9,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import urlopen
 
-from scripts.run.logsense_client import ApiError
 from academic.course.network_lab import download_images, text_to_csv, youtube_statistics
+from scripts.run.logsense_client import ApiError
 
 VIDEO_IDS = ("7cmvABXyUC0", "9eH-7x7swEM", "JndzGxbwvG0", "l0P5_E6J_g0")
 PYTHON_URL = "http://python.org/"

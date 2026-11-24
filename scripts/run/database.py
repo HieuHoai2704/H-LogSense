@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app import create_app
 from app.extensions import db
-from app.models import DataSource, Dataset
+from app.models import Dataset, DataSource
 from app.services.bgl_ingestion import ingest_bgl
 
 
@@ -41,8 +41,11 @@ def main():
         if "sqlalchemy" not in app.extensions:
             parser.error("Set DATABASE_URL to an isolated MySQL database first.")
         if args.command == "create-user":
-            import getpass, os
+            import getpass
+            import os
+
             from werkzeug.security import generate_password_hash
+
             from app.domain import User, UserDataset
 
             password = os.environ.get("LOGSENSE_BOOTSTRAP_PASSWORD") or getpass.getpass(

@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.forms import DatasetCreateForm, DatasetDeleteForm, DatasetRenameForm
+from app.i18n import translate
 from app.security import roles
 from app.services.dataset_management import (
     DELETE_ROLES,
@@ -23,8 +24,6 @@ from app.services.dataset_management import (
     update_dataset,
 )
 from app.services.investigation import QueryError, integer
-from app.i18n import translate
-
 
 forms_api = Blueprint("forms", __name__)
 

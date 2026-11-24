@@ -1,6 +1,6 @@
+from datetime import datetime, timedelta, timezone
 import os
 import unittest
-from datetime import datetime, timezone, timedelta
 from unittest.mock import patch
 
 from app import create_app

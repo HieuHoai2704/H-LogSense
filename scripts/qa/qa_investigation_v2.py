@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from flask import request
 from playwright.sync_api import expect, sync_playwright
 from werkzeug.serving import make_server
+
 from app import create_app
 
 
@@ -135,7 +136,7 @@ def main():
             assert page.url.count("host=") == 2
             page.get_by_role("link", name="Remove Host: storage-02", exact=True).click()
             ready(1)
-            assert "LS-1040" == page.locator("[data-row-id]").get_attribute("data-row-id")
+            assert page.locator("[data-row-id]").get_attribute("data-row-id") == "LS-1040"
             passed.append("OR hosts, AND priority, truthful facets, removable chips and URL state")
             page.get_by_role("link", name="Clear filters", exact=True).click()
             ready(6)

@@ -80,8 +80,8 @@ def open_browser(url, launch_url):
 
 def report_fatal(message):
     """GUI launches (Start menu, Finder, app menu, pythonw) have no console: show and log the error."""
-    import traceback
     from datetime import datetime, timezone
+    import traceback
 
     try:
         log = Path.home() / ".h-logsen" / "desktop-error.log"

@@ -11,8 +11,10 @@ from app.extensions import db, migrate
 
 
 def configure_database(app):
-    from app import models  # noqa: F401 -- register metadata before migrations
-    from app import domain  # noqa: F401
+    from app import (
+        domain,  # noqa: F401
+        models,  # noqa: F401 -- register metadata before migrations
+    )
 
     configured = app.config.get("SQLALCHEMY_DATABASE_URI")
     if not configured:

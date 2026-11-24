@@ -1,11 +1,11 @@
 """Local user/session authentication and dataset authorization, default deny."""
 
+from collections import defaultdict, deque
+from functools import wraps
 import hashlib
 import os
 import secrets
 import time
-from collections import defaultdict, deque
-from functools import wraps
 
 from flask import Blueprint, current_app, g, jsonify, request, session
 from sqlalchemy import select
@@ -154,6 +154,7 @@ def initialize_security(app):
     from flask import render_template
     from sqlalchemy.exc import DataError, IntegrityError, SQLAlchemyError
     from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
+
     from app.i18n import translate
 
     def failure(code, message, status, title):

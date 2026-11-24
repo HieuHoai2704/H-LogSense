@@ -17,7 +17,6 @@ from wtforms.validators import (
     ValidationError,
 )
 
-
 MAX_ID = 2**63 - 1
 
 

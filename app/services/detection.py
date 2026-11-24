@@ -3,28 +3,28 @@
 import hashlib
 import json
 import math
-import platform
 from pathlib import Path
+import platform
 from uuid import uuid4
 
 import joblib
 import numpy as np
 import sklearn
 from sklearn.ensemble import IsolationForest
-from sqlalchemy import select, or_, and_
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
-from app.paths import MODEL_ARTIFACTS_DIR
 from app.models import (
-    Dataset,
-    LogEvent,
-    DetectionUnit,
-    UnitEvent,
-    Detector,
-    DetectorVersion,
-    DetectorRun,
     AnomalyOutput,
+    Dataset,
+    DetectionUnit,
+    Detector,
+    DetectorRun,
+    DetectorVersion,
+    LogEvent,
+    UnitEvent,
 )
+from app.paths import MODEL_ARTIFACTS_DIR
 
 FEATURES = ["message_character_count", "message_token_count", "high_severity_indicator"]
 ERROR_LEVELS = frozenset({"ERROR", "FATAL", "SEVERE", "FAILURE"})
@@ -177,7 +177,7 @@ def detect(
                 scores = matrix[:, 2] if model is None else model.score_samples(matrix)
                 selected = [
                     (row, float(score), feature.tolist())
-                    for row, score, feature in zip(rows, scores, matrix)
+                    for row, score, feature in zip(rows, scores, matrix, strict=True)
                     if (score >= 1 if model is None else score < model.offset_)
                 ]
                 for row, score, values in selected:

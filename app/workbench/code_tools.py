@@ -1,9 +1,9 @@
 """Explicit, project-scoped editor tools with bounded results."""
 
 import json
+from pathlib import Path
 import shutil
 import subprocess
-from pathlib import Path
 from tempfile import TemporaryFile
 from threading import BoundedSemaphore
 

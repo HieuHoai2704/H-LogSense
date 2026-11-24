@@ -5,8 +5,8 @@ or new quality evaluation. Exact source bytes and physical origin are retained.
 No model fitting/calibration or existing dataset mutation occurs.
 """
 
-import csv
 import argparse
+import csv
 import hashlib
 import io
 import json
@@ -15,22 +15,22 @@ import secrets
 import time
 from zipfile import ZipFile
 
-import numpy as np
 from flask_migrate import upgrade
-from sqlalchemy import create_engine, select, text, func
+import numpy as np
+from sqlalchemy import create_engine, func, select, text
 from sqlalchemy.orm import Session
 
 from app import create_app
-from app.extensions import db
-from app.models import DataSource, Dataset, AnomalyOutput, DetectionUnit, LogEvent, UnitEvent
 from app.domain import DetectionPrediction
-from app.services.bgl_ingestion import ingest_bgl, fingerprint
-from app.services.validated_if import DEFAULT_MODEL_ID, run_validated, model_card
+from app.extensions import db
+from app.models import AnomalyOutput, Dataset, DataSource, DetectionUnit, LogEvent, UnitEvent
+from app.services.bgl_ingestion import fingerprint, ingest_bgl
+from app.services.validated_if import DEFAULT_MODEL_ID, model_card, run_validated
 from app.services.window_detection import second
-from scripts.ml.audit_if_holdout import ROOT, CURATED
+from scripts.ml.audit_if_holdout import CURATED, ROOT
 from scripts.ml.audit_isolation_forest import records
-from scripts.run.mysql_runtime import owned_root, status
 from scripts.qa.verify_university_e2e import runtime_url
+from scripts.run.mysql_runtime import owned_root, status
 
 # Repository root: paths below do not depend on the current working directory.
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -49,7 +49,7 @@ def main():
     with np.load(study / "test-predictions.npz") as predictions:
         scores = predictions["selected_if_scores"]
     selected = []
-    for unit, score in zip(records(study / "test.jsonl"), scores):
+    for unit, score in zip(records(study / "test.jsonl"), scores, strict=True):
         if unit["count"] == 1 and score < card["threshold"]:
             selected.append((unit, float(score)))
         if len(selected) == 20:

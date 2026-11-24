@@ -1,19 +1,19 @@
 """Real MySQL only. Requires a fresh token-marked, uniquely named test schema."""
 
+from datetime import datetime, timedelta, timezone
 import hashlib
 import os
+from pathlib import Path
 import re
 import tempfile
 import unittest
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from uuid import uuid4
 from zipfile import ZipFile
 
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
 from flask_migrate import upgrade
-from sqlalchemy import select, text, func, inspect
+from sqlalchemy import func, inspect, select, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
@@ -21,22 +21,22 @@ from sqlalchemy.orm import Session
 from app import create_app
 from app.extensions import db
 from app.models import (
-    DataSource,
-    Dataset,
-    SourceArtifact,
-    RawLogRecord,
-    LogEvent,
-    DetectionUnit,
-    UnitEvent,
-    Detector,
-    DetectorVersion,
-    DetectorRun,
     AnomalyOutput,
     CoverageInterval,
+    Dataset,
+    DataSource,
+    DetectionUnit,
+    Detector,
+    DetectorRun,
+    DetectorVersion,
     GroundTruthLabel,
+    LogEvent,
     ProcessingJob,
+    RawLogRecord,
+    SourceArtifact,
+    UnitEvent,
 )
-from app.repositories import page_events, archive_dataset
+from app.repositories import archive_dataset, page_events
 from app.services.bgl_ingestion import ingest_bgl
 from app.services.detection import detect
 

@@ -37,7 +37,7 @@ def csv_rows(text):
     for row in reader:
         if row:
             yield (
-                dict(zip(fields, (value if value != "" else None for value in row)))
+                dict(zip(fields, (value if value != "" else None for value in row), strict=True))
                 if len(row) == len(fields)
                 else None
             )

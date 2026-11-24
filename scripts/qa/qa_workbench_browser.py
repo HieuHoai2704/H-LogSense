@@ -2,8 +2,8 @@
 
 import logging
 import os
-import re
 from pathlib import Path
+import re
 import secrets
 import shutil
 import subprocess
@@ -13,13 +13,12 @@ from threading import Thread
 import unittest
 from urllib.parse import parse_qs, urlsplit
 
-import psutil
 from playwright.sync_api import expect, sync_playwright
+import psutil
 from werkzeug.serving import make_server
 
 from app import create_app
 from app.workbench.api import mount
-
 
 TRAIN_SCRIPT = """\
 from datetime import datetime, timedelta, timezone

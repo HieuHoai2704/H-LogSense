@@ -24,7 +24,7 @@
   const status = document.getElementById("run-compare-status");
   const content = document.getElementById("run-compare-content");
   const body = document.getElementById("run-compare-rows");
-  const formatter = new Intl.NumberFormat("vi", { maximumSignificantDigits: 7 });
+  const formatter = new Intl.NumberFormat(document.documentElement.lang, { maximumSignificantDigits: 7 });
   const numeric = (value, suffix = "") => Number.isFinite(value) ? formatter.format(value) + suffix : null;
   let revision = 0;
   let runKey = "";
@@ -51,7 +51,7 @@
     const oldRight = right.value;
     for (const select of [left, right]) {
       select.replaceChildren(new Option(tr("Choose a run"), ""), ...runs.map((run) =>
-        new Option(run.script + " · " + run.status + " · " + new Date(run.started_at).toLocaleString("vi") + " · " + run.id.slice(0, 8), run.id)));
+        new Option(run.script + " · " + run.status + " · " + new Date(run.started_at).toLocaleString(document.documentElement.lang) + " · " + run.id.slice(0, 8), run.id)));
     }
     left.value = ids.has(oldLeft) ? oldLeft : ids.has(selected) ? selected : runs[0]?.id ?? "";
     right.value = ids.has(oldRight) ? oldRight : runs.find((run) => run.id !== left.value)?.id ?? "";

@@ -8,7 +8,6 @@ from urllib.parse import urlsplit
 
 from flask import Blueprint, abort, current_app, has_request_context, redirect, request, url_for
 
-
 LANGUAGES = {
     "en": "English",
     "vi": "Tiếng Việt",

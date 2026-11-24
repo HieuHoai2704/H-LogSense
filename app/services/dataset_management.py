@@ -7,14 +7,14 @@ through this API. Only pristine empty registrations can be physically deleted.
 
 import re
 
-from sqlalchemy import delete, select, or_
+from sqlalchemy import delete, or_, select
 from sqlalchemy.dialects.mysql import insert
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import NotFound
 
+from app.domain import UserDataset
 from app.extensions import db
 from app.models import Dataset, DataSource
-from app.domain import UserDataset
 from app.security import Forbidden
 from app.services.investigation import QueryError
 

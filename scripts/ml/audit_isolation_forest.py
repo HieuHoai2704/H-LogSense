@@ -19,18 +19,18 @@ import numpy as np
 import psutil
 import sklearn
 from sklearn.ensemble import IsolationForest
-from sqlalchemy import create_engine, select, func, case, text
+from sqlalchemy import case, create_engine, func, select, text
 from sqlalchemy.orm import Session
 
+from app.models import Dataset, GroundTruthLabel, LogEvent
 from app.paths import IF_STUDIES_DIR
-from app.models import Dataset, LogEvent, GroundTruthLabel
-from app.services.window_detection import aggregate_windows, EPOCH, second, FEATURE_NAMES
 from app.services.detector_calibration import (
-    temporal_split,
-    reservoir_sample,
     binary_metrics,
     choose_threshold,
+    reservoir_sample,
+    temporal_split,
 )
+from app.services.window_detection import EPOCH, FEATURE_NAMES, aggregate_windows, second
 from app.services.window_features import TrainReference
 
 ROOT = IF_STUDIES_DIR

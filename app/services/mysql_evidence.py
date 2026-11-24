@@ -1,27 +1,40 @@
 """The existing Drawer contract, fulfilled by persisted anomaly/log evidence."""
 
-from werkzeug.exceptions import NotFound
 from datetime import timedelta
-import hashlib, json
+import hashlib
+import json
 
-from itsdangerous import URLSafeTimedSerializer, BadData
 from flask import current_app
-from sqlalchemy import func, select, or_, and_
+from itsdangerous import BadData, URLSafeTimedSerializer
+from sqlalchemy import and_, func, or_, select
+from werkzeug.exceptions import NotFound
 
 from app.extensions import db
 from app.models import (
     AnomalyOutput as A,
-    DetectionUnit as U,
-    LogEvent as E,
-    DetectorRun as R,
-    Detector as D,
-    DetectorVersion as V,
-    UnitEvent,
-    Dataset,
 )
-from app.services.mysql_investigation import state, base, row_summary, HOST
+from app.models import (
+    Dataset,
+    UnitEvent,
+)
+from app.models import (
+    DetectionUnit as U,
+)
+from app.models import (
+    Detector as D,
+)
+from app.models import (
+    DetectorRun as R,
+)
+from app.models import (
+    DetectorVersion as V,
+)
+from app.models import (
+    LogEvent as E,
+)
 from app.services.database_evidence import load_evidence
-from app.services.investigation import integer, iso, instant, QueryError
+from app.services.investigation import QueryError, instant, integer, iso
+from app.services.mysql_investigation import HOST, base, row_summary, state
 from app.services.redaction import redact
 
 
@@ -191,7 +204,7 @@ def evidence(identity, args):
     host = metadata["host"]
     service = metadata["service"]
     if relation == "same_host":
-        related_query = related_query.where(HOST == host) if host else related_query.where(A.id < 0)
+        related_query = related_query.where(host == HOST) if host else related_query.where(A.id < 0)
     if relation == "same_service":
         related_query = (
             related_query.where(E.service == service) if service else related_query.where(A.id < 0)

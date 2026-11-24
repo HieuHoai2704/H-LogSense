@@ -412,6 +412,7 @@ class WorkbenchTest(unittest.TestCase):
     def test_child_environment_keeps_nvml_paths_and_filters_credentials(self):
         import os
         from unittest.mock import patch
+
         from app.workbench.terminal import child_environment
 
         values = {
@@ -448,8 +449,9 @@ class WorkbenchTest(unittest.TestCase):
             self.assertEqual(spawn.call_count, 2)
 
     def test_shell_environment_prefers_selected_python_and_filters_credentials(self):
-        from app.workbench.terminal import terminal_environment
         import os
+
+        from app.workbench.terminal import terminal_environment
 
         interpreter = self.project / ".venv" / "bin" / "python"
         interpreter.parent.mkdir(parents=True)

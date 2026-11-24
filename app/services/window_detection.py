@@ -2,28 +2,33 @@
 
 from collections import Counter
 from datetime import datetime, timedelta, timezone
-import hashlib, json, math, re
+import hashlib
+import json
+import math
+import re
 from uuid import uuid4
 
-import joblib, numpy as np, sklearn
+import joblib
+import numpy as np
+import sklearn
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import average_precision_score
-from sqlalchemy import select, func, case, text
+from sqlalchemy import case, func, select, text
 from sqlalchemy.orm import Session
 
-from app.paths import WINDOW_FEATURES_DIR
-from app.models import (
-    Dataset,
-    LogEvent,
-    DetectionUnit,
-    UnitEvent,
-    Detector,
-    DetectorVersion,
-    DetectorRun,
-    AnomalyOutput,
-    GroundTruthLabel,
-)
 from app.domain import DetectionPrediction, EvaluationReport
+from app.models import (
+    AnomalyOutput,
+    Dataset,
+    DetectionUnit,
+    Detector,
+    DetectorRun,
+    DetectorVersion,
+    GroundTruthLabel,
+    LogEvent,
+    UnitEvent,
+)
+from app.paths import WINDOW_FEATURES_DIR
 
 EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 FEATURE_NAMES = [
@@ -379,7 +384,7 @@ def persist_predictions(
         if dataset.input_revision != revision or dataset.state == "archived":
             raise ValueError("Input revision changed.")
         run = session.get(DetectorRun, run_id)
-        for row, score in zip(rows, scores):
+        for row, score in zip(rows, scores, strict=True):
             if not math.isfinite(score):
                 raise ValueError("Nonfinite score.")
             key = (
@@ -471,10 +476,10 @@ SUPPLIED_LABELS = ("uploaded-bgl", "supplied")
 
 
 def window_metrics(truth, predictions, ranks, skipped, label_source, label_policy):
-    tp = sum(t and p for t, p in zip(truth, predictions))
-    fp = sum(not t and p for t, p in zip(truth, predictions))
-    fn = sum(t and not p for t, p in zip(truth, predictions))
-    tn = sum(not t and not p for t, p in zip(truth, predictions))
+    tp = sum(t and p for t, p in zip(truth, predictions, strict=True))
+    fp = sum(not t and p for t, p in zip(truth, predictions, strict=True))
+    fn = sum(t and not p for t, p in zip(truth, predictions, strict=True))
+    tn = sum(not t and not p for t, p in zip(truth, predictions, strict=True))
     return {
         "unit": "observed host-window",
         "label_policy": label_policy,

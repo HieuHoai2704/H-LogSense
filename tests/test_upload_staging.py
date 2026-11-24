@@ -13,9 +13,9 @@ from unittest.mock import patch
 from zipfile import ZipFile
 
 from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import NotFound
 
-from app.services.uploads import UploadError, stage_file, load_bundle, local_file, directory
-
+from app.services.uploads import UploadError, directory, load_bundle, local_file, stage_file
 
 LINE = b"- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.363779 R02-M1-N0-C:J12-U11 RAS KERNEL INFO example\n"
 
@@ -200,11 +200,10 @@ class UploadStagingTests(unittest.TestCase):
 
     def test_invalid_opaque_ids_and_symlink_candidates_fail_closed(self):
         for upload_id in ("../escape", "f" * 31, "G" * 32, "f" * 33):
-            with self.subTest(upload_id=upload_id), self.assertRaises(Exception):
+            with self.subTest(upload_id=upload_id), self.assertRaises(NotFound):
                 directory(upload_id)
-        with patch.object(Path, "is_symlink", return_value=True):
-            with self.assertRaises(UploadError):
-                local_file(self.root, "original.log")
+        with patch.object(Path, "is_symlink", return_value=True), self.assertRaises(UploadError):
+            local_file(self.root, "original.log")
 
     def test_html_like_message_is_kept_as_data_without_execution(self):
         raw = LINE.replace(b"example", b"<script>window.bad=true</script>")

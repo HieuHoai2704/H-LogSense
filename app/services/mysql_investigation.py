@@ -2,32 +2,44 @@
 
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
-from math import ceil, floor, log1p, expm1
+from math import ceil, expm1, floor, log1p
 
-from sqlalchemy import select, func, or_, text
+from sqlalchemy import func, or_, select, text
 from werkzeug.datastructures import MultiDict
 
 from app.extensions import db
 from app.models import (
-    Dataset,
     AnomalyOutput as A,
-    DetectionUnit as U,
-    LogEvent as E,
-    DetectorRun as R,
-    Detector as D,
-    DetectorVersion as V,
-    CoverageInterval,
 )
-from app.security import require_dataset, authorized_datasets
+from app.models import (
+    CoverageInterval,
+    Dataset,
+)
+from app.models import (
+    DetectionUnit as U,
+)
+from app.models import (
+    Detector as D,
+)
+from app.models import (
+    DetectorRun as R,
+)
+from app.models import (
+    DetectorVersion as V,
+)
+from app.models import (
+    LogEvent as E,
+)
+from app.security import authorized_datasets, require_dataset
 from app.services.investigation import (
-    query,
-    instant,
-    iso,
-    integer,
-    display_time,
-    resolution,
-    QueryError,
     PRIORITIES,
+    QueryError,
+    display_time,
+    instant,
+    integer,
+    iso,
+    query,
+    resolution,
 )
 from app.services.redaction import redact
 
@@ -245,10 +257,14 @@ def row_summary(row, state):
     )
 
 
+def epoch_us(moment):
+    """Exact integer microseconds since the Unix epoch (the SQL bucket arithmetic uses the same unit)."""
+    return (moment - EPOCH) // timedelta(microseconds=1)
+
+
 def build(state):
     start, end = instant(state["start_time"]), instant(state["end_time"])
     duration = resolution(state)
-    epoch_us = lambda t: ((t - EPOCH).days * 86400 + (t - EPOCH).seconds) * 1000000 + (t - EPOCH).microseconds
     origin = epoch_us(start) // (duration * 1000000) * (duration * 1000000)
     cells = []
     lower = origin
@@ -264,7 +280,7 @@ def build(state):
                 coverage="unknown",
                 partial_bin=(b - a).total_seconds() != duration,
                 count=0,
-                severity={**{p: 0 for p in PRIORITIES}, "Unknown": 0},
+                severity={**dict.fromkeys(PRIORITIES, 0), "Unknown": 0},
                 priority=0,
             )
         )

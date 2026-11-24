@@ -1,9 +1,9 @@
 """Rebuild static design artifacts only; not imported by the Flask application."""
 
-from pathlib import Path
 from html import escape
 import json
 import math
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 INK = "#172F40"
@@ -221,7 +221,7 @@ def workspace(width=1440, selected=False):
     else:
         col = [margin + 16, margin + 164, margin + 312, margin + 810, margin + 1046]
         labels = ["Time / event", "Priority", "Signal", "Host / service", "Detector"]
-    for x, label in zip(col, labels):
+    for x, label in zip(col, labels, strict=True):
         s.text(x, heading_y, label, 13, MUTED, 600)
     s.line(margin, heading_y + 12, right, heading_y + 12)
     rows = [
@@ -337,7 +337,7 @@ def states():
     s.text(44, 201, "Severity View", 14, INK, 600)
     s.text(44, 259, "Volume View", 14, INK, 600)
     ramp = ["#DCEFEB", "#9CCFC5", "#367D72", "#075E55"]
-    for i, (count, sev) in enumerate(zip(counts, priorities)):
+    for i, (count, sev) in enumerate(zip(counts, priorities, strict=True)):
         x = 226 + i * 141
         s.rect(x, 177, 129, 36, COLORS[sev], CONTROL if not count else None, 2)
         s.text(
@@ -426,7 +426,7 @@ def states():
 def luminance(color):
     values = [int(color[i : i + 2], 16) / 255 for i in (1, 3, 5)]
     linear = [v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4 for v in values]
-    return sum(v * w for v, w in zip(linear, [0.2126, 0.7152, 0.0722]))
+    return sum(v * w for v, w in zip(linear, [0.2126, 0.7152, 0.0722], strict=True))
 
 
 def contrast(a, b):

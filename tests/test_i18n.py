@@ -1,6 +1,7 @@
 """Locale switching preserves access scope and data across full and partial pages."""
 
 from html.parser import HTMLParser
+from pathlib import Path
 import re
 import unittest
 
@@ -100,3 +101,18 @@ class InterfaceLanguages(unittest.TestCase):
             result = self.client.post("/preferences/language", data={"language": "de", "next": target})
             self.assertEqual(result.location, "/?workspace=logs")
         self.assertEqual(self.client.get("/?workspace=logs").headers["Content-Language"], "de")
+
+
+class ScriptLocaleTest(unittest.TestCase):
+    def test_number_and_date_formats_follow_the_interface_language(self):
+        # A literal locale ("vi") shows Vietnamese separators to every user; use document.documentElement.lang.
+        static = Path(__file__).resolve().parents[1] / "app" / "static"
+        pattern = re.compile(r"""(?:NumberFormat|DateTimeFormat|toLocale\w*String)\(\s*["']""")
+        offenders = [
+            f"{path.relative_to(static)}:{number}"
+            for path in static.rglob("*.js")
+            if "vendor" not in path.parts
+            for number, line in enumerate(path.read_text("utf-8").splitlines(), 1)
+            if pattern.search(line)
+        ]
+        self.assertEqual(offenders, [])

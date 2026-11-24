@@ -1,10 +1,10 @@
 """Shared extensions; the demonstration application needs no database server."""
 
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_bootstrap import Bootstrap5
 from flask_mail import Mail
+from flask_migrate import Migrate
 from flask_moment import Moment
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from sqlalchemy.orm import DeclarativeBase
 

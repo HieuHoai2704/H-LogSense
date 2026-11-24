@@ -9,6 +9,7 @@ import argparse
 import cProfile
 import ctypes
 from ctypes import wintypes
+from datetime import datetime
 import hashlib
 import importlib.metadata
 import io
@@ -26,15 +27,15 @@ import tracemalloc
 from urllib.parse import urlencode
 from urllib.request import urlopen
 from zoneinfo import ZoneInfo
-from datetime import datetime
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
+from werkzeug.datastructures import MultiDict
+from werkzeug.serving import make_server
+
 from app import create_app
 from app.demo import ANOMALIES
 from app.services.investigation import build, query
-from werkzeug.datastructures import MultiDict
-from werkzeug.serving import make_server
+
+ROOT = Path(__file__).resolve().parents[2]  # run as: python -m scripts.bench.benchmark_investigation_v3
 
 
 def percentile(values, p):

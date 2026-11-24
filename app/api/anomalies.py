@@ -9,12 +9,12 @@ from itsdangerous import URLSafeTimedSerializer
 from werkzeug.exceptions import NotFound
 
 from app.access import authorize_source
-from app.presentation import payload
-from app.services.evidence import evidence, find_record, raw_page, related_page
-from app.services.redaction import redact
-from app.services.csv_safety import safe_cell
-from app.services.investigation import QueryError, REVISION, SOURCES, build, detail, export_rows, query
 from app.i18n import translate
+from app.presentation import payload
+from app.services.csv_safety import safe_cell
+from app.services.evidence import evidence, find_record, raw_page, related_page
+from app.services.investigation import REVISION, SOURCES, QueryError, build, detail, export_rows, query
+from app.services.redaction import redact
 
 api = Blueprint("anomalies", __name__, url_prefix="/api/v1")
 
@@ -128,7 +128,8 @@ def export_evidence(anomaly_id):
 @api.get("/investigation")
 def investigation():
     started = time.perf_counter()
-    from app.services.mysql_investigation import is_mysql, build as real_build, state
+    from app.services.mysql_investigation import build as real_build
+    from app.services.mysql_investigation import is_mysql, state
 
     result = (
         payload(real_build(state(request.args)))
@@ -141,7 +142,8 @@ def investigation():
 
 @api.get("/anomalies/timeline")
 def timeline():
-    from app.services.mysql_investigation import is_mysql, build as real_build, state
+    from app.services.mysql_investigation import build as real_build
+    from app.services.mysql_investigation import is_mysql, state
 
     view = real_build(state(request.args)) if is_mysql(request.args) else build(query(request.args))
     return jsonify(
@@ -164,7 +166,8 @@ def timeline():
 
 @api.get("/anomalies")
 def anomalies():
-    from app.services.mysql_investigation import is_mysql, build as real_build, state
+    from app.services.mysql_investigation import build as real_build
+    from app.services.mysql_investigation import is_mysql, state
 
     view = real_build(state(request.args)) if is_mysql(request.args) else build(query(request.args))
     return jsonify(

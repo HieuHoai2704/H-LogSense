@@ -10,7 +10,6 @@ from dataclasses import dataclass
 import math
 from numbers import Integral, Real
 
-
 BASE_FEATURE_NAMES = [
     "log1p_event_count",
     "high_severity_fraction",

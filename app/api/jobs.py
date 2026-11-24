@@ -1,13 +1,13 @@
 """Authenticated job submission. Worker execution never runs in Flask requests."""
 
 from flask import Blueprint, jsonify, request
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 
 from app.extensions import db
-from app.models import ProcessingJob, Dataset, LogEvent
-from app.security import roles, require_dataset
-from app.services.investigation import integer, QueryError
 from app.i18n import translate
+from app.models import Dataset, LogEvent, ProcessingJob
+from app.security import require_dataset, roles
+from app.services.investigation import QueryError, integer
 
 jobs_api = Blueprint("jobs", __name__)
 
@@ -36,8 +36,9 @@ def submit():
         }:
             raise QueryError("Unknown detector configuration.")
         if "model_id" in config:
-            from app.services.validated_if import DEFAULT_MODEL_ID, model_card
             from datetime import datetime
+
+            from app.services.validated_if import DEFAULT_MODEL_ID, model_card
 
             if (
                 set(config) != {"detector", "model_id"}
@@ -89,8 +90,9 @@ def submit():
         if bool(config.get("start_time")) != bool(config.get("end_time")):
             raise QueryError("Both explicit UTC boundaries are required.")
         if config.get("start_time"):
-            from app.services.investigation import instant
             from datetime import timedelta
+
+            from app.services.investigation import instant
             from app.services.window_detection import second
 
             start, end = instant(config["start_time"]), instant(config["end_time"])
@@ -148,8 +150,9 @@ def status(job_id):
 @jobs_api.post("/api/v1/detection/jobs/<int:job_id>/retry")
 @roles("analyst", "manager", "admin")
 def retry(job_id):
-    from app.services.bgl_ingestion import import_lease
     from sqlalchemy.orm import Session
+
+    from app.services.bgl_ingestion import import_lease
 
     # A worker holds this exact connection-owned lease for its entire job.
     # A process crash releases it; an active worker cannot be requeued.

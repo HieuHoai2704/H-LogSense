@@ -1,17 +1,16 @@
 """Create the H-logsen Flask application."""
 
-import secrets
 import os
+import secrets
 
 from flask import Flask, jsonify, render_template, request
 
 from app.access import AccessDenied, authorize_source
 from app.api.anomalies import api
+from app.i18n import translate
 from app.presentation import context, payload
 from app.services.investigation import QueryError, build, query
-
 from config import APP_NAME, PROFILES
-from app.i18n import translate
 
 
 def create_app(config_overrides=None):
@@ -29,14 +28,14 @@ def create_app(config_overrides=None):
     from app.database import configure_database
 
     configure_database(app)
-    from app.security import initialize_security
     from app.i18n import initialize_i18n
+    from app.security import initialize_security
 
     initialize_security(app)
     initialize_i18n(app)
     app.register_blueprint(api)
-    from app.web_datasets import dataset_pages, register_page_errors
     from app.extensions import bootstrap, db, mail, moment
+    from app.web_datasets import dataset_pages, register_page_errors
 
     bootstrap.init_app(app)
     moment.init_app(app)
@@ -73,7 +72,9 @@ def create_app(config_overrides=None):
             not request.args or (len(request.args) == 1 and project_view in {"editor", "settings"})
         ):
             return render_template("project_workspace.html", workspace_view=project_view or "monitor")
-        from app.services.mysql_investigation import is_mysql, build as mysql_build, state as mysql_state
+        from app.services.mysql_investigation import build as mysql_build
+        from app.services.mysql_investigation import is_mysql
+        from app.services.mysql_investigation import state as mysql_state
 
         if is_mysql(request.args):
             try:
