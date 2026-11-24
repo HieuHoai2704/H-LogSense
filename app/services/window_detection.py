@@ -5,7 +5,6 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import math
-import re
 from typing import Any
 from uuid import uuid4
 
@@ -46,9 +45,10 @@ SEVERE = {"ERROR", "FATAL", "SEVERE", "FAILURE"}
 
 
 def template(message):
-    # A transparent deterministic template policy, not an inferred Drain model.
-    normalized = re.sub(r"\b(?:0x[0-9a-fA-F]+|\d+)\b", "<*>", message)
-    return hashlib.sha256(normalized.encode()).hexdigest()
+    # A transparent deterministic template policy, not an inferred Drain model (shared with Patterns).
+    from app.services.log_patterns import normalize
+
+    return hashlib.sha256(normalize(message).encode()).hexdigest()
 
 
 def second(stamp):

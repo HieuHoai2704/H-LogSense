@@ -39,6 +39,7 @@ class User(Identity, Model):
     role: Mapped[str] = mapped_column(String(16), nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     auth_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    saved_log_views: Mapped[list | None] = mapped_column(JSON)  # named Log Explorer filters
 
 
 class UserDataset(Identity, Model):

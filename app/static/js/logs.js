@@ -81,6 +81,8 @@
       const next = document.getElementById("log-raw-next");
       next.hidden = data.raw.next_offset === null;
       next.onclick = () => inspect(id, null, data.raw.next_offset);
+      if (!offset)
+        document.dispatchEvent(new CustomEvent("logsense:log-inspected", { detail: { id, event: data.event } }));
     } catch (e) {
       document.getElementById("log-detail-status").textContent = e.message;
     }
@@ -174,13 +176,26 @@
       };
       const bins = document.getElementById("log-bins");
       bins.style.setProperty("--bins", String(volume.bins.length));
+      bins.classList.add("level-bins");
       bins.replaceChildren();
+      const tallest = Math.max(1, ...volume.bins.map((cell) => cell.event_count));
+      // Bottom to top: routine levels first, the most severe on top of each bar.
+      const levelOrder = ["INFO", "UNKNOWN", "WARNING", "ERROR", "SEVERE", "FAILURE", "FATAL"];
+      const rank = (level) => (levelOrder.includes(level) ? levelOrder.indexOf(level) : 1);
       for (const cell of volume.bins) {
         const b = document.createElement("button");
-        b.className = "heat " + (cell.event_count ? "volume-3" : "priority-0");
-        b.textContent = cell.event_count || "·";
+        b.className = "level-bar";
+        const parts = Object.entries(cell.levels || {}).sort(([a], [b2]) => rank(a) - rank(b2));
+        for (const [level, count] of parts) {
+          const segment = document.createElement("span");
+          segment.className = "level-segment level-" + level.toLowerCase();
+          segment.style.height = (100 * count / tallest).toFixed(2) + "%";
+          b.append(segment);
+        }
+        const breakdown = parts.map(([level, count]) => level + " " + count).join(", ");
         b.title =
-          tn(cell.event_count, "{0} — {1} · {2} event · coverage unknown", "{0} — {1} · {2} events · coverage unknown", cell.start, cell.end, cell.event_count);
+          tn(cell.event_count, "{0} — {1} · {2} event · coverage unknown", "{0} — {1} · {2} events · coverage unknown", cell.start, cell.end, cell.event_count) +
+          (breakdown ? " · " + breakdown : "");
         b.setAttribute("aria-label", b.title);
         b.onclick = () => {
           form.elements.start_time.value = cell.start.replace("Z", "");
@@ -189,6 +204,9 @@
         };
         bins.append(b);
       }
+      document.dispatchEvent(new CustomEvent("logsense:logs-loaded", {
+        detail: { params: new URLSearchParams(applied), scope, count: data.count },
+      }));
       say(
         t("MySQL ready · {0} parsed events · no raw-result download beyond this page", data.count),
       );
@@ -223,7 +241,7 @@
       return;
     }
     const params = new URLSearchParams(location.search);
-    for (const name of ["dataset_id", "host", "severity", "q", "sort", "limit"])
+    for (const name of ["dataset_id", "host", "severity", "q", "query", "sort", "limit"])
       if (params.has(name)) form.elements[name].value = params.get(name);
     chooseRange();
     for (const name of ["start_time", "end_time"])
@@ -370,6 +388,16 @@
       say(t("Dataset metadata changed; refreshing the selector failed: {0}", error.message));
     }
   });
+  // Read by log-explorer.js (facets, patterns, insights, saved views, live mode).
+  window.logsenseLogs = {
+    form,
+    csrf: () => csrf,
+    applied: () => (applied ? new URLSearchParams(applied) : null),
+    scope: () => scope,
+    reload: () => load(),
+    inspect: (id) => inspect(id, null),
+    say,
+  };
   initialize().catch(() => {
     document.dispatchEvent(new CustomEvent("logsense:auth-changed", { detail: null }));
     say(t("Sign in to access explicitly authorized MySQL datasets."));

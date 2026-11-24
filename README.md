@@ -71,6 +71,7 @@ A few constraints shape every module:
 
 | Area | What it does |
 | --- | --- |
+| **Log Explorer** | Search syntax (`host:R02* level:ERROR -service:KERNEL "phrase"`), facet counts that filter or exclude on click, volume stacked by log level with click-to-zoom, log patterns (numbers and hex masked), insights for error spikes, new patterns and detector anomalies, surrounding logs on the same host, saved views per account and a live refresh mode |
 | **Log investigation** | Severity and volume timelines per detector, brush and zoom, facet filters with live counts, keyset-paginated results and a scoped CSV export that streams exactly the rows in scope |
 | **Evidence drawer** | Raw log page with redaction before pagination, parsed fields, detector evidence (features, threshold, score direction), related anomalies by host, service, time or window, with signed cursors |
 | **Ingestion** | Streaming, versioned BGL parser; atomic batches that commit rows, counters and checkpoint together; safe resume after a crash; immutable staging for HTTP uploads |

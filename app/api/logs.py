@@ -8,6 +8,7 @@ from flask import (
     Blueprint,
     Response,
     current_app,
+    g,
     jsonify,
     request,
     stream_with_context,
@@ -19,10 +20,11 @@ from werkzeug.exceptions import NotFound
 from app.extensions import db
 from app.i18n import translate
 from app.models import Dataset, GroundTruthLabel, LogEvent, RawLogRecord, SourceArtifact
-from app.security import Forbidden, authorized_datasets, identity
+from app.security import Forbidden, authorized_datasets, identity, roles
+from app.services import log_patterns
 from app.services.csv_safety import safe_cell
 from app.services.investigation import QueryError, integer, iso
-from app.services.log_queries import page, parse_scope, predicates, timeline
+from app.services.log_queries import facets, page, parse_scope, predicates, timeline
 from app.services.redaction import redact
 
 logs_api = Blueprint("logs", __name__)
@@ -230,3 +232,92 @@ def export():
             "X-Result-Count": str(count),
         },
     )
+
+
+@logs_api.get("/api/v1/logs/facets")
+def facet_counts():
+    scope = parse_scope(db.session, request.args)
+    size = integer(request.args.get("size", "10"), 1, 50, "Facet size")
+    return jsonify(scope_token=scope.token, facets=facets(db.session, scope, size))
+
+
+@logs_api.get("/api/v1/logs/patterns")
+def patterns():
+    scope = parse_scope(db.session, request.args)
+    return jsonify(scope_token=scope.token, **log_patterns.top_patterns(db.session, scope))
+
+
+@logs_api.get("/api/v1/logs/insights")
+def insights():
+    scope = parse_scope(db.session, request.args)
+    return jsonify(scope_token=scope.token, **log_patterns.insights(db.session, scope))
+
+
+@logs_api.get("/api/v1/logs/<int:event_id>/context")
+def context(event_id):
+    scope = parse_scope(db.session, request.args)
+    event = db.session.scalar(
+        select(LogEvent).where(
+            LogEvent.dataset_id == scope.dataset_id, LogEvent.id <= scope.maximum_id, LogEvent.id == event_id
+        )
+    )
+    if event is None:
+        raise NotFound()
+    size = integer(request.args.get("size", "10"), 1, 50, "Context size")
+    before, after = log_patterns.surrounding(db.session, scope, event, size)
+    return jsonify(
+        event=serialize(event),
+        before=[serialize(row) for row in before],
+        after=[serialize(row) for row in after],
+        pattern=redact(log_patterns.normalize(event.message[:2000])[:500]),
+        pattern_terms=[
+            redact(x) for x in log_patterns.filter_terms(log_patterns.normalize(event.message[:2000]))
+        ],
+    )
+
+
+# ---- Saved views: named filter sets kept on the account ----
+
+VIEW_KEYS = {"dataset_id", "start_time", "end_time", "host", "severity", "q", "query", "sort", "limit"}
+MAX_VIEWS = 20
+
+
+def clean_view(data):
+    if not isinstance(data, dict):
+        raise QueryError("JSON object required.")
+    name = data.get("name")
+    params = data.get("params")
+    if not isinstance(name, str) or not 1 <= len(name.strip()) <= 60:
+        raise QueryError("A view name of 1 to 60 characters is required.")
+    if any(ord(ch) < 32 for ch in name):
+        raise QueryError("A view name of 1 to 60 characters is required.")
+    if not isinstance(params, dict) or not params or set(params) - VIEW_KEYS:
+        raise QueryError("Unknown saved view field.")
+    if any(not isinstance(v, str) or len(v) > 600 for v in params.values()):
+        raise QueryError("Saved view values must be text of at most 600 characters.")
+    return name.strip(), params
+
+
+@logs_api.route("/api/v1/logs/views", methods=["GET", "POST", "DELETE"])
+@roles("staff", "admin")
+def saved_views():
+    user = g.user
+    views = list(user.saved_log_views or [])
+    if request.method == "POST":
+        name, params = clean_view(request.get_json(silent=True))
+        views = [view for view in views if view.get("name") != name]
+        if len(views) >= MAX_VIEWS:
+            raise QueryError("Keep at most 20 saved views; delete one first.")
+        views.append({"name": name, "params": params})
+        user.saved_log_views = sorted(views, key=lambda view: view["name"].lower())
+        db.session.commit()
+    elif request.method == "DELETE":
+        name = request.args.get("name", "")
+        remaining = [view for view in views if view.get("name") != name]
+        if len(remaining) == len(views):
+            raise NotFound()
+        user.saved_log_views = remaining
+        db.session.commit()
+    response = jsonify(views=user.saved_log_views or [])
+    response.headers["Cache-Control"] = "no-store"
+    return response
