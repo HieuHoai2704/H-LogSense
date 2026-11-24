@@ -21,4 +21,6 @@ def downgrade():
     # The finer roles cannot be recovered; staff returns as analyst (investigation without dataset admin).
     op.drop_constraint(op.f("ck_users_role"), "users", type_="check")
     op.execute("UPDATE users SET role = 'analyst' WHERE role = 'staff'")
-    op.create_check_constraint(op.f("ck_users_role"), "users", "role IN ('viewer','analyst','manager','admin')")
+    op.create_check_constraint(
+        op.f("ck_users_role"), "users", "role IN ('viewer','analyst','manager','admin')"
+    )
