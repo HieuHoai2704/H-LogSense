@@ -74,6 +74,19 @@ class ExitWatchdogTests(unittest.TestCase):
         self.assertLess(time.monotonic() - started, 10)
 
 
+class DesktopRendererSafetyTests(unittest.TestCase):
+    def test_no_cross_document_view_transitions(self):
+        # WebKitGTK 2.52 (the Linux desktop window) crashes on a form navigation such as signing in when
+        # a stylesheet opts into cross-document view transitions. Reproduced and confirmed; keep them out.
+        static = Path(__file__).resolve().parents[1] / "app" / "static"
+        offenders = [
+            str(path.relative_to(static))
+            for path in static.rglob("*.css")
+            if "@view-transition" in path.read_text("utf-8", errors="ignore")
+        ]
+        self.assertEqual(offenders, [])
+
+
 class DemoDatabaseTests(unittest.TestCase):
     def setUp(self):
         folder = tempfile.TemporaryDirectory()

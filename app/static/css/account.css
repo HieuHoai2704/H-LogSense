@@ -283,10 +283,3 @@ html.auth-root, .auth-body {
 @media (prefers-reduced-motion: reduce) {
   .auth-card, .auth-card * { transition-duration: 0.01s !important; transition-delay: 0s !important; animation: none !important; }
 }
-
-/* Page to page: the browser cross-fades same-site navigations instead of flashing a blank page. */
-@view-transition { navigation: auto; }
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.28s; animation-timing-function: ease; }
-@media (prefers-reduced-motion: reduce) {
-  @view-transition { navigation: none; }
-}
