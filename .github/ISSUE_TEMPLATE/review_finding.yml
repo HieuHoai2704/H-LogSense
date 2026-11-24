@@ -1,0 +1,38 @@
+name: Review finding
+description: A problem found while reviewing existing code (see REVIEWING.md).
+labels: [review]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: File and line, or a link to the code.
+      placeholder: app/services/window_detection.py:140
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: As defined in REVIEWING.md.
+      options: [Blocker, Major, Minor, Nit]
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Correctness and data integrity, Machine learning and evaluation, Database and migrations, API and interface, Cross-platform, Code quality, Documentation]
+    validations:
+      required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: Finding
+      description: What happens, which input or state triggers it, and what should happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
