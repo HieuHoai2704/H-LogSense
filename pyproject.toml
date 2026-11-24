@@ -126,3 +126,8 @@ module = [
 ]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+# Windows-only ctypes names need an ignore when checking for Linux/macOS, which is unused for Windows.
+module = ["app.workbench.platforms.windows"]
+warn_unused_ignores = false

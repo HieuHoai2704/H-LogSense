@@ -6,7 +6,7 @@ from contextvars import ContextVar
 import hashlib
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePath
 import re
 import stat
 from tempfile import NamedTemporaryFile, gettempdir
@@ -101,7 +101,7 @@ def component(name):
         and name not in {".", ".."}
         and not name.startswith(".")
         and name.casefold() not in SKIPPED | PRIVATE_FILES
-        and Path(name).suffix.casefold() not in FORBIDDEN_EXTENSIONS
+        and PurePath(name).suffix.casefold() not in FORBIDDEN_EXTENSIONS  # pure: no filesystem flavor needed
         and not any(char in name for char in ':\\/<>"|?*')
         and not any(ord(char) < 32 for char in name)
         and not name.endswith((" ", "."))

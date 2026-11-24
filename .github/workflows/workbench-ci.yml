@@ -22,7 +22,8 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: ruff check --output-format github .
       - run: ruff format --check .
-      - run: mypy
+      # Platform-specific code is type-checked for every target OS, not only the runner's.
+      - run: mypy --platform linux && mypy --platform win32 && mypy --platform darwin
 
   package:
     runs-on: ubuntu-24.04
