@@ -1,56 +1,23 @@
 # Workbench guide
 
-The desktop workbench in detail: installing from a download, running from source, and every
-panel of the Project, Code, Analysis and Settings views. Start with the [README](../README.md).
+The project workbench in detail: starting H-logsen, and every panel of the Project, Code, Analysis and
+Settings views. Start with the [README](../README.md).
 
+## Start H-logsen
 
-## Install H-logsen from a download
-
-Choose the ZIP for your system in [GitHub Releases](https://github.com/HieuHoai2704/H-LogSense/releases)
-when a release is available. Extract it on the machine where H-logsen will run.
-Use 64-bit Python 3.10–3.13 on Windows and macOS. Linux uses the system Python
-(3.12 on Ubuntu 24.04, 3.14 on Ubuntu 26.04). The first install needs an internet connection.
-
-| System | Install and open | Desktop requirements |
-| --- | --- | --- |
-| Windows x64 | `Install-H-logsen.cmd`, then the H-logsen shortcut or `Open-H-logsen.cmd` | Microsoft Edge WebView2 Runtime |
-| macOS 14+ | `sh Install-H-logsen.sh`, then `sh Open-H-logsen.sh` | Python from python.org and system WKWebView. The macOS ZIP also contains Finder `.command` launchers. |
-| Ubuntu 24.04 / 26.04 x64 | `sh Install-H-logsen.sh`, then **H-logsen** in the application menu or `sh Open-H-logsen.sh` | A Wayland or X11 session, system Python and WebKitGTK. See [installation instructions](../packaging/posix/CAI_DAT_MAC_LINUX.txt) for apt packages. |
-
-Extract the Windows release ZIP into a writable folder. Double-click
-**Install-H-logsen.cmd** once, then double-click **Open-H-logsen.cmd**.
-The installer uses Python 3.10–3.13 x64 and downloads the dependencies into
-the extracted folder's own environment. The launcher opens a native Windows
-window using Microsoft Edge WebView2 Runtime, with a local Flask server tied
-to that window. Use `Open-H-logsen.cmd --browser` for browser mode.
-
-To install manually, use CMD in the extracted folder.
-
-~~~cmd
-py -3.10 -m venv .venv
-.venv\Scripts\python.exe -m pip install .\h_logsen-0.4.13-py3-none-any.whl
-Open-H-logsen.cmd
-~~~
-
-The platform installers also accept a source checkout. Use `--browser` with
-either launch script for local browser mode. Run `python -m scripts.release.package_workbench`
-to build three platform ZIPs, a source ZIP and their SHA-256 file into an empty directory.
-The [portfolio verification guide](releases/PORTFOLIO_VERIFICATION.md)
-covers clean installation, platform support and the publication checklist.
-
-## Run directly from source
-
-Use the installer above for desktop mode. To run the source checkout in a local
-browser with filesystem access, editing, training runs and a real terminal:
+H-logsen is a web application. One command starts a local server bound to `127.0.0.1` and opens it in
+your default browser; running the command again while the server runs just opens the browser on it.
 
 ```text
 python -m pip install -r requirements.txt
-python -m scripts.run.workbench --browser
+python -m app.workbench
 ```
 
-The launcher creates a temporary capability. **Project → Open folder** opens
-the operating system folder picker in desktop mode and accepts an absolute project
-path in browser mode. In the tree,
+With Docker running, `python -m scripts.run.demo` also starts MySQL, creates the demo accounts and data,
+and opens the browser. Add `--no-browser` to `app.workbench` to print the private URL instead.
+
+The launcher creates a temporary capability. **Project → Open folder** accepts an absolute project
+path. In the tree,
 open a log or a source file. **Code** supports saving, native undo and
 running a Python file with the interpreter selected in **Settings**.
 The terminal starts with CMD on Windows and an available local shell on
@@ -158,8 +125,8 @@ The regular Flask entry point has no local filesystem or terminal API.
   an outbound SSH terminal using OpenSSH and a pre-verified known host key.
   **+ New session** focuses the live shell when it is ready. Local shells can start
   in the user's home directory before a project is selected. New shells
-  start in the active project when one is selected. The desktop window
-  supports split panes. Detached terminal popups are available in browser mode.
+  start in the active project when one is selected. Terminals support split panes
+  and detached popups.
   Keep the workbench on loopback. The session executes as the OS user.
   If the browser briefly loses connectivity, the open terminal resumes from
   its last output cursor while the same shell is still running. Output older

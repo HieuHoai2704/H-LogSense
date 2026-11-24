@@ -1,7 +1,7 @@
 "use strict";
 
-// Sign-in page: keep the desktop launcher's workbench token. The server redirected here before the
-// workspace page could read it from the launch URL.
+// Sign-in page: keep the launcher's workbench token. The server redirected here before the workspace
+// page could read it from the launch URL.
 (() => {
   const params = new URLSearchParams(location.hash.slice(1));
   const supplied = params.get("workbench");

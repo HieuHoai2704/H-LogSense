@@ -15,7 +15,7 @@ from app.workbench.files import ACTIVE_ROOT, MAX_TEXT, WORKSPACES, ProjectStore,
 workbench = Blueprint("workbench", __name__, url_prefix="/api/local/v1")
 
 
-def mount(app, token, directory, *, port=None, desktop=False):
+def mount(app, token, directory, *, port=None):
     app.config.setdefault("DEFAULT_INTERFACE_LANGUAGE", "vi")
     store = ProjectStore(directory)
     terminals = terminal.Terminals()
@@ -24,7 +24,6 @@ def mount(app, token, directory, *, port=None, desktop=False):
         "terminals": terminals,
         "token": token,
         "port": port,
-        "desktop": desktop,
         "runs": jobs.Runs(store),
     }
     app.register_blueprint(workbench)

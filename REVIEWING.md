@@ -92,7 +92,7 @@ Every quantitative or behavioural claim in the README can be checked. Start here
 | CSP blocks injected script | [`tests/test_workbench.py`](tests/test_workbench.py) `ContentSecurityPolicyTest`; inspect any HTML response header |
 | Catalogs are whole messages | [`tests/test_i18n.py`](tests/test_i18n.py) `CatalogShapeTest` (over 17,000 checks) |
 | Browser behaviour | `python -m scripts.qa.qa_workbench_browser`, `qa_investigation_v2`, `qa_evidence_drawer` |
-| The package installs cleanly | `python -m scripts.release.package_workbench --output dist/ci` then `python -m scripts.release.qa_portfolio_install dist/ci --desktop` |
+| The web interface works end to end | `python -m scripts.qa.qa_workbench_browser` (Chromium) |
 
 ## Review checklists
 
@@ -131,7 +131,7 @@ Every quantitative or behavioural claim in the README can be checked. Start here
 - [ ] Response shapes stay identical for the demo and database sources.
 - [ ] User-visible text goes through `tr()`, `t()` or `tn()`, as a whole message, translated in every catalog.
 - [ ] Controls are reachable by keyboard and have accessible names; motion respects reduced-motion settings.
-- [ ] Behaviour is the same in the native window and in a browser.
+- [ ] Behaviour is the same in Chrome and Firefox.
 
 ### Cross-platform
 

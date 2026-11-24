@@ -1,4 +1,4 @@
-name: Workbench clean install
+name: H-logsen checks
 
 on:
   push:
@@ -22,10 +22,10 @@ jobs:
       - run: python -m pip install -e ".[dev]"
       - run: ruff check --output-format github .
       - run: ruff format --check .
-      # Platform-specific code is type-checked for every target OS, not only the runner's.
-      - run: mypy --platform linux && mypy --platform win32 && mypy --platform darwin
+      # The terminal backends differ on Windows; type-check both.
+      - run: mypy --platform linux && mypy --platform win32
 
-  package:
+  unit:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
@@ -34,12 +34,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - run: python -m scripts.release.package_workbench --output dist/ci
-      - uses: actions/upload-artifact@v4
-        with:
-          name: h-logsen-candidate
-          path: dist/ci/
-          if-no-files-found: error
+      - run: python -m pip install -r requirements.txt
+      - run: python -B -m unittest discover -s tests
 
   academic:
     # Research experiments are not packaged; test them from the checkout.
@@ -78,16 +74,10 @@ jobs:
       - run: python -m flask --app app db upgrade
       - run: python -B -m scripts.qa.verify_mysql
 
-  verify:
-    needs: package
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-2025, macos-15, macos-15-intel, ubuntu-24.04]
-    runs-on: ${{ matrix.os }}
+  browser:
+    # The web interface in Chromium: project workbench, analysis, appearance and accessibility checks.
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
-    env:
-      LOGSENSE_BROWSER_CHANNEL: ''
     steps:
       - uses: actions/checkout@v6
         with:
@@ -95,59 +85,6 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - uses: actions/download-artifact@v5
-        with:
-          name: h-logsen-candidate
-          path: dist/ci
-      - if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-venv python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-webkit2-4.1 xvfb xauth
-          xvfb-run -a /usr/bin/python3 -m scripts.release.qa_portfolio_install dist/ci --desktop --report dist/install.json
-      - if: runner.os != 'Linux'
-        run: python -m scripts.release.qa_portfolio_install dist/ci --desktop --report dist/install.json
-      - run: python -m pip install ".[qa]"
-      - if: runner.os == 'Linux'
-        run: python -m playwright install --with-deps chromium
-      - if: runner.os != 'Linux'
-        run: python -m playwright install chromium
+      - run: python -m pip install -e ".[qa]"
+      - run: python -m playwright install --with-deps chromium
       - run: python -m scripts.qa.qa_workbench_browser
-      - uses: actions/upload-artifact@v4
-        with:
-          name: verification-${{ matrix.os }}
-          path: dist/install.json
-          if-no-files-found: error
-
-  release:
-    # Pushing a version tag (v0.4.13) publishes the packages, after they installed and opened on every
-    # platform above, as a GitHub Release with one download per operating system.
-    needs: [lint, mysql, verify]
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - uses: actions/download-artifact@v5
-        with:
-          name: h-logsen-candidate
-          path: dist/release
-      - name: Check that the tag matches the package version
-        run: |
-          version=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match version $version in pyproject.toml"
-            exit 1
-          fi
-          test -f "docs/releases/notes/$GITHUB_REF_NAME.md"
-      - name: Publish the release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create "$GITHUB_REF_NAME" dist/release/*
-          --repo "$GITHUB_REPOSITORY"
-          --title "H-logsen ${GITHUB_REF_NAME#v}"
-          --notes-file "docs/releases/notes/$GITHUB_REF_NAME.md"
-          --verify-tag

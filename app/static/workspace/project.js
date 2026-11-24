@@ -928,17 +928,10 @@ $("use-demo").addEventListener("click", () => {
 });
 
 const appearanceOptions = $("appearance-options");
-const glassSlider = $("glass-transparency");
-function syncGlassSlider() {
-  if (!document.documentElement.matches('[data-theme|="glass"]')) return;
-  glassSlider.value = workspaceAppearance.transparency();
-  $("glass-transparency-value").value = glassSlider.value + "%";
-}
 function syncAppearanceOptions() {
   for (const option of appearanceOptions.querySelectorAll('input[name="appearance"]')) {
     option.checked = option.value === (document.documentElement.dataset.theme || "graphite");
   }
-  syncGlassSlider();
 }
 window.addEventListener("pageshow", syncAppearanceOptions);
 syncAppearanceOptions();
@@ -947,19 +940,7 @@ appearanceOptions.addEventListener("change", (event) => {
   const label = workspaceAppearance.labels.get(theme);
   if (!label) return;
   const saved = workspaceAppearance.set(theme);
-  syncGlassSlider();
   $("appearance-status").textContent = saved ? "✓ " + tr(label) : tr(label);
-});
-glassSlider.addEventListener("input", () => {
-  workspaceAppearance.setTransparency(glassSlider.valueAsNumber);
-  syncGlassSlider();
-});
-glassSlider.addEventListener("change", () => {
-  workspaceAppearance.setTransparency(glassSlider.valueAsNumber, true);
-});
-$("glass-reset").addEventListener("click", () => {
-  workspaceAppearance.setTransparency(null, true);
-  syncGlassSlider();
 });
 
 renderProject();

@@ -4,27 +4,20 @@
 
 # H-logsen
 
-**A local workbench for log investigation, anomaly detection and machine-learning runs.**
+**A web application for log investigation, anomaly detection and data quality, with a local project workbench.**
 
-One desktop application for reading a training run while it writes its logs, profiling the data behind it,
-and investigating anomalies in large system logs with full provenance from every finding back to the raw line.
+H-logsen runs as a Flask web application in the browser. It investigates anomalies in large system logs with
+full provenance from every finding back to the raw line, and gives each developer a local workbench for
+reading a training run while it writes its logs.
 
 ![Python](https://img.shields.io/badge/Python-3.10%E2%80%933.14-3776AB?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white)
 ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0-D71F00)
 ![MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?logo=mysql&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.7-F7931E?logo=scikitlearn&logoColor=white)
-![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-555555)
+![Web](https://img.shields.io/badge/runs%20in-the%20browser-555555)
 ![Types](https://img.shields.io/badge/types-mypy-2A6DB2)
 ![Lint](https://img.shields.io/badge/lint-ruff-D7FF64?labelColor=333333)
-
-<p>
-  <a href="https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-Windows.zip"><img alt="Download for Windows" src="https://img.shields.io/badge/Download-Windows%20x64-0078D4?style=for-the-badge&logo=windows&logoColor=white"></a>
-  <a href="https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-macOS.zip"><img alt="Download for macOS" src="https://img.shields.io/badge/Download-macOS%2014%2B-111111?style=for-the-badge&logo=apple&logoColor=white"></a>
-  <a href="https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-Linux.zip"><img alt="Download for Linux" src="https://img.shields.io/badge/Download-Ubuntu%20x64-E95420?style=for-the-badge&logo=ubuntu&logoColor=white"></a>
-</p>
-
-<sub>Version 0.4.13 · <a href="https://github.com/HieuHoai2704/H-LogSense/releases">All releases and checksums</a></sub>
 
 [Overview](#overview) ·
 [Screenshots](#screenshots) ·
@@ -48,11 +41,11 @@ and investigating anomalies in large system logs with full provenance from every
 
 H-logsen combines two products that share one codebase, one interface and one design language:
 
-| | Desktop workbench | Investigation platform |
+| | Project workbench | Investigation platform |
 | --- | --- | --- |
 | **Purpose** | Work on a project while it runs: logs, training metrics, code and a shell in one window | Investigate anomalies in large system logs (Loghub BGL) with evidence and provenance |
 | **Data** | Files in a project folder chosen by the user | MySQL 8.4: raw lines, parsed events, detection units, runs, anomalies, coverage |
-| **Runs on** | A native window on Windows, macOS and Linux, or a local browser | The same application; ingestion and analysis run in separate workers |
+| **Runs on** | The browser, served by a server bound to 127.0.0.1 | The same web application; ingestion and analysis run in separate workers |
 | **Needs a database** | No | Yes (a synthetic demo source works without one) |
 
 A few constraints shape every module:
@@ -79,9 +72,9 @@ A few constraints shape every module:
 | **Accounts** | The whole application sits behind a sign-in page with two portals, staff and administrator; signing out ends every workspace at once. Sign-up waits for administrator approval; administrators approve, create, search, page through, edit and delete accounts and grant dataset access; Flask-Mail sends sign-up, approval, welcome and one-time password-reset emails |
 | **Network** | A live Loghub dataset catalog read from the Zenodo REST API with `urllib` (JSON, timeout, validation, cache, optional API token), compared with the archives already downloaded |
 | **Alerting** | Rules per dataset, idempotent alert decisions with cooldown, incident acknowledgement, assignment and an append-only audit trail; an SMTP outbox with claim, send and record phases |
-| **Desktop workbench** | File explorer, live log tailing with level timelines, loss-by-epoch charts, run history and comparison, machine load, split code editor with Ruff and Pyright, PTY terminals, SSH, PDF and Parquet preview |
-| **Platform** | Native window via WebView2, WKWebView or WebKitGTK; OS-specific code isolated behind one interface; installers for all three systems |
-| **Interface** | 15 languages with CLDR plural rules, eight colour palettes including native glass on Windows, keyboard navigation, reduced-motion support |
+| **Project workbench** | File explorer, live log tailing with level timelines, loss-by-epoch charts, run history and comparison, machine load, split code editor with Ruff and Pyright, PTY terminals, SSH, PDF and Parquet preview |
+| **Web** | One Flask application in the browser; a launcher starts the local server once and reopens the browser on it; only the terminal backend differs between Windows and POSIX |
+| **Interface** | 15 languages with CLDR plural rules, eight colour palettes, keyboard navigation, reduced-motion support |
 
 ## Screenshots
 
@@ -95,18 +88,6 @@ replaced with `~/projects/...`.
 | **Evidence** | **Settings** |
 | ![Evidence drawer for a critical anomaly](docs/screenshots/evidence.png) | ![Appearance settings with eight colour palettes](docs/screenshots/settings.png) |
 | Every finding opens its raw line, parsed fields, detector evidence and related anomalies, with previous / next navigation inside the current scope. | Palettes, language, Python environments, remote machines over SSH and built-in capabilities. |
-
-<details>
-<summary><strong>Native window on Windows (glass backdrop)</strong></summary>
-<br>
-
-Captured from the native window on Windows with the Black glass palette at 82% frame transparency
-(version 0.4.11, before the icon navigation was introduced).
-
-![Windows desktop window with the glass backdrop](docs/showcase/workspace.png)
-![Windows analysis view profiling a CSV file](docs/showcase/analysis.png)
-
-</details>
 
 ## Architecture
 
@@ -197,36 +178,11 @@ flowchart LR
 
 ### Requirements
 
-| | Windows | macOS | Linux |
-| --- | --- | --- | --- |
-| System | Windows 10 or 11, x64 | macOS 14 or later (Apple silicon or Intel) | Ubuntu 24.04 or 26.04 x64 with a desktop session |
-| Python | 3.10 – 3.13, 64-bit (3.12 recommended) | 3.10 – 3.13 from python.org | System Python (3.12 or 3.14) |
-| Window | Microsoft Edge WebView2 Runtime | System WKWebView | WebKitGTK (`gir1.2-webkit2-4.1`) |
-| Database | MySQL 8.4, only for the investigation platform | | |
-
-### Install the desktop application
-
-Download the package for your system from the [latest release](https://github.com/HieuHoai2704/H-LogSense/releases/latest).
-Each ZIP contains an installer that creates a private virtual environment, installs the application and
-registers a launcher.
-
-| System | Download | Install | Open |
-| --- | --- | --- | --- |
-| Windows | [H-logsen-0.4.13-Windows.zip](https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-Windows.zip) | `Install-H-logsen.cmd` | `Open-H-logsen.cmd` or the H-logsen shortcut |
-| macOS | [H-logsen-0.4.13-macOS.zip](https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-macOS.zip) | `sh Install-H-logsen.sh` (or `Install-H-logsen.command` in Finder) | `sh Open-H-logsen.sh` |
-| Linux | [H-logsen-0.4.13-Linux.zip](https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-Linux.zip) | `sh Install-H-logsen.sh` | **H-logsen** in the application menu, or `sh Open-H-logsen.sh` |
-
-Verify a download against [H-logsen-0.4.13-SHA256.txt](https://github.com/HieuHoai2704/H-LogSense/releases/download/v0.4.13/H-logsen-0.4.13-SHA256.txt):
-`Get-FileHash -Algorithm SHA256 H-logsen-0.4.13-Windows.zip` in PowerShell, or
-`shasum -a 256 H-logsen-0.4.13-macOS.zip` on macOS and Linux. Add `--browser` to either launcher to use a
-local browser instead of the native window. Platform details are in [packaging/](packaging/README.md).
-
-Releases are built by CI: pushing a version tag packages the application, installs and opens it on Windows,
-macOS and Ubuntu, and only then publishes the release. To build the same packages locally:
-
-```bash
-python -m scripts.release.package_workbench --output dist/release
-```
+| | |
+| --- | --- |
+| Python | 3.10 – 3.14 on Windows, macOS or Linux |
+| Browser | A current Chrome, Edge, Firefox or Safari |
+| Database | MySQL 8.4 for accounts and the investigation platform (the demo command starts it in Docker) |
 
 ### Run from source
 
@@ -235,7 +191,7 @@ git clone https://github.com/HieuHoai2704/H-LogSense.git
 cd H-LogSense
 python -m venv .venv && . .venv/bin/activate        # Windows: .venv\Scripts\activate
 python -m pip install -e ".[dev]"
-python -m scripts.run.workbench --browser             # the workbench, in a local browser
+python -m app.workbench                                # start the local server and open the browser
 python -m flask --app app run --host 127.0.0.1        # or the web application alone (synthetic demo)
 ```
 
@@ -245,7 +201,7 @@ project contains `metrics.csv` with `epoch,train_loss,val_loss` columns. The com
 
 ### One-command demonstration
 
-With Docker running, one command prepares everything and opens the desktop application:
+With Docker running, one command prepares everything and opens the application in the browser:
 
 ```bash
 python -m scripts.run.demo              # --browser for the default browser; `accounts` prints the logins
@@ -310,7 +266,7 @@ Details: [July holdout and model contract](docs/ml/IF_JULY_HOLDOUT.md) ·
 | --- | --- |
 | Local API exposure | Loopback only; a random bearer token per launch; Host and Origin checks on every request |
 | Script injection | Content Security Policy with per-response nonces; autoescaped templates; secrets, tokens and e-mail addresses redacted from displayed logs |
-| Authentication | Every page behind sign-in (default deny), password hashing, session reset at sign-in, rate-limited login, CSRF protection on every state change, one-time signed reset links that expire after an hour, a new session secret per desktop launch |
+| Authentication | Every page behind sign-in (default deny), password hashing, session reset at sign-in, rate-limited login, CSRF protection on every state change, one-time signed reset links that expire after an hour, a new session secret each time the server starts |
 | Authorization | Default deny; two account types (staff, admin) plus explicit per-dataset grants, enforced in queries and by composite keys; only administrators manage accounts |
 | File system | Project root sandbox (system, home, temporary and hidden roots refused); credential files never served; Windows 8.3 aliases and reserved device names refused |
 | Data at rest | Owner-only files and folders, verified after creation; a strict mode for filesystems that ignore POSIX modes |
@@ -323,12 +279,12 @@ Please report vulnerabilities privately as described in [SECURITY.md](SECURITY.m
 
 | Practice | Implementation |
 | --- | --- |
-| Tests | 240+ unit and API tests without a database; 125 integration tests against MySQL 8.4; 26 browser end-to-end tests; a clean install of the packaged wheel with a native desktop smoke test |
-| Compatibility | Test suite verified on Python 3.10, 3.13 and 3.14; type-checked for Linux, Windows and macOS; dependency resolution verified for Windows x64 and macOS arm64 and x86_64 |
+| Tests | 250+ unit and API tests without a database; 140 integration tests against MySQL 8.4; browser end-to-end tests in Chromium |
+| Compatibility | Test suite verified on Python 3.10, 3.13 and 3.14; type-checked for Linux and Windows (the terminal backends differ) |
 | Static analysis | ruff (lint and format) and mypy with strictly typed core modules, enforced in CI and pre-commit |
 | Refactoring safety | Large refactors are verified with equivalence harnesses: tens of thousands of generated inputs fingerprinted before and after, on fixtures and on a real MySQL pipeline |
 | Internationalization | 15 languages; whole-message catalogs with placeholders checked against the source; CLDR plural forms; a test rejects concatenated fragments |
-| Continuous integration | Lint and types, packaging, MySQL integration, and a clean-install matrix on Windows, macOS (Apple silicon and Intel) and Ubuntu |
+| Continuous integration | Lint and types, unit tests, research tests, MySQL integration and browser end-to-end tests |
 
 ```bash
 ruff check . && ruff format --check . && mypy               # static analysis
@@ -345,14 +301,13 @@ app/                 the product
 ├── services/        ingestion, detection, evidence, investigation, alerts
 ├── parsers/         streaming BGL and HDFS parsers
 ├── workbench/       local files, terminals, runs, previews
-│   └── platforms/   Windows, macOS, Linux and shared POSIX integration
+│   └── platforms/   terminal backends: ConPTY on Windows, POSIX elsewhere
 ├── templates/       Jinja pages and partials
 ├── static/          JavaScript modules, styles, vendored libraries
 └── locales/         interface catalogs (14 languages; English is the source)
 migrations/          Alembic schema history (MySQL 8.4)
-scripts/             run · qa · ml · bench · release commands
+scripts/             run · qa · ml · bench commands
 tests/               unit, API, browser and MySQL integration tests
-packaging/           installers and launchers for each platform
 docs/                architecture, database, ML, guides and release notes
 academic/            research notes and experiments (not shipped)
 ```
@@ -369,15 +324,13 @@ A file-by-file map is in [docs/development/CODE_STRUCTURE_VI.md](docs/developmen
 | Data model | [Schema](docs/database/SCHEMA.md) · [ERD](docs/database/ERD.md) · [BGL pipeline](docs/database/BGL_PIPELINE.md) · [Uploads](docs/database/UPLOADS.md) |
 | Machine learning | [Detectors](docs/database/DETECTORS.md) · [July holdout](docs/ml/IF_JULY_HOLDOUT.md) · [Isolation Forest audit](docs/ml/ISOLATION_FOREST_AUDIT.md) |
 | Architecture | [Architecture notes](docs/architecture/README.md) · [Code structure](docs/development/CODE_STRUCTURE_VI.md) |
-| Testing | [Testing guide](docs/database/TESTING.md) · [Installation verification](docs/releases/PORTFOLIO_VERIFICATION.md) |
+| Testing | [Testing guide](docs/database/TESTING.md) |
 | Contributing | [Reviewing](REVIEWING.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) |
 
 ## Status and limitations
 
 H-logsen is at version **0.4.13** and is developed as a preview.
 
-- The native window was verified on Linux for this version and on Windows for 0.4.12. macOS is exercised
-  by the CI install matrix; a manual check on a physical Mac is still pending.
 - External SMTP delivery, production deployment behind TLS, screen-reader certification and detection over
   the complete BGL archive are outside the verified scope.
 - Uploads accept BGL-compatible text and single-column `raw_line` CSV; the platform is not a generic log importer.

@@ -1,4 +1,4 @@
-<!doctype html><html lang="{{ interface_language }}"{% if workbench_enabled %} data-workspace-theme{% endif %}{% if workbench_desktop %} data-workbench-desktop{% endif %}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ tr("Log Explorer · MySQL") }} · {{ app_name }}</title><link rel="stylesheet" href="{{ url_for('static',filename='css/console.css') }}">{% include "partials/language_assets.html" %}
+<!doctype html><html lang="{{ interface_language }}"{% if workbench_enabled %} data-workspace-theme{% endif %}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ tr("Log Explorer · MySQL") }} · {{ app_name }}</title><link rel="stylesheet" href="{{ url_for('static',filename='css/console.css') }}">{% include "partials/language_assets.html" %}
 {% include "partials/workspace_assets.html" %}
 <link rel="stylesheet" href="{{ url_for('static',filename='css/log-explorer.css') }}">
 <script src="{{ url_for('static',filename='js/logs.js') }}" defer></script>

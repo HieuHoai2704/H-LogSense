@@ -240,12 +240,8 @@ def initialize_security(app):
             body = response.get_data(as_text=True)
             if "<script>" in body:
                 response.set_data(body.replace("<script>", f'<script nonce="{nonce}">'))
-            # The native desktop window drives the page through pywebview's evaluate_js, which runs
-            # host code through eval(); only that mode allows it. Browser mode stays strict.
-            workbench = current_app.extensions.get("workbench") or {}
-            evaluate = " 'unsafe-eval'" if workbench.get("desktop") else ""
             response.headers["Content-Security-Policy"] = (
-                f"default-src 'self'; script-src 'self' 'nonce-{nonce}'{evaluate}; style-src 'self' 'unsafe-inline'; "
+                f"default-src 'self'; script-src 'self' 'nonce-{nonce}'; style-src 'self' 'unsafe-inline'; "
                 "img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; "
                 "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
             )

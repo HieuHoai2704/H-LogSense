@@ -1,4 +1,4 @@
-"""Find the local demonstration database so the desktop app works from its launcher icon.
+"""Find the local demonstration database so the app works from its launcher icon.
 
 ``python -m scripts.run.demo`` keeps the demo MySQL passwords owner-only in ``.local/demo/demo.json`` of a
 source checkout. When the app starts without ``DATABASE_URL``, it looks for that file, starts the demo

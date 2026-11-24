@@ -1,6 +1,5 @@
 # Development install of H-logsen and all of its runtime dependencies.
 # The dependency list lives in pyproject.toml. Optional extras:
-#   pip install -e ".[desktop]"  Linux native window (with the system Python)
 #   pip install -e ".[qa]"       Playwright for scripts/qa
 #   pip install -e ".[course]"   academic/course lab scripts
 -e .

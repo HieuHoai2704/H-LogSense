@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "H-logsen"
 version = "0.4.13"
-description = "Local workbench for code, data analysis, training runs and log investigation"
+description = "Web application for log investigation, anomaly detection, data quality and a local project workbench"
 readme = "README.md"
 requires-python = ">=3.10,<3.15"
 # Single source of truth for dependencies. requirements.txt only installs this project (-e .).
@@ -25,10 +25,8 @@ dependencies = [
     "Flask-Moment>=1,<2",
     "Flask-Mail>=0.10,<0.11",
     "requests>=2.32,<3",
-    # Desktop workbench: terminals, native window, Parquet and PDF preview
+    # Project workbench: terminals (ConPTY on Windows), Parquet and PDF preview
     "pywinpty==2.0.15; sys_platform == 'win32'",
-    "pywebview==6.2.1; sys_platform == 'win32' or sys_platform == 'darwin'",
-    "pywin32==312; sys_platform == 'win32'",
     "pyarrow==25.0.1",
     "pypdfium2==5.15.2",
     "Pillow>=12.2,<13",
@@ -38,8 +36,6 @@ dependencies = [
 Repository = "https://github.com/HieuHoai2704/H-LogSense"
 
 [project.optional-dependencies]
-# Linux uses the distribution's GTK/WebKitGTK bindings through the system Python.
-desktop = ["pywebview==6.2.1; sys_platform == 'linux'"]
 # Browser and accessibility QA in scripts/qa.
 qa = ["playwright==1.64.1"]
 # Lint/format (ruff), type checking (mypy) and the git hook runner; see [tool.ruff], [tool.mypy].
@@ -51,9 +47,6 @@ course = ["mysql-connector-python>=9,<10", "skyfield>=1.49,<2"]
 
 [project.scripts]
 h-logsen = "app.workbench.__main__:main"
-
-[project.gui-scripts]
-h-logsen-desktop = "app.workbench.__main__:desktop_main"
 
 [tool.setuptools]
 py-modules = ["config"]
@@ -109,10 +102,8 @@ no_implicit_optional = true
 # Third-party packages without type information.
 module = [
     "flask_bootstrap", "flask_mail", "flask_moment", "flask_migrate", "flask_wtf.*", "wtforms.*",
-    "sklearn.*", "joblib", "numpy.*", "pyarrow.*", "pypdfium2", "webview.*", "gi.*", "winpty",
-    "win32com.*", "pywintypes", "pythoncom", "psutil", "PIL.*", "xgboost", "pymysql",
-    # Platform bridges: PyObjC (macOS) and pythonnet (.NET on Windows).
-    "AppKit", "Foundation", "objc", "System", "System.*",
+    "sklearn.*", "joblib", "numpy.*", "pyarrow.*", "pypdfium2", "winpty",
+    "psutil", "PIL.*", "xgboost", "pymysql",
 ]
 ignore_missing_imports = true
 
@@ -126,8 +117,3 @@ module = [
 ]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
-
-[[tool.mypy.overrides]]
-# Windows-only ctypes names need an ignore when checking for Linux/macOS, which is unused for Windows.
-module = ["app.workbench.platforms.windows"]
-warn_unused_ignores = false

@@ -136,10 +136,6 @@
   --terminal-text: #eff8ff;
 }
 
-:root[data-workbench-desktop]:not([data-native-glass]) {
-  background-color: var(--background, #191919);
-}
-
 /* Palette tokens are opaque; on a see-through window a selected row would read as a solid bar.
    Tint the text colour instead so selection stays visible at every frame transparency. */
 :root[data-theme|="glass"][data-native-glass],

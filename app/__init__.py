@@ -64,7 +64,6 @@ def create_app(config_overrides=None):
         return {
             "workspace_has_database": "sqlalchemy" in app.extensions,
             "workbench_enabled": "workbench" in app.extensions,
-            "workbench_desktop": app.extensions.get("workbench", {}).get("desktop", False),
         }
 
     @app.get("/")

@@ -321,9 +321,7 @@ window.bindWorkbenchFolder = ({ getScope, onOpen, canOpen = () => true }) => {
   }
 
   button.addEventListener("click", () => {
-    const scope = getScope();
-    if (document.documentElement.hasAttribute("data-workbench-desktop")) choose(scope, scope.api.pickProject);
-    else show(form.hidden);
+    show(form.hidden);
   });
   form.addEventListener("submit", (event) => {
     event.preventDefault();

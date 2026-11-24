@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ interface_language }}"{% if workspace_view == "monitor" %} data-workspace-home{% endif %}{% if workbench_desktop %} data-workbench-desktop{% endif %}>
+<html lang="{{ interface_language }}"{% if workspace_view == "monitor" %} data-workspace-home{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -286,7 +286,7 @@
             </select>
             <select id="terminal-more-menu" aria-label="{{ tr('Terminal session actions') }}">
               <option value="">{{ tr("Actions") }}</option>
-              {% if not workbench_desktop %}<option value="detach">{{ tr("Detach window") }}</option>{% endif %}
+              <option value="detach">{{ tr("Detach window") }}</option>
             </select>
             <button type="button" data-terminal-action="collapse" aria-expanded="true" aria-controls="terminal-panes">{{ tr("Collapse") }}</button>
           </div>
@@ -410,7 +410,7 @@
           </label>
           <label class="theme-option"><input type="radio" name="appearance" value="glass">
             <span class="theme-swatch" data-swatch="glass" aria-hidden="true"></span>
-            <span><strong>{{ tr("Black glass") }}</strong><small>{{ tr("Dark glass with adjustable transparency in the desktop app.") }}</small></span>
+            <span><strong>{{ tr("Black glass") }}</strong><small>{{ tr("Deep black glass tones with soft highlights.") }}</small></span>
           </label>
           <label class="theme-option"><input type="radio" name="appearance" value="glass-forest">
             <span class="theme-swatch" data-swatch="glass-forest" aria-hidden="true"></span>
@@ -437,15 +437,6 @@
             <span><strong>{{ tr("Warm gray") }}</strong><small>{{ tr("Beige-gray background, charcoal text.") }}</small></span>
           </label>
         </fieldset>
-        <div id="glass-controls">
-          <label for="glass-transparency">{{ tr("Frame transparency") }}</label>
-          <div>
-            <input id="glass-transparency" type="range" min="0" max="100" step="1">
-            <output id="glass-transparency-value" for="glass-transparency"></output>
-            <button id="glass-reset" type="button">{{ tr("Reset") }}</button>
-          </div>
-        </div>
-        <p id="glass-unavailable" class="muted">{{ tr("Frame transparency is available when desktop glass is active.") }}</p>
         <p id="appearance-status" class="muted" role="status"></p>
       </section>
       <section class="panel settings-panel" id="setting-language" aria-labelledby="lang-title" hidden>

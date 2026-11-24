@@ -12,9 +12,6 @@ pre-commit install                                        # ruff check, ruff for
 python -m playwright install chromium                     # browser end-to-end tests
 ```
 
-On Linux the native window additionally needs the system GTK and WebKitGTK bindings; see
-[packaging/posix/CAI_DAT_MAC_LINUX.txt](packaging/posix/CAI_DAT_MAC_LINUX.txt).
-
 ## Workflow
 
 1. Branch from `main`: `feature/<topic>`, `fix/<topic>`, `refactor/<topic>` or `docs/<topic>`.
@@ -83,11 +80,10 @@ export MYSQL_GRANT_HOST=%
 python -m scripts.qa.verify_mysql
 ```
 
-The packaged application is verified with a clean install:
+The web interface is verified end to end in Chromium:
 
 ```bash
-python -m scripts.release.package_workbench --output dist/ci
-python -m scripts.release.qa_portfolio_install dist/ci --desktop
+python -m scripts.qa.qa_workbench_browser
 ```
 
 ## Pull request checklist

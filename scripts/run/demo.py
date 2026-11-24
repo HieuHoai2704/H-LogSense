@@ -1,7 +1,6 @@
 """One-command demonstration environment: MySQL in Docker, demo accounts, real BGL data, open the app.
 
-    python -m scripts.run.demo             # start (first run: create, migrate, seed) and open the desktop app
-    python -m scripts.run.demo --browser   # same, in the default browser
+    python -m scripts.run.demo             # start (first run: create, migrate, seed) and open the browser
     python -m scripts.run.demo accounts    # print the demo accounts again
     python -m scripts.run.demo stop        # stop the MySQL container (data is kept)
 
@@ -281,7 +280,7 @@ def main(argv=None):
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("command", nargs="?", default="start", choices=["start", "accounts", "stop"])
-    parser.add_argument("--browser", action="store_true", help="Open in the default browser instead.")
+    parser.add_argument("--browser", action="store_true", help=argparse.SUPPRESS)  # always the browser now
     parser.add_argument("--no-open", action="store_true", help="Prepare everything but do not open the app.")
     args = parser.parse_args(argv)
     os.chdir(REPO_ROOT)
@@ -314,13 +313,10 @@ def main(argv=None):
     if args.no_open:
         say(f"ready. Open the app with DATABASE_URL from {STATE / 'demo.json'}.")
         return
-    say("opening H-logsen (close the window to stop the app; MySQL keeps running)")
-    mode = "--browser" if args.browser else "--desktop"
+    say("opening H-logsen in the browser (Ctrl+C stops the server; MySQL keeps running)")
     environment = {**os.environ, "DATABASE_URL": url(state)}
     environment.pop("FLASK_SECRET_KEY", None)  # a new secret per launch: closing the app signs out
-    raise SystemExit(
-        subprocess.run([sys.executable, "-m", "app.workbench", mode], env=environment).returncode
-    )
+    raise SystemExit(subprocess.run([sys.executable, "-m", "app.workbench"], env=environment).returncode)
 
 
 if __name__ == "__main__":
