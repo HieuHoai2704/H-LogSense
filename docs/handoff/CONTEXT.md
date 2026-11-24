@@ -4,8 +4,8 @@ File này tóm tắt mọi thứ đã làm và đã quyết định, để tiế
 với một trợ lý lập trình mới. Toàn bộ lời nhắn qua lại nằm trong [CHAT_TRANSCRIPT.md](CHAT_TRANSCRIPT.md)
 (đã che mật khẩu, token, email).
 
-**Cách dùng trên máy mới:** clone repo, mở trợ lý trong thư mục dự án và nhắn:
-*"Đọc docs/handoff/CONTEXT.md trước, cần thì đọc thêm docs/handoff/CHAT_TRANSCRIPT.md, rồi làm tiếp phần việc còn lại."*
+**Cách dùng trên máy mới:** làm theo [START_PROMPT.md](START_PROMPT.md): cài công cụ, clone repo, rồi dán prompt
+ở đó vào đoạn chat mới.
 
 ---
 
