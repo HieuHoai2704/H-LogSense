@@ -24,6 +24,8 @@ import time
 
 import pymysql
 
+from app.permissions import check_private, open_private, write_private
+
 
 def owned_root(value):
     root = Path(value).resolve()
@@ -36,9 +38,9 @@ def owned_root(value):
 
 
 def private_write(path, text):
-    path.write_text(text, encoding="utf-8")
-    if os.name != "nt":
-        path.chmod(0o600)
+    # Owner-only from creation, atomic (a crash never truncates the only copy of the credentials)
+    # and verified: chmod is ignored on filesystems without POSIX modes.
+    write_private(path, text)
 
 
 def load(root):
@@ -189,6 +191,8 @@ def backup(root, schema, output):
     status(root)
     info = load(root)
     destination = owned_root(output)
+    if destination.is_relative_to(Path(root).resolve()):
+        raise ValueError("Write backups outside the runtime directory.")
     destination.parent.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ, MYSQL_PWD=info["root_password"])
     args = [
@@ -206,7 +210,7 @@ def backup(root, schema, output):
         "--skip-triggers",
         schema,
     ]
-    with destination.open("xb") as output_file:
+    with open_private(destination) as output_file:  # owner-only before mysqldump writes any row
         result = subprocess.run(
             args,
             env=env,
@@ -215,8 +219,6 @@ def backup(root, schema, output):
             stderr=subprocess.PIPE,
             **hidden_options(),
         )
-    if os.name != "nt":
-        destination.chmod(0o600)
     if result.returncode:
         raise RuntimeError(
             "Backup failed; incomplete output retained, never restored automatically."
@@ -312,6 +314,7 @@ def initialize(root, basedir, port):
         if sock.connect_ex(("127.0.0.1", port)) == 0:
             raise ValueError("Port is already in use.")
     root.mkdir(parents=True, mode=0o700)
+    check_private(root)
     if os.name == "nt":
         identity = subprocess.run(
             ["whoami"], capture_output=True, text=True, check=True

@@ -22,6 +22,7 @@ from werkzeug.exceptions import NotFound
 
 from app.models import Dataset, ProcessingJob, SourceArtifact
 from app.paths import LOCAL_DIR, UPLOADS_DIR
+from app.permissions import InsecurePermissions, check_private
 from app.domain import UserDataset
 from app.parsers.bgl import parse_line, MAX_LINE_BYTES
 from app.services.bgl_ingestion import fingerprint, ingest_bgl, import_lease, ImportBusyError
@@ -49,7 +50,16 @@ def root_path():
     if not root.is_relative_to(local) or root == local:
         raise UploadError('upload_storage', 'Upload storage is not an owned local directory.', 503)
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
+    private_or_refuse(root)
     return root
+
+
+def private_or_refuse(path):
+    """Verify owner-only access; strict mode turns an exposed upload store into a 503."""
+    try:
+        check_private(path)
+    except InsecurePermissions:
+        raise UploadError('upload_storage', 'Upload storage is readable by other accounts.', 503) from None
 
 
 def directory(upload_id):
@@ -94,6 +104,7 @@ def protect_directory(folder):
     """Restrict original logs to the worker account before writing any bytes."""
     if os.name != 'nt':
         folder.chmod(0o700)
+        private_or_refuse(folder)
         return
     try:
         options = {'capture_output': True, 'check': True,
@@ -237,6 +248,7 @@ def stage_file(storage):
         if os.name != 'nt':
             for stored_path in folder.iterdir():
                 stored_path.chmod(0o600)
+                private_or_refuse(stored_path)
         bundle.update(manifest=manifest, manifest_sha256=fingerprint(path))
         return bundle
     except Exception:

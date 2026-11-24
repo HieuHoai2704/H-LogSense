@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 import re
 import stat
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, gettempdir
 import time
 from threading import RLock
 
@@ -19,7 +19,9 @@ SEARCH_ENTRIES = 12_000
 SEARCH_RESULTS = 80
 SKIPPED = {"node_modules", "__pycache__", "venv", "dist", "build"}
 FORBIDDEN_EXTENSIONS = {".pem", ".key", ".pfx", ".p12"}
-PRIVATE_FILES = {"id_rsa", "id_ed25519", "credentials.json", "secrets.json"}
+# Never opened even inside a selected project (SSH keys, agent trust files, credential stores).
+PRIVATE_FILES = {"id_rsa", "id_dsa", "id_ecdsa", "id_ecdsa_sk", "id_ed25519", "id_ed25519_sk", "authorized_keys",
+                 "known_hosts", "credentials", "credentials.json", "secrets.json"}
 FEATURES = {"gpu", "ssh", "external_parsers"}
 WORKSPACES = {"project", "analysis", "code"}
 ACTIVE_ROOT = ContextVar("workbench_project_root", default=None)
@@ -85,6 +87,8 @@ def component(name):
         and not any(ord(char) < 32 for char in name)
         and not name.endswith((" ", "."))
         and not windows_reserved(name)
+        # NTFS 8.3 aliases (SSH~1 for .ssh, CREDEN~1.JSO) would bypass the name rules on Windows.
+        and not (os.name == "nt" and re.search(r"~\d", name))
     )
 
 
@@ -117,6 +121,53 @@ def project_path(root, name, *, missing=False):
                 return path
             raise WorkspaceError("The file or folder has changed.", 404) from None
     return path
+
+
+def _real(path):
+    return Path(os.path.realpath(path))
+
+
+def protected_roots(state_directory):
+    """(trees, exact) folders a project root may never be: trees also cover everything beneath them."""
+    home = _real(Path.home())
+    trees = {_real(state_directory)}
+    exact = {home}
+    if os.name == "nt":
+        trees.update(_real(os.environ[name]) for name in
+                     ("WINDIR", "PROGRAMFILES", "PROGRAMFILES(X86)", "PROGRAMDATA", "APPDATA", "LOCALAPPDATA")
+                     if os.environ.get(name))
+        exact.update({home.parent})
+    else:
+        # realpath maps macOS /etc to /private/etc, so the rule holds on every platform.
+        trees.update(_real(name) for name in ("/etc", "/proc", "/sys", "/dev", "/usr", "/bin", "/sbin", "/lib",
+                                               "/lib32", "/lib64", "/boot", "/root", "/var/lib", "/var/log",
+                                               "/System", "/Library"))
+        trees.add(home / "Library")
+        exact.update(_real(name) for name in ("/home", "/Users", "/Volumes", "/var", "/run", "/run/media", "/opt",
+                                               "/srv", "/mnt", "/media", "/tmp", "/private", "/private/var",
+                                               "/snap"))
+    return trees, exact
+
+
+def root_allowed(root, state_directory):
+    """True when ``root`` (absolute, resolved) is a specific, non-system, non-hidden project folder."""
+    root = _real(root)
+    if root == Path(root.anchor):
+        return False
+    trees, exact = protected_roots(state_directory)
+    temp = _real(gettempdir())
+    if root in exact or root == temp:
+        return False
+    for tree in trees:
+        # Windows keeps %TEMP% inside AppData\Local: folders inside the temp directory stay allowed.
+        inside_temp = root.is_relative_to(temp) and temp.is_relative_to(tree) and temp != tree
+        if (root == tree or root.is_relative_to(tree)) and not inside_temp:
+            return False
+    # Never an ancestor of the profile store: the profile itself would become editable.
+    if _real(state_directory).is_relative_to(root):
+        return False
+    # Hidden folders anywhere in the path (~/.ssh, ~/.config/..., <checkout>/.local) hold private state.
+    return not any(part.startswith(".") for part in root.parts[1:])
 
 
 class ProjectStore:
@@ -189,13 +240,7 @@ class ProjectStore:
             root = candidate.resolve(strict=True)
         except (OSError, RuntimeError):
             raise WorkspaceError("The folder does not exist or cannot be accessed.", 404) from None
-        protected = {Path.home().resolve(), Path(root.anchor), self.directory}
-        if os.name == "nt":
-            protected.update(Path(os.environ[name]).resolve() for name in ("WINDIR", "PROGRAMFILES", "PROGRAMDATA") if name in os.environ)
-        else:
-            protected.update(map(Path, ("/etc", "/proc", "/sys", "/dev", "/usr", "/bin", "/sbin")))
-        if not root.is_dir() or any(root == path or (path != Path(root.anchor) and path != Path.home().resolve()
-                                                  and root.is_relative_to(path)) for path in protected):
+        if not root.is_dir() or not root_allowed(root, self.directory):
             raise WorkspaceError("Choose a specific project folder.")
         with self.edit_profile() as state:
             roots = state["roots"]
@@ -264,11 +309,12 @@ class ProjectStore:
         value = state["root"] if workspace == "project" else state["roots"].get(workspace)
         return self._checked_root(value)
 
-    @staticmethod
-    def _checked_root(value):
-        if value:
+    def _checked_root(self, value):
+        # Re-apply the selection rules: projects.json is a plain file and may have been edited.
+        if isinstance(value, str) and value:
             root = Path(value)
-            if root.is_dir() and not linked(root) and root.resolve() == root:
+            if (root.is_absolute() and root.is_dir() and not linked(root) and root.resolve() == root
+                    and root_allowed(root, self.directory)):
                 return root
         raise WorkspaceError("Choose a project folder first.", 409)
 
