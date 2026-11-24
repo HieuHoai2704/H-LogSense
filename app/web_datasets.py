@@ -114,5 +114,5 @@ def register_page_errors(app):
             return render_template("error_page.html", code=error.code, title=error.name), error.code
         return {"error": {"code": error.name.lower().replace(" ", "_"), "message": error.description}}, error.code
 
-    app.register_error_handler(404, error_page)
-    app.register_error_handler(500, error_page)
+    for code in (400, 403, 404, 405, 500):
+        app.register_error_handler(code, error_page)

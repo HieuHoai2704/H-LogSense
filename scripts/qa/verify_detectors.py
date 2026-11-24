@@ -7,7 +7,7 @@ from pathlib import Path
 import secrets
 import time
 
-from sqlalchemy import select, exists, func, case, and_, or_
+from sqlalchemy import select, func, case, and_, or_
 from sqlalchemy.orm import Session
 
 from app import create_app
@@ -23,6 +23,9 @@ from app.models import (
     Detector,
 )
 from app.services.detection import detect
+
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def verify(dataset_id, *, reuse=False):
@@ -200,7 +203,7 @@ def main():
     parser.add_argument("--reuse", action="store_true")
     args = parser.parse_args()
     result = verify(args.dataset, reuse=args.reuse)
-    path = Path("docs/database/measurements/detectors.json")
+    path = (REPO_ROOT / "docs/database/measurements/detectors.json")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(result, indent=2))
     print(json.dumps(result, indent=2))

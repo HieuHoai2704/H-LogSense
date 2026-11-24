@@ -125,7 +125,7 @@
   font-size: 13px;
   cursor: pointer;
   list-style: none;
-  user-select: none;
+  -webkit-user-select: none; user-select: none;
 }
 .project-tree details > summary::-webkit-details-marker { display: none; }
 .project-tree details > summary::marker { content: ""; }

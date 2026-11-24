@@ -11,6 +11,7 @@ from app.services.uploads import (
     MAX_REQUEST_BYTES, MAX_ATTEMPTS, UploadError, stage_file, discard, queue_upload,
     job_for_upload, serialize_job, load_bundle,
 )
+from app.i18n import translate
 
 uploads_api = Blueprint('uploads', __name__)
 
@@ -18,7 +19,7 @@ uploads_api = Blueprint('uploads', __name__)
 @uploads_api.errorhandler(UploadError)
 def invalid(error):
     db.session.rollback()
-    return jsonify(error={'code': error.code, 'message': error.message}), error.status
+    return jsonify(error={'code': error.code, 'message': translate(error.message)}), error.status
 
 
 @uploads_api.post('/api/v1/uploads')

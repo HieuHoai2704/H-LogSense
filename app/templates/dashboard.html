@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="{{ 'Investigate persisted anomaly outputs from MySQL.' if view.is_database else 'A single investigation workspace with explicitly synthetic anomaly fixtures.' }}">
+  <meta name="description" content="{{ tr('Investigate persisted anomaly outputs from MySQL.') if view.is_database else tr('A single investigation workspace with explicitly synthetic anomaly fixtures.') }}">
   <title>{{ tr("Investigation ·") }} {{ tr('MySQL') if view.is_database else tr('Demo workspace') }} · {{ app_name }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/console.css') }}">
   {% include "partials/language_assets.html" %}

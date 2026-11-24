@@ -23,13 +23,14 @@ from app.services.investigation import QueryError, integer, iso
 from app.services.log_queries import parse_scope, page, predicates, timeline
 from app.services.redaction import redact
 from app.services.csv_safety import safe_cell
+from app.i18n import translate
 
 logs_api = Blueprint("logs", __name__)
 
 
 @logs_api.errorhandler(QueryError)
 def invalid(error):
-    return jsonify(error={"code": "invalid_query", "message": str(error)}), 400
+    return jsonify(error={"code": "invalid_query", "message": translate(str(error))}), 400
 
 
 @logs_api.errorhandler(NotFound)

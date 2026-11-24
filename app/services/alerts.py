@@ -1,6 +1,7 @@
 """Idempotent alert decisions and a bounded, opt-in SMTP outbox."""
 
 from contextlib import nullcontext, suppress
+import logging
 from datetime import datetime, timedelta, timezone
 import os
 import smtplib
@@ -16,6 +17,10 @@ from app.models import AnomalyOutput, DetectorRun, DetectionUnit, LogEvent
 from app.domain import AlertRule, Alert, AlertDecision, AlertAudit, Notification
 from app.extensions import mail
 from config import APP_NAME
+
+log = logging.getLogger("h_logsen.alerts")
+# A claimed notification is retried if the dispatcher dies before recording the result.
+CLAIM_SECONDS = 600
 
 PRIORITIES = ["Low", "Medium", "High", "Critical"]
 
@@ -190,7 +195,7 @@ def deliver_notifications(engine, *, smtp_factory=None, alert_id=None):
             "MAIL_USE_TLS": True, "MAIL_SUPPRESS_SEND": suppressed,
         })
         query = select(Notification).where(
-            Notification.state.in_(["pending", "retry"]), Notification.attempts < 3,
+            Notification.state.in_(["pending", "retry", "sending"]), Notification.attempts < 3,
             Notification.next_attempt <= datetime.now(timezone.utc),
         ).order_by(Notification.id)
         if alert_id is not None:
@@ -207,24 +212,57 @@ def _dispatch_notifications(engine, mail_state, factory, sender, recipients, que
                 connection.send(notification_message(notification, sender, recipients))
                 captured += 1
         return {"status": "suppressed", "sent": 0, "captured": captured}
+    # A claim that expired after the last allowed attempt cannot be retried: close it.
+    with Session(engine) as session, session.begin():
+        for stale in session.scalars(
+            select(Notification).where(
+                Notification.state == "sending", Notification.attempts >= 3,
+                Notification.next_attempt <= datetime.now(timezone.utc),
+            ).with_for_update(skip_locked=True).limit(100)
+        ):
+            stale.state, stale.error_code = "failed", "delivery_unknown"
     sent = 0
     for _ in range(100):
+        # 1. Claim and count the attempt in its own transaction, before any network I/O, so a
+        #    failure while building or sending can never roll the counter back (no poison rows).
         with Session(engine) as session, session.begin():
             now = datetime.now(timezone.utc)
             notification = session.scalar(query.with_for_update(skip_locked=True).limit(1))
             if notification is None:
                 break
             notification.attempts += 1
+            notification.state = "sending"
+            notification.next_attempt = now + timedelta(seconds=CLAIM_SECONDS)
+            notification_id, attempts = notification.id, notification.attempts
+            try:
+                message = notification_message(notification, sender, recipients)
+            except Exception:
+                log.exception("notification %s could not be rendered", notification_id)
+                message = None
+        # 2. Send outside any database transaction: a commit failure can no longer resend mail.
+        outcome, code = "sent", None
+        if message is None:
+            outcome, code = "failed", "message_failed"
+        else:
             try:
                 with VerifiedSMTPConnection(mail_state, factory) as connection:
-                    connection.send(notification_message(notification, sender, recipients))
-                notification.state = "sent"
-                notification.error_code = None
+                    connection.send(message)
+            except (OSError, smtplib.SMTPException) as error:
+                log.warning("notification %s: SMTP delivery failed (%s)", notification_id, type(error).__name__)
+                outcome, code = "retry", "smtp_failed"
+            except Exception:
+                log.exception("notification %s could not be sent", notification_id)
+                outcome, code = "failed", "message_failed"
+        # 3. Record the outcome.
+        with Session(engine) as session, session.begin():
+            notification = session.get(Notification, notification_id)
+            if outcome == "sent":
+                notification.state, notification.error_code = "sent", None
                 sent += 1
-            except (OSError, smtplib.SMTPException):
-                notification.state = "failed" if notification.attempts >= 3 else "retry"
-                notification.error_code = "smtp_failed"
-                notification.next_attempt = now + timedelta(
-                    seconds=60 * 2**notification.attempts
-                )
+            elif outcome == "retry":
+                notification.state = "failed" if attempts >= 3 else "retry"
+                notification.error_code = code
+                notification.next_attempt = now + timedelta(seconds=60 * 2**attempts)
+            else:
+                notification.state, notification.error_code = "failed", code
     return {"status": "processed", "sent": sent}

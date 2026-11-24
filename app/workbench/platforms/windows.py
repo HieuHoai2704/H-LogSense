@@ -85,6 +85,7 @@ def close_terminal(process):
 
 def show_fatal_error(message):
     windll.user32.MessageBoxW(None, str(message), "H-logsen", 0x10)
+    return True
 
 
 def install_shortcuts():

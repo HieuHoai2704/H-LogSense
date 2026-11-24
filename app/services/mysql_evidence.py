@@ -6,7 +6,7 @@ import hashlib, json
 
 from itsdangerous import URLSafeTimedSerializer, BadData
 from flask import current_app
-from sqlalchemy import select, or_, and_
+from sqlalchemy import func, select, or_, and_
 
 from app.extensions import db
 from app.models import (
@@ -54,13 +54,16 @@ def evidence(identity, args):
         dataset_name=db.session.get(Dataset, dataset_id).name,
         model_run_id=run.id,
     )
-    material = load_evidence(
-        db.session,
-        dataset_id,
-        anomaly_id,
-        raw_offset=integer(args.get("raw_offset", 0), 0, 10000000, "Raw offset"),
-        raw_limit=integer(args.get("raw_limit", 2048), 128, 8192, "Raw limit"),
-    )
+    try:
+        material = load_evidence(
+            db.session,
+            dataset_id,
+            anomaly_id,
+            raw_offset=integer(args.get("raw_offset", 0), 0, 10000000, "Raw offset"),
+            raw_limit=integer(args.get("raw_limit", 2048), 128, 8192, "Raw limit"),
+        )
+    except ValueError:  # offset past the raw text: a client error, as on /api/v1/database
+        raise QueryError("Raw offset is beyond the available evidence.") from None
     supplied = material.get("raw_event")
     if supplied is None:
         sample = db.session.scalar(
@@ -69,12 +72,14 @@ def evidence(identity, args):
             .order_by(UnitEvent.id)
             .limit(1)
         )
-        if sample:
+        from app.models import RawLogRecord, SourceArtifact
+
+        parsed = db.session.get(E, sample) if sample else None
+        size = parsed and db.session.scalar(select(func.length(RawLogRecord.raw_bytes)).where(
+            RawLogRecord.dataset_id == dataset_id, RawLogRecord.id == parsed.raw_id))
+        if parsed is not None and size is not None and size <= 262144:  # same inline bound as load_evidence
             # Resolve a genuine sample raw row without pretending it represents the
             # whole window. The original unit remains the window in the contract.
-            from app.models import RawLogRecord, SourceArtifact
-
-            parsed = db.session.get(E, sample)
             raw = db.session.get(RawLogRecord, parsed.raw_id)
             artifact = db.session.get(SourceArtifact, raw.artifact_id)
             full = redact(raw.raw_bytes.decode("utf-8", errors="replace"))

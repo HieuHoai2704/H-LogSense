@@ -312,7 +312,7 @@ input,select{max-width:100%}
   color:white;
   font-weight:600;
   font-size:13px;
-  user-select:none;
+  -webkit-user-select: none; user-select: none;
   touch-action:pan-y}
 .priority-0{background:var(--console-neutral);
   color:var(--muted);

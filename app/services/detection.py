@@ -11,7 +11,7 @@ import joblib
 import numpy as np
 import sklearn
 from sklearn.ensemble import IsolationForest
-from sqlalchemy import select, or_, and_, insert
+from sqlalchemy import select, or_, and_
 from sqlalchemy.orm import Session
 
 from app.paths import MODEL_ARTIFACTS_DIR
@@ -132,6 +132,8 @@ def detect(
             select(Dataset).where(Dataset.id == dataset_id).with_for_update()
         )
         if dataset.input_revision != revision:
+            if model is not None:
+                path.unlink(missing_ok=True)  # never leave an orphaned model behind
             raise ValueError("Dataset revision changed during training.")
         detector = session.scalar(
             select(Detector).where(Detector.detector_key == "bgl-" + kind)

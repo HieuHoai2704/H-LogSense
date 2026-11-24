@@ -104,7 +104,11 @@ def store():
 
 
 def offset():
-    return integer(request.args.get("offset", 0, type=int), 0, 2**53 - 1)
+    value = request.args.get("offset", "0")
+    # An unparsable offset is a client error, never a silent restart from 0.
+    if not value.isascii() or not value.isdigit() or len(value) > 16:
+        raise WorkspaceError("Numeric value is out of range.")
+    return integer(int(value), 0, 2**53 - 1)
 
 
 @workbench.get("/session")

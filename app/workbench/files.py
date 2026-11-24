@@ -102,8 +102,16 @@ def windows_reserved(name):
     return name.partition(".")[0].rstrip(" ").upper() in WINDOWS_RESERVED
 
 
+def encodable(value):
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        return False
+    return True
+
+
 def project_path(root, name, *, missing=False):
-    if not isinstance(name, str) or len(name) > 1024:
+    if not isinstance(name, str) or len(name) > 1024 or not encodable(name):
         raise WorkspaceError("Invalid file path.")
     if name == "":
         return root
@@ -226,12 +234,16 @@ class ProjectStore:
         with self.profile_lock():
             state = self._read_state()
             yield state
-            atomic_write(self.path, json.dumps(state, ensure_ascii=False).encode("utf-8"))
+            try:
+                payload = json.dumps(state, ensure_ascii=False).encode("utf-8")
+            except UnicodeEncodeError:  # lone surrogates from a client: reject, keep the old profile
+                raise WorkspaceError("Invalid text value.") from None
+            atomic_write(self.path, payload)
 
     def select(self, value, workspace="project"):
         if workspace not in WORKSPACES:
             raise WorkspaceError("Invalid workspace.")
-        if not isinstance(value, str) or not value or "\0" in value or len(value) > 2048:
+        if not isinstance(value, str) or not value or "\0" in value or len(value) > 2048 or not encodable(value):
             raise WorkspaceError("Enter the absolute path of the project folder.")
         candidate = Path(value).expanduser()
         if not candidate.is_absolute() or candidate.anchor.startswith("\\\\"):

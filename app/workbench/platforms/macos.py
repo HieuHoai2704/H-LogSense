@@ -4,6 +4,18 @@ from . import ICON_PNG
 from .posix import close_terminal, open_terminal, shell_profiles  # noqa: F401  (backend interface)
 
 
+def show_fatal_error(message):
+    """Alert dialog for Finder/Dock launches; the text is passed as an argument, never as script."""
+    import subprocess
+
+    script = ['-e', 'on run argv', '-e', 'display alert "H-logsen" message (item 1 of argv) as critical', '-e', 'end run']
+    try:
+        subprocess.run(["osascript", *script, "--", str(message)], timeout=300, check=False, stdin=subprocess.DEVNULL)
+        return True
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
 def set_dock_icon():
     """A Python-launched app shows the Python rocket in the Dock; use the H-logsen artwork instead."""
     try:

@@ -11,7 +11,11 @@ from app.parsers.hdfs import BLOCK, parse_hdfs
 
 from .files import WorkspaceError
 
-OPENSTACK = re.compile(r"(?:(\S+\.log\S*)\s+)?(\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d(?:\.\d+)?)\s+(\d+)\s+(\w+)\s+(\S+)\s+(.*)")
+# Anchored at the timestamp; the optional "nova.log.1" source token is split off first. A single
+# optional (\S+\.log\S*) group backtracked quadratically on long tokens (a 1 MiB line took minutes).
+OPENSTACK = re.compile(r"(\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d(?:\.\d+)?)\s+(\d+)\s+(\w+)\s+(\S+)\s+(.*)")
+FIRST_TOKEN = re.compile(r"(\S+)\s+(.*)")
+MAX_RECORD_CHARS = 64 * 1024
 INSTANCE = re.compile(r"\[instance:\s*([a-fA-F0-9-]{36})\]")
 REQUEST = re.compile(r"\breq-[a-fA-F0-9-]{36}\b")
 
@@ -26,10 +30,16 @@ def parse_line(line, format_name):
         item = parse_hdfs(line)
         return {"timestamp_raw": item.timestamp_raw, "thread": item.thread, "level": item.level,
                 "component": item.component, "message": item.message, "units": list(item.block_ids)}
-    match = OPENSTACK.fullmatch(line)
+    if len(line) > MAX_RECORD_CHARS:
+        raise ValueError
+    source, match = None, OPENSTACK.fullmatch(line)
+    if not match:
+        split = FIRST_TOKEN.fullmatch(line)
+        if split and ".log" in split.group(1):
+            source, match = split.group(1), OPENSTACK.fullmatch(split.group(2))
     if not match:
         raise ValueError
-    source, stamp, process, level, component, message = match.groups()
+    stamp, process, level, component, message = match.groups()
     datetime.fromisoformat(stamp)
     return {"source": source, "timestamp_raw": stamp, "process": process, "level": level,
             "component": component, "message": message, "request_ids": REQUEST.findall(message),
@@ -85,7 +95,9 @@ def analyze(text, format_name, unit=None):
         return evaluate(text, unit)
     if format_name not in ("hdfs", "openstack", "jsonl", "csv"):
         raise WorkspaceError("Choose HDFS, OpenStack, JSONL, CSV or evaluation CSV.")
-    source = csv.DictReader(StringIO(text), strict=True) if format_name == "csv" else text.splitlines()
+    # Physical lines only: str.splitlines() also breaks on \x85, \u2028 and form feeds inside a record.
+    source = (csv.DictReader(StringIO(text), strict=True) if format_name == "csv"
+              else [line.removesuffix("\r") for line in text.split("\n")[:-1 if text.endswith("\n") else None]])
     counts = Counter()
     sample = []
     units = set()

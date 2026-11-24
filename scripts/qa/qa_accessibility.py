@@ -6,9 +6,12 @@ from playwright.sync_api import sync_playwright
 from werkzeug.serving import make_server
 from app import create_app
 
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def main():
-    axe = Path(".local/qa-tools/node_modules/axe-core/axe.min.js")
+    axe = (REPO_ROOT / ".local/qa-tools/node_modules/axe-core/axe.min.js")
     if not axe.is_file():
         raise RuntimeError(
             "Install the pinned QA-only axe-core package under .local/qa-tools."
@@ -78,7 +81,7 @@ def main():
         "status": "PASS" if not any(r["violations"] for r in reports) else "FAIL",
         "limits": "Automated checks only. Screen reader, manual contrast in every state and native macOS testing NOT RUN.",
     }
-    Path("docs/database/measurements/accessibility.json").write_text(
+    (REPO_ROOT / "docs/database/measurements/accessibility.json").write_text(
         json.dumps(report, indent=2)
     )
     print(json.dumps(report, indent=2))

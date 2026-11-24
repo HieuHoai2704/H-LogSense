@@ -7,7 +7,7 @@
       <optgroup label="{{ tr('Logs and evaluation') }}"><option value="hdfs">HDFS</option><option value="openstack">OpenStack</option>
         <option value="jsonl-log">{{ tr("JSONL log") }}</option><option value="csv-log">{{ tr("CSV log") }}</option><option value="evaluation">{{ tr("Evaluation CSV") }}</option></optgroup>
     </select></label>
-    <label>{{ tr("Evaluation unit") }} <select name="unit"><option value="event">Event</option><option value="hdfs_block">HDFS block</option><option value="openstack_instance">OpenStack VM</option></select></label>
+    <label>{{ tr("Evaluation unit") }} <select name="unit"><option value="event">{{ tr("Event") }}</option><option value="hdfs_block">{{ tr("HDFS block") }}</option><option value="openstack_instance">{{ tr("OpenStack VM") }}</option></select></label>
     <button type="submit">{{ tr("Analyze file") }}</button>
   </form>
   <p>{{ tr("Read locally · CSV/JSONL up to 1 MiB · Parquet up to 256 MiB · statistics up to 5,000 rows.") }}</p>

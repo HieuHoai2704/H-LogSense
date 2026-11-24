@@ -36,7 +36,7 @@ def configure_database(app):
                 "pool_pre_ping": True,
                 "pool_recycle": 1800,
                 "hide_parameters": True,
-                "connect_args": {"connect_timeout": 5},
+                "connect_args": {"connect_timeout": 5, "read_timeout": 600, "write_timeout": 600},  # a stalled server frees the thread
             },
         )
         db.init_app(app)

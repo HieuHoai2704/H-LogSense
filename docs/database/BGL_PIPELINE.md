@@ -77,7 +77,7 @@ replacement and distributed job scheduling remain outside this task.
 
 | Version | Behaviour |
 | --- | --- |
-| `bgl-1.1.0` (current) | A row with empty content (exactly 9 fields, e.g. `... RAS KERNEL FATAL`) is a valid event with message `""`. A carriage return inside a line is `invalid_line_break`. The full Loghub BGL archive has 34,470 empty-content rows (0.72%) that `bgl-1.0.0` dropped, and no embedded CR. |
+| `bgl-1.1.0` (current) | A row with empty content (exactly 9 fields, e.g. `... RAS KERNEL FATAL`) is a valid event with message `""`. A carriage return inside a line is `invalid_line_break`. An epoch more than 1.5 days from the printed date is `invalid_timestamp`. The full Loghub BGL archive has 34,470 empty-content rows (0.72%) that `bgl-1.0.0` dropped, no embedded CR and at most a 20-hour epoch/date offset, so no real row is rejected. |
 | `bgl-1.0.0` | Empty-content rows were stored as `invalid_field_count` and produced no event or label. |
 
 New datasets and uploads use the current version. An artifact keeps the version it started with,

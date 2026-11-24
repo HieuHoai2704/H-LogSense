@@ -104,6 +104,12 @@ class ParserVersionTests(unittest.TestCase):
         self.assertEqual(parse_line(LINE.replace(b" test", b"\r test"), 1, 0).error, "invalid_line_break")
         self.assertIsNone(parse_line(LINE.replace(b"\n", b"\r\n"), 1, 0).error)
 
+    def test_epoch_must_match_the_printed_date(self):
+        self.assertEqual(parse_line(LINE.replace(b"1117838570", b"0"), 1, 0).error, "invalid_timestamp")
+        self.assertEqual(parse_line(LINE.replace(b"1117838570", b"253402300000"), 1, 0).error, "invalid_timestamp")
+        self.assertIsNone(parse_line(LINE.replace(b"1117838570", b"0"), 1, 0, LEGACY_VERSION).error)
+        self.assertIsNone(parse_line(LINE.replace(b"1117838570", b"1117810000"), 1, 0).error)  # 8 h earlier
+
     def test_iterator_and_unknown_version(self):
         records = list(iter_records(BytesIO(EMPTY_CONTENT), version=LEGACY_VERSION))
         self.assertEqual(records[0].error, "invalid_field_count")

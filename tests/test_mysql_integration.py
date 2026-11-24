@@ -37,7 +37,7 @@ from app.models import (
     ProcessingJob,
 )
 from app.repositories import page_events, archive_dataset
-from app.services.bgl_ingestion import ingest_bgl, fingerprint
+from app.services.bgl_ingestion import ingest_bgl
 from app.services.detection import detect
 
 LINE = b"- 1117838570 2005.06.03 R02-M1-N0-C:J12-U11 2005-06-03-15.42.50.363779 R02-M1-N0-C:J12-U11 RAS KERNEL INFO example\n"

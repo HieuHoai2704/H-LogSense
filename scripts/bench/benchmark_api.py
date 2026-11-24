@@ -10,6 +10,9 @@ from werkzeug.serving import make_server
 from app import create_app
 from app.extensions import db
 
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def distribution(values):
     return {
@@ -148,7 +151,7 @@ def main():
             "conditions": "20 sequential warm loopback HTTP requests per endpoint and dataset; login excluded. Existing workstation/schema, no synthetic counts.",
             "before_same_workload": "NOT RUN: real log API and real-data investigation adapter did not exist at the original baseline. Fixture latency is not a valid before comparison.",
         }
-        Path("docs/database/measurements/api-performance.json").write_text(
+        (REPO_ROOT / "docs/database/measurements/api-performance.json").write_text(
             json.dumps(result, indent=2)
         )
         print(

@@ -14,13 +14,14 @@ from app.services.redaction import redact
 from app.services.csv_safety import safe_cell
 from app.services.investigation import (QueryError, REVISION, SOURCES, build, detail,
                                         export_rows, query)
+from app.i18n import translate
 
 api = Blueprint('anomalies', __name__, url_prefix='/api/v1')
 
 
 @api.errorhandler(QueryError)
 def invalid_query(error):
-    return jsonify(error={'code': 'invalid_query', 'message': str(error)}), 400
+    return jsonify(error={'code': 'invalid_query', 'message': translate(str(error))}), 400
 
 
 @api.before_request
@@ -31,7 +32,7 @@ def validate_revision():
         return None
     authorize_source(request.args.get('source', 'demo'))
     if request.args.get('revision', REVISION) != REVISION:
-        return jsonify(error={'code': 'revision_changed', 'message': 'Data revision changed. Refresh this scope before continuing.'}), 409
+        return jsonify(error={'code': 'revision_changed', 'message': translate('Data revision changed. Refresh this scope before continuing.')}), 409
 
 
 @api.after_request

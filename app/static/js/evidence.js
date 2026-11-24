@@ -83,7 +83,7 @@ window.EvidenceDrawer = (() => {
     for (const event of data.items) {
       const row = document.createElement("div"); row.className = "related-record";
       const button = document.createElement("button"); button.dataset.relatedId = event.id;
-      button.textContent = `${event.id} · ${event.message || "Message unavailable"}`;
+      button.textContent = `${event.id} · ${event.message || t("Message unavailable")}`;
       const meta = document.createElement("p"); meta.textContent = `${event.timestamp} · ${event.host ?? "Unavailable"} / ${event.service ?? "Unavailable"}`;
       const reason = document.createElement("p"); reason.textContent = event.relationship_reasons.join(" · ");
       row.append(button, meta, reason); container.append(row);

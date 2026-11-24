@@ -3,18 +3,19 @@
 from flask import Blueprint, jsonify, request, g
 from sqlalchemy import select
 from app.extensions import db
-from app.models import Dataset, Detector
+from app.models import Detector
 from app.domain import AlertRule, Alert, AlertAudit, User, UserDataset
 from app.security import roles, require_dataset, Forbidden
 from app.services.investigation import integer, QueryError
 from app.services.redaction import redact
+from app.i18n import translate
 
 alerts_api = Blueprint("alerts", __name__)
 
 
 @alerts_api.errorhandler(QueryError)
 def invalid(error):
-    return jsonify(error={"code": "invalid_query", "message": str(error)}), 400
+    return jsonify(error={"code": "invalid_query", "message": translate(str(error))}), 400
 
 
 @alerts_api.post("/api/v1/alert-rules")
@@ -32,6 +33,7 @@ def create_rule():
     if (
         not isinstance(name, str)
         or not 1 <= len(name) <= 100
+        or not isinstance(priority, str)
         or priority not in {"Low", "Medium", "High", "Critical"}
     ):
         raise QueryError("Valid name and priority required.")
@@ -107,6 +109,8 @@ def alert_detail(alert_id):
         changes = {}
         if "status" in data:
             target = data["status"]
+            if not isinstance(target, str):
+                raise QueryError("Unknown incident change.")
             allowed = {
                 "open": {"acknowledged"},
                 "acknowledged": {"investigating", "resolved"},

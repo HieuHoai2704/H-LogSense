@@ -51,6 +51,8 @@ def instant(value):
 
 def integer(value, lower, upper, name):
     try:
+        if isinstance(value, (bool, float)):
+            raise ValueError()  # JSON true/1.9 must not silently become 1
         number = int(value)
         if not lower <= number <= upper:
             raise ValueError()

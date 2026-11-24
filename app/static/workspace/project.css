@@ -160,7 +160,7 @@ main { width: 100%; min-width: 0; }
 .editor-file-path { padding: 6px 12px; min-height: 28px; color: var(--muted); font: 11px var(--mono); overflow-wrap: anywhere; }
 .editor-code { min-height: 240px; max-height: 390px; margin: 0; padding: 10px 13px; overflow: auto; border-top: 1px solid var(--border); background: var(--background); color: var(--text); font: 12px/1.65 var(--mono); }
 .editor-line { display: block; white-space: pre; }
-.editor-line::before { content: attr(data-line); display: inline-block; width: 4ch; margin-inline-end: 2ch; text-align: right; color: var(--muted); user-select: none; }
+.editor-line::before { content: attr(data-line); display: inline-block; width: 4ch; margin-inline-end: 2ch; text-align: right; color: var(--muted); -webkit-user-select: none; user-select: none; }
 .settings-nav { display: grid; gap: 4px; padding: 0 10px; }
 .settings-nav h2 { padding: 0 4px 6px; font-size: 15px; }
 .settings-nav button { border-color: transparent; text-align: left; }

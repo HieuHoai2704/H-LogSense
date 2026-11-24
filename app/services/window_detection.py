@@ -99,6 +99,21 @@ def aggregate_windows(rows, seconds=300, include_templates=False):
 
 
 def run_windows(engine, dataset_id, job_key, configuration):
+    """Run a window detector. Temporary files never outlive the call: the feature cache is always
+    removed, and a model file is kept only when a new run references it (provenance)."""
+    files = {}
+    try:
+        return _run_windows(engine, dataset_id, job_key, configuration, files)
+    finally:
+        cache = files.get("features")
+        if cache is not None:
+            cache.unlink(missing_ok=True)
+        model = files.get("model")
+        if model is not None and not files.get("model_referenced"):
+            model.unlink(missing_ok=True)
+
+
+def _run_windows(engine, dataset_id, job_key, configuration, files):
     if "model_id" in configuration:
         from app.services.validated_if import run_validated
 
@@ -160,6 +175,7 @@ def run_windows(engine, dataset_id, job_key, configuration):
     root = WINDOW_FEATURES_DIR
     root.mkdir(parents=True, exist_ok=True)
     file = root / (uuid4().hex + ".jsonl")
+    files["features"] = file
     training = []
     validation = []
     counts = {"train": 0, "validation": 0, "test": 0}
@@ -212,6 +228,7 @@ def run_windows(engine, dataset_id, job_key, configuration):
         ).fit(x)
         threshold = float(np.quantile(model.score_samples(v), 0.01))
         model_path = root / (uuid4().hex + ".joblib")
+        files["model"] = model_path
         joblib.dump(model, model_path)
         artifact = {
             "key": model_path.name,
@@ -301,6 +318,7 @@ def run_windows(engine, dataset_id, job_key, configuration):
             )
             session.add(run)
             session.flush()
+            files["model_referenced"] = True  # this run's configuration records the model file
         elif run.input_revision != revision or any(
             run.configuration.get(k) != config.get(k)
             for k in (
@@ -526,7 +544,24 @@ def evaluate_windows(engine, dataset_id, run_id):
             ((micros < 0) & (func.mod(micros, divisor) != 0), 1), else_=0
         )
 
+        # Only windows this run predicted are scored: read labels for their time span instead of the
+        # whole dataset (millions of host-windows on the full BGL archive).
+        lowest, highest = session.execute(
+            select(func.min(DetectionUnit.start_time), func.max(DetectionUnit.start_time))
+            .join(
+                DetectionPrediction,
+                (DetectionPrediction.dataset_id == DetectionUnit.dataset_id)
+                & (DetectionPrediction.unit_id == DetectionUnit.id),
+            )
+            .where(
+                DetectionPrediction.dataset_id == dataset_id,
+                DetectionPrediction.run_id == run_id,
+            )
+        ).one()
+
         def window_labels(source, version):
+            if lowest is None:
+                return {}
             rows = session.execute(
                 select(
                     LogEvent.host,
@@ -542,6 +577,8 @@ def evaluate_windows(engine, dataset_id, run_id):
                 .where(
                     LogEvent.dataset_id == dataset_id,
                     LogEvent.id <= config["maximum_event_id"],
+                    LogEvent.timestamp >= lowest,
+                    LogEvent.timestamp < highest + timedelta(seconds=seconds),
                     GroundTruthLabel.source == source,
                     GroundTruthLabel.version == version,
                 )

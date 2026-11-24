@@ -7,7 +7,6 @@ No model fitting/calibration or existing dataset mutation occurs.
 
 import csv
 import argparse
-from datetime import datetime, timedelta, timezone
 import hashlib
 import io
 import json
@@ -27,13 +26,16 @@ from app.models import DataSource, Dataset, AnomalyOutput, DetectionUnit, LogEve
 from app.domain import DetectionPrediction
 from app.services.bgl_ingestion import ingest_bgl, fingerprint
 from app.services.validated_if import DEFAULT_MODEL_ID, run_validated, model_card
-from app.services.window_detection import EPOCH, second
+from app.services.window_detection import second
 from scripts.ml.audit_if_holdout import ROOT, CURATED
 from scripts.ml.audit_isolation_forest import records
 from scripts.run.mysql_runtime import owned_root, status
 from scripts.qa.verify_university_e2e import runtime_url
 
-PRIVATE = Path('.local/validated_if_bgl_proof')
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+PRIVATE = (REPO_ROOT / '.local/validated_if_bgl_proof')
 
 
 def main():

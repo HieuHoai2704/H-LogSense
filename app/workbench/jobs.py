@@ -174,8 +174,14 @@ class Runs:
 
     def get(self, run_id, root):
         folder = self.path(run_id)
-        record = json.loads((folder / "run.json").read_text(encoding="utf-8"))
-        if record["root"] != str(root):
+        try:
+            record = json.loads((folder / "run.json").read_text(encoding="utf-8"))
+            owner = record["root"]
+            record["status"]
+        except (OSError, ValueError, KeyError, TypeError):
+            # A corrupt or foreign run.json must not break the whole run list (or return a 500).
+            raise WorkspaceError("Run not found in this project.", 404) from None
+        if owner != str(root):
             raise WorkspaceError("Run not found in this project.", 404)
         if record.get("source") == "attached":
             record["status"] = attached.status(record, root)
@@ -185,7 +191,13 @@ class Runs:
 
     def recent(self, root):
         rows = []
-        for folder in sorted(self.directory.iterdir(), key=lambda item: item.stat().st_mtime_ns, reverse=True)[:100]:
+        def modified(item):
+            try:
+                return item.stat().st_mtime_ns
+            except OSError:  # removed while listing
+                return 0
+
+        for folder in sorted(self.directory.iterdir(), key=modified, reverse=True)[:100]:
             try:
                 rows.append(self.get(folder.name, root))
             except (OSError, ValueError, WorkspaceError):
@@ -228,7 +240,7 @@ class Runs:
                 process = subprocess.Popen(command, cwd=Path(__file__).resolve().parents[2], env=child_environment(),
                                            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                            **options)
-            except OSError:
+            except (OSError, ValueError):  # ValueError: arguments that cannot be encoded for the OS
                 save_record(folder, {**record, "status": "failed", "ended_at": now()})
                 raise WorkspaceError("Could not start the run supervisor.", 503) from None
             from threading import Thread

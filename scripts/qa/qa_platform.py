@@ -8,12 +8,15 @@ from playwright.sync_api import sync_playwright, expect
 from werkzeug.serving import make_server
 from app import create_app
 
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def main():
     dataset = int(os.environ["QA_DATASET_ID"])
     username = os.environ["QA_USERNAME"]
     password = os.environ["QA_PASSWORD"]
-    output = Path(".local/database-verification/platform-browser")
+    output = (REPO_ROOT / ".local/database-verification/platform-browser")
     output.mkdir(parents=True, exist_ok=True)
     logging.getLogger("werkzeug").setLevel(logging.ERROR)
     app = create_app()
@@ -135,7 +138,7 @@ def main():
             expect(page.locator(".demo-notice")).to_contain_text("MYSQL")
             assert page.locator("[data-row-id]").count() <= 100
             if page.locator("[data-row-id]").count():
-                total = int(page.locator("#events-title span").inner_text())
+                assert int(page.locator("#events-title span").inner_text()) >= 1  # count is numeric
                 page.locator("[data-mode=volume]").click()
                 expect(page.locator(".timeline-panel")).to_have_class(
                     __import__("re").compile("mode-volume")
@@ -210,7 +213,7 @@ def main():
             "actual external SMTP delivery",
         ],
     }
-    Path("docs/database/measurements/platform-browser.json").write_text(
+    (REPO_ROOT / "docs/database/measurements/platform-browser.json").write_text(
         json.dumps(report, indent=2)
     )
     print(json.dumps(report, indent=2))

@@ -6,7 +6,7 @@ Stages run in separate processes; restart only the dedicated QA runtime.
 
 import argparse
 import csv
-from datetime import datetime, date, timedelta, timezone
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 import hashlib
 import io
@@ -33,8 +33,15 @@ from werkzeug.security import generate_password_hash
 from app import create_app
 from app.extensions import db
 from app.models import (
-    Dataset, DataSource, SourceArtifact, RawLogRecord, LogEvent,
-    GroundTruthLabel, DetectionUnit, UnitEvent, DetectorRun, AnomalyOutput,
+    Dataset,
+    DataSource,
+    SourceArtifact,
+    RawLogRecord,
+    LogEvent,
+    GroundTruthLabel,
+    DetectionUnit,
+    DetectorRun,
+    AnomalyOutput,
     ProcessingJob,
 )
 from app.domain import User, UserDataset, DetectionPrediction, EvaluationReport
@@ -42,8 +49,11 @@ from app.services.bgl_ingestion import ingest_bgl
 from scripts.bench.benchmark_bgl import verify_provenance
 from scripts.run.mysql_runtime import owned_root, load, status, stop, start, private_write
 
-PRIVATE = Path('.local/university-qa/e2e')
-REPORT = Path('docs/releases/measurements/university-mvp-v1')
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+PRIVATE = (REPO_ROOT / '.local/university-qa/e2e')
+REPORT = (REPO_ROOT / 'docs/releases/measurements/university-mvp-v1')
 
 
 def save(path, data):
@@ -502,7 +512,7 @@ def main():
     parser.add_argument('--stage', required=True, choices=['setup', 'detect', 'verify', 'browser', 'restart', 'summary'])
     parser.add_argument('--kind', choices=['rule', 'isolation_forest'])
     parser.add_argument('--phase', default='before', choices=['before', 'after'])
-    parser.add_argument('--archive', type=Path, default=Path('data/raw/BGL.zip'))
+    parser.add_argument('--archive', type=Path, default=(REPO_ROOT / 'data/raw/BGL.zip'))
     parser.add_argument('--lines', type=int, default=100000)
     args = parser.parse_args()
     if not 10000 <= args.lines <= 1000000:

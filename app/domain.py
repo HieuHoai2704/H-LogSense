@@ -3,7 +3,6 @@
 from datetime import datetime, timezone
 from sqlalchemy import (
     String,
-    Text,
     BigInteger,
     Integer,
     Boolean,
@@ -12,6 +11,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     UniqueConstraint,
     CheckConstraint,
+    Index,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.mysql import DOUBLE
@@ -141,6 +141,8 @@ class Notification(Scoped, db.Model):
         UniqueConstraint("dataset_id", "alert_id"),
         scoped_fk("alert_id", "alerts", "fk_notification_alert"),
         CheckConstraint("attempts >= 0 AND attempts <= 3", name="attempts"),
+        CheckConstraint("state IN ('pending','retry','sending','sent','failed')", name="state"),
+        Index("ix_notification_outbox_state_next_attempt_id", "state", "next_attempt", "id"),
         options(),
     )
     alert_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
@@ -158,6 +160,7 @@ class AlertDecision(Scoped, db.Model):
         UniqueConstraint("dataset_id", "rule_id", "anomaly_id"),
         scoped_fk("rule_id", "alert_rules", "fk_decision_rule"),
         scoped_fk("anomaly_id", "anomaly_outputs", "fk_decision_anomaly"),
+        CheckConstraint("outcome IN ('alerted','cooldown')", name="outcome"),
         options(),
     )
     rule_id: Mapped[int] = mapped_column(BigInteger, nullable=False)

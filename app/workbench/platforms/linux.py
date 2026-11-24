@@ -17,6 +17,23 @@ ICON = ICON_PNG
 _NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 
 
+def show_fatal_error(message):
+    """Show a desktop dialog (zenity, kdialog) or notification; a menu launch has no terminal."""
+    import shutil
+
+    text = str(message)
+    for command in (["zenity", "--error", "--no-markup", "--title=H-logsen", "--text", text],
+                    ["kdialog", "--title", "H-logsen", "--error", text],
+                    ["notify-send", "--app-name=H-logsen", "H-logsen", text]):
+        if shutil.which(command[0]):
+            try:
+                subprocess.run(command, timeout=300, check=False, stdin=subprocess.DEVNULL)
+                return True
+            except (OSError, subprocess.SubprocessError):
+                continue
+    return False
+
+
 def desktop_options():
     """Return (create_window options, webview.start options)."""
     try:
@@ -32,8 +49,31 @@ def desktop_options():
     return {"transparent": True}, {"icon": str(ICON)}
 
 
+def compositing_available(timeout=2.0):
+    """Ask GTK on its main loop whether the screen composites; without it an RGBA window is black."""
+    import threading
+
+    try:
+        import gi
+
+        gi.require_version("Gdk", "3.0")
+        from gi.repository import Gdk, GLib
+    except (ImportError, ValueError):
+        return True
+    result, done = {}, threading.Event()
+
+    def check():
+        screen = Gdk.Screen.get_default()
+        result["value"] = screen is None or bool(screen.is_composited())
+        done.set()
+        return False
+
+    GLib.idle_add(check)
+    return result["value"] if done.wait(timeout) else True
+
+
 def set_window_glass(window, enabled):
-    return bool(window and window.transparent and enabled)
+    return bool(window and window.transparent and enabled and compositing_available())
 
 
 HEX_COLOR = re.compile(r"#[0-9a-fA-F]{6}")

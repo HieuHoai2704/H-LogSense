@@ -1,7 +1,7 @@
 """Actual MySQL platform/API/auth/incident/window-model integration tests."""
 
 from datetime import datetime, timedelta, timezone
-import io, json, os, smtplib, unittest
+import json, os, smtplib, unittest
 from types import SimpleNamespace
 from unittest.mock import patch, MagicMock
 from uuid import uuid4
@@ -13,17 +13,8 @@ from werkzeug.security import generate_password_hash
 import test_mysql_integration as baseline
 
 LINE, NOW = baseline.LINE, baseline.NOW
-from app.models import Dataset, LogEvent, AnomalyOutput, ProcessingJob, DetectorRun
-from app.domain import (
-    User,
-    UserDataset,
-    AlertRule,
-    Alert,
-    AlertAudit,
-    Notification,
-    DetectionPrediction,
-    EvaluationReport,
-)
+from app.models import AnomalyOutput, ProcessingJob, DetectorRun
+from app.domain import User, UserDataset, AlertRule, Notification, DetectionPrediction, EvaluationReport
 from app.services.bgl_ingestion import ingest_bgl
 from app.services.detection import detect
 from app.services.window_detection import aggregate_windows, template, run_windows

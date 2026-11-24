@@ -7,7 +7,6 @@ queued/running upload jobs are marked failed on teardown, avoiding queue leaks.
 import csv
 import hashlib
 import io
-import json
 import os
 from pathlib import Path
 import unittest
@@ -21,9 +20,8 @@ from werkzeug.datastructures import MultiDict
 import test_mysql_integration as baseline
 import test_dataset_crud_mysql as crud
 from app.models import Dataset, GroundTruthLabel, LogEvent, ProcessingJob, RawLogRecord, SourceArtifact
-from app.domain import UserDataset
 from app.services.bgl_ingestion import import_lease
-from app.services.uploads import TYPE, directory, run_once
+from app.services.uploads import TYPE, run_once
 import app.services.uploads as uploads
 
 

@@ -78,6 +78,14 @@ def _inspect(model_id):
 
 
 def model_card(model_id=DEFAULT_MODEL_ID):
+    try:
+        return _model_card(model_id)
+    except (KeyError, TypeError, IndexError, AttributeError) as error:
+        # A malformed frozen bundle is "unavailable" (callers handle ValueError), never a 500.
+        raise ValueError('Validated model bundle is malformed.') from error
+
+
+def _model_card(model_id):
     directory, manifest, validation, selection, names = _inspect(model_id)
     version = fingerprint(directory / 'selection.json')
     result = {

@@ -16,6 +16,9 @@ import unittest
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def main():
     admin_url = make_url(os.environ["MYSQL_ADMIN_URL"])
@@ -78,7 +81,7 @@ def main():
         else "INCOMPLETE",
         "cleanup": "No database/table/volume dropped. Generated fixtures retained.",
     }
-    destination = Path(".local/database-verification")
+    destination = (REPO_ROOT / ".local/database-verification")
     destination.mkdir(parents=True, exist_ok=True)
     (destination / "integration-results.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))

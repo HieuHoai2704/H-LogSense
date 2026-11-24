@@ -1,209 +1,255 @@
-# Khung code LogSense AI hiện tại
+# Hệ thống code H-logsen (LogSense AI)
 
-> **Lưu ý (2026-11-24):** cây thư mục đã được sắp xếp lại (`scripts/<nhóm>/`, `packaging/`, `academic/`, `docs/history/`). Xem bản đồ hiện tại ở phần *Project map* trong [README](../../README.md). Nội dung dưới đây là bản kiểm kê ngày 2026-11-05.
+Kiểm kê ngày 2026-11-24, nhánh `feature/mysql-database-foundation`, sau đợt sửa audit 1–5.
+Thay cho bản kiểm kê ngày 2026-11-05 (272 file, trước khi sắp xếp lại thư mục).
 
-Kiểm đếm trực tiếp ngày 2026-11-05 (Asia/Saigon), tại `D:\1)_KHUTAOSONG\2)Project\14)LogSense_AI`.
+## Tổng quan
 
-**272 file thuộc phần dự án**, gồm file đang được Git quản lý và file mới chưa commit, theo quy tắc Git ignore. Đây không phải 272 file code chạy ứng dụng.
+H-logsen là một **Flask modular monolith**: một ứng dụng Python phục vụ cả giao diện (Jinja + JS thuần,
+không React/Vue) lẫn REST API. Có hai cách chạy:
 
-| Phần | Số file | Vai trò |
-|---|---:|---|
-| app | 54 | Ứng dụng chính: Flask backend và frontend |
-| scripts | 23 | Workers, lệnh vận hành, benchmark và QA |
-| tests | 19 | File unit/API/integration tests |
-| migrations | 8 | Cấu hình và lịch sử schema MySQL |
-| docs | 162 | Tài liệu, báo cáo, kết quả JSON/CSV và hình minh họa |
-| data | 1 | File hỗ trợ cấu trúc dữ liệu; archive lớn bị loại khỏi Git |
-| File ở thư mục gốc | 5 | README, cấu hình, dependencies và ignore |
-| Tổng | 272 | Không đếm venv/runtime/backup/cache/dataset lớn |
+- **Workbench desktop** (`h-logsen`): cửa sổ pywebview (WebKitGTK trên Linux, WKWebView trên macOS,
+  WebView2 trên Windows) mở ứng dụng Flask trên loopback, có bearer token. Gồm explorer dự án, trình
+  soạn code, terminal, chạy và so sánh huấn luyện, xem trước dữ liệu.
+- **Investigation trên MySQL**: điều tra log BGL đã nhập vào MySQL 8 (timeline, evidence, cảnh báo,
+  incident). Không có MySQL thì giao diện dùng dữ liệu minh họa (`source=demo`).
 
-Không tính `.git`, `.venv`, `.local`, cache và các dataset/archive lớn bị Git bỏ qua. Các thư mục này vẫn tồn tại và có thể chứa hàng nghìn file. Chỉ `app` là phần ứng dụng chính, có 54 file. `tests` có 19 file, khác với số test cases; báo cáo QA đã ghi 264 cases ở discovery và DB execution riêng.
+Việc nặng (nhập log, chạy detector, gửi email) chạy trong **hai worker** ngoài request HTTP.
 
-## Frontend và backend nằm ở đâu?
+| Lớp | Thư mục | Số file | Số dòng (xấp xỉ) |
+|---|---|---:|---:|
+| Ứng dụng (backend) | `app/*.py`, `app/api`, `app/services`, `app/parsers` | 47 | 7 800 |
+| Workbench desktop | `app/workbench`, `app/workbench/platforms` | 19 | 3 150 |
+| Giao diện | `app/templates`, `app/static` (không tính `vendor/`) | 50 | 9 000 |
+| Bản dịch | `app/locales` (14 ngôn ngữ + `workspace.json`) | 15 | 16 000 |
+| Schema DB | `migrations` | 9 | 1 130 |
+| Lệnh vận hành, QA, ML, đóng gói | `scripts` | 38 | 7 750 |
+| Kiểm thử | `tests` | 27 | 6 000 |
+| Đóng gói người dùng | `packaging` | 7 | 170 |
+| Nghiên cứu / môn học | `academic` | 92 | 12 500 |
+| Tài liệu | `docs` | 167 | 19 500 |
 
-- Backend: `app/api`, `app/services`, `app/parsers`, models/domain/security.
-- Frontend: `app/templates` là HTML/Jinja; `app/static/css` là giao diện; `app/static/js` là tương tác.
-- Database: models/domain mô tả ORM; migrations lưu thay đổi schema.
-- Workers: scripts/run/ingestion_worker.py và scripts/run/worker.py chạy ngoài HTTP request.
+Không tính: `.git`, venv, `.local/` (runtime, backup, bản build), `sandbox/` (thư mục thí nghiệm, Git
+bỏ qua), các archive dataset lớn trong `data/raw/` (Git bỏ qua), `app/static/vendor/` (thư viện bên
+thứ ba: highlight.js, lucide, moment, xterm, xterm-fit).
 
-Đây là Flask modular monolith: các module cùng một ứng dụng, không có hai app frontend/backend độc lập và không dùng React/Vue.
+## Luồng chính
+
+```text
+Trình duyệt / cửa sổ desktop
+  │  HTML (Jinja, tr() dịch)       JSON (/api/v1/…, /api/local/v1/…)
+  ▼
+app/__init__.py ── security.py (session, RBAC, CSRF, CSP nonce, error handler)
+  ├── app/api/*            REST cho Investigation, logs, upload, job, cảnh báo
+  ├── web_datasets.py      trang quản lý dataset (server-rendered)
+  └── workbench/api.py     API loopback của desktop (file, terminal, run, preview)
+        │
+        ▼
+app/services/*  (nghiệp vụ, không phụ thuộc HTTP)  ──► app/models.py, app/domain.py ──► MySQL 8
+        ▲                                                         ▲
+scripts/run/worker.py, ingestion_worker.py ── supervision.py ─────┘ (hàng đợi processing_jobs,
+                                                                     outbox email)
+```
 
 ## Cây code có chú thích
 
-Tất cả file code/cấu hình/kiểm thử được liệt kê dưới đây. Tài liệu và dữ liệu được gom theo nhóm để giữ cây dễ đọc.
+### Thư mục gốc
 
 ```text
-14)LogSense_AI/ (thư mục gốc)
-├── app/ (54 file; ứng dụng chính)
-│   ├── __init__.py (tạo Flask app và route giao diện chính)
-│   ├── access.py (chính sách quyền nguồn Demo)
-│   ├── database.py (kết nối SQLAlchemy/MySQL và đăng ký API)
-│   ├── demo.py (fixture minh họa, không phải kết quả AI thật)
-│   ├── domain.py (bảng user, quyền dataset, evaluation và incidents)
-│   ├── extensions.py (SQLAlchemy, migrations và Base dùng chung)
-│   ├── forms.py (WTForms cho dataset/upload, validation và CSRF)
-│   ├── models.py (bảng source, logs, units, detector, runs và outputs)
-│   ├── presentation.py (chuẩn bị dữ liệu Jinja và payload)
-│   ├── repositories.py (truy vấn có giới hạn theo dataset)
-│   ├── security.py (login/logout, session, RBAC và quyền dataset)
-│   ├── api/ (10 file; HTTP/REST endpoints)
-│   │   ├── __init__.py (khai báo package API)
-│   │   ├── alerts.py (API luật cảnh báo và quản lý incident/audit)
-│   │   ├── anomalies.py (Investigation, timeline và Evidence API)
-│   │   ├── database.py (API kết quả MySQL được bảo vệ)
-│   │   ├── datasets.py (tạo/đọc/đổi tên/xóa dataset rỗng)
-│   │   ├── forms.py (nhận form dataset và signed CSRF)
-│   │   ├── jobs.py (queue/status/retry analysis và model card)
-│   │   ├── logs.py (filter, phân trang, volume, raw và CSV logs)
-│   │   ├── mysql_export.py (xuất CSV anomaly cùng filter scope)
-│   │   └── uploads.py (upload, trạng thái và retry import)
-│   ├── parsers/ (2 file; đọc định dạng log)
-│   │   ├── __init__.py (khai báo package parser)
-│   │   └── bgl.py (BGL streaming, UTC, label, host, malformed rows)
-│   ├── services/ (19 file; logic xử lý nghiệp vụ)
-│   │   ├── __init__.py (khai báo package services)
-│   │   ├── alerts.py (alert idempotent và SMTP outbox có retry)
-│   │   ├── bgl_ingestion.py (batch import, checkpoint và resume)
-│   │   ├── csv_safety.py (chặn công thức độc hại trong CSV)
-│   │   ├── database_evidence.py (bằng chứng DB có giới hạn/redaction)
-│   │   ├── dataset_management.py (CRUD/RBAC và bảo vệ dataset đã nhập)
-│   │   ├── detection.py (rule/IF baseline cấp sự kiện)
-│   │   ├── detector_calibration.py (split/sampling/threshold validation)
-│   │   ├── evidence.py (hợp đồng Evidence Drawer cho Demo)
-│   │   ├── investigation.py (scope và timeline aggregation Demo)
-│   │   ├── log_queries.py (scope/snapshot chung logs, volume và CSV)
-│   │   ├── mysql_evidence.py (Evidence Drawer từ anomaly/log MySQL thật)
-│   │   ├── mysql_investigation.py (timeline/facets/bảng anomaly MySQL)
-│   │   ├── redaction.py (che dữ liệu nhạy cảm khi hiển thị)
-│   │   ├── uploads.py (private staging, checksum/provenance/import job)
-│   │   ├── validated_if.py (inference frozen IF, không retrain)
-│   │   ├── window_deployment.py (persist replay của frozen IF study)
-│   │   ├── window_detection.py (features/rule/IF/prediction cho host-window)
-│   │   └── window_features.py (tham chiếu feature fit trên train thôi)
-│   ├── templates/ (4 file; HTML/Jinja2 frontend)
-│   │   ├── dashboard.html (trang Investigation chính)
-│   │   ├── logs.html (Log Explorer, login và panel inline)
-│   │   ├── query_error.html (hiển thị lỗi tham số truy vấn)
-│   │   └── partials/ (mảnh giao diện dùng lại)
-│   │       └── workspace.html (timeline, filter và bảng Investigation)
-│   └── static/ (8 file; frontend tĩnh)
-│       ├── css/ (2 file; màu sắc và bố cục)
-│       │   ├── main.css (Investigation và drawer chính)
-│       │   └── console.css (console/Log Explorer MySQL)
-│       └── js/ (6 file; tương tác trên trình duyệt)
-│           ├── dashboard.js (filter, timeline, brush/zoom và state)
-│           ├── evidence.js (drawer, raw/related logs và focus)
-│           ├── logs.js (login, log query, paging, volume, raw drawer)
-│           ├── datasets.js (dataset CRUD inline)
-│           ├── uploads.js (upload, progress, refresh và retry)
-│           └── incidents.js (analysis jobs, model card và incidents)
-│
-├── scripts/ (23 file; chạy từ terminal, không phải trang web)
-│   ├── database.py (CLI đăng ký dataset, tạo user và import)
-│   ├── mysql_runtime.py (start/stop/status, grants, backup/restore)
-│   ├── ingestion_worker.py (worker thực thi upload/import jobs)
-│   ├── worker.py (worker thực thi analysis jobs)
-│   ├── audit_if_holdout.py (nghiên cứu July holdout độc lập)
-│   ├── audit_isolation_forest.py (audit study train/validation/test MySQL)
-│   ├── benchmark_api.py (đo latency HTTP/SQL dữ liệu thật)
-│   ├── benchmark_bgl.py (đo import và kiểm tra provenance)
-│   ├── benchmark_investigation_v3.py (benchmark fixture cho thiết kế V3)
-│   ├── download_research.py (tải paper/dataset công khai theo catalog)
-│   ├── inspect_research_archives.py (kiểm tra archive an toàn)
-│   ├── qa_accessibility.py (quét axe tự động)
-│   ├── qa_dataset_crud.py (browser QA CRUD/RBAC/form/upload)
-│   ├── qa_evidence_drawer.py (browser regression drawer Demo)
-│   ├── qa_investigation_v2.py (browser regression timeline Demo)
-│   ├── qa_platform.py (browser QA auth/Explorer/alerts thật)
-│   ├── qa_university_e2e_browser.py (browser E2E BGL đã nhập)
-│   ├── verify_detectors.py (kiểm tra detector với held-out labels)
-│   ├── verify_import_restart.py (crash/checkpoint/resume import)
-│   ├── verify_mysql.py (schema riêng, migrate và DB tests)
-│   ├── verify_university_e2e.py (toàn chuỗi BGL và restart QA)
-│   ├── verify_university_filters.py (đối chiếu API filters với SQL)
-│   └── verify_validated_if_bgl.py (proof BGL thật → frozen IF → evidence)
-│
-├── tests/ (19 file; mỗi file chứa nhiều test cases)
-│   ├── test_bgl_parser.py (định dạng BGL và raw/timestamp/provenance)
-│   ├── test_database_unit.py (unit test logic database)
-│   ├── test_dataset_crud_mysql.py (CRUD/RBAC/rollback MySQL thật)
-│   ├── test_dataset_privileges.py (giới hạn cấp quyền DB)
-│   ├── test_detector_calibration.py (split và chọn threshold)
-│   ├── test_evidence.py (hợp đồng bằng chứng và dữ liệu an toàn)
-│   ├── test_forms.py (WTForms và signed CSRF)
-│   ├── test_forms_mysql.py (form/API/RBAC với MySQL thật)
-│   ├── test_if_holdout.py (gates và dữ liệu holdout)
-│   ├── test_investigation_v2.py (timeline, filters và aggregation)
-│   ├── test_isolation_study.py (IF study/artifact guards)
-│   ├── test_mysql_integration.py (schema/FK/transaction/import thật)
-│   ├── test_platform_mysql.py (auth/APIs/detector/alerts/email mocks)
-│   ├── test_upload_staging.py (format, checksum, path và private ACL)
-│   ├── test_uploads_mysql.py (upload/worker/retry/provenance MySQL)
-│   ├── test_validated_if_mysql.py (frozen IF và actual membership)
-│   ├── test_window_deployment_mysql.py (persist frozen study outputs)
-│   ├── test_window_features.py (feature và train-only reference)
-│   └── test_workspace.py (workspace Demo)
-│
-├── migrations/ (8 file; cập nhật schema MySQL)
-│   ├── README (ghi chú migrations)
-│   ├── alembic.ini (cấu hình Alembic)
-│   ├── env.py (kết nối metadata và DB cho migration)
-│   ├── script.py.mako (template migration mới)
-│   └── versions/ (4 phiên bản schema)
-│       ├── 0001_database_foundation.py (schema nền tảng log/detector)
-│       ├── 0002_security_jobs_incidents.py (auth/jobs/predictions/incidents)
-│       ├── 0003_job_identity.py (idempotency của analysis jobs)
-│       └── 0004_alert_decisions.py (lưu quyết định cooldown/dedup)
-│
-├── docs/ (162 file; tài liệu và bằng chứng kiểm thử)
-│   ├── architecture/ (4 file; kiến trúc hệ thống)
-│   ├── benchmarks/ (6 file; workload và số đo benchmark)
-│   ├── course/ (3 file; đối chiếu yêu cầu môn học)
-│   ├── database/ (33 file; ERD, API, MySQL, ingestion và runbook)
-│   ├── development/ (6 file; Git baseline, cây code, hướng dẫn dùng)
-│   ├── ml/ (25 file; IF, feature, validation và kết quả)
-│   ├── releases/ (29 file; checklist và báo cáo QA/release)
-│   ├── research/ (10 file; paper, dataset và baseline đối chiếu)
-│   ├── ui/ (37 file; thiết kế, ảnh và kiểm tra giao diện)
-│   └── (9 file Markdown trực tiếp; workspace/UI/Evidence specifications)
-│
-├── data/ (1 file hỗ trợ thuộc danh sách dự án; log lớn bị Git bỏ qua)
-│   └── raw/ (nơi lưu archive dataset nguồn)
-├── config.py (cấu hình Flask/database từ môi trường)
-├── requirements.txt (thư viện Python runtime)
-├── .env.example (mẫu biến môi trường, không phải mật khẩu thật)
-├── .gitignore (loại runtime/venv/dataset/cache khỏi Git)
-└── README.md (giới thiệu, setup, trạng thái và tài liệu)
+.
+├── README.md                 (giới thiệu, cài đặt, bản đồ dự án)
+├── THIRD_PARTY_NOTICES.md    (giấy phép thư viện bên thứ ba)
+├── pyproject.toml            (nguồn duy nhất cho dependencies; extras: desktop, qa, ml, course)
+├── requirements.txt          (chỉ cài dự án: -e .)
+├── config.py                 (cấu hình Flask mặc định)
+├── .env.example              (mẫu biến môi trường: DATABASE_URL, FLASK_SECRET_KEY, SMTP…)
+├── .gitattributes / .gitignore
+├── .github/workflows/workbench-ci.yml
+│                             (CI: đóng gói, test academic, test MySQL thật, cài sạch trên
+│                              Windows/macOS/Linux, phát hành)
+└── data/raw/                 (dataset gốc; Git chỉ giữ LOGHUB_LICENSE.txt)
 ```
 
-## Thư mục vận hành ngoài con số trên
+### `app/` — ứng dụng
 
 ```text
-.local/ (Git bỏ qua; dữ liệu vận hành riêng trên máy)
-├── run-logsense.py (launcher web, worker và tạo user cho BGL100K đã có)
-├── mysql-foundation/ (MySQL phát triển cổng 13306)
-├── university-e2e-mysql/ (MySQL QA cổng 13307, đang dùng cho web)
-├── uploads/ (file gốc upload và manifest/checksum)
-├── backups/gate1-20261104/ (backup Gate1 đã gom lại)
-└── ... (private contexts, model/cache và log QA)
-.venv/ (Python và các thư viện đã cài)
-.git/ (lịch sử và metadata Git)
-__pycache__/ (bytecode Python tự tạo)
+app/
+├── __init__.py          (create_app: cấu hình, đăng ký blueprint, route trang chính)
+├── access.py            (chính sách nguồn demo công khai; dữ liệu riêng không kết nối mặc định)
+├── database.py          (nối MySQL tùy chọn; timeout kết nối/đọc/ghi; không tự tạo DDL)
+├── demo.py              (fixture minh họa, không phải kết quả detector)
+├── domain.py            (bảng user, quyền dataset, đánh giá, luật/quyết định cảnh báo, incident,
+│                         outbox email)
+├── extensions.py        (SQLAlchemy, Migrate, Mail, Moment dùng chung)
+├── forms.py             (Flask-WTF cho dataset và upload)
+├── i18n.py              (catalog ngôn ngữ, tr()/translate(), đổi ngôn ngữ chỉ từ cùng origin)
+├── models.py            (bảng nguồn, artifact, raw log, event, unit, detector, run, anomaly,
+│                         coverage, nhãn, processing_jobs; FK ghép theo dataset)
+├── paths.py             (vị trí dữ liệu runtime; LOGSENSE_LOCAL_DIR)
+├── permissions.py       (ghi file/thư mục chỉ chủ sở hữu đọc được, kiểm tra lại sau khi tạo)
+├── presentation.py      (helper Jinja dùng chung cho trang và API)
+├── repositories.py      (truy vấn đọc có giới hạn theo dataset)
+├── security.py          (đăng nhập, session, RBAC, quyền dataset, header bảo mật, CSP nonce,
+│                         trang/JSON lỗi đã dịch)
+├── web_datasets.py      (trang quản lý dataset server-rendered)
+│
+├── api/                 REST /api/v1
+│   ├── alerts.py        (incident, luật cảnh báo, lịch sử audit chỉ ghi thêm)
+│   ├── anomalies.py     (Investigation: timeline, danh sách, evidence; demo và MySQL)
+│   ├── database.py      (API kết quả MySQL riêng, phải bật rõ)
+│   ├── datasets.py      (CRUD metadata dataset có RBAC)
+│   ├── forms.py         (form multipart cho workspace)
+│   ├── jobs.py          (gửi job phân tích, trạng thái, retry, model card)
+│   ├── logs.py          (lọc, phân trang, biểu đồ volume, raw, CSV log đã parse)
+│   ├── mysql_export.py  (xuất CSV anomaly theo đúng phạm vi lọc)
+│   └── uploads.py       (nhận upload, kiểm tra và đưa vào hàng đợi; không nhập trong request)
+│
+├── parsers/             parser streaming, có version, không phụ thuộc Flask
+│   ├── bgl.py           (Loghub BGL bgl-1.1.0: epoch là chuẩn, kiểm epoch khớp ngày in)
+│   └── hdfs.py          (Loghub HDFS_v1: block id, đồng hồ nguồn không có múi giờ)
+│
+├── services/            nghiệp vụ, không phụ thuộc HTTP
+│   ├── alerts.py               (quyết định cảnh báo idempotent; outbox SMTP claim → gửi → ghi)
+│   ├── bgl_ingestion.py        (nhập ZIP BGL có giới hạn; dữ liệu + checkpoint commit nguyên tử)
+│   ├── csv_safety.py           (chặn công thức trong ô CSV)
+│   ├── database_evidence.py    (evidence từ dòng đã lưu; giới hạn và che dữ liệu nhạy cảm)
+│   ├── dataset_management.py   (vòng đời dataset; cấp quyền rõ ràng; xóa thận trọng)
+│   ├── detection.py            (detector baseline theo event; không dùng nhãn làm đặc trưng)
+│   ├── detector_calibration.py (lấy mẫu tất định, hiệu chỉnh ngưỡng chỉ trên tập validation)
+│   ├── evidence.py             (hợp đồng evidence trên dữ liệu demo)
+│   ├── investigation.py        (hợp đồng truy vấn UTC, tổng hợp phía server)
+│   ├── log_queries.py          (một hợp đồng lọc/snapshot cho trang log, volume và CSV)
+│   ├── mysql_evidence.py       (Evidence Drawer trên MySQL; bỏ qua mẫu raw quá 256 KiB)
+│   ├── mysql_investigation.py  (Investigation V2 trên MySQL; cache state theo request)
+│   ├── redaction.py            (che dữ liệu khi hiển thị demo)
+│   ├── uploads.py              (staging upload bất biến; từ chối tên file có ký tự điều khiển)
+│   ├── validated_if.py         (suy luận từ nghiên cứu Isolation Forest đã chốt)
+│   ├── window_deployment.py    (lưu dự đoán của model IF đã chốt)
+│   ├── window_detection.py     (baseline theo cửa sổ host; chia theo thời gian; dọn cache mồ côi)
+│   └── window_features.py      (đặc trưng ngữ cảnh cửa sổ, không dùng nhãn)
+│
+├── workbench/           desktop cục bộ, tách khỏi API phân tích công khai
+│   ├── __main__.py      (lệnh h-logsen; không có màn hình thì chuyển sang trình duyệt;
+│   │                     lỗi nghiêm trọng ghi ~/.h-logsen/desktop-error.log và hiện hộp thoại)
+│   ├── api.py           (API loopback /api/local/v1, bảo vệ bằng token)
+│   ├── attached.py      (quan sát tiến trình đang chạy trong dự án, chỉ đọc)
+│   ├── code_tools.py    (công cụ editor theo dự án: tìm, format, kiểm tra)
+│   ├── desktop.py       (cửa sổ native, chọn thư mục; DesktopUnavailable)
+│   ├── external.py      (xem trước định dạng ngoài: HDFS, OpenStack…; giới hạn 64 KiB/bản ghi)
+│   ├── files.py         (truy cập thư mục dự án đã duyệt; chặn thư mục hệ thống/home/ẩn)
+│   ├── jobs.py          (interpreter, telemetry máy, các lượt huấn luyện độc lập)
+│   ├── pdf_preview.py   (render trang PDF, không chạy script trong PDF)
+│   ├── run_profile.py   (provenance có version cho một lượt chạy Python)
+│   ├── runner.py        (supervisor nền cho tiến trình do workbench khởi chạy)
+│   ├── tabular.py       (profile dữ liệu bảng: CSV, Parquet…)
+│   ├── terminal.py      (phiên terminal độc lập, có giới hạn)
+│   └── platforms/       code riêng từng hệ điều hành, nạp lười
+│       ├── __init__.py  (chọn backend theo OS)
+│       ├── linux.py     (WebKitGTK, kính khi có compositing, launcher menu, hộp thoại lỗi)
+│       ├── macos.py     (WKWebView, vibrancy, hộp thoại lỗi qua osascript)
+│       ├── posix.py     (terminal PTY dùng chung; tìm shell trong $SHELL và các thư mục chuẩn)
+│       └── windows.py   (ConPTY, kính DWM, taskbar, shortcut)
+│
+├── templates/           Jinja
+│   ├── base.html, error_page.html, query_error.html
+│   ├── dashboard.html          (Investigation / workspace phân tích)
+│   ├── logs.html               (trang log)
+│   ├── project_workspace.html  (khung workbench: nav icon, explorer, editor, terminal, run)
+│   ├── dataset_pages/          (index.html, edit.html: quản lý dataset)
+│   ├── mail/alert.html         (email cảnh báo)
+│   └── partials/               (workspace, explorer, navigation, chọn ngôn ngữ, assets…)
+│
+├── static/
+│   ├── css/             (console.css, language.css)
+│   ├── js/              (dashboard, datasets, evidence, i18n, incidents, logs, uploads)
+│   ├── workspace/       (CSS/JS của workbench: appearance, controls, dock, explorer,
+│   │                     code-editor + worker tô màu, terminal, live-terminal, machine-chart,
+│   │                     run-detail, run-compare, local-api, local-project, project…)
+│   ├── vendor/          (thư viện bên thứ ba, không sửa tay)
+│   └── h-logsen.ico, h-logsen.png  (icon chữ H)
+│
+└── locales/             vi, de, fr, es, it, pt, nl, ru, ja, ko, zh-Hans, th, id, tr
+                         (khóa là câu tiếng Anh) + workspace.json (nhãn workbench, ưu tiên hơn)
 ```
 
-Không xóa `.local` để dọn code: nó chứa database, upload, model và backup. Git ignore không có nghĩa là không quan trọng.
-
-## Luồng chạy dễ hiểu
+### `migrations/` — schema MySQL (Alembic)
 
 ```text
-Trình duyệt → templates/static → api → services → models/domain + MySQL
-                 ↑                                   ↓
-                 └────────── HTML/JSON trả về ────────┘
-
-Upload → job queued → ingestion_worker → parser BGL → MySQL
-Analysis queued → worker → features → rule/IF → anomalies → Timeline/Evidence
+migrations/
+├── env.py, alembic.ini, script.py.mako
+└── versions/
+    ├── 0001_database_foundation.py       (nền tảng MySQL 8, DDL cố định)
+    ├── 0002_security_jobs_incidents.py   (xác thực, dự đoán cửa sổ, job, incident)
+    ├── 0003_job_identity.py              (gửi job idempotent)
+    ├── 0004_alert_decisions.py           (lưu quyết định cooldown cảnh báo)
+    └── 0005_job_and_outbox_indexes.py    (cột sinh upload_id, index cho worker/outbox/phân trang
+                                           theo run, CHECK cho outbox.state và outcome)
 ```
 
-Nên đọc theo thứ tự: README → app/__init__.py → templates/static → api → services → models/domain/migrations → tests.
+### `scripts/` — vận hành, QA, ML, phát hành
 
-Cách mở web và sử dụng: [USER_GUIDE_VI.md](USER_GUIDE_VI.md).
+Chạy từ thư mục gốc: `python -m scripts.<nhóm>.<lệnh>`.
+
+```text
+scripts/
+├── run/        chạy và vận hành
+│   ├── supervision.py      (vòng lặp chung của worker: backoff khi mất DB, thu hồi job kẹt)
+│   ├── worker.py           (worker phân tích: chạy detector, gửi outbox)
+│   ├── ingestion_worker.py (worker nhập file BGL đã upload)
+│   ├── database.py         (CLI vận hành DB)
+│   ├── mysql_runtime.py    (vòng đời MySQL ZIP tự quản: init, start, backup, restore)
+│   ├── desktop.py          (companion Tkinter)
+│   ├── logsense_client.py  (client Python cho JSON API)
+│   └── workbench.py, workbench_run.py (lối vào cũ, giữ tương thích)
+├── qa/         kiểm tra sản phẩm
+│   ├── qa_workbench_browser.py, qa_workbench_desktop.py   (E2E workbench trình duyệt / native)
+│   ├── qa_investigation_v2.py, qa_evidence_drawer.py      (Investigation và Evidence)
+│   ├── qa_dataset_crud.py, qa_platform.py, qa_accessibility.py, qa_university_e2e_browser.py
+│   └── verify_mysql.py, verify_detectors.py, verify_import_restart.py,
+│       verify_university_e2e.py, verify_university_filters.py, verify_validated_if_bgl.py
+├── ml/         dựng và audit model sản phẩm nạp
+│   ├── audit_isolation_forest.py, audit_if_holdout.py    (nghiên cứu IF, holdout BGL về sau)
+│   └── bgl_window_baseline.py                            (baseline cửa sổ BGL; cần extra "ml")
+├── bench/      benchmark_api.py, benchmark_bgl.py, benchmark_investigation_v3.py
+└── release/    package_workbench.py (dựng ZIP nguồn + từng OS), qa_portfolio_install.py (cài sạch)
+```
+
+### `tests/` — kiểm thử
+
+27 file. Không cần MySQL: parser, form, i18n, evidence, workbench, lưu trữ riêng tư, staging upload,
+desktop Linux, worker/outbox, đặc trưng cửa sổ, hiệu chỉnh detector, nghiên cứu IF. Các file
+`*_mysql.py` và `test_mysql_integration.py` chỉ chạy khi `LOGSENSE_RUN_MYSQL_TESTS=1` trên schema test
+có token (do `scripts.qa.verify_mysql` tạo).
+
+### `packaging/` — gói cho người dùng
+
+```text
+packaging/
+├── posix/    Install-H-logsen.sh, Open-H-logsen.sh (có quyền thực thi), CAI_DAT_MAC_LINUX.txt
+└── windows/  Install-H-logsen.cmd, Open-H-logsen.cmd, CAI_DAT_WINDOWS.txt
+```
+
+### `academic/` — nghiên cứu và môn học (không đóng gói)
+
+```text
+academic/
+├── course/       bài tập, báo cáo, slide bảo vệ, lab MySQL và mạng
+├── experiments/  thí nghiệm HDFS_v1 theo block (không dùng trong sản phẩm)
+├── tools/        tải và kiểm tra bài báo / dataset công khai
+├── literature/   tài liệu tham khảo theo chủ đề
+├── notes/        ghi chú nghiên cứu, danh mục dataset, đo đạc
+└── tests/        test cho experiments
+```
+
+### `docs/` — tài liệu
+
+| Thư mục | Nội dung |
+|---|---|
+| `architecture/` | Đề xuất Investigation V3, dữ liệu, timeline API |
+| `database/` | Pipeline BGL, schema, kiểm chứng MySQL |
+| `ml/` | Nghiên cứu detector, Isolation Forest, kết quả |
+| `benchmarks/` | Số đo hiệu năng |
+| `ui/` | Thiết kế và ảnh chụp giao diện |
+| `releases/` | Ghi chú phát hành và QA từng bản |
+| `development/` | Cấu trúc code (file này), hướng dẫn sử dụng, báo cáo Git |
+| `history/` | Tài liệu cũ được giữ lại |

@@ -1,13 +1,13 @@
 """Authenticated job submission. Worker execution never runs in Flask requests."""
 
-from flask import Blueprint, jsonify, request, g
+from flask import Blueprint, jsonify, request
 from sqlalchemy import select, func
-from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
 from app.models import ProcessingJob, Dataset, LogEvent
 from app.security import roles, require_dataset
 from app.services.investigation import integer, QueryError
+from app.i18n import translate
 
 jobs_api = Blueprint("jobs", __name__)
 
@@ -59,13 +59,13 @@ def submit():
                 raise QueryError(
                     "A frozen study accepts only isolation_forest and a valid study_id."
                 )
-        if config.get("detector", "rule") not in {
-            "rule",
-            "isolation_forest",
-        } or config.get("window_seconds", 300) not in {60, 300, 900, 3600}:
+        detector, window = config.get("detector", "rule"), config.get("window_seconds", 300)
+        # Type checks first: a JSON list or object is unhashable and must be a 400, not a 500.
+        if (not isinstance(detector, str) or detector not in {"rule", "isolation_forest"}
+                or type(window) is not int or window not in {60, 300, 900, 3600}):
             raise QueryError("Unsupported detector/window.")
         if (
-            not isinstance(config.get("seed", 42), int)
+            type(config.get("seed", 42)) is not int
             or not 0 <= config.get("seed", 42) <= 2**31 - 1
         ):
             raise QueryError("Invalid seed.")
@@ -90,7 +90,7 @@ def submit():
                     "Choose aligned positive UTC windows, at most 366 days."
                 )
     except QueryError as error:
-        return jsonify(error={"code": "invalid_query", "message": str(error)}), 400
+        return jsonify(error={"code": "invalid_query", "message": translate(str(error))}), 400
     dataset = db.session.scalar(
         select(Dataset).where(Dataset.id == dataset_id).with_for_update()
     )

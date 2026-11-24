@@ -630,3 +630,25 @@ class WorkbenchTest(unittest.TestCase):
                 break
             time.sleep(0.2)
         self.assertEqual(result.json["run"]["status"], "stopped", result.json)
+
+
+class ContentSecurityPolicyTest(unittest.TestCase):
+    def policy(self, **workbench):
+        app = create_app({"TESTING": True})
+        if workbench:
+            folder = TemporaryDirectory()
+            self.addCleanup(folder.cleanup)
+            mount(app, "tok", Path(folder.name), port=8760, **workbench)
+            self.addCleanup(app.extensions["workbench"]["terminals"].shutdown)
+        response = app.test_client().get("/?source=demo")
+        return response.headers["Content-Security-Policy"]
+
+    def test_browser_mode_never_allows_eval(self):
+        self.assertNotIn("unsafe-eval", self.policy())
+        self.assertNotIn("unsafe-eval", self.policy(desktop=False))
+
+    def test_native_window_allows_the_eval_pywebview_needs(self):
+        # pywebview's evaluate_js runs host code through eval(); without it the window never initializes.
+        policy = self.policy(desktop=True)
+        self.assertIn("'unsafe-eval'", policy)
+        self.assertIn("object-src 'none'", policy)

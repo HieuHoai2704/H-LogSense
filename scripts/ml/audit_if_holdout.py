@@ -11,13 +11,11 @@ import hashlib
 import heapq
 import itertools
 import json
-import math
 import os
 from pathlib import Path
 import platform
 import time
 from types import SimpleNamespace
-from uuid import uuid4
 from zipfile import ZipFile
 
 import joblib
@@ -29,12 +27,15 @@ from sklearn.ensemble import IsolationForest
 from app.paths import IF_HOLDOUT_DIR
 from app.parsers.bgl import LEGACY_VERSION, parse_line
 from app.services.detector_calibration import reservoir_sample, choose_threshold, binary_metrics
-from app.services.window_detection import aggregate_windows, EPOCH, FEATURE_NAMES
+from app.services.window_detection import aggregate_windows, FEATURE_NAMES
 from app.services.window_features import TrainReference
 from scripts.ml.audit_isolation_forest import digest, write_json, read_json, records
 
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 ROOT = IF_HOLDOUT_DIR
-CURATED = Path('docs/ml/measurements/if-july-holdout-2026-11-04')
+CURATED = (REPO_ROOT / 'docs/ml/measurements/if-july-holdout-2026-11-04')
 EXPOSED_TEST_END = int(datetime(2005, 6, 25, 18, 50, tzinfo=timezone.utc).timestamp())
 STUDY_ID = 'f3e5a88403ab48fb84ea36904214e867'
 GRID = [
@@ -436,7 +437,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--stage', required=True, choices=['prepare', 'validate', 'test'])
     parser.add_argument('--study-id', default=STUDY_ID)
-    parser.add_argument('--archive', type=Path, default=Path('data/raw/BGL.zip'))
+    parser.add_argument('--archive', type=Path, default=(REPO_ROOT / 'data/raw/BGL.zip'))
     args = parser.parse_args()
     if len(args.study_id) != 32 or any(c not in '0123456789abcdef' for c in args.study_id):
         parser.error('A lowercase 32-hex study ID is required.')

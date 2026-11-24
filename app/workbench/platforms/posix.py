@@ -8,8 +8,26 @@ import subprocess
 import sys
 
 
+SHELL_DIRECTORIES = ("/bin", "/usr/bin", "/usr/local/bin", "/opt/homebrew/bin")
+
+
 def shell_profiles():
-    return {name: [str(Path("/bin") / name)] for name in ("zsh", "bash", "sh")}
+    """Shell name -> argv. $SHELL comes first when it is an executable regular file."""
+    import os
+
+    profiles = {}
+    preferred = os.environ.get("SHELL", "")
+    if preferred and os.path.isabs(preferred) and os.access(preferred, os.X_OK) and Path(preferred).is_file():
+        profiles[Path(preferred).name] = [preferred]
+    for name in ("zsh", "bash", "fish", "sh"):
+        if name in profiles:
+            continue
+        for directory in SHELL_DIRECTORIES:
+            candidate = Path(directory) / name
+            if candidate.is_file() and os.access(candidate, os.X_OK):
+                profiles[name] = [str(candidate)]
+                break
+    return profiles
 
 
 class PosixTerminal:

@@ -18,6 +18,9 @@ from app.models import DataSource, Dataset, SourceArtifact, ProcessingJob
 from app.services.bgl_ingestion import ingest_bgl
 from scripts.bench.benchmark_bgl import verify_provenance
 
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -106,7 +109,7 @@ def main():
             | result
             | proof
         )
-        output = Path("docs/database/measurements/bgl-process-crash.json")
+        output = (REPO_ROOT / "docs/database/measurements/bgl-process-crash.json")
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(report, indent=2))
         print(json.dumps(report, indent=2))

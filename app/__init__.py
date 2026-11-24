@@ -11,6 +11,7 @@ from app.presentation import context, payload
 from app.services.investigation import QueryError, build, query
 
 from config import APP_NAME, PROFILES
+from app.i18n import translate
 
 
 def create_app(config_overrides=None):
@@ -49,7 +50,7 @@ def create_app(config_overrides=None):
 
     @app.errorhandler(AccessDenied)
     def forbidden(error):
-        response = jsonify(error={'code': 'forbidden', 'message': str(error)})
+        response = jsonify(error={'code': 'forbidden', 'message': translate(str(error))})
         response.headers['Cache-Control'] = 'no-store'
         return response, 403
 
@@ -81,7 +82,7 @@ def create_app(config_overrides=None):
             view = build(query(request.args))
         except QueryError as error:
             if request.headers.get('X-Workspace-Fragment') == '1':
-                return jsonify(error={'code': 'invalid_query', 'message': str(error)}), 400
+                return jsonify(error={'code': 'invalid_query', 'message': translate(str(error))}), 400
             return render_template('query_error.html', message=str(error)), 400
         if request.headers.get('X-Workspace-Fragment') == '1':
             return jsonify(payload(view))

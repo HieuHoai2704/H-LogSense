@@ -1,7 +1,5 @@
 """Opt-in private result API; not connected to the public demo workspace."""
 
-import os
-import secrets
 
 from flask import Blueprint, current_app, jsonify, request
 from sqlalchemy import select

@@ -7,7 +7,9 @@ from typing import BinaryIO, Iterator
 # Every stored event records the parser version that produced it; a dataset keeps one version.
 # bgl-1.1.0: a row with empty content (9 fields, e.g. "... RAS KERNEL FATAL") is valid with message "",
 #            and a carriage return inside a line (CR-only line endings) is invalid_line_break.
-#            The full Loghub BGL archive has 34,470 such empty-content rows and no embedded CR.
+#            The epoch must lie within 1.5 days of the printed date (time-zone offset); otherwise
+#            invalid_timestamp. The full Loghub BGL archive has 34,470 empty-content rows, no
+#            embedded CR and a maximum epoch/printed-date offset of 20 hours.
 # bgl-1.0.0: rejected empty-content rows as invalid_field_count. Kept so datasets imported with it can
 #            be resumed unchanged and frozen studies stay reproducible.
 VERSION = "bgl-1.1.0"
@@ -67,8 +69,10 @@ def parse_line(raw: bytes, line_number: int, byte_offset: int, version: str = VE
         timestamp = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(
             seconds=int(epoch)
         )
-        datetime.strptime(date, "%Y.%m.%d")
+        printed_date = datetime.strptime(date, "%Y.%m.%d").replace(tzinfo=timezone.utc)
         datetime.strptime(printed_time, "%Y-%m-%d-%H.%M.%S.%f")
+        if version != LEGACY_VERSION and abs(timestamp - printed_date - timedelta(hours=12)) > timedelta(days=1.5):
+            raise ValueError()  # e.g. epoch 0 or year 9999 with a 2005 date
     except (ValueError, OverflowError):
         return BGLRecord(**base, error="invalid_timestamp")
     if any(

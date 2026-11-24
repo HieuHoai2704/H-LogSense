@@ -9,6 +9,10 @@ from threading import Lock
 from .files import WORKSPACES, WorkspaceError
 from .platforms import current as platform_backend
 
+class DesktopUnavailable(RuntimeError):
+    """The native window cannot open here (no graphical session or no webview); browser mode can."""
+
+
 RENDERERS = {"win32": ("edgechromium", "edgechromium"), "darwin": ("cocoa", "wkwebview"),
              "linux": ("gtk", "gtkwebkit2")}
 
@@ -61,11 +65,11 @@ class DesktopBridge:
 def desktop_window(url, token, store):
     gui, expected_renderer = RENDERERS[sys.platform]
     if gui == "gtk" and not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
-        raise RuntimeError("Desktop mode requires a graphical session. Use --no-browser for a local server.")
+        raise DesktopUnavailable("Desktop mode requires a graphical session.")
     try:
         import webview
     except ImportError:
-        raise RuntimeError("Install H-logsen with the platform installer to use desktop mode.") from None
+        raise DesktopUnavailable("The desktop window needs pywebview; install H-logsen with the platform installer.") from None
 
     window_options, start_options = platform_backend.desktop_options()
 

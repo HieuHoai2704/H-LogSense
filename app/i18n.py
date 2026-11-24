@@ -64,6 +64,11 @@ def translate(message, *values):
 
 @locale_pages.post("/preferences/language")
 def select_language():
+    # Only this site may change the preference (the form posts same-origin; no token needed).
+    site = request.headers.get("Sec-Fetch-Site")
+    origin = request.headers.get("Origin")
+    if site not in (None, "same-origin", "none") or (origin and origin != request.host_url.rstrip("/")):
+        abort(403)
     language = request.form.get("language", "")
     if language not in LANGUAGES:
         abort(400)

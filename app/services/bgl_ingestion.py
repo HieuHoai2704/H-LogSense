@@ -6,6 +6,7 @@ from itertools import islice
 from pathlib import Path, PurePosixPath
 from zipfile import ZipFile
 
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import insert, select, text, update
 from sqlalchemy.orm import Session
 
@@ -64,8 +65,11 @@ def import_lease(engine, dataset_id):
         try:
             yield
         finally:
-            connection.execute(text("SELECT RELEASE_LOCK(:key)"), {"key": lock})
-            connection.commit()
+            try:
+                connection.execute(text("SELECT RELEASE_LOCK(:key)"), {"key": lock})
+                connection.commit()
+            except SQLAlchemyError:
+                pass  # connection lost: MySQL already released the lock; keep the original error
 
 
 def ingest_bgl(

@@ -10,6 +10,7 @@ from app.services.dataset_management import (
     DatasetConflict, MAX_ID, create_dataset, delete_dataset, find_dataset,
     label, list_datasets, serialize, update_dataset, READ_ROLES, WRITE_ROLES, DELETE_ROLES,
 )
+from app.i18n import translate
 
 datasets_api = Blueprint('datasets', __name__)
 
@@ -17,13 +18,13 @@ datasets_api = Blueprint('datasets', __name__)
 @datasets_api.errorhandler(QueryError)
 def invalid(error):
     db.session.rollback()
-    return jsonify(error={'code': 'invalid_query', 'message': str(error)}), 400
+    return jsonify(error={'code': 'invalid_query', 'message': translate(str(error))}), 400
 
 
 @datasets_api.errorhandler(DatasetConflict)
 def conflict(error):
     db.session.rollback()
-    return jsonify(error={'code': error.code, 'message': error.message}), 409
+    return jsonify(error={'code': error.code, 'message': translate(error.message)}), 409
 
 
 def body():

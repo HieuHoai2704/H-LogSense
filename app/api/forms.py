@@ -16,6 +16,7 @@ from app.services.dataset_management import (
     create_dataset, delete_dataset, serialize, update_dataset,
 )
 from app.services.investigation import QueryError, integer
+from app.i18n import translate
 
 
 forms_api = Blueprint('forms', __name__)
@@ -30,13 +31,13 @@ def private_form_response(response):
 @forms_api.errorhandler(QueryError)
 def invalid(error):
     db.session.rollback()
-    return jsonify(error={'code': 'invalid_query', 'message': str(error)}), 400
+    return jsonify(error={'code': 'invalid_query', 'message': translate(str(error))}), 400
 
 
 @forms_api.errorhandler(DatasetConflict)
 def conflict(error):
     db.session.rollback()
-    return jsonify(error={'code': error.code, 'message': error.message}), 409
+    return jsonify(error={'code': error.code, 'message': translate(error.message)}), 409
 
 
 def validate_form(form_class, allowed_fields):

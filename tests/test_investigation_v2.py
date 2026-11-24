@@ -8,7 +8,7 @@ from werkzeug.datastructures import MultiDict
 
 from app import create_app
 from app.demo import ANOMALIES
-from app.services.investigation import build, query, records
+from app.services.investigation import build, query
 
 
 class InvestigationTests(unittest.TestCase):

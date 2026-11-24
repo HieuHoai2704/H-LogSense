@@ -9,10 +9,12 @@ from contextlib import contextmanager
 import csv
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import re
 import subprocess
+import unicodedata
 from uuid import uuid4
 from zipfile import ZipFile, ZipInfo, ZIP_STORED
 
@@ -29,6 +31,7 @@ from app.services.bgl_ingestion import fingerprint, ingest_bgl, import_lease, Im
 from app.services.redaction import redact
 from app.security import Forbidden
 
+log = logging.getLogger('h_logsen.uploads')
 UPLOAD_ROOT = UPLOADS_DIR
 MAX_FILE_BYTES = 16 * 1024 * 1024
 MAX_REQUEST_BYTES = 17 * 1024 * 1024
@@ -88,7 +91,9 @@ def local_file(folder, name):
 def filename(value):
     if (not isinstance(value, str) or not 1 <= len(value) <= 200
             or value.startswith('.') or any(c in value for c in ('/', '\\', ':'))
-            or any(ord(c) < 32 or ord(c) == 127 for c in value)):
+            or any(ord(c) < 32 or ord(c) == 127 for c in value)
+            # Cc/Cf: C1 controls and bidi overrides (e.g. U+202E) can disguise the extension.
+            or any(unicodedata.category(c) in {'Cc', 'Cf'} for c in value)):
         raise UploadError('invalid_filename', 'Use a plain .txt, .log or .csv filename.', 400)
     try:
         value.encode('utf-8', errors='strict')
@@ -161,6 +166,9 @@ def _csv_lines(original):
                 raise UploadError('unsupported_csv_schema', 'CSV must have exactly one header: raw_line.')
             previous = reader.line_num
             for ordinal, row in enumerate(reader, 1):
+                if not row:  # blank line (e.g. a trailing newline): nothing to import
+                    previous = reader.line_num
+                    continue
                 if ordinal > MAX_ROWS or len(row) != 1:
                     raise UploadError('invalid_csv_row', 'Each bounded CSV row must contain one raw_line field.')
                 value = row[0]
@@ -297,9 +305,9 @@ def load_bundle(upload_id, expected=None):
 def job_for_upload(session, upload_id, *, lock=False):
     if not isinstance(upload_id, str) or not re.fullmatch(r'[a-f0-9]{32}', upload_id):
         raise NotFound()
-    query = select(ProcessingJob).where(ProcessingJob.kind == 'parsing',
-        ProcessingJob.configuration['type'].as_string() == TYPE,
-        ProcessingJob.configuration['upload_id'].as_string() == upload_id)
+    # upload_id is an indexed generated column (migration 0005): no full scan, no table-wide locks.
+    query = select(ProcessingJob).where(ProcessingJob.upload_id == upload_id, ProcessingJob.kind == 'parsing',
+        ProcessingJob.configuration['type'].as_string() == TYPE)
     if lock:
         query = query.with_for_update()
     job = session.scalar(query)
@@ -417,6 +425,10 @@ def execute_job(engine, job_id):
             outer.result = dict(outer.result or {}, **imported, stage='completed')
     except Exception as error:
         code = error.code if isinstance(error, UploadError) else 'dataset_busy' if isinstance(error, ImportBusyError) else 'upload_ingestion_failed'
+        if code == 'upload_ingestion_failed':
+            log.exception('upload job %s failed', job_id)
+        else:
+            log.warning('upload job %s failed: %s', job_id, code)
         with Session(engine) as session, session.begin():
             outer = session.get(ProcessingJob, job_id)
             outer.state, outer.error_code = 'failed', code

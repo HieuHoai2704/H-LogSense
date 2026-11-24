@@ -38,6 +38,30 @@ jobs:
       - run: python -m pip install -r requirements.txt
       - run: python -B -m unittest discover -s academic -t .
 
+  mysql:
+    # Migrations and the *_mysql integration suites against a real server. The runner's own
+    # MySQL 8 is used (not a service container) so the application user is 'logsense'@'localhost',
+    # the account scripts/qa/verify_mysql grants test schemas to.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      MYSQL_ADMIN_URL: mysql+pymysql://root:root@127.0.0.1:3306/mysql
+      DATABASE_URL: mysql+pymysql://logsense:ci-only-password@127.0.0.1:3306/logsense_ci
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - name: Start MySQL and create the application user
+        run: |
+          sudo systemctl start mysql.service
+          mysql -h 127.0.0.1 -uroot -proot -e "CREATE USER 'logsense'@'localhost' IDENTIFIED BY 'ci-only-password'; CREATE DATABASE logsense_ci CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs; GRANT ALL ON logsense_ci.* TO 'logsense'@'localhost';"
+      - run: python -m flask --app app db upgrade
+      - run: python -B -m scripts.qa.verify_mysql
+
   verify:
     needs: package
     strategy:

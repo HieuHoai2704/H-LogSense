@@ -4,7 +4,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from math import ceil, floor, log1p, expm1
 
-from sqlalchemy import select, func, or_, and_, case, text
+from sqlalchemy import select, func, or_, text
 from werkzeug.datastructures import MultiDict
 
 from app.extensions import db
@@ -46,6 +46,19 @@ def is_mysql(args):
 
 
 def state(args):
+    """Validated scope for a MySQL investigation request. The API validates it in before_request and
+    again in each view; within one request the result is reused instead of re-running its scans."""
+    from flask import g, has_request_context, request
+
+    if has_request_context() and args is request.args:
+        cached = g.get("_mysql_investigation_state")
+        if cached is None:
+            cached = g._mysql_investigation_state = _state(args)
+        return deepcopy(cached)
+    return _state(args)
+
+
+def _state(args):
     source = args.get("source", "")
     dataset_id = integer(source[3:], 1, 2**63 - 1, "Dataset")
     require_dataset(dataset_id)
@@ -335,6 +348,7 @@ def build(state):
                 CoverageInterval.start_time < end,
                 CoverageInterval.end_time > start,
             )
+            .order_by(CoverageInterval.start_time, CoverageInterval.id)  # deterministic cut-off
             .limit(5000)
         )
     )

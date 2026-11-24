@@ -170,55 +170,68 @@ def initialize_security(app):
             raise ValueError("Invalid dataset allow-list.") from None
     app.register_blueprint(security_api)
 
+    from flask import render_template
+    from sqlalchemy.exc import DataError, IntegrityError, SQLAlchemyError
+    from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
+    from app.i18n import translate
+
+    def failure(code, message, status, title):
+        """JSON for API clients; the HTML error page for browser navigation (never raw JSON)."""
+        browser = request.accept_mimetypes["text/html"] > request.accept_mimetypes["application/json"]
+        if browser and not request.path.startswith(("/api/", "/forms/")):
+            return render_template("error_page.html", code=status, title=title), status
+        response = jsonify(error={"code": code, "message": translate(message)})
+        response.headers["Cache-Control"] = "no-store"
+        return response, status
+
     @app.errorhandler(Forbidden)
     def denied(error):
-        return jsonify(
-            error={
-                "code": "forbidden",
-                "message": "Authentication and dataset permission required.",
-            }
-        ), 403
-
-    from sqlalchemy.exc import SQLAlchemyError
+        return failure("forbidden", "Authentication and dataset permission required.", 403, "Forbidden")
 
     @app.errorhandler(SQLAlchemyError)
     def unavailable(error):
         if "sqlalchemy" in app.extensions:
             db.session.rollback()
-        return jsonify(
-            error={
-                "code": "database_unavailable",
-                "message": "Database operation unavailable; retry safely.",
-            }
-        ), 503
-
-    from werkzeug.exceptions import RequestEntityTooLarge
+        # Permanent data errors are not "retry safely" outages.
+        if isinstance(error, IntegrityError):
+            return failure("conflict", "The change conflicts with existing data.", 409, "Conflict")
+        if isinstance(error, DataError):
+            return failure("invalid_data", "A value is outside the stored range or format.", 400, "Bad Request")
+        return failure("database_unavailable", "Database operation unavailable; retry safely.", 503,
+                       "Service Unavailable")
 
     @app.errorhandler(RequestEntityTooLarge)
     def oversized(error):
-        return jsonify(
-            error={
-                "code": "payload_too_large",
-                "message": "Request exceeds the configured size limit.",
-            }
-        ), 413
-
-    from werkzeug.exceptions import HTTPException
+        return failure("payload_too_large", "Request exceeds the configured size limit.", 413, "Payload Too Large")
 
     @app.errorhandler(HTTPException)
     def http_error(error):
-        return jsonify(
-            error={
-                "code": error.name.lower().replace(" ", "_"),
-                "message": error.description,
-            }
-        ), error.code
+        return failure(error.name.lower().replace(" ", "_"), error.description, error.code, error.name)
 
     @app.after_request
     def security_headers(response):
+        if response.mimetype == "text/html" and not response.direct_passthrough:
+            # Content-Security-Policy: same-origin scripts only. Server-rendered inline scripts
+            # (Flask-Moment) get a per-response nonce; user data is autoescaped, so it can never
+            # produce a literal <script> tag. The workbench token shares this origin, so an XSS
+            # must not be able to run code.
+            nonce = secrets.token_urlsafe(16)
+            body = response.get_data(as_text=True)
+            if "<script>" in body:
+                response.set_data(body.replace("<script>", f'<script nonce="{nonce}">'))
+            # The native desktop window drives the page through pywebview's evaluate_js, which runs
+            # host code through eval(); only that mode allows it. Browser mode stays strict.
+            workbench = current_app.extensions.get("workbench") or {}
+            evaluate = " 'unsafe-eval'" if workbench.get("desktop") else ""
+            response.headers["Content-Security-Policy"] = (
+                f"default-src 'self'; script-src 'self' 'nonce-{nonce}'{evaluate}; style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; "
+                "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+            )
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "same-origin"
         response.headers["X-Frame-Options"] = "DENY"
-        if request.path.startswith("/api/"):
+        if request.path.startswith("/api/") or (request.path == "/" and request.args.get("source", "").startswith("db-")):
+            # Private MySQL-backed pages and API data are never cached.
             response.headers["Cache-Control"] = "no-store"
         return response

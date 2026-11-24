@@ -28,7 +28,10 @@ from threadpoolctl import threadpool_limits
 
 from app.parsers.bgl import LEGACY_VERSION as PARSER_VERSION, parse_line  # documented results use bgl-1.0.0
 from app.services.detector_calibration import binary_metrics
-from app.services.window_detection import FEATURE_NAMES, SEVERE
+from app.services.window_detection import SEVERE
+
+# Repository root: paths below do not depend on the current working directory.
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 SEED = 42
 SECONDS = 300
@@ -357,7 +360,7 @@ def evaluate(archive, out, archive_sha):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--archive", type=Path, default=Path("data/raw/BGL.zip"))
+    parser.add_argument("--archive", type=Path, default=(REPO_ROOT / "data/raw/BGL.zip"))
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--stage", choices=("fit", "test"), required=True)
     options = parser.parse_args()

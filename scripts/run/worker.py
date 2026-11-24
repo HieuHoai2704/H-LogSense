@@ -1,12 +1,15 @@
 """Bounded single-process worker. Run explicitly outside the Flask server."""
 
-import argparse, time
+import argparse
+from functools import partial
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app import create_app
 from app.extensions import db
 from app.models import ProcessingJob
 from app.services.window_detection import run_windows
+from scripts.run.supervision import configure_logging, log, reclaim_interrupted, serve
 
 
 def run_once(engine):
@@ -51,6 +54,8 @@ def execute_job(engine, candidate):
             job.state = "completed"
             job.result = result
     except Exception:
+        # Keep the reason for operators; the API still reports only the stable error code.
+        log.exception("analysis job %s failed", job_id)
         with Session(engine) as session, session.begin():
             job = session.get(ProcessingJob, job_id)
             job.state = "failed"
@@ -62,14 +67,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--once", action="store_true")
     args = parser.parse_args()
+    configure_logging()
     app = create_app()
     with app.app_context():
-        while True:
-            worked = run_once(db.engine)
-            if args.once:
-                break
-            if not worked:
-                time.sleep(1)
+        if "sqlalchemy" not in app.extensions:
+            raise SystemExit("Configure MySQL (DATABASE_URL) before starting the analysis worker.")
+        engine = db.engine
+        serve(partial(run_once, engine), once=args.once,
+              reclaim=partial(reclaim_interrupted, engine, "analysis", "analysis-job-"))
 
 
 if __name__ == "__main__":
