@@ -70,10 +70,12 @@
 .analysis-shell .workspace-heading { align-items: baseline; gap: 6px 16px; flex-wrap: wrap; margin-bottom: 10px; }
 .analysis-shell .workspace-heading h1 { font-size: 19px; line-height: 26px; font-weight: 650; letter-spacing: -.2px; }
 .analysis-shell .workspace-heading > span { font-size: 12px; }
-.analysis-shell .demo-notice { align-items: center; gap: 10px; padding: 7px 12px; border: 1px solid var(--border);
-  border-left: 3px solid var(--accent); border-radius: var(--control-radius); background: var(--control-bg); font-size: 12.5px; }
-.analysis-shell .demo-notice strong { padding: 1px 7px; border-radius: 4px; background: var(--accent); color: var(--accent-on);
-  font-size: 11px; letter-spacing: .06em; }
+/* The data-source note is one quiet line; its full text is the tooltip. */
+.analysis-shell .demo-notice { align-items: center; gap: 8px; min-width: 0; margin: 0 0 6px; padding: 0; border: 0;
+  background: transparent; color: var(--muted); font-size: 12px; }
+.analysis-shell .demo-notice span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.analysis-shell .demo-notice strong { flex: 0 0 auto; padding: 1px 6px; border: 1px solid var(--border); border-radius: 4px;
+  background: transparent; color: var(--text); font: 600 10.5px/1.5 var(--mono, monospace); }
 .analysis-shell #query-status { margin: 8px 2px; font-size: 12px; }
 
 /* Collapsible sections: "Analyze data files", "Data coverage", evaluation */

@@ -131,24 +131,33 @@
       const body = document.getElementById("log-rows");
       body.replaceChildren();
       for (const row of data.items) {
+        // One line per event: the whole row opens the evidence drawer; the button keeps it reachable by keyboard.
         const tr = document.createElement("tr");
-        for (const value of [
-          row.timestamp + " · " + row.id,
-          row.severity || "Unavailable",
-          row.message,
-          (row.host || "Unavailable") + " / " + (row.service || "Unavailable"),
-        ]) {
+        tr.className = "log-row";
+        const cell = (text, className, title) => {
           const td = document.createElement("td");
-          td.textContent = value;
+          td.textContent = text;
+          if (className) td.className = className;
+          if (title) td.title = title;
           tr.append(td);
-        }
+          return td;
+        };
+        const level = row.severity || t("Unavailable");
+        cell(row.timestamp.replace("T", " ").replace("Z", ""), "log-time", t("Event {0}", row.id));
+        cell(level, "log-level level-text level-" + level.toLowerCase());
+        cell(row.message, "log-message", row.message.slice(0, 600));
+        cell((row.host || t("Unavailable")) + " / " + (row.service || t("Unavailable")), "log-source");
         const td = document.createElement("td"),
           button = document.createElement("button");
-        button.textContent = t("Inspect →");
+        td.className = "log-open";
+        button.className = "row-open";
         button.setAttribute("aria-label", t("Inspect log {0}", row.id));
         button.onclick = () => inspect(row.id, button);
         td.append(button);
         tr.append(td);
+        tr.onclick = (event) => {
+          if (!event.target.closest("button, a") && !getSelection().toString()) inspect(row.id, button);
+        };
         body.append(tr);
       }
       if (!data.items.length) {

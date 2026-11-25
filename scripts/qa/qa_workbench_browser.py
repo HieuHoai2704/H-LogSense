@@ -278,7 +278,7 @@ class WorkbenchBrowserTest(unittest.TestCase):
         expect(page.get_by_role("link", name="Settings", exact=True)).to_be_visible()
         page.get_by_role("link", name="Analysis", exact=True).click()
         expect(page.locator("html")).to_have_attribute("data-theme", "paper")
-        expect(page.get_by_role("heading", name="Investigation", exact=True)).to_be_visible()
+        expect(page.get_by_role("heading", name="Anomaly investigation", exact=True)).to_be_visible()
         analysis_color = page.locator("html").evaluate("(el) => getComputedStyle(el).backgroundColor")
         self.assertEqual(project_color, analysis_color)
         page.get_by_role("link", name="Project", exact=True).click()

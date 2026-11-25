@@ -7,7 +7,6 @@
   --level-unknown: #a9b2ba;
 }
 
-#log-filters .query-field { grid-column: 1 / -1; }
 /* Signing out lives in the workspace header on every page. */
 #logs-logout { display: none; }
 #log-filters .query-field input { font-family: ui-monospace, "Cascadia Code", "JetBrains Mono", monospace; font-size: 13px; }

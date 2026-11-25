@@ -104,6 +104,7 @@
   function insightCard(kind, title, body, actions) {
     const card = element("article", null, "insight insight-" + kind);
     card.append(element("strong", title), element("p", body));
+    card.title = body;
     if (actions.length) {
       const row = element("div", null, "insight-actions");
       row.append(...actions);
@@ -126,6 +127,9 @@
     submit();
   }
 
+  // "2005-06-04T07:10:53.050000Z" -> "2005-06-04 07:10:53": the drawer and the zoom keep the exact value.
+  const shortTime = (value) => String(value).replace("T", " ").replace(/\.\d+/, "").replace("Z", "");
+
   function renderInsights(data) {
     const host = $("log-insights");
     host.replaceChildren();
@@ -135,7 +139,7 @@
         "danger",
         t("Error spike"),
         t("{0} error-level events between {1} and {2}; the usual level in this range is about {3} per interval.",
-          number.format(spike.count), spike.start, spike.end, number.format(spike.baseline)),
+          number.format(spike.count), shortTime(spike.start), shortTime(spike.end), number.format(spike.baseline)),
         [actionButton(t("Zoom in"), () => zoomTo(spike.start, spike.end))],
       ));
     }
@@ -143,7 +147,7 @@
       cards.push(insightCard(
         "warning",
         t("New log pattern"),
-        tn(pattern.count, "First seen {0} · {1} event: {2}", "First seen {0} · {1} events: {2}", pattern.first, number.format(pattern.count), pattern.pattern),
+        tn(pattern.count, "First seen {0} · {1} event: {2}", "First seen {0} · {1} events: {2}", shortTime(pattern.first), number.format(pattern.count), pattern.pattern),
         pattern.filter_terms.length
           ? [actionButton(t("Show these logs"), () => addToQuery(pattern.filter_terms.map((term) => '"' + term + '"').join(" ")))]
           : [],

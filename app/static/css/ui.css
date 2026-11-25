@@ -220,3 +220,146 @@
   --bs-pagination-disabled-border-color: var(--border);
   --bs-pagination-font-size: var(--fs);
 }
+
+/* ---------------------------------------------------------------- Analysis console (Log Explorer, Investigation) */
+.analysis-shell .workspace-heading { margin-bottom: 4px; }
+.analysis-shell .workspace-heading h1 { font-size: var(--fs-xl); }
+.analysis-shell :is(#logs-status, #query-status) { margin: 2px 0 10px; color: var(--muted); font-size: var(--fs-sm); }
+
+/* One field style for the console's own inputs and selects. */
+.analysis-shell :is(#log-filters, .explorer-toolbar, #saved-view-form) :is(input:not([type="checkbox"], [type="radio"], [type="file"]), select) {
+  min-height: var(--ui-control-h);
+  height: var(--ui-control-h);
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--ui-control-bg);
+  color: var(--text);
+  font-size: var(--fs);
+}
+.analysis-shell :is(#log-filters, .explorer-toolbar) select { padding-inline-end: 28px; }
+.analysis-shell :is(#log-filters, .explorer-toolbar) input::placeholder { color: var(--muted); }
+.analysis-shell :is(#log-filters, .explorer-toolbar) :is(button, .button) { min-height: var(--ui-control-h); height: var(--ui-control-h); padding: 0 12px; font-size: var(--fs); }
+
+/* Search: one main row, the rest behind "More filters". */
+.log-search { margin: 0 0 8px; }
+.log-search-main {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(150px, 200px) repeat(2, minmax(170px, 200px)) auto;
+  gap: 8px;
+  align-items: end;
+}
+.log-search label { display: grid; gap: 4px; min-width: 0; margin: 0; color: var(--muted); font-size: var(--fs-sm); font-weight: 500; }
+.log-search label :is(input, select) { width: 100%; }
+.log-search .query-field input { font-family: var(--mono); font-size: var(--fs); }
+.log-search-more { margin-top: 6px; }
+.log-search-more > summary { width: max-content; color: var(--muted); font-size: var(--fs-sm); cursor: pointer; }
+.log-search-more > summary:hover { color: var(--text); }
+.log-search-extra { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.analysis-shell .explorer-toolbar { margin: 6px 0 12px; font-size: var(--fs); }
+
+/* Insights: a short list, one line each. */
+.analysis-shell .insights { display: block; margin: 0 0 12px; border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.analysis-shell .insight {
+  --dot: var(--muted);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 7px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--ui-line);
+  border-radius: 0;
+  background: transparent;
+}
+.analysis-shell .insight:last-child { border-bottom: 0; }
+.analysis-shell .insight strong { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--fs); white-space: nowrap; }
+.analysis-shell .insight strong::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); }
+.analysis-shell .insight p { margin: 0; overflow: hidden; color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; text-overflow: ellipsis; }
+.analysis-shell .insight-actions :is(button, .button) { min-height: 26px; height: 26px; padding: 0 10px; font-size: var(--fs-sm); }
+.analysis-shell .insight-danger { --dot: var(--bad); }
+.analysis-shell .insight-warning { --dot: var(--warn); }
+.analysis-shell .insight-info { --dot: var(--info); }
+.analysis-shell .insight-ok { --dot: var(--ok); }
+
+/* Log rows: one line each, the whole row opens the evidence drawer. */
+.analysis-shell table:has(#log-rows) { table-layout: fixed; }
+.analysis-shell table:has(#log-rows) th:nth-child(1) { width: 172px; }
+.analysis-shell table:has(#log-rows) th:nth-child(2) { width: 92px; }
+.analysis-shell table:has(#log-rows) th:nth-child(4) { width: 250px; }
+.analysis-shell table:has(#log-rows) th:nth-child(5) { width: 40px; }
+.analysis-shell table:has(#log-rows) th:nth-child(5) { font-size: 0; }
+.analysis-shell #log-rows td { padding: 5px 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; vertical-align: middle; }
+.analysis-shell #log-rows .log-row { cursor: pointer; }
+.analysis-shell #log-rows .log-row:hover { background: var(--ui-hover); }
+.analysis-shell #log-rows :is(.log-time, .log-source) { color: var(--muted); font: var(--fs-sm) var(--mono); }
+.analysis-shell #log-rows .log-message { font: 12.5px/1.5 var(--mono); }
+.analysis-shell .log-level { font-size: var(--fs-sm); font-weight: 600; }
+.analysis-shell .log-level::before,
+.analysis-shell .severity::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-inline-end: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 1px;
+}
+.analysis-shell :is(.row-open, .inspect-button) {
+  width: 26px;
+  min-height: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0;
+}
+.analysis-shell :is(.row-open, .inspect-button)::after { content: "›"; font-size: 18px; line-height: 1; }
+.analysis-shell .inspect-button[aria-expanded="true"]::after { content: "•"; color: var(--text); }
+.analysis-shell :is(.row-open, .inspect-button):hover { background: var(--ui-hover); color: var(--text); }
+
+/* Investigation result rows: compact, clickable. */
+.analysis-shell [data-row-id] { cursor: pointer; }
+.analysis-shell [data-row-id] > td { padding-block: 7px; vertical-align: middle; }
+.analysis-shell [data-row-id]:hover > td { background: var(--ui-hover); }
+.analysis-shell [data-row-id] td small { display: inline; margin-inline-start: 6px; color: var(--muted); }
+.analysis-shell .message-button { font-family: var(--mono); font-size: 12.5px; text-align: left; }
+
+@media (max-width: 1100px) {
+  .log-search-main { grid-template-columns: 1fr 1fr; }
+  .log-search-main .query-field { grid-column: 1 / -1; }
+  .log-search-extra { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Console panels: smaller headings, quiet notes. */
+.analysis-shell .panel { border-color: var(--border); border-radius: var(--radius-lg); }
+.analysis-shell .panel-heading h2 { font-size: 15px; font-weight: 600; }
+.analysis-shell .panel-heading h2 > span { color: var(--muted); font-size: var(--fs-sm); font-weight: 500; }
+.analysis-shell .panel-heading p { color: var(--muted); font-size: var(--fs-sm); line-height: 1.45; }
+.analysis-shell .timeline-panel { padding: 12px 14px 8px; }
+.analysis-shell .timeline-panel .evidence-note,
+.analysis-shell .facets-panel .evidence-note { margin: 6px 0 0; color: var(--muted); font-size: var(--fs-sm); }
+.analysis-shell .lane-name { font-size: var(--fs-sm); font-weight: 500; }
+.analysis-shell .facets-panel { padding: 12px; }
+.analysis-shell .facets-panel h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.analysis-shell .facet-value { padding: 3px 8px; font-size: var(--fs); }
+.analysis-shell .facet-bar { background: color-mix(in srgb, var(--text) 9%, transparent); }
+.analysis-shell .view-tabs { border-color: var(--border); }
+.analysis-shell .view-tabs button { min-height: 26px; padding: 0 12px; font-size: var(--fs); }
+.analysis-shell .table-footer { font-size: var(--fs-sm); color: var(--muted); }
+.analysis-shell table:has([data-row-id]) { table-layout: fixed; }
+.analysis-shell table:has([data-row-id]) th:nth-child(1) { width: 150px; }
+.analysis-shell table:has([data-row-id]) th:nth-child(2) { width: 118px; }
+.analysis-shell table:has([data-row-id]) th:nth-child(4) { width: 250px; }
+.analysis-shell table:has([data-row-id]) th:nth-child(5) { width: 200px; }
+.analysis-shell table:has([data-row-id]) th:nth-child(6) { width: 40px; }
+.analysis-shell [data-row-id] > td { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.analysis-shell [data-row-id] > td:nth-child(4) { font: var(--fs-sm) var(--mono); }
+.analysis-shell .workspace-heading > span .button { min-height: 30px; padding: 0 12px; font-size: var(--fs); text-decoration: none; }
+/* Timeline: empty bins recede so bins with anomalies stand out. */
+.analysis-shell a.heat[data-count="0"] { border-color: transparent; background: color-mix(in srgb, var(--text) 5%, transparent); color: transparent; }
+.analysis-shell a.heat[data-count="0"]:hover { color: var(--muted); }
+.analysis-shell .axis-label { font: var(--fs-xs)/20px var(--mono); }

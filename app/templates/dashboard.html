@@ -18,7 +18,7 @@
 {% with analysis_section = "investigation" %}{% include "partials/analysis_menu.html" %}{% endwith %}
 
   <main class="workspace-main" id="workspace">
-    <header class="workspace-heading"><h1>{{ tr("Investigation") }}</h1><span>{{ tr("One scope · timeline, results and evidence ·") }} <a href="{{ url_for('dashboard', workspace='logs', dataset_id=view.state.source[3:] if view.is_database else none) }}">{{ tr("Log Explorer · MySQL") }}</a></span></header>
+    <header class="workspace-heading"><h1>{{ tr("Anomaly investigation") }}</h1><span><a class="button" href="{{ url_for('dashboard', workspace='logs', dataset_id=view.state.source[3:] if view.is_database else none) }}">{{ tr("Log Explorer") }}</a></span></header>
     <div class="demo-notice"><strong>{{ 'MYSQL · ' ~ view.dataset_mode|upper if view.is_database else 'DEMO' }}</strong><span>{{ tr('Persisted anomaly outputs and actual supporting logs. Native scores are not probabilities; coverage may be unknown.') if view.is_database else tr('Synthetic events, scores and evidence. No dataset imported or model executed.') }}</span></div>
     <div id="request-error" class="request-error" role="alert" hidden><span id="error-message"></span><button id="retry-button">{{ tr("Retry") }}</button><button id="revert-button">{{ tr("Revert filters") }}</button></div>
     <p id="query-status" role="status">{{ tr("Query ready · MySQL, selected completed runs") if view.is_database else tr("Query ready · synthetic fixture") }}</p>

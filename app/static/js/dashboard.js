@@ -257,6 +257,9 @@ document.addEventListener("click", event => {
     load(new URL(link.href)); return;
   }
   const inspect = target.closest("[data-event-id]"); if (inspect) { openDetail(inspect.dataset.eventId, inspect); return; }
+  // A click anywhere on a result row (not on its own links or buttons) opens its evidence.
+  const row = target.closest("tr[data-row-id]");
+  if (row && !target.closest("a, button, input, select") && !getSelection().toString()) { openDetail(row.dataset.rowId, row.querySelector(".inspect-button")); return; }
   const related = target.closest("[data-related-id]"); if (related) { openDetail(related.dataset.relatedId); return; }
   const nav = target.closest("[data-nav]"); if (nav) { navigate(nav.dataset.nav); return; }
   const mode = target.closest("[data-mode]"); if (mode) { applyMode(mode.dataset.mode, !pending); return; }
