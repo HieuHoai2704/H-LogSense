@@ -137,9 +137,9 @@ The regular Flask entry point has no local filesystem or terminal API.
   built-in capabilities. **Python and packages** selects the interpreter and
   lists installed packages. Use the terminal for package installation.
 - **Analysis** has a function menu on the left instead of a folder tree:
-  Log Explorer, anomaly investigation, alerts, data quality, datasets and
-  the Loghub catalog. Entries marked *Coming soon* (overview, pipeline and
-  jobs, schedules) are planned pages.
+  Log Explorer, anomaly investigation, alerts, data quality, pipeline and
+  jobs, datasets and the Loghub catalog. Entries marked *Coming soon*
+  (overview, schedules) are planned pages.
 - **Analysis → Data quality** scores the selected dataset from its import
   counters and parsed events: malformed lines, exact duplicate lines, events
   missing a host, component or level, hours without events, and a drop of the
@@ -148,6 +148,15 @@ The regular Flask entry point has no local filesystem or terminal API.
   skipped); the score averages the judged checks (100, 50, 0). An hourly UTC
   grid of the last 14 days marks empty hours in red. The same report is
   available as JSON from `GET /api/v1/quality?dataset_id=N`.
+- **Analysis → Pipeline & jobs** shows the data flow raw logs → import →
+  quality checks → ML detectors → alerts, each stage coloured by its latest
+  state, and a job grid: one row per job type (log import, rule detector,
+  Isolation Forest and the validated or frozen profiles), one square per run,
+  the last 20 runs. Selecting a run opens its details; a failed analysis job
+  can be retried, a completed one run again with the same configuration, and a
+  failed upload import retried, all through the existing job APIs. Queued jobs
+  run in the separate worker (`python -m scripts.run.worker`). JSON:
+  `GET /api/v1/pipeline?dataset_id=N`.
 - **Project → Analyze data files** profiles CSV, JSONL and Parquet files
   within the open project: select a data file in the tree, or choose
   **Analyze file** under it. It displays a schema, up to 20 valid sample rows,

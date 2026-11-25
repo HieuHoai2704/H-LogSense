@@ -53,15 +53,16 @@ class AnalysisMenuTests(unittest.TestCase):
         entries = menu(page.data)
         self.assertEqual(
             list(entries.links),
-            ["logs", "investigation", "alerts", "quality", "datasets", "catalog"],
+            ["logs", "investigation", "alerts", "quality", "pipeline", "datasets", "catalog"],
         )
-        self.assertEqual(entries.planned, ["overview", "pipeline", "schedule"])
+        self.assertEqual(entries.planned, ["overview", "schedule"])
         self.assertEqual(entries.current, ["investigation"])
         # Without a database the investigation entry opens the synthetic workspace.
         self.assertEqual(entries.links["investigation"], "/?source=demo")
         self.assertEqual(entries.links["logs"], "/?workspace=logs")
         self.assertEqual(entries.links["alerts"], "/?workspace=logs#incident-workspace")
         self.assertEqual(entries.links["quality"], "/analysis/quality")
+        self.assertEqual(entries.links["pipeline"], "/analysis/pipeline")
         self.assertEqual(entries.links["datasets"], "/manage/datasets")
         self.assertEqual(entries.links["catalog"], "/manage/datasets/catalog")
 

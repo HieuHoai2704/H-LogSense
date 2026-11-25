@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% set analysis_section = "pipeline" %}
+{% block title %}{{ tr("Pipeline & jobs") }} · {{ app_name }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pipeline.css') }}">{% endblock %}
+{% macro number(value) %}{{ "{:,}".format(value) }}{% endmacro %}
+{% set type_labels = {"ingestion": tr("Log import"), "parsing": tr("Parsing"), "rule": tr("Rule detector"), "isolation_forest": tr("Isolation Forest"), "validated": tr("Validated Isolation Forest"), "study": tr("Frozen study")} %}
+{% set job_states = {"queued": tr("Queued"), "running": tr("Running"), "completed": tr("Completed"), "failed": tr("Run failed")} %}
+{% set stage_states = {"ok": tr("Healthy"), "running": tr("Running"), "failed": tr("Run failed"), "warn": tr("Needs attention"), "idle": tr("Not run")} %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-baseline gap-3 mb-1">
+  <h1 class="me-auto mb-0">{{ tr("Pipeline & jobs") }}</h1>
+  {% if datasets %}
+  <form class="pipeline-dataset d-flex gap-2 align-items-center" method="get">
+    <label for="pipeline-dataset" class="mb-0">{{ tr("Dataset") }}</label>
+    <select id="pipeline-dataset" name="dataset_id" class="form-select form-select-sm">
+      {% for item in datasets %}<option value="{{ item.id }}"{% if dataset and item.id == dataset.id %} selected{% endif %}>{{ item.name }} · {{ item.data_mode }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-sm btn-outline-secondary">{{ tr("Show") }}</button>
+  </form>
+  {% endif %}
+</div>
+<p class="text-secondary">{{ tr("Jobs of the selected dataset and the path its logs take from raw files to alerts.") }}</p>
+
+{% if unavailable %}
+<p class="alert alert-warning" role="status">{{ tr("Pipeline status needs the MySQL database.") }}</p>
+{% elif not dataset %}
+<p class="alert alert-info" role="status">{{ tr("No dataset access has been granted.") }}</p>
+{% else %}
+<section class="mb-4" aria-labelledby="pipeline-flow-title">
+  <h2 id="pipeline-flow-title" class="h5">{{ tr("Data flow") }}</h2>
+  <ol class="pipeline-flow">
+    {% for stage in report.flow %}
+    <li class="pipeline-stage {{ stage.state }}" data-stage="{{ stage.key }}" data-state="{{ stage.state }}">
+      <span class="pipeline-stage-name">{{ {"raw": tr("Raw logs"), "import": tr("Import"), "quality": tr("Quality checks"), "ml": tr("ML detectors"), "alerts": tr("Alerts")}[stage.key] }}</span>
+      <strong>{% if stage.key == "raw" %}{{ tr("{0} lines", number(stage.value)) }}{% elif stage.key == "import" %}{{ tr("{0} events", number(stage.value)) }}{% elif stage.key == "quality" %}{{ tr("Score {0}", stage.value) if stage.value is not none else "—" }}{% elif stage.key == "ml" %}{{ tr("{0} anomalies", number(stage.value)) }}{% else %}{{ tr("{0} open of {1}", number(stage.value), number(stage.total)) }}{% endif %}</strong>
+      <span class="pipeline-stage-state">{{ stage_states[stage.state] }}</span>
+      {% if stage.key == "quality" %}<a class="stretched-link" href="{{ url_for('operations.quality', dataset_id=dataset.id) }}"><span class="visually-hidden">{{ tr("Data quality") }}</span></a>
+      {% elif stage.key == "alerts" %}<a class="stretched-link" href="{{ url_for('dashboard', workspace='logs', dataset_id=dataset.id, _anchor='incident-workspace') }}"><span class="visually-hidden">{{ tr("Alerts") }}</span></a>
+      {% elif stage.key == "import" %}<a class="stretched-link" href="{{ url_for('dashboard', workspace='logs', dataset_id=dataset.id) }}"><span class="visually-hidden">{{ tr("Log Explorer") }}</span></a>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section class="card card-body mb-4" aria-labelledby="pipeline-grid-title">
+  <h2 id="pipeline-grid-title" class="h5">{{ tr("Job grid") }}</h2>
+  <p class="text-secondary small mb-2">{{ tr("Each row is a job type and each square one run, oldest on the left; the last 20 runs are shown. Select a square for its details.") }}</p>
+  <table class="pipeline-grid">
+    <tbody>
+    {% for row in report.grid %}
+      <tr data-type="{{ row.type }}">
+        <th scope="row">{{ type_labels[row.type] }} <small class="text-secondary">· {{ row.total }}</small></th>
+        <td><div class="pipeline-runs">
+          {% for run in row.runs %}<a class="pipeline-run {{ run.state }}{% if run.id == selected %} selected{% endif %}" href="{{ url_for('operations.pipeline', dataset_id=dataset.id, job=run.id, _anchor='job-detail') }}" title="#{{ run.id }} · {{ job_states[run.state] }}"><span class="visually-hidden">#{{ run.id }} {{ job_states[run.state] }}</span></a>{% else %}<span class="text-secondary small">{{ tr("Not run yet") }}</span>{% endfor %}
+        </div></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="pipeline-legend small text-secondary mt-2 mb-0">{% for key in ("completed", "running", "queued", "failed") %}<span class="pipeline-run {{ key }}"></span> {{ job_states[key] }} {% endfor %}</p>
+</section>
+
+{% set ns = namespace(job=none) %}
+{% for row in report.grid %}{% for run in row.runs %}{% if run.id == selected %}{% set ns.job = run %}{% endif %}{% endfor %}{% endfor %}
+{% for run in report.recent %}{% if run.id == selected %}{% set ns.job = run %}{% endif %}{% endfor %}
+{% if selected is not none %}
+<section class="card card-body mb-4" id="job-detail" aria-labelledby="job-detail-title" tabindex="-1">
+  {% if ns.job %}{% set job = ns.job %}
+  <h2 id="job-detail-title" class="h5">{{ tr("Job #{0}", job.id) }} · {{ type_labels[job.type] }}</h2>
+  <dl class="row mb-2 small">
+    <dt class="col-sm-3">{{ tr("Status") }}</dt><dd class="col-sm-9"><span class="pipeline-badge {{ job.state }}">{{ job_states[job.state] }}</span></dd>
+    <dt class="col-sm-3">{{ tr("Rows processed") }}</dt><dd class="col-sm-9">{{ number(job.processed_count) }}</dd>
+    {% if job.error_code %}<dt class="col-sm-3">{{ tr("Error code") }}</dt><dd class="col-sm-9"><code>{{ job.error_code }}</code></dd>{% endif %}
+    {% if job.run_id %}<dt class="col-sm-3">{{ tr("Detector run") }}</dt><dd class="col-sm-9"><a href="{{ url_for('dashboard', source='db-' ~ dataset.id) }}">#{{ job.run_id }}</a></dd>{% endif %}
+    {% if job.alerts_created is not none %}<dt class="col-sm-3">{{ tr("Alerts created") }}</dt><dd class="col-sm-9">{{ number(job.alerts_created) }}</dd>{% endif %}
+    {% if job.configuration %}<dt class="col-sm-3">{{ tr("Configuration") }}</dt><dd class="col-sm-9"><code>{{ job.configuration|tojson }}</code></dd>{% endif %}
+  </dl>
+  {% if job.actions %}
+  <div class="pipeline-actions d-flex flex-wrap gap-2 align-items-center" data-dataset="{{ dataset.id }}" data-job="{{ job.id }}">
+    {% if "retry" in job.actions %}<button type="button" class="btn btn-sm btn-primary" data-action="retry">{{ tr("Retry job") }}</button>{% endif %}
+    {% if "rerun" in job.actions %}<button type="button" class="btn btn-sm btn-primary" data-action="rerun" data-configuration="{{ job.configuration|tojson|forceescape }}">{{ tr("Run again with this configuration") }}</button>{% endif %}
+    {% if "retry_upload" in job.actions %}<button type="button" class="btn btn-sm btn-primary" data-action="retry_upload" data-upload="{{ job.upload_id }}">{{ tr("Retry import") }}</button>{% endif %}
+    <span id="pipeline-action-status" role="status" class="small"></span>
+  </div>
+  {% endif %}
+  <p class="text-secondary small mt-2 mb-0">{{ tr("Queued jobs run in a separate worker process: python -m scripts.run.worker") }}</p>
+  {% else %}
+  <h2 id="job-detail-title" class="h5">{{ tr("Job not found") }}</h2>
+  <p class="mb-0">{{ tr("This job is not among the recent jobs of the selected dataset.") }}</p>
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="card card-body mb-4" aria-labelledby="pipeline-recent-title">
+  <h2 id="pipeline-recent-title" class="h5">{{ tr("Recent jobs") }}{% if report.queued %} <small class="text-secondary">· {{ tr("{0} queued", report.queued) }}</small>{% endif %}</h2>
+  {% if report.recent %}
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th scope="col">ID</th><th scope="col">{{ tr("Job type") }}</th><th scope="col">{{ tr("Status") }}</th><th scope="col" class="text-end">{{ tr("Rows processed") }}</th><th scope="col">{{ tr("Error code") }}</th></tr></thead>
+      <tbody>
+      {% for job in report.recent %}
+        <tr data-job="{{ job.id }}"><td><a href="{{ url_for('operations.pipeline', dataset_id=dataset.id, job=job.id, _anchor='job-detail') }}">#{{ job.id }}</a></td><td>{{ type_labels[job.type] }}</td><td><span class="pipeline-badge {{ job.state }}">{{ job_states[job.state] }}</span></td><td class="text-end">{{ number(job.processed_count) }}</td><td>{{ job.error_code or "—" }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="mb-0 text-secondary">{{ tr("No jobs have run for this dataset yet.") }}</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/pipeline.js') }}" defer></script>{% endblock %}

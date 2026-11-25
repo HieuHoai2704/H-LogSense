@@ -113,7 +113,8 @@ module = [
     "app.contracts", "app.paths", "app.permissions", "app.i18n", "app.parsers.*", "app.api.anomalies",
     "app.api.sources",
     "app.services.investigation", "app.services.mysql_investigation", "app.services.csv_safety",
-    "app.services.redaction", "app.services.data_quality", "app.analysis_menu", "scripts.run.supervision",
+    "app.services.redaction", "app.services.data_quality", "app.services.pipeline",
+    "app.analysis_menu", "app.web_operations", "scripts.run.supervision",
 ]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
