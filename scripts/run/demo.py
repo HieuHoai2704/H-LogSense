@@ -315,7 +315,17 @@ def main(argv=None):
         return
     environment = {**os.environ, "DATABASE_URL": url(state)}
     environment.pop("FLASK_SECRET_KEY", None)  # a new secret per launch: closing the app signs out
-    # The worker runs schedules and queued jobs next to the app; it stops with the app.
+    raise SystemExit(launch(environment))
+
+
+def launch(environment):
+    """Start the job worker and the app; stop the worker when the app stops. A second launch while the
+    app runs only reopens the browser: the first launch owns the worker."""
+    from app.workbench.__main__ import running_instance
+
+    if running_instance(Path.home() / ".h-logsen"):
+        say("H-logsen is already running; opening it in the browser")
+        return subprocess.run([sys.executable, "-m", "app.workbench"], env=environment).returncode
     log = STATE / "worker.log"
     say(f"starting the job worker (log: {log})")
     with open(log, "ab") as output:
@@ -328,16 +338,15 @@ def main(argv=None):
         )
     say("opening H-logsen in the browser (Ctrl+C stops the server and the worker; MySQL keeps running)")
     try:
-        code = subprocess.run([sys.executable, "-m", "app.workbench"], env=environment).returncode
+        return subprocess.run([sys.executable, "-m", "app.workbench"], env=environment).returncode
     except KeyboardInterrupt:
-        code = 0
+        return 0
     finally:
         worker.terminate()
         try:
             worker.wait(timeout=15)
         except subprocess.TimeoutExpired:
             worker.kill()
-    raise SystemExit(code)
 
 
 if __name__ == "__main__":
