@@ -239,7 +239,7 @@ set `SMTP_ENABLED=1` and the `SMTP_*` settings described in the [operations guid
 
 ### 2. Find your way around
 
-The bar at the top has four icons:
+The bar at the top has four icons, and a fifth for administrators:
 
 | Icon | View | Use it for |
 | --- | --- | --- |
@@ -247,6 +247,7 @@ The bar at the top has four icons:
 | Folder | **Project** | A project folder on this machine: its log, loss chart, runs and a terminal |
 | `</>` | **Code** | The code editor, terminal, problems, output, ports and debug console |
 | Gear | **Settings** | Appearance, language, remote machines, Python and packages, data, extensions |
+| People | **User management** | Administrators only: sign-up requests, accounts and dataset access |
 
 In **Analysis**, the menu on the left has the groups **Monitoring**, **Data operations**, **Data sources**
 and, for administrators, **Administration**. Each report page has a dataset selector at the top right;
