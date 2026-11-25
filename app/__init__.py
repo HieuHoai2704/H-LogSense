@@ -14,12 +14,37 @@ from app.presentation import context, payload
 from app.services.investigation import QueryError
 from config import APP_NAME, PROFILES
 
+STATIC_CACHE_SECONDS = 365 * 24 * 3600
+
+
+def version_static_files(app):
+    """Static URLs carry ``?v=<modification time>``; such requests are cached for a year, so moving
+    between pages no longer revalidates every stylesheet and script. Editing a file changes its URL."""
+
+    @app.url_defaults
+    def static_version(endpoint, values):
+        if endpoint != "static" or "v" in values or "filename" not in values:
+            return
+        try:
+            stamp = os.stat(os.path.join(app.static_folder, values["filename"])).st_mtime_ns
+        except (OSError, TypeError):
+            return
+        values["v"] = format(stamp, "x")
+
+    default_max_age = app.get_send_file_max_age
+
+    def static_max_age(filename):
+        return STATIC_CACHE_SECONDS if request.args.get("v") else default_max_age(filename)
+
+    app.get_send_file_max_age = static_max_age
+
 
 def create_app(config_overrides=None):
     """Build an application with its configuration and initial routes."""
     app = Flask(__name__)
     app.jinja_env.globals["app_name"] = APP_NAME
     init_analysis_menu(app)
+    version_static_files(app)
     profile = os.environ.get("LOGSENSE_PROFILE", "development")
     if profile not in PROFILES:
         raise ValueError("LOGSENSE_PROFILE must be development, testing or production.")

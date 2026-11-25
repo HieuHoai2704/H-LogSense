@@ -799,7 +799,11 @@ for (const link of projectLinks) {
   link.addEventListener("click", (event) => {
     if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    navigateProject(link.dataset.projectView);
+    // Project, Code and Settings share one page: a click cross-fades like a page change where
+    // supported. Code that switches views itself stays synchronous (it focuses right after).
+    if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.startViewTransition(() => navigateProject(link.dataset.projectView));
+    } else navigateProject(link.dataset.projectView);
   });
 }
 window.addEventListener("popstate", () => showView(viewFromLocation()));

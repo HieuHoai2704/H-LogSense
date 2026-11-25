@@ -13,7 +13,8 @@ from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session, scoped_session
 from werkzeug.datastructures import MultiDict
 
-from app.models import AnomalyOutput, LogEvent
+from app.models import AnomalyOutput, Dataset, LogEvent
+from app.services.report_cache import cached
 
 SEVERE = ("ERROR", "FATAL", "SEVERE", "FAILURE")
 VOLUME_HOURS = 48  # the volume chart shows the last 48 hours of data
@@ -110,17 +111,10 @@ def volume(hourly: dict[Any, tuple[int, int]]) -> list[dict[str, Any]]:
     ]
 
 
-def overview_report(session: Session | scoped_session[Any], dataset_id: int) -> dict[str, Any]:
+def event_summary(session: Session | scoped_session[Any], dataset_id: int) -> dict[str, Any]:
+    """Event, host and severe counts, the time range and the last VOLUME_HOURS hours of volume."""
     from datetime import timezone
 
-    from app.services.data_quality import quality_report
-    from app.services.log_patterns import insights as log_insights
-    from app.services.log_queries import parse_scope
-    from app.services.pipeline import pipeline_report
-    from app.services.schedules import list_schedules
-
-    quality = quality_report(session, dataset_id)
-    pipeline = pipeline_report(session, dataset_id, quality=quality)
     events, hosts, severe, first, last = session.execute(
         select(
             func.count(),
@@ -130,6 +124,49 @@ def overview_report(session: Session | scoped_session[Any], dataset_id: int) -> 
             func.max(LogEvent.timestamp),
         ).where(LogEvent.dataset_id == dataset_id)
     ).one()
+    bucket = func.date_format(LogEvent.timestamp, "%Y-%m-%d %H")
+    hourly: dict[datetime, tuple[int, int]] = {}
+    if last is not None:
+        rows = session.execute(
+            select(
+                bucket,
+                func.count(),
+                func.coalesce(func.sum(case((LogEvent.severity.in_(SEVERE), 1), else_=0)), 0),
+            )
+            .where(
+                LogEvent.dataset_id == dataset_id, LogEvent.timestamp > last - timedelta(hours=VOLUME_HOURS)
+            )
+            .group_by(bucket)
+        ).tuples()
+        for hour, total, severe_count in rows:
+            stamp = datetime.strptime(hour, "%Y-%m-%d %H").replace(tzinfo=timezone.utc)
+            hourly[stamp] = (int(total), int(severe_count))
+    return {
+        "events": events,
+        "hosts": hosts,
+        "severe": severe,
+        "first": first,
+        "last": last,
+        "hourly": hourly,
+    }
+
+
+def overview_report(session: Session | scoped_session[Any], dataset_id: int) -> dict[str, Any]:
+    from app.services.data_quality import quality_report
+    from app.services.log_patterns import insights as log_insights
+    from app.services.log_queries import parse_scope
+    from app.services.pipeline import pipeline_report
+    from app.services.schedules import list_schedules
+
+    quality = quality_report(session, dataset_id)
+    pipeline = pipeline_report(session, dataset_id, quality=quality)
+    revision = session.scalar(select(Dataset.input_revision).where(Dataset.id == dataset_id))
+    newest_event = session.scalar(select(func.max(LogEvent.id)).where(LogEvent.dataset_id == dataset_id))
+    # Counts over every event only change with the data: reused until the next import batch.
+    summary = cached(
+        ("events", dataset_id, revision, newest_event), lambda: event_summary(session, dataset_id)
+    )
+    events, hosts, severe, first, last = (summary[k] for k in ("events", "hosts", "severe", "first", "last"))
     anomalies, high = session.execute(
         select(
             func.count(),
@@ -148,22 +185,12 @@ def overview_report(session: Session | scoped_session[Any], dataset_id: int) -> 
                 {"dataset_id": str(dataset_id), "start_time": start.isoformat(), "end_time": end.isoformat()}
             ),
         )
-        insights = log_insights(session, scope)
-    bucket = func.date_format(LogEvent.timestamp, "%Y-%m-%d %H")
-    since = (last - timedelta(hours=VOLUME_HOURS)) if last is not None else None
-    hourly = {}
-    if since is not None:
-        for hour, total, severe_count in session.execute(
-            select(
-                bucket,
-                func.count(),
-                func.coalesce(func.sum(case((LogEvent.severity.in_(SEVERE), 1), else_=0)), 0),
-            )
-            .where(LogEvent.dataset_id == dataset_id, LogEvent.timestamp > since)
-            .group_by(bucket)
-        ).tuples():
-            stamp = datetime.strptime(hour, "%Y-%m-%d %H").replace(tzinfo=timezone.utc)
-            hourly[stamp] = (int(total), int(severe_count))
+        # Reused until an import batch (input_revision) or a detector run (newest anomaly) changes them.
+        newest = session.scalar(
+            select(func.max(AnomalyOutput.id)).where(AnomalyOutput.dataset_id == dataset_id)
+        )
+        key = ("insights", dataset_id, revision, newest, scope.maximum_id)
+        insights = cached(key, lambda: log_insights(session, scope))
     open_alerts = int(stages["alerts"]["value"])
     return {
         "events": int(events),
@@ -186,5 +213,5 @@ def overview_report(session: Session | scoped_session[Any], dataset_id: int) -> 
             high_anomalies=int(high),
             schedules=list_schedules(session, dataset_id),
         ),
-        "volume": volume(hourly),
+        "volume": volume(summary["hourly"]),
     }

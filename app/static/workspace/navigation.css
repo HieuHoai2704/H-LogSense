@@ -108,3 +108,14 @@
 .workspace-account button:hover { background: color-mix(in srgb, var(--text) 9%, transparent); }
 .workspace-account button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .workspace-account .workspace-nav-icon { width: 16px; height: 16px; }
+
+/* Page changes cross-fade instead of blanking (Chrome/Edge 126+, Safari 18.2+; others switch at once).
+   The top bar and the Analysis menu keep their place, so only the page content changes. */
+@view-transition { navigation: auto; }
+.workspace-nav { view-transition-name: workspace-nav; }
+.analysis-menu { view-transition-name: analysis-menu; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 180ms; }
+::view-transition-group(workspace-nav), ::view-transition-group(analysis-menu) { animation-duration: 0s; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}

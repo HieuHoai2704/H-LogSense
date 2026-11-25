@@ -225,4 +225,10 @@ def collect(session: Session | scoped_session[Any], dataset_id: int) -> QualityS
 
 
 def quality_report(session: Session | scoped_session[Any], dataset_id: int) -> dict[str, Any]:
-    return evaluate(collect(session, dataset_id))
+    """The report depends only on the imported data, so it is reused until the next import batch."""
+    from app.models import Dataset
+    from app.services.report_cache import cached
+
+    revision = session.scalar(select(Dataset.input_revision).where(Dataset.id == dataset_id))
+    newest = session.scalar(select(func.max(RawLogRecord.id)).where(RawLogRecord.dataset_id == dataset_id))
+    return cached(("quality", dataset_id, revision, newest), lambda: evaluate(collect(session, dataset_id)))

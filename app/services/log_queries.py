@@ -1,6 +1,6 @@
 """One UTC filter/snapshot contract for log pages, volume bins and CSV."""
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 import hashlib
 import json
@@ -35,6 +35,16 @@ class LogScope:
     exclude_severities: list = field(default_factory=list)
     terms: list = field(default_factory=list)
     exclude_terms: list = field(default_factory=list)
+
+
+def scope_key(scope: LogScope) -> tuple:
+    """What a scope's results depend on, without its signed token or page cursor (for caching)."""
+    values = asdict(scope)
+    values.pop("token")
+    values.pop("after")
+    values.pop("direction")
+    values.pop("limit")
+    return tuple((name, tuple(value) if isinstance(value, list) else value) for name, value in values.items())
 
 
 # Search syntax in the style of log explorers: ``host:R02-M1 level:ERROR -service:KERNEL "exact phrase"

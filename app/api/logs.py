@@ -19,13 +19,14 @@ from werkzeug.exceptions import NotFound
 
 from app.extensions import db
 from app.i18n import translate
-from app.models import Dataset, GroundTruthLabel, LogEvent, RawLogRecord, SourceArtifact
+from app.models import AnomalyOutput, Dataset, GroundTruthLabel, LogEvent, RawLogRecord, SourceArtifact
 from app.security import Forbidden, authorized_datasets, identity, roles
 from app.services import log_patterns
 from app.services.csv_safety import safe_cell
 from app.services.investigation import QueryError, integer, iso
-from app.services.log_queries import facets, page, parse_scope, predicates, timeline
+from app.services.log_queries import facets, page, parse_scope, predicates, scope_key, timeline
 from app.services.redaction import redact
+from app.services.report_cache import cached
 
 logs_api = Blueprint("logs", __name__)
 
@@ -238,19 +239,26 @@ def export():
 def facet_counts():
     scope = parse_scope(db.session, request.args)
     size = integer(request.args.get("size", "10"), 1, 50, "Facet size")
-    return jsonify(scope_token=scope.token, facets=facets(db.session, scope, size))
+    counted = cached(("facets", size, scope_key(scope)), lambda: facets(db.session, scope, size))
+    return jsonify(scope_token=scope.token, facets=counted)
 
 
 @logs_api.get("/api/v1/logs/patterns")
 def patterns():
     scope = parse_scope(db.session, request.args)
-    return jsonify(scope_token=scope.token, **log_patterns.top_patterns(db.session, scope))
+    found = cached(("patterns", scope_key(scope)), lambda: log_patterns.top_patterns(db.session, scope))
+    return jsonify(scope_token=scope.token, **found)
 
 
 @logs_api.get("/api/v1/logs/insights")
 def insights():
     scope = parse_scope(db.session, request.args)
-    return jsonify(scope_token=scope.token, **log_patterns.insights(db.session, scope))
+    # Detector anomalies are part of the insights: a new run changes the key.
+    newest = db.session.scalar(
+        select(func.max(AnomalyOutput.id)).where(AnomalyOutput.dataset_id == scope.dataset_id)
+    )
+    found = cached(("insights", newest, scope_key(scope)), lambda: log_patterns.insights(db.session, scope))
+    return jsonify(scope_token=scope.token, **found)
 
 
 @logs_api.get("/api/v1/logs/<int:event_id>/context")
