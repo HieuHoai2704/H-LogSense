@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% set analysis_section = "quality" %}
+{% block title %}{{ tr("Data quality") }} · {{ app_name }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/quality.css') }}">{% endblock %}
+{% macro number(value) %}{{ "{:,}".format(value) }}{% endmacro %}
+{% macro percent(value) %}{{ "{:.2%}".format(value) }}{% endmacro %}
+{% set status_labels = {"pass": tr("Passed"), "warn": tr("Warning"), "fail": tr("Failed"), "skipped": tr("Skipped")} %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-baseline gap-3 mb-1">
+  <h1 class="me-auto mb-0">{{ tr("Data quality") }}</h1>
+  {% if datasets %}
+  <form class="quality-dataset d-flex gap-2 align-items-center" method="get">
+    <label for="quality-dataset" class="mb-0">{{ tr("Dataset") }}</label>
+    <select id="quality-dataset" name="dataset_id" class="form-select form-select-sm">
+      {% for item in datasets %}<option value="{{ item.id }}"{% if dataset and item.id == dataset.id %} selected{% endif %}>{{ item.name }} · {{ item.data_mode }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-sm btn-outline-secondary">{{ tr("Show") }}</button>
+  </form>
+  {% endif %}
+</div>
+<p class="text-secondary">{{ tr("Checks run on the import counters and parsed events of the selected dataset. They describe the data, not anomalies.") }}</p>
+
+{% if unavailable %}
+<p class="alert alert-warning" role="status">{{ tr("Data quality needs the MySQL database.") }}</p>
+{% elif not dataset %}
+<p class="alert alert-info" role="status">{{ tr("No dataset access has been granted.") }}</p>
+{% elif not report.events and not report.lines %}
+<p class="alert alert-info" role="status">{{ tr("This dataset has no imported data yet.") }}</p>
+{% else %}
+{% set score = report.score %}
+<section class="quality-summary" aria-label="{{ tr('Quality score') }}">
+  <div class="quality-score {{ 'good' if score is not none and score >= 90 else 'fair' if score is not none and score >= 70 else 'poor' }}" style="--score: {{ score or 0 }}">
+    <strong>{{ score if score is not none else "—" }}</strong>
+    <span>{{ tr("Quality score") }}</span>
+  </div>
+  <dl class="quality-facts">
+    <div><dt>{{ tr("Verdict") }}</dt><dd>{{ tr("Not judged") if score is none else tr("Good") if score >= 90 else tr("Needs attention") if score >= 70 else tr("Poor") }}</dd></div>
+    <div><dt>{{ tr("Checks passed") }}</dt><dd>{{ report.passed }} / {{ report.checks|length }}</dd></div>
+    <div><dt>{{ tr("Raw lines read") }}</dt><dd>{{ number(report.lines) }}</dd></div>
+    <div><dt>{{ tr("Parsed events") }}</dt><dd>{{ number(report.events) }}</dd></div>
+    <div><dt>{{ tr("Period · UTC") }}</dt><dd>{% if report.first_hour %}{{ report.first_hour[:13]|replace("T", " ") }}:00 → {{ report.last_hour[:13]|replace("T", " ") }}:59{% else %}—{% endif %}</dd></div>
+  </dl>
+</section>
+
+<section class="card card-body mb-4" aria-labelledby="quality-checks-title">
+  <h2 id="quality-checks-title" class="h5">{{ tr("Checks") }}</h2>
+  <div class="table-responsive">
+    <table class="table align-middle mb-0 quality-checks">
+      <thead><tr><th scope="col">{{ tr("Status") }}</th><th scope="col">{{ tr("Check") }}</th><th scope="col">{{ tr("Observed") }}</th><th scope="col">{{ tr("Expectation") }}</th></tr></thead>
+      <tbody>
+      {% for check in report.checks %}
+        <tr data-check="{{ check.key }}" data-status="{{ check.status }}">
+          <td><span class="quality-status {{ check.status }}">{{ status_labels[check.status] }}</span></td>
+          {% if check.key == "malformed" %}
+          <th scope="row">{{ tr("Malformed lines") }}</th>
+          <td>{% if check.total %}{{ tr("{0} of {1} lines ({2})", number(check.count), number(check.total), percent(check.share)) }}{% else %}{{ tr("No imported lines") }}{% endif %}</td>
+          <td>{{ tr("At most 0.1% of raw lines fail to parse") }}</td>
+          {% elif check.key == "duplicates" %}
+          <th scope="row">{{ tr("Duplicate lines") }}</th>
+          <td>{% if check.total %}{{ tr("{0} of {1} lines ({2})", number(check.count), number(check.total), percent(check.share)) }}{% else %}{{ tr("No imported lines") }}{% endif %}</td>
+          <td>{{ tr("At most 0.1% of raw lines repeat an earlier line exactly") }}</td>
+          {% elif check.key == "missing_fields" %}
+          <th scope="row">{{ tr("Missing fields") }}</th>
+          <td>{% if check.total %}{{ tr("{0} of {1} events ({2})", number(check.count), number(check.total), percent(check.share)) }}
+            <small class="d-block text-secondary">{{ tr("Host") }} {{ number(check.host) }} · {{ tr("Component") }} {{ number(check.service) }} · {{ tr("Level") }} {{ number(check.severity) }}</small>
+            {% else %}{{ tr("No parsed events") }}{% endif %}</td>
+          <td>{{ tr("At most 1% of events lack a host, component or level") }}</td>
+          {% elif check.key == "time_gaps" %}
+          <th scope="row">{{ tr("Time gaps") }}</th>
+          <td>{% if check.hours %}{{ tr("{0} of {1} hours without events · longest gap {2} h", check.empty_hours, check.hours, check.longest_hours) }}{% else %}{{ tr("No parsed events") }}{% endif %}</td>
+          <td>{{ tr("Every hour between the first and last event has logs; gaps up to 3 h are a warning") }}</td>
+          {% elif check.key == "volume_drop" %}
+          <th scope="row">{{ tr("Volume drop") }}</th>
+          <td>{% if check.baseline is not none %}{{ tr("Last 6 h: {0} events · usual 6 h: {1} · drop {2}", number(check.recent), number(check.baseline|round|int), percent(check.drop)) }}{% else %}{{ tr("Not enough history (needs 12 hours of events)") }}{% endif %}</td>
+          <td>{{ tr("The last 6 hours keep at least 75% of the median 6-hour volume of the previous day") }}</td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card card-body mb-4" aria-labelledby="quality-grid-title">
+  <h2 id="quality-grid-title" class="h5">{{ tr("Hourly coverage · UTC") }}</h2>
+  <p class="text-secondary small mb-2">{{ tr("Each cell is one hour: a stronger shade means more events; red marks an hour without events between the first and last event.") }}{% if report.grid.truncated %} {{ tr("Only the last 14 days are shown.") }}{% endif %}</p>
+  <div class="table-responsive">
+    <table class="quality-grid">
+      <thead><tr><th scope="col"><span class="visually-hidden">{{ tr("Day") }}</span></th>{% for hour in range(24) %}<th scope="col">{{ "%02d"|format(hour) }}</th>{% endfor %}</tr></thead>
+      <tbody>
+      {% for day in report.grid.days %}
+        <tr><th scope="row">{{ day.date }}</th>
+        {% for cell in day.cells %}<td class="{{ 'out' if cell.level is none else 'gap' if cell.level == 0 else 'l' ~ cell.level }}" title="{{ day.date }} {{ '%02d'|format(cell.hour) }}:00 · {{ tr('outside the data range') if cell.count is none else tr('{0} events', number(cell.count)) }}"><span class="visually-hidden">{{ '—' if cell.count is none else cell.count }}</span></td>{% endfor %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="quality-legend small text-secondary mt-2 mb-0"><span class="gap"></span> {{ tr("No events") }} <span class="l1"></span><span class="l2"></span><span class="l3"></span><span class="l4"></span> {{ tr("Fewer → more events") }} · {{ tr("Busiest hour: {0} events", number(report.grid.max)) }}</p>
+</section>
+{% endif %}
+{% endblock %}

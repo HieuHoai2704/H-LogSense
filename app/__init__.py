@@ -47,6 +47,9 @@ def create_app(config_overrides=None):
     moment.init_app(app)
     mail.init_app(app)
     app.register_blueprint(dataset_pages)
+    from app.web_quality import quality_pages
+
+    app.register_blueprint(quality_pages)
     register_page_errors(app)
 
     @app.shell_context_processor
