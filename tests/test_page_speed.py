@@ -53,6 +53,23 @@ class StaticVersionTests(unittest.TestCase):
         self.assertNotIn('link[href$="', terminal)
 
 
+class InterfaceSystemTests(unittest.TestCase):
+    def test_every_page_loads_the_shared_interface_and_palette(self):
+        client = create_app({"TESTING": True}).test_client()
+        for path in ("/?source=demo", "/?workspace=logs", "/", "/analysis/quality"):
+            with self.subTest(path=path):
+                html = client.get(path).get_data(as_text=True)
+                self.assertIn("css/ui.css", html)
+                self.assertIn("data-workspace-theme", html.split(">", 2)[1])
+
+    def test_labels_are_sentence_case_outside_the_sign_in_card(self):
+        for path in [*(STATIC / "css").glob("*.css"), *(STATIC / "workspace").glob("*.css")]:
+            if path.name == "account.css":
+                continue  # the sign-in card keeps its display type
+            with self.subTest(path=path.name):
+                self.assertNotIn("text-transform: uppercase", path.read_text(encoding="utf-8"))
+
+
 class ReportCacheTests(unittest.TestCase):
     def setUp(self):
         report_cache.clear()

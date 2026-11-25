@@ -25,11 +25,11 @@
   color: var(--muted, #6c757d);
   font-size: 18px;
 }
-.pipeline-stage.ok { --stage: #2e9e5b; }
-.pipeline-stage.running { --stage: #3a7bd5; }
-.pipeline-stage.warn { --stage: #c98d0c; }
-.pipeline-stage.failed { --stage: #d0453a; }
-.pipeline-stage-name { color: var(--muted, #6c757d); font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.pipeline-stage.ok { --stage: var(--ok); }
+.pipeline-stage.running { --stage: var(--info); }
+.pipeline-stage.warn { --stage: var(--warn); }
+.pipeline-stage.failed { --stage: var(--bad); }
+.pipeline-stage-name { color: var(--muted, #6c757d); font-size: 12px; font-weight: 500; }
 .pipeline-stage strong { font-size: 17px; font-variant-numeric: tabular-nums; }
 .pipeline-stage-state { color: var(--stage); font-size: 12px; font-weight: 600; }
 .pipeline-stage:has(.stretched-link):hover { background: color-mix(in srgb, var(--text, #222) 5%, transparent); }
@@ -48,17 +48,17 @@
   background: var(--run);
 }
 .pipeline-legend .pipeline-run { width: 12px; height: 12px; margin-inline: 2px 0; vertical-align: -2px; border-radius: 3px; }
-.pipeline-run.completed { --run: #2e9e5b; }
-.pipeline-run.running { --run: #3a7bd5; }
-.pipeline-run.queued { --run: color-mix(in srgb, #3a7bd5 35%, transparent); box-shadow: inset 0 0 0 1.5px #3a7bd5; }
-.pipeline-run.failed { --run: #d0453a; }
+.pipeline-run.completed { --run: var(--ok); }
+.pipeline-run.running { --run: var(--info); }
+.pipeline-run.queued { --run: color-mix(in srgb, var(--info) 35%, transparent); box-shadow: inset 0 0 0 1.5px var(--info); }
+.pipeline-run.failed { --run: var(--bad); }
 a.pipeline-run:hover, a.pipeline-run:focus-visible { outline: 2px solid var(--text, #222); outline-offset: 1px; }
 .pipeline-run.selected { outline: 2px solid var(--text, #222); outline-offset: 2px; }
 
 .pipeline-badge { display: inline-block; padding: 1px 8px; border: 1px solid currentColor; border-radius: 999px; font-size: 12px; font-weight: 600; }
-.pipeline-badge.completed { color: #2e9e5b; }
-.pipeline-badge.running, .pipeline-badge.queued { color: #3a7bd5; }
-.pipeline-badge.failed { color: #d0453a; }
+.pipeline-badge.completed { color: var(--ok); }
+.pipeline-badge.running, .pipeline-badge.queued { color: var(--info); }
+.pipeline-badge.failed { color: var(--bad); }
 #job-detail:focus { outline: none; }
 #job-detail code { overflow-wrap: anywhere; }
 

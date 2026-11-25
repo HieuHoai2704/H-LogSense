@@ -5,14 +5,14 @@
   gap: 2px;
   padding: 12px 14px;
   border: 1px solid var(--border, #dee2e6);
-  border-left: 4px solid #2e9e5b;
+  border-left: 4px solid var(--ok);
   border-radius: 8px;
   color: inherit;
   text-decoration: none;
 }
-.overview-kpi.warn { border-left-color: #c98d0c; }
+.overview-kpi.warn { border-left-color: var(--warn); }
 .overview-kpi:hover { background: color-mix(in srgb, var(--text, #222) 5%, transparent); color: inherit; }
-.overview-kpi span { color: var(--muted, #6c757d); font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.overview-kpi span { color: var(--muted, #6c757d); font-size: 12px; font-weight: 500; }
 .overview-kpi strong { font-size: 24px; font-variant-numeric: tabular-nums; }
 .overview-kpi small { color: var(--muted, #6c757d); font-size: 12px; }
 
@@ -21,10 +21,10 @@
 .overview-attention a { color: inherit; overflow-wrap: anywhere; }
 .overview-attention code { font-size: 12px; }
 .overview-level { flex: 0 0 auto; min-width: 86px; padding: 1px 8px; border: 1px solid currentColor; border-radius: 999px; font-size: 12px; font-weight: 600; text-align: center; }
-.overview-attention .critical .overview-level { color: #d0453a; }
-.overview-attention .warn .overview-level { color: #c98d0c; }
-.overview-attention .info .overview-level { color: #3a7bd5; }
-.overview-clear { color: #2e9e5b; }
+.overview-attention .critical .overview-level { color: var(--bad); }
+.overview-attention .warn .overview-level { color: var(--warn); }
+.overview-attention .info .overview-level { color: var(--info); }
+.overview-clear { color: var(--ok); }
 
 /* Hourly volume: total bar with its severe share in red at the bottom. */
 .overview-volume { display: flex; align-items: flex-end; gap: 2px; height: 120px; padding-bottom: 1px; border-bottom: 1px solid var(--border, #dee2e6); }
@@ -33,5 +33,5 @@
   min-height: 1px;
   height: var(--total);
   border-radius: 2px 2px 0 0;
-  background: linear-gradient(to top, #d0453a var(--severe), color-mix(in srgb, var(--text, #222) 55%, transparent) var(--severe));
+  background: linear-gradient(to top, var(--bad) var(--severe), color-mix(in srgb, var(--text, #222) 55%, transparent) var(--severe));
 }

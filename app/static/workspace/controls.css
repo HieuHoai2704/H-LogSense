@@ -103,8 +103,7 @@
 .analysis-shell #filters .source-controls {
   display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)) minmax(0, 1.2fr); gap: 10px; align-items: end;
 }
-:is(.analysis-shell, .project-shell) :is(#filters .source-controls, #external-preview .source-controls) label { gap: 5px; color: var(--muted); font-size: 11px; font-weight: 600;
-  letter-spacing: .05em; text-transform: uppercase; }
+:is(.analysis-shell, .project-shell) :is(#filters .source-controls, #external-preview .source-controls) label { gap: 5px; color: var(--muted); font-size: 12px; font-weight: 500; }
 .analysis-shell #filters .source-note { align-self: center; justify-self: end; max-width: 100%; text-align: right;
   font-size: 12px; line-height: 1.4; color: var(--muted); }
 .analysis-shell #filters .filter-controls { gap: 8px; margin-top: 10px; flex-wrap: wrap; }

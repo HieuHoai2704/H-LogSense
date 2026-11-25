@@ -35,10 +35,8 @@
   margin: 0 0 8px;
   padding: 0 14px;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: .07em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 /* Generic tree buttons (both pages); specific rows override below. */
@@ -184,10 +182,8 @@
   margin: 0 0 6px;
   padding: 0 8px;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: .07em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 500;
 }
 .analysis-menu ul { margin: 0; padding: 0; list-style: none; }
 .analysis-menu :is(a, .analysis-menu-planned) {

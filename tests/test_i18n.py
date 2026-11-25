@@ -45,7 +45,7 @@ class InterfaceLanguages(unittest.TestCase):
                 response = self.client.get(result.location)
                 self.assertEqual(response.headers["Content-Language"], language)
                 html = response.get_data(as_text=True)
-                self.assertIn(f'<html lang="{language}">', html)
+                self.assertIn(f'<html lang="{language}" data-workspace-theme>', html)
                 messages = catalog(language)
                 self.assertIn(messages.get("Sign in", "Sign in"), html)
                 if language != "en":
@@ -54,7 +54,9 @@ class InterfaceLanguages(unittest.TestCase):
                 options.feed(html)
                 self.assertEqual(options.codes, [])
                 settings = self.client.get("/?view=settings")
-                self.assertIn(f'<html lang="{language}">', settings.get_data(as_text=True))
+                self.assertIn(
+                    f'<html lang="{language}" data-workspace-theme>', settings.get_data(as_text=True)
+                )
                 self.assertIn(messages.get("Open project", "Open project"), settings.get_data(as_text=True))
                 options.feed(settings.get_data(as_text=True))
                 self.assertEqual(options.codes, list(LANGUAGES))

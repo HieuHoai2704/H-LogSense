@@ -1,0 +1,222 @@
+/* H-logsen interface system: one set of sizes, spacing and status colours, and one look for buttons,
+   fields, tables, cards, notices, badges and links on every page. Colours come from the workspace
+   palette (appearance.css), so each theme in Settings applies everywhere. Loaded after Bootstrap. */
+
+:root[data-workspace-theme] {
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius: 6px;
+  --radius-lg: 8px;
+  --ui-control-h: 32px;
+  --ui-control-bg: color-mix(in srgb, var(--text) 4%, var(--panel));
+  --ui-hover: color-mix(in srgb, var(--text) 7%, transparent);
+  --ui-line: color-mix(in srgb, var(--border) 70%, transparent);
+  /* Status colours are the only colours: everything else stays in the palette's greys. */
+  --ok: #4fb383;
+  --warn: #d6a23e;
+  --bad: #e2584f;
+  --info: #7aa3d6;
+
+  /* Bootstrap reads these; without them its pages keep their own blue, 16 px look. */
+  --bs-body-font-family: var(--font);
+  --bs-body-font-size: var(--fs-md);
+  --bs-link-color-rgb: 237, 237, 235;
+  --bs-link-hover-color-rgb: 255, 255, 255;
+  --bs-focus-ring-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  --bs-border-radius: var(--radius);
+  --bs-border-radius-sm: var(--radius);
+  --bs-border-radius-lg: var(--radius-lg);
+}
+:root[data-workspace-theme][data-theme="paper"],
+:root[data-workspace-theme][data-theme="warm"],
+:root[data-workspace-theme][data-theme="glass-mint"] {
+  --bs-link-color-rgb: 23, 23, 23;
+  --bs-link-hover-color-rgb: 0, 0, 0;
+  --ok: #23845a;
+  --warn: #9a6a12;
+  --bad: #c03a32;
+  --info: #2f64a8;
+}
+
+/* ---------------------------------------------------------------- text */
+:root[data-workspace-theme] body { font-family: var(--font); }
+:root[data-workspace-theme] main.container :is(h1, .h1) { margin-bottom: var(--space-1); font-size: 22px; font-weight: 650; letter-spacing: -.01em; }
+:root[data-workspace-theme] main.container :is(h2, .h2, .h4, .h5) { font-size: 15px; font-weight: 600; }
+:root[data-workspace-theme] main.container :is(h3, .h3, .h6) { font-size: var(--fs-md); font-weight: 600; }
+:root[data-workspace-theme] main.container { font-size: var(--fs-md); }
+:root[data-workspace-theme] main.container p { line-height: 1.5; }
+:root[data-workspace-theme] .text-secondary, :root[data-workspace-theme] .form-text { color: var(--muted) !important; }
+:root[data-workspace-theme] main.container a:not(.btn, .stretched-link, .overview-kpi, .pipeline-run) {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--text) 35%, transparent);
+  text-underline-offset: 3px;
+}
+:root[data-workspace-theme] main.container a:not(.btn):hover { text-decoration-color: currentColor; }
+
+/* A small field or column label: sentence case, never spaced capitals. */
+.ui-label {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---------------------------------------------------------------- buttons */
+:root[data-workspace-theme] .btn {
+  --bs-btn-font-size: var(--fs);
+  --bs-btn-font-weight: 500;
+  --bs-btn-padding-x: 12px;
+  --bs-btn-padding-y: 0;
+  --bs-btn-border-radius: var(--radius);
+  --bs-btn-color: var(--text);
+  --bs-btn-bg: var(--ui-control-bg);
+  --bs-btn-border-color: var(--border);
+  --bs-btn-hover-color: var(--text);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--text) 10%, var(--panel));
+  --bs-btn-hover-border-color: var(--muted);
+  --bs-btn-active-color: var(--text);
+  --bs-btn-active-bg: color-mix(in srgb, var(--text) 14%, var(--panel));
+  --bs-btn-active-border-color: var(--muted);
+  --bs-btn-disabled-color: var(--muted);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--border);
+  --bs-btn-focus-box-shadow: 0 0 0 2px var(--bs-focus-ring-color);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--ui-control-h);
+  line-height: 1.2;
+}
+:root[data-workspace-theme] .btn-sm { --bs-btn-font-size: var(--fs-sm); --bs-btn-padding-x: 10px; min-height: 28px; }
+:root[data-workspace-theme] .btn-primary {
+  --bs-btn-color: var(--accent-on);
+  --bs-btn-bg: var(--accent);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-color: var(--accent-on);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--accent) 85%, var(--panel));
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--accent) 85%, var(--panel));
+  --bs-btn-active-color: var(--accent-on);
+  --bs-btn-active-bg: color-mix(in srgb, var(--accent) 75%, var(--panel));
+  --bs-btn-active-border-color: color-mix(in srgb, var(--accent) 75%, var(--panel));
+  font-weight: 600;
+}
+:root[data-workspace-theme] :is(.btn-outline-secondary, .btn-secondary, .btn-light, .btn-outline-primary) {
+  --bs-btn-color: var(--text);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: var(--border);
+}
+:root[data-workspace-theme] :is(.btn-outline-danger, .btn-danger) {
+  --bs-btn-color: var(--bad);
+  --bs-btn-bg: transparent;
+  --bs-btn-border-color: color-mix(in srgb, var(--bad) 45%, var(--border));
+  --bs-btn-hover-color: var(--text);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--bad) 22%, var(--panel));
+  --bs-btn-hover-border-color: var(--bad);
+  --bs-btn-active-bg: color-mix(in srgb, var(--bad) 30%, var(--panel));
+  --bs-btn-active-border-color: var(--bad);
+}
+:root[data-workspace-theme] .btn-link { --bs-btn-bg: transparent; --bs-btn-border-color: transparent; }
+
+/* ---------------------------------------------------------------- fields */
+:root[data-workspace-theme] :is(.form-control, .form-select) {
+  min-height: var(--ui-control-h);
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  background-color: var(--ui-control-bg);
+  font-size: var(--fs);
+}
+:root[data-workspace-theme] .form-select { padding-inline-end: 30px; background-position: right 10px center; }
+:root[data-workspace-theme] :is(.form-control-sm, .form-select-sm) { min-height: 28px; padding-block: 3px; font-size: var(--fs-sm); }
+:root[data-workspace-theme] :is(.form-control, .form-select):focus {
+  border-color: var(--muted);
+  box-shadow: 0 0 0 2px var(--bs-focus-ring-color);
+}
+:root[data-workspace-theme] :is(.form-label, .col-form-label) { margin-bottom: var(--space-1); color: var(--muted); font-size: var(--fs-sm); font-weight: 500; }
+:root[data-workspace-theme] .form-check-input { accent-color: var(--accent); background-color: var(--ui-control-bg); border-color: var(--border); }
+:root[data-workspace-theme] .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+:root[data-workspace-theme] .invalid-feedback, :root[data-workspace-theme] .text-danger { color: var(--bad) !important; }
+:root[data-workspace-theme] .is-invalid { border-color: var(--bad) !important; }
+
+/* ---------------------------------------------------------------- tables */
+:root[data-workspace-theme] .table { --bs-table-hover-bg: var(--ui-hover); font-size: var(--fs); }
+:root[data-workspace-theme] .table > :not(caption) > * > * { padding: 9px 10px; border-bottom-color: var(--ui-line); }
+:root[data-workspace-theme] .table > thead th {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  border-bottom-color: var(--border);
+}
+:root[data-workspace-theme] .table > tbody > tr:last-child > * { border-bottom: 0; }
+:root[data-workspace-theme] .table tbody tr:hover > * { background-color: var(--ui-hover); }
+
+/* ---------------------------------------------------------------- cards and sections */
+:root[data-workspace-theme] .card { border-radius: var(--radius-lg); background-color: var(--panel); }
+:root[data-workspace-theme] .card-body { padding: var(--space-4); }
+
+/* ---------------------------------------------------------------- notices (flash messages, form errors) */
+:root[data-workspace-theme] .alert {
+  --notice: var(--muted);
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--notice);
+  border-radius: var(--radius);
+  background: var(--panel);
+  color: var(--text);
+  font-size: var(--fs);
+}
+:root[data-workspace-theme] .alert-success { --notice: var(--ok); }
+:root[data-workspace-theme] :is(.alert-danger, .alert-error) { --notice: var(--bad); }
+:root[data-workspace-theme] .alert-warning { --notice: var(--warn); }
+:root[data-workspace-theme] .alert-info { --notice: var(--info); }
+
+/* ---------------------------------------------------------------- badges and status */
+:root[data-workspace-theme] .badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--text) 10%, transparent) !important;
+  color: var(--text) !important;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+}
+.ui-status { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: 500; }
+.ui-status::before { content: ""; flex: 0 0 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.ui-status.ok { color: var(--ok); }
+.ui-status.warn { color: var(--warn); }
+.ui-status.bad { color: var(--bad); }
+.ui-status.info { color: var(--info); }
+.ui-status.idle { color: var(--muted); }
+
+/* ---------------------------------------------------------------- pagination */
+:root[data-workspace-theme] .pagination {
+  --bs-pagination-color: var(--text);
+  --bs-pagination-bg: transparent;
+  --bs-pagination-border-color: var(--border);
+  --bs-pagination-hover-color: var(--text);
+  --bs-pagination-hover-bg: var(--ui-hover);
+  --bs-pagination-hover-border-color: var(--border);
+  --bs-pagination-active-color: var(--accent-on);
+  --bs-pagination-active-bg: var(--accent);
+  --bs-pagination-active-border-color: var(--accent);
+  --bs-pagination-disabled-color: var(--muted);
+  --bs-pagination-disabled-bg: transparent;
+  --bs-pagination-disabled-border-color: var(--border);
+  --bs-pagination-font-size: var(--fs);
+}

@@ -53,7 +53,7 @@
 .explorer-grid { display: grid; grid-template-columns: minmax(200px, 250px) minmax(0, 1fr); gap: 12px; align-items: start; }
 .facets-panel h2 { margin-top: 0; font-size: 1rem; }
 .facet-group { margin-top: 12px; }
-.facet-group h3 { margin: 0 0 6px; font-size: .85rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.facet-group h3 { margin: 0 0 6px; font-size: 12px; font-weight: 500; color: var(--muted); }
 .facet-group h3 small { text-transform: none; letter-spacing: 0; font-weight: 400; }
 .facet-value { position: relative; display: flex; justify-content: space-between; gap: 8px; width: 100%; margin: 0 0 3px; padding: 4px 8px;
   overflow: hidden; border: 1px solid transparent; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }

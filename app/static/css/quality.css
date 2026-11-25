@@ -10,7 +10,7 @@
   margin: 18px 0 22px;
 }
 .quality-score {
-  --ring: #2e9e5b;
+  --ring: var(--ok);
   display: grid;
   place-items: center;
   align-content: center;
@@ -21,14 +21,14 @@
     radial-gradient(closest-side, var(--panel, #fff) 78%, transparent 79%),
     conic-gradient(var(--ring) calc(var(--score) * 1%), color-mix(in srgb, var(--text, #222) 12%, transparent) 0);
 }
-.quality-score.fair { --ring: #d39b16; }
-.quality-score.poor { --ring: #d0453a; }
+.quality-score.fair { --ring: var(--warn); }
+.quality-score.poor { --ring: var(--bad); }
 .quality-score strong { font-size: 38px; line-height: 1; font-variant-numeric: tabular-nums; }
-.quality-score span { margin-top: 4px; color: var(--muted, #6c757d); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.quality-score span { margin-top: 4px; color: var(--muted, #6c757d); font-size: 12px; }
 
 .quality-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px 24px; flex: 1 1 420px; margin: 0; }
 .quality-facts div { padding: 10px 12px; border: 1px solid var(--border, #dee2e6); border-radius: 8px; }
-.quality-facts dt { color: var(--muted, #6c757d); font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.quality-facts dt { color: var(--muted, #6c757d); font-size: 12px; font-weight: 500; }
 .quality-facts dd { margin: 4px 0 0; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .quality-checks th[scope="row"] { font-weight: 600; }
@@ -42,9 +42,9 @@
   font-weight: 600;
   text-align: center;
 }
-.quality-status.pass { color: #2e9e5b; }
-.quality-status.warn { color: #c98d0c; }
-.quality-status.fail { color: #d0453a; }
+.quality-status.pass { color: var(--ok); }
+.quality-status.warn { color: var(--warn); }
+.quality-status.fail { color: var(--bad); }
 .quality-status.skipped { color: var(--muted, #6c757d); }
 
 .quality-grid { border-collapse: separate; border-spacing: 3px; font-size: 11px; }
@@ -58,7 +58,7 @@
 }
 .quality-legend span { display: inline-block; width: 12px; height: 12px; margin-inline: 1px; vertical-align: -2px; border-radius: 3px; }
 .quality-grid .out { background: transparent; outline: 1px dashed color-mix(in srgb, var(--text, #222) 12%, transparent); outline-offset: -1px; }
-:is(.quality-grid td, .quality-legend span).gap { background: color-mix(in srgb, #d0453a 70%, transparent); }
+:is(.quality-grid td, .quality-legend span).gap { background: color-mix(in srgb, var(--bad) 70%, transparent); }
 :is(.quality-grid td, .quality-legend span).l1 { background: color-mix(in srgb, var(--text, #222) 18%, transparent); }
 :is(.quality-grid td, .quality-legend span).l2 { background: color-mix(in srgb, var(--text, #222) 38%, transparent); }
 :is(.quality-grid td, .quality-legend span).l3 { background: color-mix(in srgb, var(--text, #222) 62%, transparent); }
