@@ -53,9 +53,19 @@ class AnalysisMenuTests(unittest.TestCase):
         entries = menu(page.data)
         self.assertEqual(
             list(entries.links),
-            ["overview", "logs", "investigation", "alerts", "quality", "pipeline", "datasets", "catalog"],
+            [
+                "overview",
+                "logs",
+                "investigation",
+                "alerts",
+                "quality",
+                "pipeline",
+                "schedule",
+                "datasets",
+                "catalog",
+            ],
         )
-        self.assertEqual(entries.planned, ["schedule"])
+        self.assertEqual(entries.planned, [])  # every entry has its page now
         self.assertEqual(entries.current, ["investigation"])
         # Without a database the investigation entry opens the synthetic workspace.
         self.assertEqual(entries.links["investigation"], "/?source=demo")
@@ -64,6 +74,7 @@ class AnalysisMenuTests(unittest.TestCase):
         self.assertEqual(entries.links["overview"], "/analysis/overview")
         self.assertEqual(entries.links["quality"], "/analysis/quality")
         self.assertEqual(entries.links["pipeline"], "/analysis/pipeline")
+        self.assertEqual(entries.links["schedule"], "/analysis/schedules")
         self.assertEqual(entries.links["datasets"], "/manage/datasets")
         self.assertEqual(entries.links["catalog"], "/manage/datasets/catalog")
 
@@ -82,7 +93,7 @@ class AnalysisMenuTests(unittest.TestCase):
             "Điều tra bất thường",
             "Chất lượng dữ liệu",
             "Pipeline &amp; job",
-            "Sắp có",
+            "Lịch chạy",
         ):
             self.assertIn(text, page)
 

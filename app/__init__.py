@@ -50,6 +50,9 @@ def create_app(config_overrides=None):
     from app.web_operations import operations
 
     app.register_blueprint(operations)
+    from app.web_schedules import schedule_pages
+
+    app.register_blueprint(schedule_pages)
     register_page_errors(app)
 
     @app.shell_context_processor

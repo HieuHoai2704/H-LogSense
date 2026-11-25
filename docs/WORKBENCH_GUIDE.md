@@ -138,9 +138,8 @@ The regular Flask entry point has no local filesystem or terminal API.
   lists installed packages. Use the terminal for package installation.
 - **Analysis** has a function menu on the left instead of a folder tree:
   overview, Log Explorer, anomaly investigation, alerts, data quality,
-  pipeline and jobs, datasets and the Loghub catalog. The entry marked
-  *Coming soon* (schedules) is a planned page. With a database, the Analysis
-  icon opens the overview.
+  pipeline and jobs, schedules, datasets and the Loghub catalog. With a
+  database, the Analysis icon opens the overview.
 - **Analysis → Overview** is the home of the analysis area: key numbers
   (parsed events and hosts, severe events, anomalies and how many are high or
   critical, open alerts, quality score), a *Needs attention* list (failed
@@ -164,8 +163,18 @@ The regular Flask entry point has no local filesystem or terminal API.
   the last 20 runs. Selecting a run opens its details; a failed analysis job
   can be retried, a completed one run again with the same configuration, and a
   failed upload import retried, all through the existing job APIs. Queued jobs
-  run in the separate worker (`python -m scripts.run.worker`). JSON:
-  `GET /api/v1/pipeline?dataset_id=N`.
+  run in the separate worker (`python -m scripts.run.worker`; the demo command
+  starts one next to the app). JSON: `GET /api/v1/pipeline?dataset_id=N`.
+- **Analysis → Schedules** keeps recurring jobs per dataset: the rule detector,
+  Isolation Forest, or importing the next lines of the BGL archive, every 15
+  minutes, hour, 6 hours or day. Schedules can be added, edited, paused,
+  resumed, run now and deleted (Flask-WTF forms with CSRF). On every pass the
+  worker queues the detector runs that are due (and then runs them) or imports
+  the next lines from its checkpoint; a stopped worker runs a missed schedule
+  once, not once per missed slot. The archive is operator configuration
+  (`LOGSENSE_BGL_ARCHIVE`, default `data/raw/BGL.zip`), never a path from the
+  web page, and import schedules only extend a BGL dataset. The overview lists
+  schedules that failed or are overdue.
 - **Project → Analyze data files** profiles CSV, JSONL and Parquet files
   within the open project: select a data file in the tree, or choose
   **Analyze file** under it. It displays a schema, up to 20 valid sample rows,

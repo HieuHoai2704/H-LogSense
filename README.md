@@ -211,7 +211,8 @@ The first run starts MySQL 8.4 in a container bound to `127.0.0.1:3308`, applies
 administrator (`admin`) and a staff account (`staff`) with generated passwords kept owner-only in
 `.local/demo/accounts.txt`, imports the first 60,000 lines of `data/raw/BGL.zip` and runs the rule and
 Isolation Forest window detectors through the normal job API and worker. Later runs only start the
-container and the app; `python -m scripts.run.demo stop` stops MySQL and keeps the data.
+container and the app; every run also starts the job worker next to the app, so reruns and schedules
+complete. `python -m scripts.run.demo stop` stops MySQL and keeps the data.
 A step-by-step walkthrough in Vietnamese, from installation to the check loop, is in
 [docs/development/RUN_DEMO_VI.md](docs/development/RUN_DEMO_VI.md).
 

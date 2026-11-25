@@ -163,3 +163,29 @@ class AlertDecision(Scoped, Model):
     rule_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     anomaly_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
     outcome: Mapped[str] = mapped_column(String(20), nullable=False)
+
+
+class JobSchedule(Scoped, Model):
+    """A recurring job: the worker queues a detector run or imports the next lines when it falls due."""
+
+    __tablename__ = "job_schedules"
+    __table_args__ = (
+        UniqueConstraint("dataset_id", "name"),
+        CheckConstraint("task IN ('rule','isolation_forest','import')", name="task"),
+        CheckConstraint("interval_minutes >= 5 AND interval_minutes <= 10080", name="interval"),
+        CheckConstraint(
+            "import_lines IS NULL OR (import_lines >= 100 AND import_lines <= 100000)", name="lines"
+        ),
+        Index("ix_job_schedules_enabled_next_run_at", "enabled", "next_run_at"),
+        options(),
+    )
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    task: Mapped[str] = mapped_column(String(32), nullable=False)
+    interval_minutes: Mapped[int] = mapped_column(Integer, nullable=False)
+    import_lines: Mapped[int | None] = mapped_column(Integer)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    next_run_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False, default=now)
+    last_run_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
+    last_job_id: Mapped[int | None] = mapped_column(BigInteger)
+    last_error: Mapped[str | None] = mapped_column(String(64))
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))

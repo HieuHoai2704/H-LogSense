@@ -8,7 +8,9 @@ from scripts.run.mysql_runtime import grant_dataset_crud
 
 
 class DatasetPrivilegeTests(unittest.TestCase):
-    def invoke(self, tables=(("datasets",), ("user_datasets",), ("users",)), *, port=13307):
+    def invoke(
+        self, tables=(("datasets",), ("user_datasets",), ("users",), ("job_schedules",)), *, port=13307
+    ):
         cursor = MagicMock()
         cursor.fetchall.return_value = tables
         connection = MagicMock()
@@ -32,14 +34,15 @@ class DatasetPrivilegeTests(unittest.TestCase):
                 "GRANT DELETE ON `logsense_test_0123456789ab`.`datasets` TO 'logsense_app'@'localhost'",
                 "GRANT DELETE ON `logsense_test_0123456789ab`.`user_datasets` TO 'logsense_app'@'localhost'",
                 "GRANT DELETE ON `logsense_test_0123456789ab`.`users` TO 'logsense_app'@'localhost'",
+                "GRANT DELETE ON `logsense_test_0123456789ab`.`job_schedules` TO 'logsense_app'@'localhost'",
             ],
         )
         self.assertEqual(
             cursor.execute.call_args_list[0].args[1],
-            ("logsense_test_0123456789ab", "datasets", "user_datasets", "users"),
+            ("logsense_test_0123456789ab", "datasets", "user_datasets", "users", "job_schedules"),
         )
         self.assertFalse(any(".*" in statement or "GRANT OPTION" in statement for statement in statements))
-        self.assertEqual(result["tables_granted"], ["datasets", "user_datasets", "users"])
+        self.assertEqual(result["tables_granted"], ["datasets", "user_datasets", "users", "job_schedules"])
         self.assertFalse(result["data_deleted"])
         owned.assert_called_once_with(".local/owned")
         status.assert_called_once_with(Path("owned"))

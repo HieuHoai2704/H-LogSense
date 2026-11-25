@@ -8,7 +8,7 @@
 
   function setDataset(id) {
     if (!/^\d+$/.test(String(id ?? ""))) return;
-    for (const key of ["overview", "logs", "alerts", "quality", "pipeline"]) {
+    for (const key of ["overview", "logs", "alerts", "quality", "pipeline", "schedule"]) {
       const anchor = link(key);
       if (!anchor) continue;
       const url = new URL(anchor.href, location.href);

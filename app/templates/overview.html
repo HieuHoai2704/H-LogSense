@@ -58,6 +58,10 @@
       <a href="{{ url_for('dashboard', workspace='logs', dataset_id=dataset.id, start_time=item.start, end_time=item.end, query='level:ERROR level:FATAL level:SEVERE level:FAILURE') }}">{{ tr("Error spike: {0} severe events from {1} to {2} UTC (usual {3})", number(item.count), moment_text(item.start), moment_text(item.end)[11:], "{:g}".format(item.baseline)) }}</a>
       {% elif item.kind == "new_pattern" %}
       <a href="{{ url_for('dashboard', workspace='logs', dataset_id=dataset.id, query=item.terms|map('tojson')|join(' ') if item.terms else none) }}">{{ tr("New log pattern ({0} events)", number(item.count)) }}: <code>{{ item.pattern }}</code></a>
+      {% elif item.kind == "schedule_error" %}
+      <a href="{{ url_for('schedules.index', dataset_id=dataset.id) }}">{{ tr("Schedule \"{0}\" failed at its last run", item.name) }}: <code>{{ item.error }}</code></a>
+      {% elif item.kind == "schedule_overdue" %}
+      <a href="{{ url_for('schedules.index', dataset_id=dataset.id) }}">{{ tr("Schedule \"{0}\" is overdue: is the worker running?", item.name) }}</a>
       {% elif item.kind == "queued" %}
       <a href="{{ url_for('operations.pipeline', dataset_id=dataset.id) }}">{{ tr("{0} jobs are waiting for the worker", number(item.count)) }}</a>
       {% endif %}

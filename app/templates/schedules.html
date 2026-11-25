@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% set analysis_section = "schedule" %}
+{% from "bootstrap5/form.html" import render_field %}
+{% block title %}{{ tr("Schedules") }} · {{ app_name }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pipeline.css') }}">{% endblock %}
+{% macro moment(value) %}{{ value.strftime("%Y-%m-%d %H:%M") ~ " UTC" if value else "—" }}{% endmacro %}
+{% set task_labels = {"rule": tr("Rule detector"), "isolation_forest": tr("Isolation Forest"), "import": tr("Import the next BGL lines")} %}
+{% set interval_labels = {15: tr("Every 15 minutes"), 60: tr("Every hour"), 360: tr("Every 6 hours"), 1440: tr("Every day")} %}
+{% set job_states = {"queued": tr("Queued"), "running": tr("Running"), "completed": tr("Completed"), "failed": tr("Run failed")} %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-baseline gap-3 mb-1">
+  <h1 class="me-auto mb-0">{{ tr("Schedules") }}</h1>
+  {% if datasets %}
+  <form class="pipeline-dataset d-flex gap-2 align-items-center" method="get" action="{{ url_for('schedules.index') }}">
+    <label for="schedule-dataset" class="mb-0">{{ tr("Dataset") }}</label>
+    <select id="schedule-dataset" name="dataset_id" class="form-select form-select-sm">
+      {% for item in datasets %}<option value="{{ item.id }}"{% if dataset and item.id == dataset.id %} selected{% endif %}>{{ item.name }} · {{ item.data_mode }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-sm btn-outline-secondary">{{ tr("Show") }}</button>
+  </form>
+  {% endif %}
+</div>
+<p class="text-secondary">{{ tr("Recurring jobs: the worker queues a detector run or imports the next lines of the BGL archive when a schedule falls due. The demo command starts the worker; otherwise run python -m scripts.run.worker.") }}</p>
+
+{% if unavailable %}
+<p class="alert alert-warning" role="status">{{ tr("Schedules need the MySQL database.") }}</p>
+{% elif not dataset %}
+<p class="alert alert-info" role="status">{{ tr("No dataset access has been granted.") }}</p>
+{% else %}
+<section class="card card-body mb-4" aria-labelledby="schedule-list-title">
+  <h2 id="schedule-list-title" class="h5">{{ tr("Schedules of this dataset") }}</h2>
+  {% if schedules %}
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead><tr><th scope="col">{{ tr("Schedule name") }}</th><th scope="col">{{ tr("Task") }}</th><th scope="col">{{ tr("Runs") }}</th><th scope="col">{{ tr("Next run") }}</th><th scope="col">{{ tr("Last run") }}</th><th scope="col">{{ tr("Actions") }}</th></tr></thead>
+      <tbody>
+      {% for item in schedules %}
+        <tr data-schedule="{{ item.id }}" data-enabled="{{ 'true' if item.enabled else 'false' }}">
+          <th scope="row">{{ item.name }}{% if editing == item.id %} <small class="text-secondary">· {{ tr("editing") }}</small>{% endif %}</th>
+          <td>{{ task_labels[item.task] }}{% if item.task == "import" %}<small class="d-block text-secondary">{{ tr("{0} lines each time", "{:,}".format(item.import_lines)) }}</small>{% endif %}</td>
+          <td>{{ interval_labels.get(item.interval_minutes, tr("Every {0} minutes", item.interval_minutes)) }}</td>
+          <td>{% if item.enabled %}{{ moment(item.next_run_at) }}{% if item.overdue %}<small class="d-block text-warning">{{ tr("Overdue: is the worker running?") }}</small>{% endif %}{% else %}<span class="pipeline-badge">{{ tr("Paused") }}</span>{% endif %}</td>
+          <td>{{ moment(item.last_run_at) }}
+            {% if item.last_job_id %}<small class="d-block"><a href="{{ url_for('operations.pipeline', dataset_id=dataset.id, job=item.last_job_id, _anchor='job-detail') }}">#{{ item.last_job_id }}</a>{% if item.last_job_state %} · <span class="pipeline-badge {{ item.last_job_state }}">{{ job_states[item.last_job_state] }}</span>{% endif %}</small>{% endif %}
+            {% if item.last_error %}<small class="d-block text-danger"><code>{{ item.last_error }}</code></small>{% endif %}</td>
+          <td>
+            <div class="d-flex flex-wrap gap-1">
+              <form method="post" action="{{ url_for('schedules.act', schedule_id=item.id, verb='run') }}">{{ action.hidden_tag() }}<button class="btn btn-sm btn-primary">{{ tr("Run now") }}</button></form>
+              <form method="post" action="{{ url_for('schedules.act', schedule_id=item.id, verb='toggle') }}">{{ action.hidden_tag() }}<button class="btn btn-sm btn-outline-secondary">{{ tr("Pause") if item.enabled else tr("Resume") }}</button></form>
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('schedules.edit', schedule_id=item.id) }}#schedule-form">{{ tr("Edit") }}</a>
+              <form method="post" action="{{ url_for('schedules.act', schedule_id=item.id, verb='delete') }}">{{ action.hidden_tag() }}<button class="btn btn-sm btn-outline-danger">{{ tr("Delete") }}</button></form>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="mb-0 text-secondary">{{ tr("No schedule yet. Add one below, for example the rule detector every hour.") }}</p>
+  {% endif %}
+</section>
+
+<section class="card card-body mb-4" id="schedule-form" aria-labelledby="schedule-form-title">
+  <h2 id="schedule-form-title" class="h5">{{ tr("Edit schedule") if editing else tr("Add a schedule") }}</h2>
+  <form method="post" action="{{ url_for('schedules.edit', schedule_id=editing) if editing else url_for('schedules.index', dataset_id=dataset.id) }}" class="row g-3 align-items-end">
+    {{ form.hidden_tag() }}
+    <div class="col-md-4">{{ render_field(form.name) }}</div>
+    <div class="col-md-3">{{ render_field(form.task) }}</div>
+    <div class="col-md-2">{{ render_field(form.interval_minutes) }}</div>
+    <div class="col-md-3">{{ render_field(form.import_lines) }}<small class="text-secondary">{{ tr("Only for the import task.") }}</small></div>
+    <div class="col-12 d-flex gap-3 align-items-center">
+      {{ render_field(form.enabled) }}
+      <button class="btn btn-primary">{{ tr("Save schedule") if editing else tr("Add schedule") }}</button>
+      {% if editing %}<a href="{{ url_for('schedules.index', dataset_id=dataset.id) }}">{{ tr("Cancel") }}</a>{% endif %}
+    </div>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

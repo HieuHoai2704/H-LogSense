@@ -68,6 +68,7 @@ def analysis_menu() -> tuple[MenuGroup, ...]:
     overview = url_for("operations.overview", dataset_id=dataset)
     quality = url_for("operations.quality", dataset_id=dataset)
     pipeline = url_for("operations.pipeline", dataset_id=dataset)
+    schedules = url_for("schedules.index", dataset_id=dataset)
     return (
         MenuGroup(
             "Monitoring",
@@ -83,7 +84,7 @@ def analysis_menu() -> tuple[MenuGroup, ...]:
             (
                 MenuItem("quality", "Data quality", "quality", quality),
                 MenuItem("pipeline", "Pipeline & jobs", "pipeline", pipeline),
-                MenuItem("schedule", "Schedules", "schedule", None),
+                MenuItem("schedule", "Schedules", "schedule", schedules),
             ),
         ),
         MenuGroup(

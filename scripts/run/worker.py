@@ -1,4 +1,5 @@
-"""Bounded single-process worker. Run explicitly outside the Flask server."""
+"""Bounded single-process worker: runs due schedules and queued analysis jobs. Run it outside the Flask
+server (the demo command starts one next to the app)."""
 
 import argparse
 from functools import partial
@@ -64,6 +65,14 @@ def execute_job(engine, candidate):
     return True
 
 
+def tick(engine):
+    """One worker pass: queue the schedules that are due, then run the oldest queued analysis job."""
+    from app.services.schedules import run_due
+
+    scheduled = run_due(engine)
+    return run_once(engine) or scheduled > 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--once", action="store_true")
@@ -75,7 +84,7 @@ def main():
             raise SystemExit("Configure MySQL (DATABASE_URL) before starting the analysis worker.")
         engine = db.engine
         serve(
-            partial(run_once, engine),
+            partial(tick, engine),
             once=args.once,
             reclaim=partial(reclaim_interrupted, engine, "analysis", "analysis-job-"),
         )

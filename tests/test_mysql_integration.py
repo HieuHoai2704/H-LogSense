@@ -183,7 +183,7 @@ class MySQLIntegrationTests(unittest.TestCase):
             self.assertEqual(diff, [])
             self.assertEqual(
                 connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one(),
-                "0009",
+                "0010",
             )
             tables = inspect(connection).get_table_names()
             self.assertTrue(set(db.metadata.tables) <= set(tables))

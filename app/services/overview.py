@@ -37,9 +37,22 @@ def attention_items(
     insights: dict[str, Any] | None,
     open_alerts: int,
     high_anomalies: int,
+    schedules: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """What an operator should look at first, most severe first. Each item names a page to open."""
     items: list[dict[str, Any]] = []
+    for schedule in schedules or []:
+        if schedule["last_error"]:
+            items.append(
+                {
+                    "kind": "schedule_error",
+                    "level": "critical",
+                    "name": schedule["name"],
+                    "error": schedule["last_error"],
+                }
+            )
+        elif schedule["overdue"]:
+            items.append({"kind": "schedule_overdue", "level": "warn", "name": schedule["name"]})
     for row in pipeline["grid"]:
         if row["latest"] == "failed":
             run = row["runs"][-1]
@@ -104,6 +117,7 @@ def overview_report(session: Session | scoped_session[Any], dataset_id: int) -> 
     from app.services.log_patterns import insights as log_insights
     from app.services.log_queries import parse_scope
     from app.services.pipeline import pipeline_report
+    from app.services.schedules import list_schedules
 
     quality = quality_report(session, dataset_id)
     pipeline = pipeline_report(session, dataset_id, quality=quality)
@@ -170,6 +184,7 @@ def overview_report(session: Session | scoped_session[Any], dataset_id: int) -> 
             insights=insights,
             open_alerts=open_alerts,
             high_anomalies=int(high),
+            schedules=list_schedules(session, dataset_id),
         ),
         "volume": volume(hourly),
     }

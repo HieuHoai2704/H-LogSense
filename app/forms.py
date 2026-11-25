@@ -176,3 +176,41 @@ class UserDeleteForm(FlaskForm):
         false_values=(False, "false", "", "0"),
         validators=[DataRequired(message="Confirm account deletion.")],
     )
+
+
+SCHEDULE_TASKS = [
+    ("rule", "Rule detector"),
+    ("isolation_forest", "Isolation Forest"),
+    ("import", "Import the next BGL lines"),
+]
+SCHEDULE_INTERVALS = [
+    (15, "Every 15 minutes"),
+    (60, "Every hour"),
+    (360, "Every 6 hours"),
+    (1440, "Every day"),
+]
+
+
+class ScheduleForm(FlaskForm):
+    """Create or edit a recurring job (Analysis > Schedules)."""
+
+    name = StringField(
+        "Schedule name",
+        filters=[clean_label],
+        validators=[InputRequired(), Length(min=1, max=100), valid_text],
+    )
+    task = SelectField("Task", choices=SCHEDULE_TASKS, default="rule", validators=[InputRequired()])
+    interval_minutes = SelectField(
+        "Runs", choices=SCHEDULE_INTERVALS, default=60, coerce=int, validators=[InputRequired()]
+    )
+    # Checked in validate_import_lines: an Optional() validator would stop the chain on an empty field.
+    import_lines = IntegerField("Lines per import", default=10_000)
+    enabled = BooleanField("Enabled", default=True)
+
+    def validate_import_lines(self, field):
+        if self.task.data != "import":
+            return
+        if field.data is None:
+            raise ValidationError("Choose how many lines each import reads.")
+        if not 100 <= field.data <= 100_000:
+            raise ValidationError("Choose 100 to 100,000 lines.")

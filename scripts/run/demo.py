@@ -164,7 +164,7 @@ def migrate(state):
         connection.cursor() as cursor,
     ):
         # Deleting is limited to the tables whose pages offer it.
-        for table in ("datasets", "user_datasets", "users"):
+        for table in ("datasets", "user_datasets", "users", "job_schedules"):
             cursor.execute(f"GRANT DELETE ON `{SCHEMA}`.`{table}` TO 'logsense_app'@'%'")
 
 
@@ -313,10 +313,31 @@ def main(argv=None):
     if args.no_open:
         say(f"ready. Open the app with DATABASE_URL from {STATE / 'demo.json'}.")
         return
-    say("opening H-logsen in the browser (Ctrl+C stops the server; MySQL keeps running)")
     environment = {**os.environ, "DATABASE_URL": url(state)}
     environment.pop("FLASK_SECRET_KEY", None)  # a new secret per launch: closing the app signs out
-    raise SystemExit(subprocess.run([sys.executable, "-m", "app.workbench"], env=environment).returncode)
+    # The worker runs schedules and queued jobs next to the app; it stops with the app.
+    log = STATE / "worker.log"
+    say(f"starting the job worker (log: {log})")
+    with open(log, "ab") as output:
+        worker = subprocess.Popen(
+            [sys.executable, "-m", "scripts.run.worker"],
+            cwd=REPO_ROOT,
+            env=environment,
+            stdout=output,
+            stderr=subprocess.STDOUT,
+        )
+    say("opening H-logsen in the browser (Ctrl+C stops the server and the worker; MySQL keeps running)")
+    try:
+        code = subprocess.run([sys.executable, "-m", "app.workbench"], env=environment).returncode
+    except KeyboardInterrupt:
+        code = 0
+    finally:
+        worker.terminate()
+        try:
+            worker.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            worker.kill()
+    raise SystemExit(code)
 
 
 if __name__ == "__main__":

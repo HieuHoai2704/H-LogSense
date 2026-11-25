@@ -143,11 +143,11 @@ def grant_dataset_crud(root, schema):
     info = load(root)
     if ready["port"] != info.get("port", 13306):
         raise ValueError("Server port does not match the owned runtime.")
-    tables = ("datasets", "user_datasets", "users")
+    tables = ("datasets", "user_datasets", "users", "job_schedules")
     with connect(info) as connection, connection.cursor() as cursor:
         cursor.execute(
             "SELECT TABLE_NAME FROM information_schema.tables "
-            "WHERE TABLE_SCHEMA=%s AND TABLE_NAME IN (%s,%s,%s) "
+            "WHERE TABLE_SCHEMA=%s AND TABLE_NAME IN (%s,%s,%s,%s) "
             "AND TABLE_TYPE='BASE TABLE'",
             (schema, *tables),
         )

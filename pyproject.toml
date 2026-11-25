@@ -114,7 +114,8 @@ module = [
     "app.api.sources",
     "app.services.investigation", "app.services.mysql_investigation", "app.services.csv_safety",
     "app.services.redaction", "app.services.data_quality", "app.services.pipeline",
-    "app.analysis_menu", "app.web_operations", "scripts.run.supervision",
+    "app.analysis_menu", "app.web_operations", "app.services.schedules", "app.web_schedules",
+    "scripts.run.supervision",
 ]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
