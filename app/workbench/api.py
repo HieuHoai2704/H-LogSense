@@ -359,16 +359,25 @@ def start_terminal():
 def listening_ports():
     import psutil
 
+    denied = WorkspaceError("The operating system has not granted permission to read TCP ports.", 403)
     try:
-        sockets = psutil.net_connections(kind="tcp")
-    except (psutil.AccessDenied, NotImplementedError) as error:
-        raise WorkspaceError(
-            "The operating system has not granted permission to read TCP ports.", 403
-        ) from error
+        sockets = [(conn, conn.pid) for conn in psutil.net_connections(kind="tcp")]
+    except NotImplementedError as error:
+        raise denied from error
+    except psutil.AccessDenied:
+        # macOS lists system-wide sockets only for root; fall back to the processes we may inspect.
+        sockets = []
+        for process in psutil.process_iter():
+            try:
+                sockets.extend((conn, process.pid) for conn in process.net_connections(kind="tcp"))
+            except (psutil.AccessDenied, psutil.NoSuchProcess, psutil.ZombieProcess):
+                continue
+        if not sockets:
+            raise denied from None
     rows = sorted(
         {
-            (conn.status != psutil.CONN_LISTEN, conn.laddr.port, conn.laddr.ip, conn.pid or 0)
-            for conn in sockets
+            (conn.status != psutil.CONN_LISTEN, conn.laddr.port, conn.laddr.ip, pid or 0)
+            for conn, pid in sockets
             if conn.laddr and not conn.raddr and conn.status in (psutil.CONN_LISTEN, psutil.CONN_NONE)
         }
     )

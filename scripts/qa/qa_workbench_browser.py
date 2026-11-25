@@ -52,7 +52,8 @@ class WorkbenchBrowserTest(unittest.TestCase):
     def setUp(self):
         folder = TemporaryDirectory()
         self.addCleanup(folder.cleanup)
-        root = Path(folder.name)
+        # The workbench shows resolved roots, and on macOS /tmp and /var are symlinks to /private.
+        root = Path(folder.name).resolve()
         self.project = root / "project"
         self.project.mkdir()
         (self.project / "train.py").write_text(TRAIN_SCRIPT, encoding="utf-8")

@@ -26,7 +26,8 @@ class WorkbenchTest(unittest.TestCase):
     def setUp(self):
         folder = TemporaryDirectory()
         self.addCleanup(folder.cleanup)
-        self.folder = Path(folder.name)
+        # The workbench resolves project roots, and on macOS /tmp and /var are symlinks to /private.
+        self.folder = Path(folder.name).resolve()
         self.project = self.folder / "project"
         self.project.mkdir()
         app = create_app({"TESTING": True})
@@ -483,6 +484,38 @@ class WorkbenchTest(unittest.TestCase):
         self.assertNotIn("timestamp", points[1])
         self.assertNotIn("timestamp", points[2])
         self.assertEqual([point["train_loss"] for point in points], [0.4, 0.2, 0.1])
+
+    def test_ports_fall_back_to_own_processes_when_system_listing_is_denied(self):
+        from types import SimpleNamespace as Row
+
+        import psutil
+
+        listening = Row(laddr=Row(ip="127.0.0.1", port=8123), raddr=(), status=psutil.CONN_LISTEN)
+        outbound = Row(
+            laddr=Row(ip="127.0.0.1", port=50000), raddr=Row(ip="1.1.1.1", port=443), status="ESTABLISHED"
+        )
+
+        class Owned:
+            pid = 4242
+
+            def net_connections(self, kind):
+                return [listening, outbound]
+
+        class Foreign:
+            pid = 1
+
+            def net_connections(self, kind):
+                raise psutil.AccessDenied(1)
+
+        denied = patch.object(psutil, "net_connections", side_effect=psutil.AccessDenied())
+        with denied, patch.object(psutil, "process_iter", return_value=[Foreign(), Owned()]):
+            result = self.call("/ports")
+        self.assertEqual(result.status_code, 200, result.get_json())
+        self.assertEqual(
+            result.json["ports"], [{"address": "127.0.0.1", "port": 8123, "pid": 4242, "status": "listening"}]
+        )
+        with denied, patch.object(psutil, "process_iter", return_value=[Foreign()]):
+            self.assertEqual(self.call("/ports").status_code, 403)
 
     def test_terminal_cursor_returns_only_unread_output_and_reports_buffer_gaps(self):
         session = Session.__new__(Session)
