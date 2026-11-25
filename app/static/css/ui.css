@@ -57,7 +57,7 @@
 :root[data-workspace-theme] main.container { font-size: var(--fs-md); }
 :root[data-workspace-theme] main.container p { line-height: 1.5; }
 :root[data-workspace-theme] .text-secondary, :root[data-workspace-theme] .form-text { color: var(--muted) !important; }
-:root[data-workspace-theme] main.container a:not(.btn, .stretched-link, .overview-kpi, .pipeline-run) {
+:root[data-workspace-theme] main.container a:not(.btn, .stretched-link, .stat, .pipeline-run) {
   color: var(--text);
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, var(--text) 35%, transparent);
@@ -146,8 +146,17 @@
   box-shadow: 0 0 0 2px var(--bs-focus-ring-color);
 }
 :root[data-workspace-theme] :is(.form-label, .col-form-label) { margin-bottom: var(--space-1); color: var(--muted); font-size: var(--fs-sm); font-weight: 500; }
-:root[data-workspace-theme] .form-check-input { accent-color: var(--accent); background-color: var(--ui-control-bg); border-color: var(--border); }
-:root[data-workspace-theme] .form-check-input:checked { background-color: var(--accent); border-color: var(--accent); }
+/* Native check boxes: the browser picks a check mark that contrasts with the accent. */
+:root[data-workspace-theme] .form-check-input[type="checkbox"] {
+  -webkit-appearance: checkbox;
+  appearance: auto;
+  width: 16px;
+  height: 16px;
+  margin-top: .2em;
+  border: 0;
+  background: none;
+  accent-color: var(--accent);
+}
 :root[data-workspace-theme] .invalid-feedback, :root[data-workspace-theme] .text-danger { color: var(--bad) !important; }
 :root[data-workspace-theme] .is-invalid { border-color: var(--bad) !important; }
 
@@ -363,3 +372,60 @@
 .analysis-shell a.heat[data-count="0"] { border-color: transparent; background: color-mix(in srgb, var(--text) 5%, transparent); color: transparent; }
 .analysis-shell a.heat[data-count="0"]:hover { color: var(--muted); }
 .analysis-shell .axis-label { font: var(--fs-xs)/20px var(--mono); }
+
+/* ---------------------------------------------------------------- report pages (overview, quality, pipeline, schedules) */
+.page-head { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 16px; margin-bottom: 20px; }
+.page-head h1 { margin: 0; }
+.page-title { flex: 1 1 auto; min-width: 0; }
+.page-context { margin: 2px 0 0; color: var(--muted); font-size: var(--fs); }
+.dataset-picker { display: flex; align-items: center; gap: 6px; }
+.dataset-picker select { min-width: 220px; }
+.report-section { margin-bottom: 28px; }
+.report-section > h2, .report-section > header h2 { margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+.report-section > header { display: flex; align-items: baseline; gap: 12px; }
+.report-section > header p { margin: 0; color: var(--muted); font-size: var(--fs-sm); }
+.report-note { margin: 8px 0 0; color: var(--muted); font-size: var(--fs-sm); }
+
+/* A row of figures in one frame, split by hairlines (no coloured card edges). */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  overflow: hidden;
+}
+.stat { min-width: 0; padding: 12px 16px; border-inline-start: 1px solid var(--ui-line); color: inherit; text-decoration: none; }
+.stat:first-child { border-inline-start: 0; }
+a.stat:hover { background: var(--ui-hover); color: inherit; }
+.stat-label { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: var(--fs-sm); }
+.stat-value { display: block; margin-top: 4px; font-size: 22px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.stat-note { display: block; margin-top: 2px; overflow: hidden; color: var(--muted); font-size: var(--fs-sm); white-space: nowrap; text-overflow: ellipsis; }
+.stat .ui-status { font-size: inherit; font-weight: inherit; color: var(--muted); }
+.stat .ui-status::before { background: var(--dot, var(--muted)); }
+.stat .ui-status.ok { --dot: var(--ok); }
+.stat .ui-status.warn { --dot: var(--warn); }
+.stat .ui-status.bad { --dot: var(--bad); }
+
+/* A list of items to act on: dot, text, chevron. */
+.action-list { margin: 0; padding: 0; list-style: none; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--panel); }
+.action-list li { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 9px 14px; border-top: 1px solid var(--ui-line); }
+.action-list li:first-child { border-top: 0; }
+.action-list li:hover { background: var(--ui-hover); }
+.action-list li::after { content: "›"; color: var(--muted); font-size: 16px; }
+.action-list li .ui-status { font-size: 0; gap: 0; }
+.action-list li .ui-status::before { flex-basis: 8px; }
+.action-list a { color: var(--text) !important; text-decoration: none !important; overflow-wrap: anywhere; }
+.action-list a::before { content: ""; position: absolute; inset: 0; }
+.action-list code { color: var(--muted); font-size: var(--fs-sm); }
+.action-list-empty { margin: 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-lg); color: var(--muted); }
+.action-list-empty::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-inline-end: 8px; border-radius: 50%; background: var(--ok); }
+.report-section > .table-responsive { border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--panel); }
+.report-section > .table-responsive > .table { margin: 0; }
+.report-section > .table-responsive > .table > thead th:first-child,
+.report-section > .table-responsive > .table > tbody td:first-child,
+.report-section > .table-responsive > .table > tbody th:first-child { padding-inline-start: 14px; }
+:root[data-workspace-theme] main.container code { color: var(--muted); font-family: var(--mono); font-size: var(--fs-sm); }
+.report-section .table td:has(> .ui-status) { white-space: nowrap; }
+.empty-note { margin: 0; padding: 14px; border: 1px dashed var(--border); border-radius: var(--radius-lg); color: var(--muted); font-size: var(--fs); }

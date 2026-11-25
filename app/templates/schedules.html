@@ -7,31 +7,21 @@
 {% set task_labels = {"rule": tr("Rule detector"), "isolation_forest": tr("Isolation Forest"), "import": tr("Import the next BGL lines")} %}
 {% set interval_labels = {15: tr("Every 15 minutes"), 60: tr("Every hour"), 360: tr("Every 6 hours"), 1440: tr("Every day")} %}
 {% set job_states = {"queued": tr("Queued"), "running": tr("Running"), "completed": tr("Completed"), "failed": tr("Run failed")} %}
+{% set job_kinds = {"queued": "info", "running": "info", "completed": "ok", "failed": "bad"} %}
+{% from "partials/report_ui.html" import page_header, status with context %}
 {% block content %}
-<div class="d-flex flex-wrap align-items-baseline gap-3 mb-1">
-  <h1 class="me-auto mb-0">{{ tr("Schedules") }}</h1>
-  {% if datasets %}
-  <form class="pipeline-dataset d-flex gap-2 align-items-center" method="get" action="{{ url_for('schedules.index') }}">
-    <label for="schedule-dataset" class="mb-0">{{ tr("Dataset") }}</label>
-    <select id="schedule-dataset" name="dataset_id" class="form-select form-select-sm">
-      {% for item in datasets %}<option value="{{ item.id }}"{% if dataset and item.id == dataset.id %} selected{% endif %}>{{ item.name }} · {{ item.data_mode }}</option>{% endfor %}
-    </select>
-    <button class="btn btn-sm btn-outline-secondary">{{ tr("Show") }}</button>
-  </form>
-  {% endif %}
-</div>
-<p class="text-secondary">{{ tr("Recurring jobs: the worker queues a detector run or imports the next lines of the BGL archive when a schedule falls due. The demo command starts the worker; otherwise run python -m scripts.run.worker.") }}</p>
+{{ page_header(tr("Schedules"), datasets, dataset, action=url_for('schedules.index')) }}
 
 {% if unavailable %}
 <p class="alert alert-warning" role="status">{{ tr("Schedules need the MySQL database.") }}</p>
 {% elif not dataset %}
 <p class="alert alert-info" role="status">{{ tr("No dataset access has been granted.") }}</p>
 {% else %}
-<section class="card card-body mb-4" aria-labelledby="schedule-list-title">
-  <h2 id="schedule-list-title" class="h5">{{ tr("Schedules of this dataset") }}</h2>
+<section class="report-section" aria-labelledby="schedule-list-title">
+  <h2 id="schedule-list-title">{{ tr("Schedules of this dataset") }}</h2>
   {% if schedules %}
   <div class="table-responsive">
-    <table class="table align-middle mb-0">
+    <table class="table align-middle">
       <thead><tr><th scope="col">{{ tr("Schedule name") }}</th><th scope="col">{{ tr("Task") }}</th><th scope="col">{{ tr("Runs") }}</th><th scope="col">{{ tr("Next run") }}</th><th scope="col">{{ tr("Last run") }}</th><th scope="col">{{ tr("Actions") }}</th></tr></thead>
       <tbody>
       {% for item in schedules %}
@@ -39,9 +29,9 @@
           <th scope="row">{{ item.name }}{% if editing == item.id %} <small class="text-secondary">· {{ tr("editing") }}</small>{% endif %}</th>
           <td>{{ task_labels[item.task] }}{% if item.task == "import" %}<small class="d-block text-secondary">{{ tr("{0} lines each time", "{:,}".format(item.import_lines)) }}</small>{% endif %}</td>
           <td>{{ interval_labels.get(item.interval_minutes, tr("Every {0} minutes", item.interval_minutes)) }}</td>
-          <td>{% if item.enabled %}{{ moment(item.next_run_at) }}{% if item.overdue %}<small class="d-block text-warning">{{ tr("Overdue: is the worker running?") }}</small>{% endif %}{% else %}<span class="pipeline-badge">{{ tr("Paused") }}</span>{% endif %}</td>
+          <td>{% if item.enabled %}{{ moment(item.next_run_at) }}{% if item.overdue %}<small class="d-block text-warning">{{ tr("Overdue: is the worker running?") }}</small>{% endif %}{% else %}{{ status("idle", tr("Paused")) }}{% endif %}</td>
           <td>{{ moment(item.last_run_at) }}
-            {% if item.last_job_id %}<small class="d-block"><a href="{{ url_for('operations.pipeline', dataset_id=dataset.id, job=item.last_job_id, _anchor='job-detail') }}">#{{ item.last_job_id }}</a>{% if item.last_job_state %} · <span class="pipeline-badge {{ item.last_job_state }}">{{ job_states[item.last_job_state] }}</span>{% endif %}</small>{% endif %}
+            {% if item.last_job_id %}<small class="d-block"><a href="{{ url_for('operations.pipeline', dataset_id=dataset.id, job=item.last_job_id, _anchor='job-detail') }}">#{{ item.last_job_id }}</a>{% if item.last_job_state %} · {{ status(job_kinds[item.last_job_state], job_states[item.last_job_state]) }}{% endif %}</small>{% endif %}
             {% if item.last_error %}<small class="d-block text-danger"><code>{{ item.last_error }}</code></small>{% endif %}</td>
           <td>
             <div class="d-flex flex-wrap gap-1">
@@ -57,12 +47,14 @@
     </table>
   </div>
   {% else %}
-  <p class="mb-0 text-secondary">{{ tr("No schedule yet. Add one below, for example the rule detector every hour.") }}</p>
+  <p class="empty-note">{{ tr("No schedule yet. Add one below, for example the rule detector every hour.") }}</p>
   {% endif %}
+  <p class="report-note">{{ tr("Recurring jobs: the worker queues a detector run or imports the next lines of the BGL archive when a schedule falls due. The demo command starts the worker; otherwise run python -m scripts.run.worker.") }}</p>
 </section>
 
-<section class="card card-body mb-4" id="schedule-form" aria-labelledby="schedule-form-title">
-  <h2 id="schedule-form-title" class="h5">{{ tr("Edit schedule") if editing else tr("Add a schedule") }}</h2>
+<section class="report-section" id="schedule-form" aria-labelledby="schedule-form-title">
+  <h2 id="schedule-form-title">{{ tr("Edit schedule") if editing else tr("Add a schedule") }}</h2>
+  <div class="card card-body">
   <form method="post" action="{{ url_for('schedules.edit', schedule_id=editing) if editing else url_for('schedules.index', dataset_id=dataset.id) }}" class="row g-3 align-items-end">
     {{ form.hidden_tag() }}
     <div class="col-md-4">{{ render_field(form.name) }}</div>
@@ -75,6 +67,7 @@
       {% if editing %}<a href="{{ url_for('schedules.index', dataset_id=dataset.id) }}">{{ tr("Cancel") }}</a>{% endif %}
     </div>
   </form>
+  </div>
 </section>
 {% endif %}
 {% endblock %}

@@ -20,6 +20,13 @@
   }
   window.analysisMenu = { setDataset };
 
+  // Report pages: choosing another dataset shows it at once (the button stays for no-script use).
+  for (const select of document.querySelectorAll(".dataset-picker select")) {
+    const button = select.form.querySelector("button");
+    if (button) button.hidden = true;
+    select.addEventListener("change", () => select.form.requestSubmit());
+  }
+
   const alerts = document.getElementById("incident-workspace");
   if (!alerts) return;
   const alertsLink = link("alerts");

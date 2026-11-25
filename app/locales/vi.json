@@ -1220,7 +1220,7 @@
   "WARN and ERROR lines in the current source": "Các dòng WARN và ERROR trong nguồn đang xem",
   "Open a log file to see activity": "Mở tệp log để xem diễn biến.",
   "warnings and errors": "cảnh báo và lỗi",
-  "Warning": "Cảnh báo",
+  "Warning": "Lưu ý",
   "Error": "Lỗi",
   "Loss by epoch": "Loss theo epoch",
   "Train and validation": "Train và validation",

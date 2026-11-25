@@ -2,37 +2,31 @@
 .pipeline-dataset label { color: var(--muted, #6c757d); font-size: 13px; white-space: nowrap; }
 .pipeline-dataset select { min-width: 220px; }
 
-/* Data flow: five stages joined by arrows. */
-.pipeline-flow { display: flex; flex-wrap: wrap; gap: 28px; margin: 0; padding: 0; list-style: none; }
+/* Data flow: five stages joined by arrows; each shows its state as a status dot. */
+.pipeline-flow { display: flex; flex-wrap: wrap; gap: 24px; margin: 0; padding: 0; list-style: none; }
 .pipeline-stage {
-  --stage: var(--muted, #6c757d);
   position: relative;
   display: grid;
   gap: 4px;
   flex: 1 1 150px;
   min-width: 140px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border: 1px solid var(--border, #dee2e6);
-  border-top: 4px solid var(--stage);
   border-radius: 8px;
+  background: var(--panel);
 }
 .pipeline-stage + .pipeline-stage::before {
   content: "→";
   position: absolute;
-  left: -22px;
+  left: -19px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--muted, #6c757d);
-  font-size: 18px;
+  font-size: 14px;
 }
-.pipeline-stage.ok { --stage: var(--ok); }
-.pipeline-stage.running { --stage: var(--info); }
-.pipeline-stage.warn { --stage: var(--warn); }
-.pipeline-stage.failed { --stage: var(--bad); }
 .pipeline-stage-name { color: var(--muted, #6c757d); font-size: 12px; font-weight: 500; }
-.pipeline-stage strong { font-size: 17px; font-variant-numeric: tabular-nums; }
-.pipeline-stage-state { color: var(--stage); font-size: 12px; font-weight: 600; }
-.pipeline-stage:has(.stretched-link):hover { background: color-mix(in srgb, var(--text, #222) 5%, transparent); }
+.pipeline-stage strong { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pipeline-stage:has(.stretched-link):hover { background: color-mix(in srgb, var(--text, #222) 5%, var(--panel)); }
 
 /* Job grid: rows are job types, squares are runs. */
 .pipeline-grid { border-collapse: separate; border-spacing: 0 6px; }
