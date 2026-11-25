@@ -432,6 +432,37 @@ class PlatformMySQLTests(unittest.TestCase):
         status = self.client.get("/api/v1/detection/jobs/" + str(first.json["job_id"]))
         self.assertEqual(status.json["state"], "completed", status.json)
 
+    def test_14b_rule_detector_runs_again_on_unchanged_data(self):
+        # A schedule or "run again" queues the same rule configuration with a new key; the second run
+        # reuses the detector version instead of failing on its unique key.
+        ingest_bgl(self.engine, self.dataset_id, self.window_source())
+        self.login("staff")
+        from scripts.run.worker import run_once
+
+        jobs = []
+        for key in ("rule-first", "rule-again"):
+            body = {
+                "dataset_id": self.dataset_id,
+                "idempotency_key": key,
+                "configuration": {"detector": "rule"},
+            }
+            queued = self.client.post("/api/v1/detection/jobs", json=body, headers=self.headers())
+            self.assertEqual(queued.status_code, 202, queued.json)
+            jobs.append(queued.json["job_id"])
+            self.assertTrue(run_once(self.engine))
+        for job_id in jobs:
+            status = self.client.get("/api/v1/detection/jobs/" + str(job_id)).json
+            self.assertEqual(status["state"], "completed", status)
+        first, again = (
+            self.client.get(f"/api/v1/detection/jobs/{job}").json["result"]["run_id"] for job in jobs
+        )
+        self.assertNotEqual(first, again)
+        with Session(self.engine) as session:
+            versions = session.scalars(
+                select(DetectorRun.version_id).where(DetectorRun.id.in_([first, again]))
+            ).all()
+        self.assertEqual(len(set(versions)), 1)
+
     def test_15_upload_requires_auth_and_unrelated_size_limit(self):
         self.assertEqual(self.client.post("/api/v1/uploads", data=b"test").status_code, 403)
         self.assertEqual(

@@ -254,15 +254,23 @@ def register_window_run(engine, dataset_id, job_key, kind, config, revision, fil
             select(DetectorRun).where(DetectorRun.dataset_id == dataset_id, DetectorRun.run_key == job_key)
         )
         if run is None:
-            version = DetectorVersion(
-                detector_id=detector.id,
-                version=version_key,
-                configuration=config,
-                feature_schema={"names": FEATURE_NAMES, "version": "1", "label_free": True},
-                score_direction=config["score_direction"],
+            # A new run with an identical configuration (a scheduled or repeated rule run on unchanged
+            # data) reuses its detector version: (detector_id, version) is unique.
+            version = session.scalar(
+                select(DetectorVersion).where(
+                    DetectorVersion.detector_id == detector.id, DetectorVersion.version == version_key
+                )
             )
-            session.add(version)
-            session.flush()
+            if version is None:
+                version = DetectorVersion(
+                    detector_id=detector.id,
+                    version=version_key,
+                    configuration=config,
+                    feature_schema={"names": FEATURE_NAMES, "version": "1", "label_free": True},
+                    score_direction=config["score_direction"],
+                )
+                session.add(version)
+                session.flush()
             run = DetectorRun(
                 dataset_id=dataset_id,
                 detector_id=detector.id,
