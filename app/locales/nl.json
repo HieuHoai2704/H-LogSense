@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "Een waargenomen hostvenster vereist een niet-lege host",
   "Analysis": "Analyse",
   "Analysis / model run": "Analyse / modelrun",
-  "Analysis folder": "Analysemap",
   "Analyze data files": "Gegevensbestanden analyseren",
   "Analyze file": "Bestand analyseren",
   "Anomaly activity": "Activiteit van afwijkingen",
@@ -1459,5 +1458,17 @@
   "New staff account": "Nieuw medewerkersaccount",
   "WELCOME!": "WELKOM!",
   "Deep black glass tones with soft highlights.": "Diepzwarte glastinten met zachte accenten.",
-  "Open H-logsen from its launcher or start command to grant access.": "Open H-logsen via de starter of het startcommando om toegang te krijgen."
+  "Open H-logsen from its launcher or start command to grant access.": "Open H-logsen via de starter of het startcommando om toegang te krijgen.",
+  "Analysis functions": "Analysefuncties",
+  "Monitoring": "Monitoring",
+  "Anomaly investigation": "Anomalieonderzoek",
+  "Alerts": "Waarschuwingen",
+  "Data operations": "Gegevensbeheer",
+  "Data quality": "Gegevenskwaliteit",
+  "Pipeline & jobs": "Pipeline & taken",
+  "Schedules": "Planningen",
+  "Data sources": "Gegevensbronnen",
+  "Datasets": "Datasets",
+  "Loghub catalog": "Loghub-catalogus",
+  "Coming soon": "Binnenkort"
 }

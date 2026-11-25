@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "Для наблюдаемого окна хоста нужен непустой хост",
   "Analysis": "Анализ",
   "Analysis / model run": "Анализ/прогон модели",
-  "Analysis folder": "Папка анализа",
   "Analyze data files": "Анализ файлов данных",
   "Analyze file": "Анализировать файл",
   "Anomaly activity": "Активность аномалий",
@@ -1451,5 +1450,17 @@
   "New staff account": "Новая учётная запись сотрудника",
   "WELCOME!": "ДОБРО ПОЖАЛОВАТЬ!",
   "Deep black glass tones with soft highlights.": "Глубокие чёрные стеклянные тона с мягкими бликами.",
-  "Open H-logsen from its launcher or start command to grant access.": "Откройте H-logsen через ярлык или команду запуска, чтобы получить доступ."
+  "Open H-logsen from its launcher or start command to grant access.": "Откройте H-logsen через ярлык или команду запуска, чтобы получить доступ.",
+  "Analysis functions": "Функции анализа",
+  "Monitoring": "Мониторинг",
+  "Anomaly investigation": "Расследование аномалий",
+  "Alerts": "Оповещения",
+  "Data operations": "Операции с данными",
+  "Data quality": "Качество данных",
+  "Pipeline & jobs": "Конвейер и задания",
+  "Schedules": "Расписания",
+  "Data sources": "Источники данных",
+  "Datasets": "Наборы данных",
+  "Loghub catalog": "Каталог Loghub",
+  "Coming soon": "Скоро"
 }

@@ -185,10 +185,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
             arrow.table({"epoch": [1, 2], "loss": [0.2, None]}), self.project / "data.parquet"
         )
         page = self.page
-        page.get_by_role("link", name="Phân tích", exact=True).click()
-        expect(page.locator("#local-active-root")).to_have_text(str(self.project))
         page.locator("#local-search-input").fill("data.csv")
         page.locator("#local-search-results button").click()
+        expect(page.locator("#external-preview")).to_have_attribute("open", "")
         expect(page.locator('#external-preview [name="path"]')).to_have_value("data.csv")
         expect(page.locator('#external-preview [name="format"]')).to_have_value("csv")
         form = page.locator("#external-preview form")
@@ -358,11 +357,9 @@ class WorkbenchBrowserTest(unittest.TestCase):
 
     def test_folders_are_independent_and_code_saves_by_keyboard(self):
         code = self.project.parent / "code"
-        analysis = self.project.parent / "analysis"
         code.mkdir()
-        analysis.mkdir()
         (code / "train.py").write_text("print('code')\n", encoding="utf-8")
-        (analysis / "results.csv").write_text("metric,value\nloss,0.3\n", encoding="utf-8")
+        (self.project / "results.csv").write_text("metric,value\nloss,0.3\n", encoding="utf-8")
         monitor_text = (self.project / "train.py").read_bytes()
         self.open_project()
         page = self.page
@@ -394,19 +391,23 @@ class WorkbenchBrowserTest(unittest.TestCase):
         expect(page.locator("#dock-output-text")).to_contain_text("meta", timeout=15000)
         expect(page.locator("#editor")).to_be_visible()
 
-        page.get_by_role("link", name="Phân tích", exact=True).click()
-        choose(analysis)
-        expect(page.locator("#analysis-explorer-title")).to_have_text("Thư mục phân tích")
+        page.get_by_role("link", name="Dự án", exact=True).click()
+        expect(page.locator("#local-active-root")).to_have_text(str(self.project))
         page.locator('#local-tree button[data-path="results.csv"]').click()
+        page.locator("#local-analyze-file").click()
         expect(page.locator('#external-preview [name="path"]')).to_have_value("results.csv")
         page.locator('#external-preview button[type="submit"]').click()
         expect(page.locator("#external-sample")).to_contain_text("loss")
-        page.get_by_role("link", name="Dự án", exact=True).click()
-        expect(page.locator("#local-active-root")).to_have_text(str(self.project))
         page.get_by_role("link", name="Code", exact=True).click()
         expect(page.locator("#local-active-root")).to_have_text(str(code))
         page.get_by_role("link", name="Phân tích", exact=True).click()
-        expect(page.locator("#local-active-root")).to_have_text(str(analysis))
+        menu = page.get_by_role("navigation", name="Chức năng phân tích")
+        expect(menu.get_by_role("link", name="Điều tra bất thường")).to_have_attribute("aria-current", "page")
+        expect(menu).to_contain_text("Chất lượng dữ liệu")
+        expect(page.locator("#local-tree")).to_have_count(0)
+        expect(page.locator("#external-preview")).to_have_count(0)
+        page.get_by_role("link", name="Dự án", exact=True).click()
+        expect(page.locator("#local-active-root")).to_have_text(str(self.project))
         self.assertEqual(self.page_errors, [])
 
     def test_machine_sample_syncs_log_and_loss_and_switches_named_gpu(self):
@@ -505,16 +506,7 @@ class WorkbenchBrowserTest(unittest.TestCase):
         page.locator('[data-terminal-action="log"]').click()
         expect(page.locator("#terminal-body")).to_be_visible()
         expect(page.locator("#terminal-body")).to_contain_text("restored log")
-        page.get_by_role("link", name="Phân tích", exact=True).click()
-        open_branches()
-        with page.expect_response(
-            lambda response: "/view-state" in response.url and response.request.method == "PUT"
-        ):
-            page.locator('button[data-path="nested/inner/data.csv"]').click()
-        page.reload()
-        expect(page.locator('button[data-path="nested/inner/data.csv"]')).to_have_attribute(
-            "aria-pressed", "true"
-        )
+        page.locator('button[data-path="nested/inner/data.csv"]').click()
         expect(page.locator('#external-preview [name="path"]')).to_have_value("nested/inner/data.csv")
         self.assertEqual(self.page_errors, [])
 

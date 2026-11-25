@@ -6,6 +6,7 @@ import secrets
 from flask import Flask, jsonify, render_template, request
 
 from app.access import AccessDenied
+from app.analysis_menu import init_analysis_menu
 from app.api.anomalies import api
 from app.api.sources import source_for
 from app.i18n import translate
@@ -18,6 +19,7 @@ def create_app(config_overrides=None):
     """Build an application with its configuration and initial routes."""
     app = Flask(__name__)
     app.jinja_env.globals["app_name"] = APP_NAME
+    init_analysis_menu(app)
     profile = os.environ.get("LOGSENSE_PROFILE", "development")
     if profile not in PROFILES:
         raise ValueError("LOGSENSE_PROFILE must be development, testing or production.")

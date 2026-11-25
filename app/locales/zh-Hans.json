@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "观测到的主机窗口需要非空主机",
   "Analysis": "分析",
   "Analysis / model run": "分析/模型运行",
-  "Analysis folder": "分析文件夹",
   "Analyze data files": "分析数据文件",
   "Analyze file": "分析文件",
   "Anomaly activity": "异常活动",
@@ -1411,5 +1410,17 @@
   "New staff account": "新员工账户",
   "WELCOME!": "欢迎!",
   "Deep black glass tones with soft highlights.": "深黑玻璃色调,柔和高光。",
-  "Open H-logsen from its launcher or start command to grant access.": "请通过启动器或启动命令打开 H-logsen 以获得访问权限。"
+  "Open H-logsen from its launcher or start command to grant access.": "请通过启动器或启动命令打开 H-logsen 以获得访问权限。",
+  "Analysis functions": "分析功能",
+  "Monitoring": "监控",
+  "Anomaly investigation": "异常调查",
+  "Alerts": "告警",
+  "Data operations": "数据运维",
+  "Data quality": "数据质量",
+  "Pipeline & jobs": "流水线与作业",
+  "Schedules": "调度",
+  "Data sources": "数据源",
+  "Datasets": "数据集",
+  "Loghub catalog": "Loghub 目录",
+  "Coming soon": "即将推出"
 }

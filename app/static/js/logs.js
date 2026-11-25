@@ -122,6 +122,7 @@
         source: "db-" + applied.get("dataset_id"),
       });
       investigationNav.hidden = false;
+      window.analysisMenu?.setDataset(applied.get("dataset_id"));
       if (reset) {
         historyCursors = [null];
         index = 0;

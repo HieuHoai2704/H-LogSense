@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "หน้าต่างโฮสต์ที่สังเกตได้ต้องมีโฮสต์ที่ไม่ว่าง",
   "Analysis": "วิเคราะห์",
   "Analysis / model run": "การวิเคราะห์/การรันแบบจำลอง",
-  "Analysis folder": "โฟลเดอร์การวิเคราะห์",
   "Analyze data files": "วิเคราะห์ไฟล์ข้อมูล",
   "Analyze file": "วิเคราะห์ไฟล์",
   "Anomaly activity": "กิจกรรมความผิดปกติ",
@@ -1411,5 +1410,17 @@
   "New staff account": "บัญชีพนักงานใหม่",
   "WELCOME!": "ยินดีต้อนรับ!",
   "Deep black glass tones with soft highlights.": "โทนกระจกสีดำเข้มพร้อมไฮไลต์นุ่มนวล",
-  "Open H-logsen from its launcher or start command to grant access.": "เปิด H-logsen จากตัวเรียกใช้หรือคำสั่งเริ่มเพื่อรับสิทธิ์เข้าถึง"
+  "Open H-logsen from its launcher or start command to grant access.": "เปิด H-logsen จากตัวเรียกใช้หรือคำสั่งเริ่มเพื่อรับสิทธิ์เข้าถึง",
+  "Analysis functions": "ฟังก์ชันการวิเคราะห์",
+  "Monitoring": "การเฝ้าติดตาม",
+  "Anomaly investigation": "การตรวจสอบความผิดปกติ",
+  "Alerts": "การแจ้งเตือน",
+  "Data operations": "การดำเนินงานข้อมูล",
+  "Data quality": "คุณภาพข้อมูล",
+  "Pipeline & jobs": "ไปป์ไลน์และงาน",
+  "Schedules": "กำหนดการ",
+  "Data sources": "แหล่งข้อมูล",
+  "Datasets": "ชุดข้อมูล",
+  "Loghub catalog": "แคตตาล็อก Loghub",
+  "Coming soon": "เร็ว ๆ นี้"
 }

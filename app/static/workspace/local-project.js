@@ -35,6 +35,7 @@
   window.hlogsenEditor = codeEditor; // read by the quit prompt (quit.js)
   const codeFile = (path) => /\.pdf$/i.test(path) || projectExtensions.has(path.split(".").at(-1).toLowerCase());
 
+  const external = window.workbenchExternal; // "Analyze data files" panel (external.js)
   function updateSelection(path, directory) {
     selectedPath = path;
     selectedDirectory = directory;
@@ -42,9 +43,11 @@
     $("local-selected").textContent = path || tr("Root folder");
     const canWatch = !directory && visibleScope().root === current && /\.(log|txt|jsonl)$/i.test(path);
     const canEdit = !directory && codeFile(path);
+    const canAnalyze = !directory && visibleScope() === projectScope && Boolean(external?.supports(path));
     $("local-watch-log").hidden = !canWatch;
     $("local-open-editor").hidden = !canEdit;
-    $("local-file-actions").hidden = !canWatch && !canEdit;
+    $("local-analyze-file").hidden = !canAnalyze;
+    $("local-file-actions").hidden = !canWatch && !canEdit && !canAnalyze;
   }
 
   const explorer = window.createWorkbenchExplorer({
@@ -54,7 +57,9 @@
       if (!$("monitor").hidden) {
         if (/\.log$/i.test(path)) return watchLog(path);
         if (/^metrics\.csv$/i.test(path.split("/").at(-1))) selectPanel("training");
-        if (/^machine\.jsonl$/i.test(path.split("/").at(-1))) selectPanel("machine");
+        const name = path.split("/").at(-1);
+        if (/^machine\.jsonl$/i.test(name)) selectPanel("machine");
+        else if (/\.(csv|jsonl|parquet)$/i.test(name) && !/^metrics\.csv$/i.test(name)) external?.show(path);
         return;
       }
       if (!$("editor").hidden && codeFile(path)) {
@@ -184,6 +189,7 @@
   });
 
   function setScope(scope, result) {
+    if (scope === projectScope && scope.root !== result.root) external?.reset();
     scope.root = result.root;
     scope.recent = result.recent;
     scope.api.setProject(result.project);
@@ -318,6 +324,7 @@
     });
   }
 
+  $("local-analyze-file").addEventListener("click", () => external?.show(selectedPath));
   $("local-open-editor").addEventListener("click", () => selectFile(selectedPath).catch((error) => setStatus(error.message)));
   $("local-watch-log").addEventListener("click", () => {
     watchLog(selectedPath).then(() => document.dispatchEvent(new Event("workspace:show-log")))

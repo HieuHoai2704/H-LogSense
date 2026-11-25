@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "Jendela host yang diamati memerlukan host yang tidak kosong",
   "Analysis": "Analisis",
   "Analysis / model run": "Analisis/model dijalankan",
-  "Analysis folder": "Folder analisis",
   "Analyze data files": "Analisis berkas data",
   "Analyze file": "Analisis file",
   "Anomaly activity": "Aktivitas anomali",
@@ -1411,5 +1410,17 @@
   "New staff account": "Akun staf baru",
   "WELCOME!": "SELAMAT DATANG!",
   "Deep black glass tones with soft highlights.": "Nuansa kaca hitam pekat dengan sorotan lembut.",
-  "Open H-logsen from its launcher or start command to grant access.": "Buka H-logsen dari peluncur atau perintah mulai untuk mendapat akses."
+  "Open H-logsen from its launcher or start command to grant access.": "Buka H-logsen dari peluncur atau perintah mulai untuk mendapat akses.",
+  "Analysis functions": "Fungsi analisis",
+  "Monitoring": "Pemantauan",
+  "Anomaly investigation": "Investigasi anomali",
+  "Alerts": "Peringatan",
+  "Data operations": "Operasi data",
+  "Data quality": "Kualitas data",
+  "Pipeline & jobs": "Pipeline & job",
+  "Schedules": "Jadwal",
+  "Data sources": "Sumber data",
+  "Datasets": "Dataset",
+  "Loghub catalog": "Katalog Loghub",
+  "Coming soon": "Segera hadir"
 }

@@ -10,14 +10,17 @@
 </head>
 <body>
 {% include "partials/workspace_navigation.html" %}
+{# Pages of the Analysis menu set analysis_section at their top level. #}
+{% if analysis_section is defined %}<div class="analysis-shell analysis-page">{% include "partials/analysis_menu.html" %}{% endif %}
   <main class="container py-4">
-    <nav class="mb-3"><a href="{{ url_for('dashboard', workspace='logs') }}">{{ tr("Log Explorer") }}</a></nav>
+    {% if analysis_section is not defined %}<nav class="mb-3"><a href="{{ url_for('dashboard', workspace='logs') }}">{{ tr("Log Explorer") }}</a></nav>{% endif %}
 
     {% for category, message in get_flashed_messages(with_categories=true) %}
     <p class="alert alert-{{ category }}" role="status">{{ tr(message) }}</p>
     {% endfor %}
     {% block content %}{% endblock %}
   </main>
+{% if analysis_section is defined %}</div>{% endif %}
   {% block scripts %}{% endblock %}
 </body>
 </html>

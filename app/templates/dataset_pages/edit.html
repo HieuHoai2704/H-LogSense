@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set analysis_section = "datasets" %}
 {% from "bootstrap5/form.html" import render_field %}
 {% block title %}{{ tr("Delete empty dataset" if action == "delete" else "Rename dataset") }} · {{ app_name }}{% endblock %}
 {% block content %}

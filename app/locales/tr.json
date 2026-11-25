@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "Gözlemlenen bir ana makine penceresi boş olmayan bir ana makine gerektirir",
   "Analysis": "Analiz",
   "Analysis / model run": "Analiz / model çalıştırması",
-  "Analysis folder": "Analiz klasörü",
   "Analyze data files": "Veri dosyalarını analiz et",
   "Analyze file": "Dosyayı analiz et",
   "Anomaly activity": "Anomali etkinliği",
@@ -1411,5 +1410,17 @@
   "New staff account": "Yeni personel hesabı",
   "WELCOME!": "HOŞ GELDİNİZ!",
   "Deep black glass tones with soft highlights.": "Yumuşak vurgulu koyu siyah cam tonları.",
-  "Open H-logsen from its launcher or start command to grant access.": "Erişim için H-logsen'i başlatıcısından veya başlatma komutuyla açın."
+  "Open H-logsen from its launcher or start command to grant access.": "Erişim için H-logsen'i başlatıcısından veya başlatma komutuyla açın.",
+  "Analysis functions": "Analiz işlevleri",
+  "Monitoring": "İzleme",
+  "Anomaly investigation": "Anomali incelemesi",
+  "Alerts": "Uyarılar",
+  "Data operations": "Veri operasyonları",
+  "Data quality": "Veri kalitesi",
+  "Pipeline & jobs": "İşlem hattı ve işler",
+  "Schedules": "Zamanlamalar",
+  "Data sources": "Veri kaynakları",
+  "Datasets": "Veri kümeleri",
+  "Loghub catalog": "Loghub kataloğu",
+  "Coming soon": "Yakında"
 }

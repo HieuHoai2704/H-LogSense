@@ -5,11 +5,10 @@
 <script src="{{ url_for('static',filename='js/log-explorer.js') }}" defer></script></head><body>
 <a class="skip-link" href="#logs-title">{{ tr("Skip to logs") }}</a>
 {% include "partials/workspace_navigation.html" %}
-<div class="app-shell{% if workbench_enabled %} analysis-shell{% endif %}">
-{% if workbench_enabled %}{% include "partials/analysis_explorer.html" %}{% endif %}
+<div class="app-shell analysis-shell">
+{% with analysis_section = "logs" %}{% include "partials/analysis_menu.html" %}{% endwith %}
 <main class="workspace-main">
 <header class="workspace-heading"><h1>{{ tr("Investigation") }}</h1><span><span id="log-investigation-nav" hidden><a id="log-investigation">{{ tr("Anomaly activity") }}</a> · </span><a href="{{ url_for('dataset_pages.index') }}">{{ tr("Manage datasets") }}</a> · <strong>{{ tr("Log Explorer · MySQL") }}</strong></span></header>
-{% if workbench_enabled %}{% include "partials/workbench_external.html" %}{% endif %}
 <div class="demo-notice"><strong>MYSQL</strong><span>{{ tr("Imported parsed logs. Log volume is not anomaly count. Research labels are not predictions.") }}</span></div>
 <section id="login-panel" class="panel"><header class="panel-heading"><h2>{{ tr("Sign in to private datasets") }}</h2></header><form id="login-form" class="source-controls"><label>{{ tr("Username") }}<input name="username" autocomplete="username" required maxlength="100"></label><label>{{ tr("Password") }}<input type="password" name="password" autocomplete="current-password" required maxlength="1024"></label><button class="primary">{{ tr("Sign in") }}</button></form></section>
 <p id="logs-status" role="status">{{ tr("Authentication required.") }}</p><button id="logs-logout" hidden>{{ tr("Sign out") }}</button>

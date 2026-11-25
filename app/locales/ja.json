@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "観測されたホストウィンドウには空でないホストが必要です",
   "Analysis": "分析",
   "Analysis / model run": "分析/モデルの実行",
-  "Analysis folder": "分析フォルダー",
   "Analyze data files": "データファイルを分析",
   "Analyze file": "ファイルを分析",
   "Anomaly activity": "異常の推移",
@@ -1411,5 +1410,17 @@
   "New staff account": "新しいスタッフアカウント",
   "WELCOME!": "ようこそ!",
   "Deep black glass tones with soft highlights.": "柔らかなハイライトの深い黒のガラス調。",
-  "Open H-logsen from its launcher or start command to grant access.": "アクセスするには、ランチャーまたは起動コマンドから H-logsen を開いてください。"
+  "Open H-logsen from its launcher or start command to grant access.": "アクセスするには、ランチャーまたは起動コマンドから H-logsen を開いてください。",
+  "Analysis functions": "分析機能",
+  "Monitoring": "監視",
+  "Anomaly investigation": "異常の調査",
+  "Alerts": "アラート",
+  "Data operations": "データ運用",
+  "Data quality": "データ品質",
+  "Pipeline & jobs": "パイプラインとジョブ",
+  "Schedules": "スケジュール",
+  "Data sources": "データソース",
+  "Datasets": "データセット",
+  "Loghub catalog": "Loghub カタログ",
+  "Coming soon": "近日公開"
 }

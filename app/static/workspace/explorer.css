@@ -165,21 +165,69 @@
 .search-text { display: grid; min-width: 0; }
 #local-search-results .search-path { overflow: hidden; color: var(--muted); font: 11px/1.35 var(--mono); white-space: nowrap; text-overflow: ellipsis; }
 
-/* Analysis page */
-.analysis-shell { display: grid; grid-template-columns: clamp(220px, 18vw, 280px) minmax(0, 1fr); }
+/* Analysis page: function menu on the left (partials/analysis_menu.html) */
+.analysis-shell { display: grid; grid-template-columns: clamp(200px, 16vw, 248px) minmax(0, 1fr); }
 .analysis-shell > main { width: 100%; min-width: 0; }
-.analysis-shell .project-tree :is(h2, p, ul) { margin-block: 0; }
-.analysis-shell .project-tree h2 { margin-bottom: 8px; }
-.analysis-shell .project-tree a { align-self: start; margin: 6px 14px; }
-.analysis-shell .project-tree input { width: 100%; }
-.analysis-shell #analysis-explorer-status:not(:empty) { margin: 6px 14px 0; color: var(--muted); font-size: 11.5px; }
+.analysis-menu {
+  position: sticky;
+  top: var(--workspace-nav-height, 51px);
+  align-self: start;
+  height: calc(100dvh - var(--workspace-nav-height, 51px));
+  overflow: auto;
+  padding: 14px 8px 18px;
+  background: var(--panel);
+  border-inline-end: 1px solid var(--border);
+  font-size: 13px;
+}
+.analysis-menu-group + .analysis-menu-group { margin-top: 14px; }
+.analysis-menu h2 {
+  margin: 0 0 6px;
+  padding: 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.analysis-menu ul { margin: 0; padding: 0; list-style: none; }
+.analysis-menu :is(a, .analysis-menu-planned) {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 32px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--text);
+  text-decoration: none;
+  line-height: 1.25;
+}
+.analysis-menu a:hover { background: color-mix(in srgb, var(--text) 7%, transparent); }
+.analysis-menu a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.analysis-menu a[aria-current] { background: color-mix(in srgb, var(--text) 12%, transparent); font-weight: 600; }
+.analysis-menu a[aria-current] .analysis-menu-icon { color: var(--text); }
+.analysis-menu-icon { flex: 0 0 16px; color: var(--muted); }
+.analysis-menu-planned { color: var(--muted); cursor: default; }
+.analysis-menu-planned small {
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+/* Bootstrap pages (datasets, catalog) inside the same shell */
+.analysis-page > main.container { max-width: 1140px; margin-inline: 0; padding-inline: 24px; }
 
 @media (prefers-reduced-motion: reduce) {
   .tree-chevron, .project-tree details > summary::before { transition: none; }
 }
 @media (max-width: 700px) {
   .analysis-shell { grid-template-columns: minmax(0, 1fr); }
-  .analysis-shell .project-sidebar { position: static; height: auto; max-height: 240px; border-inline-end: 0; border-bottom: 1px solid var(--border); }
+  .analysis-menu { position: static; height: auto; padding: 8px; border-inline-end: 0; border-bottom: 1px solid var(--border); }
+  .analysis-menu nav { display: flex; gap: 12px; overflow-x: auto; }
+  .analysis-menu-group + .analysis-menu-group { margin-top: 0; }
+  .analysis-menu ul { display: flex; gap: 2px; }
+  .analysis-menu :is(a, .analysis-menu-planned) { white-space: nowrap; }
 }
 
 /* Project tab file actions: one compact row under the open-folder control. */

@@ -3,7 +3,7 @@
 (() => {
   const panel = document.getElementById("external-preview");
   if (!panel) return;
-  // logs.html includes this panel without i18n.js; fall back to the English key there.
+  // Fall back to the English key when i18n.js is absent.
   const tr = window.logsenseTranslate || ((message, ...values) =>
     message.replace(/\{(\d+)\}/g, (match, index) => Number(index) < values.length ? String(values[index]) : match));
   const form = panel.querySelector("form");
@@ -83,56 +83,30 @@
   const syncFormat = () => { unit.disabled = form.elements.format.value !== "evaluation"; };
   form.elements.format.addEventListener("change", syncFormat);
   syncFormat();
-  const api = window.localWorkbench.scope("analysis");
+  // The Project page owns the folder tree; this panel reads files from the project open there.
+  const api = window.localWorkbench;
   let revision = 0;
-  const view = window.createWorkbenchViewState(api);
-  if (api.authorized) {
-    const explorerStatus = document.getElementById("analysis-explorer-status");
-    const onError = (message) => { explorerStatus.textContent = message; };
-    function showFile(path, format) {
-      revision += 1;
-      form.elements.path.value = path;
-      const suffix = path.split(".").at(-1).toLowerCase();
-      if (format) form.elements.format.value = format;
-      else if (["csv", "jsonl", "parquet"].includes(suffix)) form.elements.format.value = suffix;
-      syncFormat();
-      data.hidden = output.hidden = true;
-      status.textContent = "";
-      form.closest("details").open = true;
-    }
-    const explorer = window.createWorkbenchExplorer({
-      api,
-      onFile(path) {
-        showFile(path);
-        view.patch({ analysis_file: path, analysis_format: form.elements.format.value });
-      },
-      onError,
-    });
-    const scope = { api, view, root: null, recent: [] };
-    async function openRoot(result) {
-      const changed = result.root !== scope.root;
-      if (changed) {
-        revision += 1;
-        form.elements.path.value = "";
-        data.hidden = output.hidden = true;
-        status.textContent = "";
-      }
-      Object.assign(scope, { root: result.root, recent: result.recent });
-      api.setProject(result.project);
-      if (changed) {
-        await view.load(scope.root);
-        if (view.data.analysis_file) showFile(view.data.analysis_file, view.data.analysis_format);
-      }
-      chooser.update(scope);
-      explorerStatus.textContent = "";
-      await explorer.open(scope.root, api, view);
-    }
-    const chooser = window.bindWorkbenchFolder({ getScope: () => scope, onOpen: openRoot });
-    api.call("/session").then(openRoot).catch((error) => onError(error.message));
-    form.elements.format.addEventListener("change", () => {
-      if (scope.root && form.elements.path.value) view.patch({ analysis_format: form.elements.format.value });
-    });
+  function clear() {
+    revision += 1;
+    data.hidden = output.hidden = true;
+    status.textContent = "";
   }
+  function show(path) {
+    clear();
+    form.elements.path.value = path;
+    const suffix = path.split(".").at(-1).toLowerCase();
+    if (["csv", "jsonl", "parquet"].includes(suffix)) form.elements.format.value = suffix;
+    syncFormat();
+    panel.hidden = false;
+    panel.open = true;
+    panel.scrollIntoView({ block: "nearest" });
+    form.elements.path.focus();
+  }
+  window.workbenchExternal = {
+    show,
+    supports: (path) => /\.(csv|jsonl|parquet|log|txt)$/i.test(path),
+    reset() { clear(); form.elements.path.value = ""; },
+  };
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -145,7 +119,6 @@
       const values = Object.fromEntries(new FormData(form));
       const report = await api.call("/external", "POST", values);
       if (observed !== revision) return;
-      view.patch({ analysis_file: values.path, analysis_format: values.format });
       if (report.columns) renderReport(report);
       else {
         output.textContent = JSON.stringify(report, null, 2);

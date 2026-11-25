@@ -25,6 +25,7 @@
   <script src="{{ url_for('static', filename='workspace/explorer.js') }}" defer></script>
   <script src="{{ url_for('static', filename='workspace/dock.js') }}" defer></script>
   <script src="{{ url_for('static', filename='workspace/code-editor.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='workspace/external.js') }}" defer></script>
   <script src="{{ url_for('static', filename='workspace/local-project.js') }}" defer></script>
   {% endif %}
 </head>
@@ -61,6 +62,7 @@
         <div class="project-file-actions" id="local-file-actions" hidden>
           <button id="local-open-editor" type="button" hidden>{{ tr("Open in editor") }}</button>
           <button id="local-watch-log" type="button" hidden>{{ tr("Follow as log") }}</button>
+          <button id="local-analyze-file" type="button" hidden>{{ tr("Analyze file") }}</button>
         </div>
         {% include "partials/workbench_explorer.html" %}
         {% endif %}
@@ -123,6 +125,7 @@
       </div>
       <div class="monitor-visuals">
       {% if workbench_enabled %}
+      {% include "partials/workbench_external.html" %}
       <section id="run-compare" class="panel run-detail" aria-labelledby="run-compare-title" hidden>
         <header class="panel-header">
           <h2 id="run-compare-title">{{ tr("Compare two runs") }}</h2>

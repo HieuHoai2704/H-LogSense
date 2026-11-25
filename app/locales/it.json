@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "Una finestra host osservata richiede un host non vuoto",
   "Analysis": "Analisi",
   "Analysis / model run": "Analisi/esecuzione del modello",
-  "Analysis folder": "Cartella di analisi",
   "Analyze data files": "Analizza file di dati",
   "Analyze file": "Analizza file",
   "Anomaly activity": "Attività delle anomalie",
@@ -1453,5 +1452,17 @@
   "New staff account": "Nuovo account del personale",
   "WELCOME!": "BENVENUTO!",
   "Deep black glass tones with soft highlights.": "Toni di vetro nero intenso con riflessi morbidi.",
-  "Open H-logsen from its launcher or start command to grant access.": "Apri H-logsen dal suo launcher o comando di avvio per ottenere l'accesso."
+  "Open H-logsen from its launcher or start command to grant access.": "Apri H-logsen dal suo launcher o comando di avvio per ottenere l'accesso.",
+  "Analysis functions": "Funzioni di analisi",
+  "Monitoring": "Monitoraggio",
+  "Anomaly investigation": "Indagine sulle anomalie",
+  "Alerts": "Avvisi",
+  "Data operations": "Operazioni sui dati",
+  "Data quality": "Qualità dei dati",
+  "Pipeline & jobs": "Pipeline e job",
+  "Schedules": "Pianificazioni",
+  "Data sources": "Fonti dati",
+  "Datasets": "Dataset",
+  "Loghub catalog": "Catalogo Loghub",
+  "Coming soon": "Prossimamente"
 }

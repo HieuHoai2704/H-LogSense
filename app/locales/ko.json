@@ -50,7 +50,6 @@
   "An observed host-window requires a nonempty host": "관측된 호스트 윈도우에는 비어 있지 않은 호스트가 필요합니다",
   "Analysis": "분석",
   "Analysis / model run": "분석/모델 실행",
-  "Analysis folder": "분석 폴더",
   "Analyze data files": "데이터 파일 분석",
   "Analyze file": "파일 분석",
   "Anomaly activity": "이상 탐지 활동",
@@ -1411,5 +1410,17 @@
   "New staff account": "새 직원 계정",
   "WELCOME!": "환영합니다!",
   "Deep black glass tones with soft highlights.": "부드러운 하이라이트가 있는 짙은 검은 유리 톤.",
-  "Open H-logsen from its launcher or start command to grant access.": "접근하려면 실행 아이콘이나 시작 명령으로 H-logsen을 여세요."
+  "Open H-logsen from its launcher or start command to grant access.": "접근하려면 실행 아이콘이나 시작 명령으로 H-logsen을 여세요.",
+  "Analysis functions": "분석 기능",
+  "Monitoring": "모니터링",
+  "Anomaly investigation": "이상 조사",
+  "Alerts": "알림",
+  "Data operations": "데이터 운영",
+  "Data quality": "데이터 품질",
+  "Pipeline & jobs": "파이프라인 및 작업",
+  "Schedules": "일정",
+  "Data sources": "데이터 소스",
+  "Datasets": "데이터셋",
+  "Loghub catalog": "Loghub 카탈로그",
+  "Coming soon": "곧 제공"
 }

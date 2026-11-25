@@ -77,25 +77,25 @@
 .analysis-shell #query-status { margin: 8px 2px; font-size: 12px; }
 
 /* Collapsible sections: "Analyze data files", "Data coverage", evaluation */
-.analysis-shell :is(#external-preview, .coverage-status) { border: 1px solid var(--border); border-radius: 8px;
+:is(.analysis-shell, .project-shell) :is(#external-preview, .coverage-status) { border: 1px solid var(--border); border-radius: 8px;
   background: transparent; margin: 0 0 10px; }
-.analysis-shell :is(#external-preview, .coverage-status) > summary {
+:is(.analysis-shell, .project-shell) :is(#external-preview, .coverage-status) > summary {
   display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px;
   list-style: none; cursor: pointer; color: var(--text); font-size: 13px; font-weight: 600; border-radius: 8px;
 }
-.analysis-shell :is(#external-preview, .coverage-status) > summary::-webkit-details-marker { display: none; }
-.analysis-shell :is(#external-preview, .coverage-status) > summary::before {
+:is(.analysis-shell, .project-shell) :is(#external-preview, .coverage-status) > summary::-webkit-details-marker { display: none; }
+:is(.analysis-shell, .project-shell) :is(#external-preview, .coverage-status) > summary::before {
   content: ""; flex: 0 0 14px; height: 14px; background: var(--muted);
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
   transition: transform .12s ease;
 }
-.analysis-shell :is(#external-preview, .coverage-status)[open] > summary::before { transform: rotate(90deg); }
-.analysis-shell :is(#external-preview, .coverage-status) > summary:hover { background: var(--control-bg); }
+:is(.analysis-shell, .project-shell) :is(#external-preview, .coverage-status)[open] > summary::before { transform: rotate(90deg); }
+:is(.analysis-shell, .project-shell) :is(#external-preview, .coverage-status) > summary:hover { background: var(--control-bg); }
 .analysis-shell .coverage-status > summary { font-weight: 500; color: var(--muted); }
 .analysis-shell .coverage-status > summary strong { color: var(--text); font-weight: 600; }
 .analysis-shell .coverage-status > summary > span { margin-left: auto; font-size: 12px; }
-.analysis-shell #external-preview > :not(summary) { margin-inline: 12px; }
-.analysis-shell #external-preview[open] { padding-bottom: 12px; }
+:is(.analysis-shell, .project-shell) #external-preview > :not(summary) { margin-inline: 12px; }
+:is(.analysis-shell, .project-shell) #external-preview[open] { padding-bottom: 12px; }
 
 /* ---------------------------------------------------------------- Analysis: filter card */
 .analysis-shell #filters { margin: 0 0 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
@@ -103,25 +103,25 @@
 .analysis-shell #filters .source-controls {
   display: grid; grid-template-columns: repeat(3, minmax(160px, 1fr)) minmax(0, 1.2fr); gap: 10px; align-items: end;
 }
-.analysis-shell :is(#filters .source-controls, #external-preview .source-controls) label { gap: 5px; color: var(--muted); font-size: 11px; font-weight: 600;
+:is(.analysis-shell, .project-shell) :is(#filters .source-controls, #external-preview .source-controls) label { gap: 5px; color: var(--muted); font-size: 11px; font-weight: 600;
   letter-spacing: .05em; text-transform: uppercase; }
 .analysis-shell #filters .source-note { align-self: center; justify-self: end; max-width: 100%; text-align: right;
   font-size: 12px; line-height: 1.4; color: var(--muted); }
 .analysis-shell #filters .filter-controls { gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-.analysis-shell :is(#filters, #external-preview) :is(select, input:not([type="checkbox"]):not([type="radio"]), button, .filter-picker > summary) {
+:is(.analysis-shell, .project-shell) :is(#filters, #external-preview) :is(select, input:not([type="checkbox"]):not([type="radio"]), button, .filter-picker > summary) {
   min-height: var(--control-h); height: var(--control-h); padding-block: 0; padding-inline-start: 11px;
   border: 1px solid var(--border); border-radius: var(--control-radius); background-color: var(--control-bg);
   color: var(--text); font: 500 var(--control-font)/1 system-ui, -apple-system, "Segoe UI", sans-serif;
   text-transform: none; letter-spacing: 0;
 }
-.analysis-shell :is(#filters, #external-preview) button { padding-inline-end: 14px; }
-.analysis-shell :is(#filters, #external-preview) :is(select, input, button, .filter-picker > summary):hover { border-color: var(--muted); }
-.analysis-shell #external-preview .source-controls { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(140px, 1fr)) auto;
+:is(.analysis-shell, .project-shell) :is(#filters, #external-preview) button { padding-inline-end: 14px; }
+:is(.analysis-shell, .project-shell) :is(#filters, #external-preview) :is(select, input, button, .filter-picker > summary):hover { border-color: var(--muted); }
+:is(.analysis-shell, .project-shell) #external-preview .source-controls { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(2, minmax(140px, 1fr)) auto;
   gap: 10px; align-items: end; margin-top: 2px; }
-.analysis-shell #external-preview .source-controls :is(input, select) { width: 100%; }
-.analysis-shell #external-preview .source-controls input::placeholder { color: var(--muted); }
-.analysis-shell #external-preview .source-controls button { justify-self: start; }
-.analysis-shell #external-preview > p { margin-top: 10px; color: var(--muted); font-size: 12px; }
+:is(.analysis-shell, .project-shell) #external-preview .source-controls :is(input, select) { width: 100%; }
+:is(.analysis-shell, .project-shell) #external-preview .source-controls input::placeholder { color: var(--muted); }
+:is(.analysis-shell, .project-shell) #external-preview .source-controls button { justify-self: start; }
+:is(.analysis-shell, .project-shell) #external-preview > p { margin-top: 10px; color: var(--muted); font-size: 12px; }
 .analysis-shell #filters select { width: 100%; }
 .analysis-shell #filters .search-label { position: relative; min-width: 220px; }
 .analysis-shell #filters .search-label::before {
@@ -147,7 +147,7 @@
 .analysis-shell #filters .custom-range { margin-top: 10px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .analysis-shell :is(#external-preview, .coverage-status) > summary::before { transition: none; }
+  :is(.analysis-shell, .project-shell) :is(#external-preview, .coverage-status) > summary::before { transition: none; }
 }
 @media (max-width: 1250px) {
   /* Search gets its own row; facets, Apply and Clear stay together on the next one. */
@@ -155,10 +155,10 @@
 }
 @media (max-width: 1100px) {
   .analysis-shell #filters .source-controls { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .analysis-shell #external-preview .source-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :is(.analysis-shell, .project-shell) #external-preview .source-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .analysis-shell #filters .source-note { grid-column: 1 / -1; justify-self: start; text-align: left; }
 }
 @media (max-width: 700px) {
-  .analysis-shell :is(#filters, #external-preview) .source-controls { grid-template-columns: minmax(0, 1fr); }
+  :is(.analysis-shell, .project-shell) :is(#filters, #external-preview) .source-controls { grid-template-columns: minmax(0, 1fr); }
   .analysis-shell #filters .search-label { flex-basis: 100%; }
 }

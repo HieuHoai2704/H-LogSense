@@ -136,8 +136,13 @@ The regular Flask entry point has no local filesystem or terminal API.
   palette applies across all workbench tabs. **Extensions** manages
   built-in capabilities. **Python and packages** selects the interpreter and
   lists installed packages. Use the terminal for package installation.
-- **Analysis → Analyze data files** profiles CSV, JSONL and Parquet files
-  within the open project. It displays a schema, up to 20 valid sample rows,
+- **Analysis** has a function menu on the left instead of a folder tree:
+  Log Explorer, anomaly investigation, alerts, datasets and the Loghub
+  catalog. Entries marked *Coming soon* (overview, data quality, pipeline
+  and jobs, schedules) are planned pages.
+- **Project → Analyze data files** profiles CSV, JSONL and Parquet files
+  within the open project: select a data file in the tree, or choose
+  **Analyze file** under it. It displays a schema, up to 20 valid sample rows,
   missing values, duplicate rows after the first occurrence and distributions.
   Text inputs are limited to 1 MiB. The profiler scans at most 5,000 records.
   Parquet reports the total from file metadata and inspects at most 24 MiB of

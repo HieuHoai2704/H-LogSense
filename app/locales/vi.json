@@ -24,7 +24,6 @@
   "No matching timestamped logs": "Chưa có log cùng phạm vi thời gian",
   "Log at the same time": "Log trùng mốc",
   "Nearest log": "Log gần nhất",
-  "Analysis folder": "Thư mục phân tích",
   "Code folder": "Thư mục Code",
   "Local folder path": "Đường dẫn thư mục trên máy",
   "Project folder scope": "Nguồn theo dõi của tab Dự án",
@@ -1435,5 +1434,17 @@
   "New staff account": "Tài khoản nhân viên mới",
   "WELCOME!": "XIN CHÀO!",
   "Deep black glass tones with soft highlights.": "Tông kính đen sâu, điểm sáng dịu.",
-  "Open H-logsen from its launcher or start command to grant access.": "Hãy mở H-logsen từ biểu tượng hoặc lệnh khởi động để được cấp quyền."
+  "Open H-logsen from its launcher or start command to grant access.": "Hãy mở H-logsen từ biểu tượng hoặc lệnh khởi động để được cấp quyền.",
+  "Analysis functions": "Chức năng phân tích",
+  "Monitoring": "Giám sát",
+  "Anomaly investigation": "Điều tra bất thường",
+  "Alerts": "Cảnh báo",
+  "Data operations": "Vận hành dữ liệu",
+  "Data quality": "Chất lượng dữ liệu",
+  "Pipeline & jobs": "Pipeline & job",
+  "Schedules": "Lịch chạy",
+  "Data sources": "Nguồn dữ liệu",
+  "Datasets": "Bộ dữ liệu",
+  "Loghub catalog": "Danh mục Loghub",
+  "Coming soon": "Sắp có"
 }

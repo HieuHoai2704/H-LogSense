@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set analysis_section = "catalog" %}
 {% block title %}{{ tr("Loghub dataset catalog") }} · {{ app_name }}{% endblock %}
 {% macro size(value) -%}
 {%- if value >= 1073741824 %}{{ "%.2f"|format(value / 1073741824) }} GB{% elif value >= 1048576 %}{{ "%.1f"|format(value / 1048576) }} MB{% else %}{{ "%.0f"|format(value / 1024) }} KB{% endif -%}

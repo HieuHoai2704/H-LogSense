@@ -167,6 +167,26 @@ class LogExplorerMySQLTests(unittest.TestCase):
             self.client.delete("/api/v1/logs/views?name=missing", headers=self.headers()).status_code, 404
         )
 
+    def test_07_analysis_menu_opens_the_granted_dataset(self):
+        from test_analysis_menu import menu
+
+        self.login("staff")
+        expected = {
+            "logs": f"/?workspace=logs&dataset_id={self.dataset_id}",
+            "investigation": f"/?source=db-{self.dataset_id}",
+            "alerts": f"/?workspace=logs&dataset_id={self.dataset_id}#incident-workspace",
+        }
+        # The first granted dataset by default; an unknown dataset in the URL does not leak into links.
+        for path in ("/?workspace=logs", "/?workspace=logs&dataset_id=999999999"):
+            with self.subTest(path=path):
+                entries = menu(self.client.get(path).data)
+                self.assertEqual({key: entries.links[key] for key in expected}, expected)
+        entries = menu(self.client.get(f"/?source=db-{self.dataset_id}").data)
+        self.assertEqual(entries.current, ["investigation"])
+        page = self.client.get("/manage/datasets")
+        self.assertEqual(page.status_code, 200)
+        self.assertEqual(menu(page.data).current, ["datasets"])
+
 
 if __name__ == "__main__":
     unittest.main()

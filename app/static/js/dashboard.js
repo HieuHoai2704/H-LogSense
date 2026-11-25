@@ -136,6 +136,8 @@ async function load(url, historyMode = "push") {
     const canonical = stateURL();
     if (historyMode === "push" && canonical.href !== location.href) history.pushState({}, "", canonical);
     if (historyMode === "replace") history.replaceState({}, "", canonical);
+    const datasetSource = /^db-(\d+)$/.exec(applied.source || "");
+    if (datasetSource) window.analysisMenu?.setDataset(datasetSource[1]);
     const backend = data.mode === "database" ? "MYSQL" : "DEMO";
     status.textContent = dirty
       ? tn(data.result_count, "Query ready · {0} result · {1} ms · {2} · Unapplied filter changes", "Query ready · {0} results · {1} ms · {2} · Unapplied filter changes", data.result_count, data.query_ms, backend)
