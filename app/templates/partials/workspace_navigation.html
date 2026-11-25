@@ -25,7 +25,7 @@
     <span>{{ app_name }}</span>
   </strong>
   <nav aria-label="{{ tr('Workspace') }}">
-    <a href="{{ url_for('dashboard', workspace='logs') if workspace_has_database else url_for('dashboard', source='demo') }}" aria-label="{{ analysis_label }}" data-tooltip="{{ analysis_label }}"{% if active == "analysis" %} aria-current="page"{% endif %}>{{ nav_icon("analysis") }}</a>
+    <a href="{{ url_for('operations.overview') if workspace_has_database else url_for('dashboard', source='demo') }}" aria-label="{{ analysis_label }}" data-tooltip="{{ analysis_label }}"{% if active == "analysis" %} aria-current="page"{% endif %}>{{ nav_icon("analysis") }}</a>
     <a href="{{ url_for('dashboard') }}" data-project-view="monitor" aria-label="{{ project_label }}" data-tooltip="{{ project_label }}"{% if active == "monitor" %} aria-current="page"{% endif %}>{{ nav_icon("project") }}</a>
     <a href="{{ url_for('dashboard', view='editor') }}" data-project-view="editor" aria-label="{{ tr('Code') }}" data-tooltip="{{ tr('Code') }}"{% if active == "editor" %} aria-current="page"{% endif %}>{{ nav_icon("code") }}</a>
     <a href="{{ url_for('dashboard', view='settings') }}" data-project-view="settings" aria-label="{{ settings_label }}" data-tooltip="{{ settings_label }}"{% if active == "settings" %} aria-current="page"{% endif %}>{{ nav_icon("settings") }}</a>

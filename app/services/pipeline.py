@@ -148,7 +148,9 @@ def load_jobs(session: Session | scoped_session[Any], dataset_id: int) -> list[J
     return [JobRecord(*row) for row in rows]
 
 
-def pipeline_report(session: Session | scoped_session[Any], dataset_id: int) -> dict[str, Any]:
+def pipeline_report(
+    session: Session | scoped_session[Any], dataset_id: int, quality: dict[str, Any] | None = None
+) -> dict[str, Any]:
     from app.services.data_quality import quality_report
 
     jobs = load_jobs(session, dataset_id)
@@ -165,7 +167,9 @@ def pipeline_report(session: Session | scoped_session[Any], dataset_id: int) -> 
             Alert.dataset_id == dataset_id
         )
     ).one()
-    score = quality_report(session, dataset_id)["score"] if events or lines else None
+    if quality is None and (events or lines):
+        quality = quality_report(session, dataset_id)
+    score = quality["score"] if quality and (events or lines) else None
     return {
         "flow": flow(
             lines=int(lines or 0),

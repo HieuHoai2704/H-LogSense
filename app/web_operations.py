@@ -1,4 +1,5 @@
-"""Data operations pages (data quality, pipeline and jobs) and their JSON reports, for granted datasets only."""
+"""Analysis report pages (overview, data quality, pipeline and jobs) and their JSON reports, for granted
+datasets only."""
 
 from __future__ import annotations
 
@@ -60,6 +61,12 @@ def json_report(build: Callable[[Any, int], dict[str, Any]]) -> ResponseReturnVa
         return jsonify(error={"code": "database_unavailable"}), 503
 
 
+def overview_report(session: Any, dataset_id: int) -> dict[str, Any]:
+    from app.services.overview import overview_report as build
+
+    return build(session, dataset_id)
+
+
 def quality_report(session: Any, dataset_id: int) -> dict[str, Any]:
     from app.services.data_quality import quality_report as build
 
@@ -70,6 +77,16 @@ def pipeline_report(session: Any, dataset_id: int) -> dict[str, Any]:
     from app.services.pipeline import pipeline_report as build
 
     return build(session, dataset_id)
+
+
+@operations.get("/analysis/overview")
+def overview() -> ResponseReturnValue:
+    return render_page("overview.html", overview_report)
+
+
+@operations.get("/api/v1/overview")
+def overview_json() -> ResponseReturnValue:
+    return json_report(overview_report)
 
 
 @operations.get("/analysis/quality")

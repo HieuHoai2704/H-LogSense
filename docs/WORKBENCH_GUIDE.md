@@ -137,9 +137,18 @@ The regular Flask entry point has no local filesystem or terminal API.
   built-in capabilities. **Python and packages** selects the interpreter and
   lists installed packages. Use the terminal for package installation.
 - **Analysis** has a function menu on the left instead of a folder tree:
-  Log Explorer, anomaly investigation, alerts, data quality, pipeline and
-  jobs, datasets and the Loghub catalog. Entries marked *Coming soon*
-  (overview, schedules) are planned pages.
+  overview, Log Explorer, anomaly investigation, alerts, data quality,
+  pipeline and jobs, datasets and the Loghub catalog. The entry marked
+  *Coming soon* (schedules) is a planned page. With a database, the Analysis
+  icon opens the overview.
+- **Analysis → Overview** is the home of the analysis area: key numbers
+  (parsed events and hosts, severe events, anomalies and how many are high or
+  critical, open alerts, quality score), a *Needs attention* list (failed
+  latest jobs, quality checks that failed or warn, open alerts, high-priority
+  anomalies, error spikes and new log patterns from the Log Explorer insights,
+  jobs waiting for the worker), each linking to the page that explains it, the
+  hourly log volume of the last 48 hours of data with severe events in red, and
+  the data flow. JSON: `GET /api/v1/overview?dataset_id=N`.
 - **Analysis → Data quality** scores the selected dataset from its import
   counters and parsed events: malformed lines, exact duplicate lines, events
   missing a host, component or level, hours without events, and a drop of the
