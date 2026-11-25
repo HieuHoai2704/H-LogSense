@@ -142,6 +142,8 @@ function renderActivity(stats) {
   const chart = $("severity-chart");
   const detail = $("activity-detail");
   chart.toggleAttribute("data-empty", !stats.length);
+  // An empty chart says why in one line instead of showing a grid of placeholders.
+  chart.dataset.emptyText = stats.length ? "" : tr(state.localSource || state.activeFile ? "Waiting for log lines" : "No project open");
   $("activity-controls").hidden = !stats.length;
   detail.hidden = false;
   $("activity-live").hidden = state.selected === null;

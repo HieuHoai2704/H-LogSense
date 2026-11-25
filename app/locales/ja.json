@@ -1578,5 +1578,7 @@
   "Schedule paused.": "スケジュールを一時停止しました。",
   "Schedule resumed.": "スケジュールを再開しました。",
   "The schedule runs at the worker's next pass.": "スケジュールはワーカーの次回の巡回で実行されます。",
-  "Schedule deleted.": "スケジュールを削除しました。"
+  "Schedule deleted.": "スケジュールを削除しました。",
+  "More filters": "その他のフィルター",
+  "Administration": "管理"
 }

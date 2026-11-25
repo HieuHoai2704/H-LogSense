@@ -1,13 +1,15 @@
 {% extends "base.html" %}
+{% set analysis_section = "users" %}
 {% from "bootstrap5/form.html" import render_field %}
+{% from "partials/report_ui.html" import status with context %}
 {% block title %}{{ tr("User management") }} · {{ app_name }}{% endblock %}
 {% block content %}
-<div class="d-flex flex-wrap align-items-baseline gap-3 mb-3">
-  <h1 class="me-auto mb-0">{{ tr("User management") }}</h1>
-  {% for value, label in [("admin", "Administrator"), ("staff", "Staff")] %}
-  <span class="badge text-bg-secondary">{{ tr(label) }}: {{ counts.get(value, 0) }}</span>
-  {% endfor %}
-</div>
+<header class="page-head">
+  <div class="page-title">
+    <h1>{{ tr("User management") }}</h1>
+    <p class="page-context">{% for value, label in [("admin", "Administrator"), ("staff", "Staff")] %}{{ tr(label) }}: {{ counts.get(value, 0) }}{% if not loop.last %} · {% endif %}{% endfor %} · {{ tr("Total accounts") }}: {{ pages.total }}</p>
+  </div>
+</header>
 
 {% if pending %}
 <div class="alert alert-warning d-flex flex-wrap align-items-center gap-2" role="status">
@@ -15,7 +17,7 @@
   {% if state != "pending" %}<a class="ms-auto" href="{{ url_for('accounts.users', state='pending') }}">{{ tr("Review requests") }}</a>{% endif %}
 </div>
 {% endif %}
-<form class="row g-2 mb-3" method="get" role="search">
+<form class="row g-2 mb-3 filter-row" method="get" role="search">
   <div class="col-md-4"><input class="form-control" type="search" name="q" value="{{ q }}" maxlength="100" placeholder="{{ tr('Search username or email') }}" aria-label="{{ tr('Search username or email') }}"></div>
   <div class="col-md-3">
     <select class="form-select" name="role" aria-label="{{ tr('Role') }}">
@@ -36,6 +38,7 @@
   <div class="col-md-3 d-flex gap-2"><button class="btn btn-primary">{{ tr("Search") }}</button><a class="btn btn-outline-secondary" href="{{ url_for('accounts.users') }}">{{ tr("Clear filters") }}</a></div>
 </form>
 
+<section class="report-section">
 <div class="table-responsive">
   <table class="table align-middle">
     <thead><tr><th>ID</th><th>{{ tr("Username") }}</th><th>{{ tr("Email") }}</th><th>{{ tr("Role") }}</th><th>{{ tr("State") }}</th><th>{{ tr("Actions") }}</th></tr></thead>
@@ -46,10 +49,10 @@
         <td>{{ user.username }}</td>
         <td>{{ user.email or "—" }}</td>
         <td>{{ tr({"staff": "Staff", "admin": "Administrator"}[user.role]) }}</td>
-        <td>{% if user.pending %}<span class="badge text-bg-warning">{{ tr("Waiting for approval") }}</span>{% elif user.active %}{{ tr("Active") }}{% else %}{{ tr("Disabled") }}{% endif %}</td>
-        <td class="d-flex flex-wrap gap-2 align-items-center">
+        <td>{% if user.pending %}{{ status("warn", tr("Waiting for approval")) }}{% elif user.active %}{{ status("ok", tr("Active")) }}{% else %}{{ status("idle", tr("Disabled")) }}{% endif %}</td>
+        <td><div class="d-flex flex-wrap gap-2 align-items-center">
           {% if user.pending %}
-          {% for decision, label, kind in [("approve", "Approve", "btn-success"), ("reject", "Reject", "btn-outline-danger")] %}
+          {% for decision, label, kind in [("approve", "Approve", "btn-primary"), ("reject", "Reject", "btn-outline-danger")] %}
           <form method="post" action="{{ url_for('accounts.decide', user_id=user.id, decision=decision) }}" class="m-0">
             <input type="hidden" name="csrf_token" value="{{ action_form.csrf_token.current_token }}">
             <input type="hidden" name="back" value="{{ request.full_path }}">
@@ -57,8 +60,8 @@
           </form>
           {% endfor %}
           {% endif %}
-          <a href="{{ url_for('accounts.edit_user', user_id=user.id) }}">{{ tr("Edit") }}</a>
-        </td>
+          <a class="btn btn-sm" href="{{ url_for('accounts.edit_user', user_id=user.id) }}">{{ tr("Edit") }}</a>
+        </div></td>
       </tr>
     {% else %}
       <tr><td colspan="6">{{ tr("No accounts match.") }}</td></tr>
@@ -66,6 +69,7 @@
     </tbody>
   </table>
 </div>
+</section>
 {% if pages.pages > 1 %}
 <nav aria-label="{{ tr('Pages') }}">
   <ul class="pagination">
@@ -79,10 +83,9 @@
   </ul>
 </nav>
 {% endif %}
-<p class="text-secondary">{{ tr("Total accounts") }}: {{ pages.total }}</p>
-
-<section class="card card-body mt-4">
-  <h2 class="h4">{{ tr("Add account") }}</h2>
+<section class="report-section">
+  <h2>{{ tr("Add account") }}</h2>
+  <div class="card card-body">
   <form method="post" action="{{ url_for('accounts.create_user') }}" class="row g-2">
     {{ form.hidden_tag() }}
     <div class="col-md-4">{{ render_field(form.username) }}</div>
@@ -92,5 +95,6 @@
     <div class="col-md-6">{{ render_field(form.confirm, autocomplete="new-password") }}</div>
     <div class="col-12"><button class="btn btn-primary">{{ tr("Add account") }}</button></div>
   </form>
+  </div>
 </section>
 {% endblock %}

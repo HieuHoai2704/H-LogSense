@@ -1,16 +1,45 @@
 {% extends "base.html" %}
 {% set analysis_section = "datasets" %}
 {% from "bootstrap5/form.html" import render_field %}
+{% from "partials/report_ui.html" import status with context %}
 {% block title %}{{ tr("Dataset management") }} · {{ app_name }}{% endblock %}
 {% block content %}
-<div class="d-flex flex-wrap align-items-baseline gap-3"><h1 class="me-auto">{{ tr("Dataset management") }}</h1><a href="{{ url_for('dataset_pages.catalog') }}">{{ tr("Loghub dataset catalog") }}</a>{% if current_account and current_account.role == "admin" %}<a href="{{ url_for('accounts.users') }}">{{ tr("User management") }}</a>{% endif %}</div>
-<p class="text-secondary">{{ tr("Rendered at") }} {{ moment(viewed_at).format('LLLL') }}
-  <time datetime="{{ viewed_at.isoformat() }}">{{ viewed_at.strftime('%Y-%m-%d %H:%M UTC') }}</time>
-</p>
+<header class="page-head">
+  <div class="page-title">
+    <h1>{{ tr("Dataset management") }}</h1>
+    <p class="page-context">{{ tr("Rendered at") }} {{ moment(viewed_at).format('LLLL') }} · <time datetime="{{ viewed_at.isoformat() }}">{{ viewed_at.strftime('%Y-%m-%d %H:%M UTC') }}</time></p>
+  </div>
+  <a class="btn btn-sm" href="{{ url_for('dataset_pages.catalog') }}">{{ tr("Loghub dataset catalog") }}</a>
+</header>
+
+<section class="report-section">
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>{{ tr("Dataset") }}</th><th>{{ tr("Key") }}</th><th>{{ tr("State") }}</th><th>{{ tr("Actions") }}</th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>{{ row.name }}</td><td><code>{{ row.dataset_key }}</code></td><td>{{ status({"imported": "ok", "partial": "warn", "importing": "info", "failed": "bad"}.get(row.state, "idle"), tr(row.state)) }}</td>
+        <td>
+          <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-sm" href="{{ url_for('dashboard', workspace='logs', dataset_id=row.id) }}">{{ tr("View logs") }}</a>
+          {% if can_write %}<a class="btn btn-sm" href="{{ url_for('dataset_pages.edit', dataset_id=row.id, action='rename') }}">{{ tr("Rename") }}</a>{% endif %}
+          {% if can_delete and row.input_revision == 0 %}<a class="btn btn-sm btn-outline-danger" href="{{ url_for('dataset_pages.edit', dataset_id=row.id, action='delete') }}">{{ tr("Delete empty dataset") }}</a>{% endif %}
+          </div>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4">{{ tr("No datasets on this page.") }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if next_id %}<p class="mt-2"><a class="btn btn-sm" href="{{ url_for('dataset_pages.index', after_id=next_id) }}">{{ tr("Next page") }}</a></p>{% endif %}
+</section>
 {% if form %}
-<section class="card card-body mb-4">
-  <h2 class="h4">{{ tr("Register dataset") }}</h2>
-  <form method="post">
+<section class="report-section">
+  <h2>{{ tr("Register dataset") }}</h2>
+  <form method="post" class="card card-body narrow-form">
     {{ form.hidden_tag() }}
     {% for error in (form.csrf_token.errors if form.csrf_token is defined else []) %}<p class="alert alert-danger">{{ error }}</p>{% endfor %}
     {{ render_field(form.name) }}
@@ -21,25 +50,5 @@
   </form>
 </section>
 {% endif %}
-<div class="table-responsive">
-  <table class="table">
-    <thead><tr><th>{{ tr("Dataset") }}</th><th>{{ tr("Key") }}</th><th>{{ tr("State") }}</th><th>{{ tr("Actions") }}</th></tr></thead>
-    <tbody>
-    {% for row in rows %}
-      <tr>
-        <td>{{ row.name }}</td><td>{{ row.dataset_key }}</td><td>{{ tr(row.state) }}</td>
-        <td>
-          <a href="{{ url_for('dashboard', workspace='logs', dataset_id=row.id) }}">{{ tr("View logs") }}</a>
-          {% if can_write %}<a class="ms-2" href="{{ url_for('dataset_pages.edit', dataset_id=row.id, action='rename') }}">{{ tr("Rename") }}</a>{% endif %}
-          {% if can_delete and row.input_revision == 0 %}<a class="ms-2" href="{{ url_for('dataset_pages.edit', dataset_id=row.id, action='delete') }}">{{ tr("Delete empty dataset") }}</a>{% endif %}
-        </td>
-      </tr>
-    {% else %}
-      <tr><td colspan="4">{{ tr("No datasets on this page.") }}</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</div>
-{% if next_id %}<a href="{{ url_for('dataset_pages.index', after_id=next_id) }}">{{ tr("Next page") }}</a>{% endif %}
 {% endblock %}
 {% block scripts %}{{ moment.include_moment(local_js=url_for('static', filename='vendor/moment/moment.min.js')) }}{% endblock %}

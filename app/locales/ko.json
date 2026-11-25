@@ -1578,5 +1578,7 @@
   "Schedule paused.": "일정을 일시 중지했습니다.",
   "Schedule resumed.": "일정을 재개했습니다.",
   "The schedule runs at the worker's next pass.": "일정은 워커의 다음 주기에 실행됩니다.",
-  "Schedule deleted.": "일정을 삭제했습니다."
+  "Schedule deleted.": "일정을 삭제했습니다.",
+  "More filters": "추가 필터",
+  "Administration": "관리"
 }

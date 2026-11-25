@@ -1603,5 +1603,6 @@
   "Schedule resumed.": "Đã tiếp tục lịch.",
   "The schedule runs at the worker's next pass.": "Lịch sẽ chạy ở vòng tiếp theo của worker.",
   "Schedule deleted.": "Đã xóa lịch.",
-  "More filters": "Bộ lọc khác"
+  "More filters": "Bộ lọc khác",
+  "Administration": "Quản trị"
 }

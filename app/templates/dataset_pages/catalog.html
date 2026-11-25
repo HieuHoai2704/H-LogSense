@@ -4,18 +4,21 @@
 {% macro size(value) -%}
 {%- if value >= 1073741824 %}{{ "%.2f"|format(value / 1073741824) }} GB{% elif value >= 1048576 %}{{ "%.1f"|format(value / 1048576) }} MB{% else %}{{ "%.0f"|format(value / 1024) }} KB{% endif -%}
 {%- endmacro %}
+{% from "partials/report_ui.html" import status with context %}
 {% block content %}
-<div class="d-flex flex-wrap align-items-baseline gap-3 mb-2">
-  <h1 class="me-auto mb-0">{{ tr("Loghub dataset catalog") }}</h1>
-  <a href="{{ url_for('dataset_pages.index') }}">{{ tr("Dataset management") }}</a>
-</div>
-<p class="text-secondary">{{ tr("Read live from the Zenodo REST API (JSON over HTTPS) and compared with the archives in data/raw.") }}</p>
+<header class="page-head">
+  <div class="page-title">
+    <h1>{{ tr("Loghub dataset catalog") }}</h1>
+    <p class="page-context">{{ tr("Read live from the Zenodo REST API (JSON over HTTPS) and compared with the archives in data/raw.") }}</p>
+  </div>
+  <a class="btn btn-sm" href="{{ url_for('dataset_pages.index') }}">{{ tr("Dataset management") }}</a>
+</header>
 {% if error %}
 <p class="alert alert-warning" role="status">{{ tr(error) }}</p>
 <a class="btn btn-outline-secondary" href="{{ url_for('dataset_pages.catalog', refresh=1) }}">{{ tr("Try again") }}</a>
 {% else %}
-<section class="card card-body mb-3">
-  <h2 class="h5 mb-1">{{ record.title }}</h2>
+<section class="card card-body report-section">
+  <h2 class="h5 mb-2">{{ record.title }}</h2>
   <dl class="row mb-0 small">
     {% if record.doi %}<dt class="col-sm-3">DOI</dt><dd class="col-sm-9"><a href="https://doi.org/{{ record.doi }}" rel="noopener noreferrer" target="_blank">{{ record.doi }}</a></dd>{% endif %}
     {% if record.published %}<dt class="col-sm-3">{{ tr("Published") }}</dt><dd class="col-sm-9">{{ record.published }}</dd>{% endif %}
@@ -29,6 +32,7 @@
   <div class="col-md-6"><input class="form-control" type="search" name="q" value="{{ q }}" maxlength="100" placeholder="{{ tr('Filter by file name') }}" aria-label="{{ tr('Filter by file name') }}"></div>
   <div class="col-md-3"><button class="btn btn-primary">{{ tr("Search") }}</button></div>
 </form>
+<section class="report-section">
 <div class="table-responsive">
   <table class="table align-middle">
     <thead><tr><th>{{ tr("File") }}</th><th class="text-end">{{ tr("Size") }}</th><th>MD5</th><th>{{ tr("Local copy") }}</th><th>{{ tr("Source") }}</th></tr></thead>
@@ -38,7 +42,7 @@
         <td>{{ item.name }}</td>
         <td class="text-end">{{ size(item.size) }}</td>
         <td><code class="small">{{ item.checksum[4:] if item.checksum else "—" }}</code></td>
-        <td>{% if item.local_state == "present" %}<span class="badge text-bg-success">{{ tr("In data/raw") }}</span>{% elif item.local_state == "missing" %}<span class="badge text-bg-secondary">{{ tr("Not downloaded") }}</span>{% else %}<span class="badge text-bg-warning">{{ tr("Size differs") }}</span>{% endif %}</td>
+        <td>{% if item.local_state == "present" %}{{ status("ok", tr("In data/raw")) }}{% elif item.local_state == "missing" %}{{ status("idle", tr("Not downloaded")) }}{% else %}{{ status("warn", tr("Size differs")) }}{% endif %}</td>
         <td><a href="{{ item.url }}" rel="noopener noreferrer" target="_blank">Zenodo</a></td>
       </tr>
     {% else %}
@@ -47,5 +51,6 @@
     </tbody>
   </table>
 </div>
+</section>
 {% endif %}
 {% endblock %}

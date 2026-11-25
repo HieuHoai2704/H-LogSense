@@ -429,3 +429,9 @@ a.stat:hover { background: var(--ui-hover); color: inherit; }
 :root[data-workspace-theme] main.container code { color: var(--muted); font-family: var(--mono); font-size: var(--fs-sm); }
 .report-section .table td:has(> .ui-status) { white-space: nowrap; }
 .empty-note { margin: 0; padding: 14px; border: 1px dashed var(--border); border-radius: var(--radius-lg); color: var(--muted); font-size: var(--fs); }
+.narrow-form { max-width: 720px; }
+.danger-zone { border-color: color-mix(in srgb, var(--bad) 45%, var(--border)) !important; }
+.danger-zone h2 { color: var(--bad); }
+.filter-row { align-items: center; }
+/* Buttons in a card form keep their own width. */
+form.card > .btn, .card > form > .btn, form.card > div > .btn { align-self: flex-start; }

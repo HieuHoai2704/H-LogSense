@@ -1578,5 +1578,7 @@
   "Schedule paused.": "Jadwal dijeda.",
   "Schedule resumed.": "Jadwal dilanjutkan.",
   "The schedule runs at the worker's next pass.": "Jadwal berjalan pada putaran worker berikutnya.",
-  "Schedule deleted.": "Jadwal dihapus."
+  "Schedule deleted.": "Jadwal dihapus.",
+  "More filters": "Filter lainnya",
+  "Administration": "Administrasi"
 }

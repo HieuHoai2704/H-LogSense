@@ -1618,5 +1618,7 @@
   "Schedule paused.": "Расписание приостановлено.",
   "Schedule resumed.": "Расписание возобновлено.",
   "The schedule runs at the worker's next pass.": "Расписание выполнится при следующем проходе worker.",
-  "Schedule deleted.": "Расписание удалено."
+  "Schedule deleted.": "Расписание удалено.",
+  "More filters": "Другие фильтры",
+  "Administration": "Администрирование"
 }

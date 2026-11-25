@@ -94,6 +94,23 @@ def analysis_menu() -> tuple[MenuGroup, ...]:
                 MenuItem("catalog", "Loghub catalog", "catalog", url_for("dataset_pages.catalog")),
             ),
         ),
+        *admin_group(),
+    )
+
+
+def admin_group() -> tuple[MenuGroup, ...]:
+    """Administrators also manage accounts from the same menu."""
+    from flask import g
+
+    from app.security import identity
+
+    account = getattr(g, "account", None) or identity()
+    if account is None or account.role != "admin":
+        return ()
+    return (
+        MenuGroup(
+            "Administration", (MenuItem("users", "User management", "users", url_for("accounts.users")),)
+        ),
     )
 
 

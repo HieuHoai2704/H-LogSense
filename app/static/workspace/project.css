@@ -414,3 +414,17 @@ input[type="file"] { max-width: 100%; }
 #dock-ports :is(th, td) { padding: 4px 6px; text-align: start; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
 #dock-debug { display: flex; flex-direction: column; }
 #dock-debug-shell { min-height: 90px; }
+
+/* No log yet: the placeholder grid fades behind one line that says why. */
+#severity-chart[data-empty] { position: relative; }
+#severity-chart[data-empty] .heatmap { opacity: .22; }
+#severity-chart[data-empty]::after {
+  content: attr(data-empty-text);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 13px;
+  pointer-events: none;
+}

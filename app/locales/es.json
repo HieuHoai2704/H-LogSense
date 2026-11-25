@@ -1626,5 +1626,7 @@
   "Schedule paused.": "Programación pausada.",
   "Schedule resumed.": "Programación reanudada.",
   "The schedule runs at the worker's next pass.": "La programación se ejecuta en la siguiente pasada del worker.",
-  "Schedule deleted.": "Programación eliminada."
+  "Schedule deleted.": "Programación eliminada.",
+  "More filters": "Más filtros",
+  "Administration": "Administración"
 }

@@ -1578,5 +1578,7 @@
   "Schedule paused.": "Zamanlama duraklatıldı.",
   "Schedule resumed.": "Zamanlama sürdürüldü.",
   "The schedule runs at the worker's next pass.": "Zamanlama, worker'ın bir sonraki turunda çalışır.",
-  "Schedule deleted.": "Zamanlama silindi."
+  "Schedule deleted.": "Zamanlama silindi.",
+  "More filters": "Diğer filtreler",
+  "Administration": "Yönetim"
 }

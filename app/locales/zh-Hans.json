@@ -1578,5 +1578,7 @@
   "Schedule paused.": "已暂停调度。",
   "Schedule resumed.": "已恢复调度。",
   "The schedule runs at the worker's next pass.": "调度将在 worker 的下一轮运行。",
-  "Schedule deleted.": "已删除调度。"
+  "Schedule deleted.": "已删除调度。",
+  "More filters": "更多筛选条件",
+  "Administration": "管理"
 }

@@ -1620,5 +1620,7 @@
   "Schedule paused.": "Pianificazione messa in pausa.",
   "Schedule resumed.": "Pianificazione ripresa.",
   "The schedule runs at the worker's next pass.": "La pianificazione viene eseguita al prossimo passaggio del worker.",
-  "Schedule deleted.": "Pianificazione eliminata."
+  "Schedule deleted.": "Pianificazione eliminata.",
+  "More filters": "Altri filtri",
+  "Administration": "Amministrazione"
 }

@@ -186,6 +186,12 @@ class LogExplorerMySQLTests(unittest.TestCase):
         page = self.client.get("/manage/datasets")
         self.assertEqual(page.status_code, 200)
         self.assertEqual(menu(page.data).current, ["datasets"])
+        self.assertNotIn("users", menu(page.data).links)  # staff accounts see no administration group
+        self.client = self.app.test_client()
+        self.login("admin")
+        page = self.client.get("/account/admin/users")
+        self.assertEqual(menu(page.data).links["users"], "/account/admin/users")
+        self.assertEqual(menu(page.data).current, ["users"])
 
 
 if __name__ == "__main__":

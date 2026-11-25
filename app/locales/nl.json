@@ -1626,5 +1626,7 @@
   "Schedule paused.": "Planning gepauzeerd.",
   "Schedule resumed.": "Planning hervat.",
   "The schedule runs at the worker's next pass.": "De planning wordt uitgevoerd bij de volgende ronde van de worker.",
-  "Schedule deleted.": "Planning verwijderd."
+  "Schedule deleted.": "Planning verwijderd.",
+  "More filters": "Meer filters",
+  "Administration": "Beheer"
 }

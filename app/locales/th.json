@@ -1578,5 +1578,7 @@
   "Schedule paused.": "หยุดกำหนดการชั่วคราวแล้ว",
   "Schedule resumed.": "ทำกำหนดการต่อแล้ว",
   "The schedule runs at the worker's next pass.": "กำหนดการจะรันในรอบถัดไปของ worker",
-  "Schedule deleted.": "ลบกำหนดการแล้ว"
+  "Schedule deleted.": "ลบกำหนดการแล้ว",
+  "More filters": "ตัวกรองเพิ่มเติม",
+  "Administration": "การดูแลระบบ"
 }

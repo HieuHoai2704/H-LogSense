@@ -1623,5 +1623,7 @@
   "Schedule paused.": "Zeitplan pausiert.",
   "Schedule resumed.": "Zeitplan fortgesetzt.",
   "The schedule runs at the worker's next pass.": "Der Zeitplan läuft beim nächsten Durchgang des Workers.",
-  "Schedule deleted.": "Zeitplan gelöscht."
+  "Schedule deleted.": "Zeitplan gelöscht.",
+  "More filters": "Weitere Filter",
+  "Administration": "Verwaltung"
 }
