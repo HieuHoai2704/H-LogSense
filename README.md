@@ -212,6 +212,8 @@ administrator (`admin`) and a staff account (`staff`) with generated passwords k
 `.local/demo/accounts.txt`, imports the first 60,000 lines of `data/raw/BGL.zip` and runs the rule and
 Isolation Forest window detectors through the normal job API and worker. Later runs only start the
 container and the app; `python -m scripts.run.demo stop` stops MySQL and keeps the data.
+A step-by-step walkthrough in Vietnamese, from installation to the check loop, is in
+[docs/development/RUN_DEMO_VI.md](docs/development/RUN_DEMO_VI.md).
 
 The app opens on the sign-in page. There are two account types: **staff** sign in under **Staff sign-in**
 and use the whole application; **administrators** sign in under **Administrator sign-in** and also manage
@@ -318,7 +320,7 @@ A file-by-file map is in [docs/development/CODE_STRUCTURE_VI.md](docs/developmen
 
 | Topic | Documents |
 | --- | --- |
-| Using the workbench | [Workbench guide](docs/WORKBENCH_GUIDE.md) · [Vietnamese user guide](docs/development/USER_GUIDE_VI.md) |
+| Using the workbench | [Workbench guide](docs/WORKBENCH_GUIDE.md) · [Vietnamese user guide](docs/development/USER_GUIDE_VI.md) · [Run the demo step by step (Vietnamese)](docs/development/RUN_DEMO_VI.md) |
 | Operating the platform | [Operations guide](docs/OPERATIONS.md) · [MySQL runbook](docs/database/MYSQL_RUNBOOK.md) |
 | API | [REST API reference](docs/database/API.md) |
 | Data model | [Schema](docs/database/SCHEMA.md) · [ERD](docs/database/ERD.md) · [BGL pipeline](docs/database/BGL_PIPELINE.md) · [Uploads](docs/database/UPLOADS.md) |
